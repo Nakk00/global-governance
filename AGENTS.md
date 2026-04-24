@@ -53,8 +53,13 @@
 - On every successful `git push`, the agent must include a `PR Summary` in the final user-facing response.
 - Treat the `PR Summary` as required even when no pull request has been opened yet.
 - Keep the `PR Summary` short and practical: what changed, why it changed, and any key verification or follow-up notes the reviewer should know.
+- On every successful `git push`, if `gh` is available and authenticated for the repository remote, the agent must use `gh` to create a pull request for the current branch unless an open pull request already exists for that branch.
+- When the agent creates a pull request with `gh`, it must include the prepared title and body at creation time rather than relying on GitHub to infer or autofill them.
+- If an open pull request for the current branch already exists, the agent must use `gh` to retrieve it instead of creating a duplicate.
+- On every successful `git push`, when a pull request exists or is created, the agent must include the pull request link in the final user-facing response.
 - On every successful `git push`, the agent must also include a paste-ready pull request description when a PR has not already been created through a tool that fills the PR body.
 - Do not assume GitHub's compare page will auto-populate the PR description from the chat response. Unless the repo has a PR template or the agent opened the PR with a tool that set the body, provide the user with ready-to-paste PR body text in the final response.
+- If `gh` is unavailable, unauthenticated, lacks repo permission, or pull request creation fails for any reason, the agent must say so clearly in the final response and still provide the `PR Summary` plus a paste-ready PR title and description.
 
 ### Playwright Browser Install Policy
 
