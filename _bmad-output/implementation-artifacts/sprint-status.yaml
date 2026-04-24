@@ -1,0 +1,64 @@
+# generated: 2026-04-24T00:50:58+08:00
+# last_updated: 2026-04-24T12:30:00+08:00
+# project: Global-Governance
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+generated: 2026-04-24T00:50:58+08:00
+last_updated: 2026-04-24T12:30:00+08:00
+project: Global-Governance
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # Epic 1: Guided Learning Journey
+  epic-1: in-progress
+  1-1-set-up-initial-project-from-starter-template: done
+  1-2-open-the-journey: backlog
+  1-3-navigate-the-story: backlog
+  1-4-explore-the-core-narrative: backlog
+  1-5-re-enter-with-recaps: backlog
+  1-6-shape-the-editorial-system: backlog
+  1-7-keep-the-core-journey-usable: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: UN Institutional Explorer
+  epic-2: backlog
+  2-1-introduce-the-un-command-center: backlog
+  2-2-inspect-un-organs: backlog
+  2-3-compare-organs-across-devices: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: West Philippine Sea Case Dossier
+  epic-3: backlog
+  3-1-open-the-case-dossier: backlog
+  3-2-follow-the-timeline: backlog
+  3-3-compare-ruling-and-reality: backlog
+  3-4-inspect-case-evidence: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Grounded Guidance and Trust
+  epic-4: backlog
+  4-1-close-with-thesis-and-references: backlog
+  4-2-open-the-source-aware-chat: backlog
+  4-3-receive-grounded-answers: backlog
+  4-4-handle-refusal-and-protection-states: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Content Stewardship and Demo Reliability
+  epic-5: backlog
+  5-1-manage-approved-source-bundles: backlog
+  5-2-prepare-sources-for-ingestion: backlog
+  5-3-validate-chatbot-boundaries: backlog
+  5-4-rehearse-demo-readiness: backlog
+  5-5-bootstrap-the-working-environment: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Adaptive Presentation and Future Expansion
+  epic-6: backlog
+  6-1-switch-explanation-depth: backlog
+  6-2-layer-optional-presentation-enhancements: backlog
+  6-3-prepare-a-simulator-ready-scenario-shell: backlog
+  epic-6-retrospective: optional
