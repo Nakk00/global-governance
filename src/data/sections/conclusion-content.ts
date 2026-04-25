@@ -16,4 +16,10 @@ export const conclusionContent: NarrativeSectionContent = {
   disclosures: [],
   synthesis:
     "The clean takeaway: global governance is imperfect because it works through states, but it matters because shared rules give people a way to argue, organize, and demand better conduct.",
+  recap: {
+    takeaway:
+      "This chapter closed the journey with the thesis intact: global governance is imperfect, contested, and still worth understanding.",
+    nextStepLabel: "Return to Journey start",
+    nextStepTargetId: "journey-start",
+  },
 }

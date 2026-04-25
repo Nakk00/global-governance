@@ -10,9 +10,9 @@ export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const { activeSectionId, completedSectionIds, navigateToSection } =
     useNavigation()
-  const activeChapter = chapterNavigation.find(
-    (item) => item.id === activeSectionId,
-  ) ?? (activeSectionId === journeyStartSection.id ? journeyStartSection : null)
+  const activeChapter =
+    chapterNavigation.find((item) => item.id === activeSectionId) ??
+    (activeSectionId === journeyStartSection.id ? journeyStartSection : null)
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(min-width: 768px)")
@@ -73,7 +73,7 @@ export function MobileMenu() {
                     "flex min-h-11 items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     isActive && "bg-foreground text-background",
                     !isActive && "hover:bg-accent hover:text-accent-foreground",
-                    isComplete && !isActive && "text-foreground",
+                    isComplete && !isActive && "text-foreground"
                   )}
                   onClick={(event) => {
                     event.preventDefault()

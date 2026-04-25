@@ -4,6 +4,12 @@ export type NarrativeDisclosure = {
   details: string[]
 }
 
+export type NarrativeRecapContent = {
+  takeaway: string
+  nextStepLabel?: string
+  nextStepTargetId?: string
+}
+
 export type NarrativeSectionContent = {
   id: string
   navigationLabel: string
@@ -14,6 +20,7 @@ export type NarrativeSectionContent = {
   supportingDetails: string[]
   disclosures: NarrativeDisclosure[]
   synthesis: string
+  recap?: NarrativeRecapContent
 }
 
 export type ChapterTransitionContent = {

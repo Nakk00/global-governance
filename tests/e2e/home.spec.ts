@@ -14,6 +14,45 @@ const narrativeSections = [
   "UN Command Center",
   "Governance limits and enforcement",
   "West Philippine Sea dossier",
+  "Conclusion and references",
+]
+
+const recapCues = [
+  {
+    sectionId: "global-governance-overview",
+    sectionName: "Global governance overview",
+    cueName: "Continue to UN Command Center",
+    hash: /#un-command-center$/,
+    targetName: "UN Command Center",
+  },
+  {
+    sectionId: "un-command-center",
+    sectionName: "UN Command Center",
+    cueName: "Continue to Governance limits and enforcement",
+    hash: /#governance-limits$/,
+    targetName: "Governance limits and enforcement",
+  },
+  {
+    sectionId: "governance-limits",
+    sectionName: "Governance limits and enforcement",
+    cueName: "Continue to West Philippine Sea dossier",
+    hash: /#west-philippine-sea-dossier$/,
+    targetName: "West Philippine Sea dossier",
+  },
+  {
+    sectionId: "west-philippine-sea-dossier",
+    sectionName: "West Philippine Sea dossier",
+    cueName: "Continue to Conclusion and references",
+    hash: /#conclusion-references$/,
+    targetName: "Conclusion and references",
+  },
+  {
+    sectionId: "conclusion-references",
+    sectionName: "Conclusion and references",
+    cueName: "Return to Journey start",
+    hash: /#journey-start$/,
+    targetName: "Journey start",
+  },
 ]
 
 test("home page opens the journey and continues in-page", async ({ page }) => {
@@ -227,22 +266,69 @@ test("core narrative renders summary-first sections with local synthesis", async
     await expect(section.getByText("Summary")).toBeVisible()
     await expect(section.getByText("Supporting detail")).toBeVisible()
     await expect(section.getByText("Key takeaway")).toBeVisible()
+    await expect(section.getByText("Next step")).toBeVisible()
 
     const summaryBox = await section.getByText("Summary").boundingBox()
     const detailBox = await section.getByText("Supporting detail").boundingBox()
     const takeawayBox = await section.getByText("Key takeaway").boundingBox()
+    const nextStepBox = await section.getByText("Next step").boundingBox()
 
     expect(summaryBox).not.toBeNull()
     expect(detailBox).not.toBeNull()
     expect(takeawayBox).not.toBeNull()
+    expect(nextStepBox).not.toBeNull()
     expect(summaryBox!.y).toBeLessThan(detailBox!.y)
     expect(detailBox!.y).toBeLessThan(takeawayBox!.y)
+    expect(takeawayBox!.y).toBeLessThan(nextStepBox!.y)
   }
 
   await expect(page.getByText(/without a world government/i)).toBeVisible()
   await expect(
     page.getByText(/global governance is not a world state/i)
   ).toBeVisible()
+})
+
+test("recap cues explain re-entry and use canonical next anchors", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  for (const cue of recapCues) {
+    const section = page.getByRole("region", { name: cue.sectionName })
+    await expect(section.getByText("Key takeaway")).toBeVisible()
+    await expect(section.getByRole("link", { name: cue.cueName })).toBeVisible()
+  }
+
+  await page.goto("/#governance-limits")
+  const directEntry = page.getByRole("region", {
+    name: "Governance limits and enforcement",
+  })
+  await expect(
+    directEntry.getByText(/rules need actors to interpret, defend, and apply/i)
+  ).toBeVisible()
+  await expect(
+    directEntry.getByRole("link", {
+      name: "Continue to West Philippine Sea dossier",
+    })
+  ).toBeVisible()
+
+  for (const cue of recapCues) {
+    await page.goto(`/#${cue.sectionId}`)
+    const section = page.getByRole("region", { name: cue.sectionName })
+    const nextCue = section.getByRole("link", { name: cue.cueName })
+    await nextCue.focus()
+    await expect(nextCue).toBeFocused()
+    await page.keyboard.press("Enter")
+    await expect(page).toHaveURL(cue.hash)
+    await expect(
+      page.getByRole("region", { name: cue.targetName })
+    ).toBeFocused()
+
+    if (cue.targetName === "Journey start") {
+      await page.waitForTimeout(900)
+      await expect(page.getByText("Current chapter: Journey start")).toBeVisible()
+    }
+  }
 })
 
 test("dense narrative detail is keyboard-operable and preserves collapsed meaning", async ({

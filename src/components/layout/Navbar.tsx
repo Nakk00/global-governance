@@ -11,11 +11,15 @@ import { useNavigation } from "@/hooks/useNavigation"
 import { cn } from "@/lib/utils"
 
 export function Navbar() {
-  const { activeSectionId, completedSectionIds, navigateToSection, resetToTop } =
-    useNavigation()
-  const activeChapter = chapterNavigation.find(
-    (item) => item.id === activeSectionId,
-  ) ?? (activeSectionId === journeyStartSection.id ? journeyStartSection : null)
+  const {
+    activeSectionId,
+    completedSectionIds,
+    navigateToSection,
+    resetToTop,
+  } = useNavigation()
+  const activeChapter =
+    chapterNavigation.find((item) => item.id === activeSectionId) ??
+    (activeSectionId === journeyStartSection.id ? journeyStartSection : null)
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/78">
@@ -46,10 +50,10 @@ export function Navbar() {
                 aria-current={isActive ? "location" : undefined}
                 data-complete={isComplete || undefined}
                 className={cn(
-                  "min-h-11 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background lg:text-sm",
+                  "min-h-11 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background lg:text-sm",
                   isActive && "bg-foreground text-background",
                   !isActive && "hover:bg-accent hover:text-accent-foreground",
-                  isComplete && !isActive && "text-foreground",
+                  isComplete && !isActive && "text-foreground"
                 )}
                 onClick={(event) => {
                   event.preventDefault()

@@ -6,8 +6,12 @@ import { useNavigation } from "@/hooks/useNavigation"
 import { cn } from "@/lib/utils"
 
 export function SectionProgressRail() {
-  const { activeSectionId, completedSectionIds, navigateToSection, resetToTop } =
-    useNavigation()
+  const {
+    activeSectionId,
+    completedSectionIds,
+    navigateToSection,
+    resetToTop,
+  } = useNavigation()
 
   return (
     <aside className="pointer-events-none fixed top-24 right-4 z-30 hidden xl:block">
@@ -36,7 +40,7 @@ export function SectionProgressRail() {
                 className={cn(
                   "flex size-6 items-center justify-center rounded-full border border-border text-[0.68rem] font-semibold text-muted-foreground transition-colors",
                   isActive && "border-foreground bg-foreground text-background",
-                  isComplete && !isActive && "border-foreground text-foreground",
+                  isComplete && !isActive && "border-foreground text-foreground"
                 )}
               >
                 {index + 1}
@@ -44,7 +48,7 @@ export function SectionProgressRail() {
               <span
                 className={cn(
                   "truncate text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground",
-                  isActive && "text-foreground",
+                  isActive && "text-foreground"
                 )}
               >
                 {item.label}

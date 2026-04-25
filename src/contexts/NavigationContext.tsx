@@ -52,7 +52,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
 
   const navigateToSection = useCallback(
     (sectionId: string) => {
-      if (!isChapterId(sectionId)) {
+      if (!isKnownSectionId(sectionId)) {
         return
       }
 
@@ -68,7 +68,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
       window.history.pushState(null, "", `#${sectionId}`)
       setActiveAndFocus(sectionId)
     },
-    [setActiveAndFocus],
+    [setActiveAndFocus]
   )
 
   const resetToTop = useCallback(() => {
@@ -88,7 +88,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
         ? hashSectionId
         : isKnownSectionId(hashSectionId)
           ? hashSectionId
-        : defaultChapterId
+          : defaultChapterId
 
       if (hashSectionId !== nextSectionId) {
         window.history.replaceState(null, "", `#${nextSectionId}`)
@@ -117,16 +117,38 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
 
       if (Date.now() < programmaticNavigationUntilRef.current) {
         if (!delayedFrame) {
-          delayedFrame = window.setTimeout(() => {
-            delayedFrame = 0
-            scheduleUpdate()
-          }, programmaticNavigationUntilRef.current - Date.now() + 16)
+          delayedFrame = window.setTimeout(
+            () => {
+              delayedFrame = 0
+              scheduleUpdate()
+            },
+            programmaticNavigationUntilRef.current - Date.now() + 16
+          )
         }
 
         return
       }
 
       const anchorLine = window.scrollY + 180
+      const hashSectionId = getHashSectionId()
+      if (
+        hashSectionId &&
+        isKnownSectionId(hashSectionId) &&
+        !isChapterId(hashSectionId)
+      ) {
+        const firstChapter = document.getElementById(chapterNavigation[1]?.id)
+        const firstChapterTop = firstChapter
+          ? firstChapter.getBoundingClientRect().top + window.scrollY
+          : Number.POSITIVE_INFINITY
+
+        if (anchorLine < firstChapterTop) {
+          setActiveSectionId((current) =>
+            current === hashSectionId ? current : hashSectionId
+          )
+          return
+        }
+      }
+
       const nearestPrevious = chapterNavigation.reduce((current, item) => {
         const section = document.getElementById(item.id)
 
@@ -144,7 +166,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
       }, defaultChapterId)
 
       setActiveSectionId((current) =>
-        current === nearestPrevious ? current : nearestPrevious,
+        current === nearestPrevious ? current : nearestPrevious
       )
     }
 
@@ -179,7 +201,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
     return new Set(
       chapterNavigation
         .slice(0, Math.max(activeIndex, 0))
-        .map((item) => item.id),
+        .map((item) => item.id)
     )
   }, [activeSectionId])
 
@@ -190,7 +212,7 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
       navigateToSection,
       resetToTop,
     }),
-    [activeSectionId, completedSectionIds, navigateToSection, resetToTop],
+    [activeSectionId, completedSectionIds, navigateToSection, resetToTop]
   )
 
   return (

@@ -29,6 +29,12 @@ export const governanceLimits: NarrativeSectionContent = {
   ],
   synthesis:
     "A realistic view holds both truths together: international rules are politically limited, and those limits are exactly why institutions, evidence, and collective pressure matter.",
+  recap: {
+    takeaway:
+      "This chapter established the central limit: rules matter, but they need actors, pressure, and political will to make them usable.",
+    nextStepLabel: "Continue to West Philippine Sea dossier",
+    nextStepTargetId: "west-philippine-sea-dossier",
+  },
 }
 
 export const caseFileTransition: ChapterTransitionContent = {

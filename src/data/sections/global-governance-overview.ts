@@ -40,6 +40,12 @@ export const globalGovernanceOverview: NarrativeSectionContent = {
   ],
   synthesis:
     "Global governance is easiest to understand as a toolkit: it cannot erase power politics, but it gives states ways to coordinate, argue, and measure conduct against shared standards.",
+  recap: {
+    takeaway:
+      "This chapter established global governance as coordination under constraint: useful tools for shared problems, not a world government.",
+    nextStepLabel: "Continue to UN Command Center",
+    nextStepTargetId: "un-command-center",
+  },
 }
 
 export const institutionsTransition: ChapterTransitionContent = {
