@@ -9,6 +9,13 @@ const chapterNames = [
   "Conclusion and references",
 ]
 
+const narrativeSections = [
+  "Global governance overview",
+  "UN Command Center",
+  "Governance limits and enforcement",
+  "West Philippine Sea dossier",
+]
+
 test("home page opens the journey and continues in-page", async ({ page }) => {
   await page.goto("/")
 
@@ -18,11 +25,9 @@ test("home page opens the journey and continues in-page", async ({ page }) => {
   })
 
   await expect(
-    page.getByRole("heading", { name: "Global Governance", exact: true }),
+    page.getByRole("heading", { name: "Global Governance", exact: true })
   ).toBeVisible()
-  await expect(
-    page.getByText(/step into an interactive guide/i),
-  ).toBeVisible()
+  await expect(page.getByText(/step into an interactive guide/i)).toBeVisible()
   await expect(continueLink).toBeVisible()
 
   await continueLink.focus()
@@ -46,39 +51,39 @@ test("desktop navigation jumps between chapter sections and restores history", a
   })
 
   for (const chapterName of chapterNames) {
-    await expect(
-      topNav.getByRole("link", { name: chapterName }),
-    ).toBeVisible()
+    await expect(topNav.getByRole("link", { name: chapterName })).toBeVisible()
     await expect(rail.getByRole("link", { name: chapterName })).toBeVisible()
   }
 
   await topNav.getByRole("link", { name: "UN Command Center" }).click()
   await expect(page).toHaveURL(/#un-command-center$/)
   await expect(
-    page.getByRole("region", { name: "UN Command Center" }),
+    page.getByRole("region", { name: "UN Command Center" })
   ).toBeFocused()
   await expect(
-    topNav.getByRole("link", { name: "UN Command Center" }),
+    topNav.getByRole("link", { name: "UN Command Center" })
   ).toHaveAttribute("aria-current", "location")
-  await expect(page.getByText("Current chapter: UN Command Center")).toBeVisible()
+  await expect(
+    page.getByText("Current chapter: UN Command Center")
+  ).toBeVisible()
 
   await rail.getByRole("link", { name: "West Philippine Sea dossier" }).click()
   await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
   await expect(dossier).toBeFocused()
   await expect(
-    rail.getByRole("link", { name: "West Philippine Sea dossier" }),
+    rail.getByRole("link", { name: "West Philippine Sea dossier" })
   ).toHaveAttribute("aria-current", "location")
 
   await page.goBack()
   await expect(page).toHaveURL(/#un-command-center$/)
   await expect(
-    page.getByRole("region", { name: "UN Command Center" }),
+    page.getByRole("region", { name: "UN Command Center" })
   ).toBeFocused()
 
   await page.reload()
   await expect(page).toHaveURL(/#un-command-center$/)
   await expect(
-    page.getByRole("region", { name: "UN Command Center" }),
+    page.getByRole("region", { name: "UN Command Center" })
   ).toBeFocused()
 })
 
@@ -96,13 +101,13 @@ test("hash entry falls back predictably and keyboard users can activate navigati
   await expect(
     page
       .getByRole("navigation", { name: "Primary" })
-      .getByRole("link", { name: "Governance limits and enforcement" }),
+      .getByRole("link", { name: "Governance limits and enforcement" })
   ).toHaveAttribute("aria-current", "location")
 
   await page.goto("/#not-a-real-section")
   await expect(page).toHaveURL(/#hero-narrative-frame$/)
   await expect(
-    page.getByRole("region", { name: "Global Governance", exact: true }),
+    page.getByRole("region", { name: "Global Governance", exact: true })
   ).toBeFocused()
 
   const keyboardTarget = page
@@ -114,7 +119,7 @@ test("hash entry falls back predictably and keyboard users can activate navigati
   await page.keyboard.press("Enter")
   await expect(page).toHaveURL(/#global-governance-overview$/)
   await expect(
-    page.getByRole("region", { name: "Global governance overview" }),
+    page.getByRole("region", { name: "Global governance overview" })
   ).toBeFocused()
 })
 
@@ -148,7 +153,7 @@ test("mobile navigation is touch-friendly, dismissible, and resets at desktop", 
   await expect(page).toHaveURL(/#conclusion-references$/)
   await expect(mobileNav).toBeHidden()
   await expect(
-    page.getByRole("region", { name: "Conclusion and references" }),
+    page.getByRole("region", { name: "Conclusion and references" })
   ).toBeFocused()
 
   await menuButton.click()
@@ -160,9 +165,7 @@ test("mobile navigation is touch-friendly, dismissible, and resets at desktop", 
   await expect(mobileNav).toBeVisible()
   await page.setViewportSize({ width: 1024, height: 740 })
   await expect(mobileNav).toBeHidden()
-  await expect(
-    page.getByRole("navigation", { name: "Primary" }),
-  ).toBeVisible()
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible()
 })
 
 test("home page respects reduced motion and keeps hero responsive", async ({
@@ -183,14 +186,14 @@ test("home page respects reduced motion and keeps hero responsive", async ({
     await expect(heading).toBeVisible()
     await expect(continueLink).toBeVisible()
     await expect(
-      page.getByText(/step into an interactive guide/i),
+      page.getByText(/step into an interactive guide/i)
     ).toBeVisible()
     await expect(
-      page.getByRole("button", { name: "Open navigation" }),
+      page.getByRole("button", { name: "Open navigation" })
     ).toBeVisible({ visible: width < 768 })
 
     const hasHorizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth,
+      () => document.documentElement.scrollWidth > window.innerWidth
     )
     expect(hasHorizontalOverflow).toBe(false)
 
@@ -212,4 +215,116 @@ test("home page respects reduced motion and keeps hero responsive", async ({
 
   await expect(page).toHaveURL(/#journey-start$/)
   await expect(journeyStart).toBeFocused()
+})
+
+test("core narrative renders summary-first sections with local synthesis", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  for (const sectionName of narrativeSections) {
+    const section = page.getByRole("region", { name: sectionName })
+    await expect(section.getByText("Summary")).toBeVisible()
+    await expect(section.getByText("Supporting detail")).toBeVisible()
+    await expect(section.getByText("Key takeaway")).toBeVisible()
+
+    const summaryBox = await section.getByText("Summary").boundingBox()
+    const detailBox = await section.getByText("Supporting detail").boundingBox()
+    const takeawayBox = await section.getByText("Key takeaway").boundingBox()
+
+    expect(summaryBox).not.toBeNull()
+    expect(detailBox).not.toBeNull()
+    expect(takeawayBox).not.toBeNull()
+    expect(summaryBox!.y).toBeLessThan(detailBox!.y)
+    expect(detailBox!.y).toBeLessThan(takeawayBox!.y)
+  }
+
+  await expect(page.getByText(/without a world government/i)).toBeVisible()
+  await expect(
+    page.getByText(/global governance is not a world state/i)
+  ).toBeVisible()
+})
+
+test("dense narrative detail is keyboard-operable and preserves collapsed meaning", async ({
+  page,
+}) => {
+  await page.goto("/#governance-limits")
+
+  const governanceLimits = page.getByRole("region", {
+    name: "Governance limits and enforcement",
+  })
+  const disclosure = governanceLimits.getByRole("button", {
+    name: /why rules still shape choices/i,
+  })
+
+  await expect(
+    governanceLimits.getByText(
+      "Law and institutions can narrow the menu of acceptable behavior even when they cannot force a state by themselves."
+    )
+  ).toBeVisible()
+  await expect(
+    governanceLimits.getByText(/reputation, reciprocity, domestic pressure/i)
+  ).toBeHidden()
+
+  await disclosure.focus()
+  await expect(disclosure).toBeFocused()
+  await page.keyboard.press("Enter")
+  await expect(disclosure).toHaveAttribute("aria-expanded", "true")
+  await expect(
+    governanceLimits.getByText(/reputation, reciprocity, domestic pressure/i)
+  ).toBeVisible()
+
+  await page.keyboard.press("Space")
+  await expect(disclosure).toHaveAttribute("aria-expanded", "false")
+  await expect(
+    governanceLimits.getByText(
+      "Law and institutions can narrow the menu of acceptable behavior even when they cannot force a state by themselves."
+    )
+  ).toBeVisible()
+})
+
+test("narrative flow has transition beats without requiring an account", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  await expect(page.getByText("Next: Institutions")).toBeVisible()
+  await expect(page.getByText("Next: Constraints")).toBeVisible()
+  await expect(page.getByText("Next: Case file")).toBeVisible()
+  await expect(page.getByText("No account needed")).toBeVisible()
+  await expect(page.getByText(/create a profile/i)).toHaveCount(0)
+  await expect(page.getByText(/sign in/i)).toHaveCount(0)
+})
+
+test("full narrative stays readable across responsive checkpoints", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" })
+
+  for (const width of [360, 480, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto("/")
+
+    for (const sectionName of [
+      ...narrativeSections,
+      "Conclusion and references",
+    ]) {
+      await expect(
+        page.getByRole("region", { name: sectionName })
+      ).toBeVisible()
+    }
+
+    const disclosure = page.getByRole("button", {
+      name: /why rules still shape choices/i,
+    })
+    await expect(disclosure).toBeVisible()
+    await disclosure.focus()
+    await page.keyboard.press("Enter")
+    await expect(disclosure).toHaveAttribute("aria-expanded", "true")
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    )
+    expect(hasHorizontalOverflow).toBe(false)
+  }
 })

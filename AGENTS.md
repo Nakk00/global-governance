@@ -74,6 +74,14 @@
 
 - If `playwright-cli` is available in the local environment, use it as the primary interactive browser verification tool before authoring or refreshing checked-in E2E scripts.
 - Prefer a named session per task, for example `playwright-cli -s=attendance ...`, so repeated commands target the same browser session.
+- When an agent needs to understand the current UI structure, prefer `playwright-cli snapshot` because it captures the page state and interactive element refs in an agent-friendly form.
+- When an agent needs to understand the actual visual appearance of the UI, use `playwright-cli screenshot` to capture the rendered page or a specific element.
+- When both structure and appearance matter, use both in the same named session: take a `snapshot` first for navigation and targeting, then take a `screenshot` for visual review.
+- Typical visual inspection flow:
+  - `playwright-cli -s=ui-check open http://localhost:5173`
+  - `playwright-cli -s=ui-check snapshot --filename=ui-check.yaml`
+  - `playwright-cli -s=ui-check screenshot --filename=ui-check.png`
+- Element-level inspection is allowed when only part of the interface matters, for example `playwright-cli -s=ui-check screenshot e5` after capturing a snapshot and identifying the relevant ref.
 - Use `state-save` and `state-load` only for local debugging workflows. Do not commit local browser state artifacts.
 - Local workflow reference for agent use lives at `.claude/skills/playwright-cli/SKILL.md` with supporting docs under `.claude/skills/playwright-cli/references/`.
 
@@ -88,7 +96,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **Global-Governance** (1019 symbols, 1078 relationships, 2 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **Global-Governance** (1050 symbols, 1127 relationships, 2 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -184,7 +192,5 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the Contexts area (16 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
-| Work in the Layout area (7 symbols) | `.claude/skills/generated/layout/SKILL.md` |
 
 <!-- gitnexus:end -->
