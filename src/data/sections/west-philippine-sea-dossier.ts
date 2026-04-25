@@ -26,4 +26,10 @@ export const westPhilippineSeaDossier: NarrativeSectionContent = {
   ],
   synthesis:
     "The case shows the central lesson of the journey: global governance is strongest when law, institutions, evidence, and public accountability reinforce one another.",
+  recap: {
+    takeaway:
+      "This chapter tested the theory in a real dispute, where law clarifies claims while politics shapes what changes on the water.",
+    nextStepLabel: "Continue to Conclusion and references",
+    nextStepTargetId: "conclusion-references",
+  },
 }

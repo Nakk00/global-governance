@@ -7,5 +7,6 @@ export type NavigationContextValue = {
   resetToTop: () => void
 }
 
-export const NavigationContext =
-  createContext<NavigationContextValue | null>(null)
+export const NavigationContext = createContext<NavigationContextValue | null>(
+  null
+)

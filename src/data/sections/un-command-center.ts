@@ -29,6 +29,12 @@ export const unCommandCenter: NarrativeSectionContent = {
   ],
   synthesis:
     "The UN is powerful as a convening and norm-setting system, but its authority is filtered through member states and the political bargains they accept.",
+  recap: {
+    takeaway:
+      "This chapter showed the UN as a shared address for world politics: a system of rooms that organizes debate, norms, and coordination.",
+    nextStepLabel: "Continue to Governance limits and enforcement",
+    nextStepTargetId: "governance-limits",
+  },
 }
 
 export const constraintsTransition: ChapterTransitionContent = {

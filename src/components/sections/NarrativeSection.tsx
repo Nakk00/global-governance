@@ -6,6 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { resolveNarrativeRecapCue } from "@/data/sections/core-narrative"
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
 
 import { InsightRecapCard } from "./InsightRecapCard"
@@ -16,6 +17,7 @@ type NarrativeSectionProps = {
 
 export function NarrativeSection({ content }: NarrativeSectionProps) {
   const headingId = `${content.id}-heading`
+  const recapCue = resolveNarrativeRecapCue(content)
 
   return (
     <section
@@ -101,7 +103,9 @@ export function NarrativeSection({ content }: NarrativeSectionProps) {
           </Collapsible>
         ))}
 
-        <InsightRecapCard>{content.synthesis}</InsightRecapCard>
+        <InsightRecapCard nextStep={recapCue.nextStep}>
+          {recapCue.takeaway}
+        </InsightRecapCard>
       </div>
     </section>
   )
