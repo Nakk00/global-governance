@@ -5,9 +5,10 @@ import type { HeroContent } from "@/data/sections/hero-content"
 
 type HeroNarrativeFrameProps = {
   content: HeroContent
+  id?: string
 }
 
-export function HeroNarrativeFrame({ content }: HeroNarrativeFrameProps) {
+export function HeroNarrativeFrame({ content, id }: HeroNarrativeFrameProps) {
   const targetHref = `#${content.continueTargetId}`
 
   function handleContinue() {
@@ -24,8 +25,10 @@ export function HeroNarrativeFrame({ content }: HeroNarrativeFrameProps) {
 
   return (
     <section
+      id={id}
       aria-labelledby="hero-heading"
-      className="relative isolate flex min-h-svh overflow-hidden bg-background px-5 py-8 text-foreground sm:px-8 lg:px-12"
+      className="relative isolate flex min-h-svh overflow-hidden bg-background px-5 py-8 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:px-8 lg:px-12"
+      tabIndex={id ? -1 : undefined}
     >
       <div
         aria-hidden="true"
