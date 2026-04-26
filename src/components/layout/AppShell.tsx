@@ -11,7 +11,7 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   return (
     <NavigationProvider>
-      <div className="min-h-svh bg-background text-foreground">
+      <div className="editorial-shell min-h-svh overflow-x-clip">
         <Navbar />
         <SectionProgressRail />
         {children}

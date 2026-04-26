@@ -15,19 +15,19 @@ export function InsightRecapCard({
   const { navigateToSection } = useNavigation()
 
   return (
-    <aside className="rounded-lg border border-border bg-secondary/55 p-5 text-secondary-foreground">
-      <p className="text-xs font-semibold tracking-normal text-muted-foreground uppercase">
-        Key takeaway
-      </p>
+    <aside
+      className="editorial-surface editorial-recap shadow-none"
+      data-editorial-surface="recap"
+    >
+      <p className="editorial-kicker">Key takeaway</p>
       <p className="mt-3 text-base leading-7">{children}</p>
       {nextStep ? (
         <div className="mt-5 border-t border-border pt-4">
-          <p className="text-xs font-semibold tracking-normal text-muted-foreground uppercase">
-            Next step
-          </p>
+          <p className="editorial-kicker">Next step</p>
           <a
             href={`#${nextStep.targetId}`}
-            className="mt-2 inline-flex min-h-11 items-center rounded-md text-sm font-semibold text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+            data-action-priority="primary"
+            className="editorial-primary-action mt-3 inline-flex items-center text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
             onClick={(event) => {
               event.preventDefault()
               navigateToSection(nextStep.targetId)

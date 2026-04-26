@@ -14,11 +14,14 @@ export function SectionProgressRail() {
   } = useNavigation()
 
   return (
-    <aside className="pointer-events-none fixed top-24 right-4 z-30 hidden xl:block">
+    <aside className="pointer-events-none fixed top-28 right-4 z-30 hidden xl:block">
       <nav
         aria-label="Section progress"
-        className="pointer-events-auto flex w-56 flex-col gap-2 border-l border-border bg-background/80 py-2 pl-4 backdrop-blur"
+        className="orbital-rail-card pointer-events-auto flex w-64 flex-col gap-2 px-4 py-4"
       >
+        <div className="px-1">
+          <p className="orbital-chip">Orbital route</p>
+        </div>
         {chapterNavigation.map((item, index) => {
           const isActive = item.id === activeSectionId
           const isComplete = completedSectionIds.has(item.id)
@@ -28,8 +31,10 @@ export function SectionProgressRail() {
               key={item.id}
               href={`#${item.id}`}
               aria-current={isActive ? "location" : undefined}
+              data-action-priority="secondary"
               data-complete={isComplete || undefined}
-              className="group grid min-h-11 grid-cols-[1.5rem_minmax(0,1fr)] items-center gap-2 rounded-sm text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+              data-state={isActive ? "active" : isComplete ? "complete" : "idle"}
+              className="orbital-rail-link group grid min-h-11 grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
               onClick={(event) => {
                 event.preventDefault()
                 navigateToSection(item.id)
@@ -37,11 +42,7 @@ export function SectionProgressRail() {
             >
               <span
                 aria-hidden="true"
-                className={cn(
-                  "flex size-6 items-center justify-center rounded-full border border-border text-[0.68rem] font-semibold text-muted-foreground transition-colors",
-                  isActive && "border-foreground bg-foreground text-background",
-                  isComplete && !isActive && "border-foreground text-foreground"
-                )}
+                className={cn("orbital-rail-marker transition-colors")}
               >
                 {index + 1}
               </span>
@@ -59,7 +60,8 @@ export function SectionProgressRail() {
         <Button
           type="button"
           variant="ghost"
-          className="mt-1 min-h-11 justify-start px-0 text-xs"
+          className="editorial-secondary-action mt-1 min-h-11 justify-start rounded-full px-3 text-xs"
+          data-action-priority="secondary"
           onClick={resetToTop}
         >
           <RotateCcw aria-hidden="true" data-icon="inline-start" />
