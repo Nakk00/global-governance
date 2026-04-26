@@ -1,4 +1,12 @@
-import { ChevronDown, Compass, Info } from "lucide-react"
+import { useState } from "react"
+import {
+  ChevronDown,
+  Compass,
+  Info,
+  Landmark,
+  Scale,
+  Users,
+} from "lucide-react"
 
 import { InsightRecapCard } from "@/components/sections/InsightRecapCard"
 import { Button } from "@/components/ui/button"
@@ -9,7 +17,10 @@ import {
 } from "@/components/ui/collapsible"
 import { resolveNarrativeRecapCue } from "@/data/sections/core-narrative"
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
-import type { UNCommandCenterShellContent } from "@/data/sections/un-command-center"
+import {
+  unOrgans,
+  type UNCommandCenterShellContent,
+} from "@/data/sections/un-command-center"
 import { cn } from "@/lib/utils"
 
 type UNCommandCenterProps = {
@@ -18,10 +29,20 @@ type UNCommandCenterProps = {
 }
 
 const controlIcons = [Compass, Info]
+const organIcons = [Users, Scale, Compass, Landmark, Info]
 
 export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
+  const [selectedOrganId, setSelectedOrganId] = useState(unOrgans[0]?.id)
   const headingId = `${content.id}-heading`
+  const organExplorerHeadingId = `${content.id}-organ-explorer-heading`
+  const organPanelId = `${content.id}-organ-panel`
   const recapCue = resolveNarrativeRecapCue(content)
+  const selectedOrgan =
+    unOrgans.find((organ) => organ.id === selectedOrganId) ?? unOrgans[0]
+
+  if (!selectedOrgan) {
+    return null
+  }
 
   return (
     <section
@@ -98,6 +119,110 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
           </div>
         </div>
 
+        <div
+          role="region"
+          aria-labelledby={organExplorerHeadingId}
+          className="editorial-surface scroll-mt-36 space-y-6"
+        >
+          <div className="space-y-2">
+            <p className="editorial-kicker">Organ explorer</p>
+            <h3
+              id={organExplorerHeadingId}
+              className="text-2xl font-semibold tracking-normal text-foreground"
+            >
+              Inspect the rooms of the UN system
+            </h3>
+            <p className="editorial-prose">
+              Select an organ to compare what it does, where its authority comes
+              from, and where politics still limits the room.
+            </p>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
+            <div
+              role="group"
+              aria-labelledby={organExplorerHeadingId}
+              className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1"
+            >
+              {unOrgans.map((organ, index) => {
+                const isSelected = organ.id === selectedOrgan.id
+                const Icon = organIcons[index] ?? Landmark
+
+                return (
+                  <Button
+                    key={organ.id}
+                    type="button"
+                    variant={isSelected ? "default" : "outline"}
+                    aria-pressed={isSelected}
+                    aria-controls={organPanelId}
+                    data-state={isSelected ? "selected" : "idle"}
+                    data-action-priority={isSelected ? "primary" : "secondary"}
+                    className={cn(
+                      "min-h-24 w-full justify-start gap-3 rounded-2xl px-4 py-3 text-left whitespace-normal",
+                      isSelected && "editorial-primary-action"
+                    )}
+                    onClick={() => setSelectedOrganId(organ.id)}
+                  >
+                    <Icon
+                      aria-hidden="true"
+                      data-icon="inline-start"
+                      className="mt-0.5"
+                    />
+                    <span className="grid min-w-0 gap-1">
+                      <span className="font-semibold">{organ.label}</span>
+                      <span
+                        className={cn(
+                          "text-sm leading-6",
+                          isSelected
+                            ? "text-primary-foreground/90"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {organ.summary}
+                      </span>
+                    </span>
+                  </Button>
+                )
+              })}
+            </div>
+
+            <div
+              id={organPanelId}
+              role="region"
+              aria-live="polite"
+              aria-label={`${selectedOrgan.label} details`}
+              className="rounded-2xl border border-border bg-background/50 p-4 shadow-sm sm:p-5"
+            >
+              <div className="space-y-3">
+                <p className="editorial-kicker">Selected organ</p>
+                <h4 className="text-xl font-semibold text-foreground">
+                  {selectedOrgan.label}
+                </h4>
+                <p className="editorial-prose">{selectedOrgan.summary}</p>
+              </div>
+
+              <dl className="mt-5 grid gap-3">
+                {[
+                  ["Role", selectedOrgan.role],
+                  ["Scope of power", selectedOrgan.power],
+                  ["Limitation", selectedOrgan.limit],
+                  ["Why it matters", selectedOrgan.whyItMatters],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    className="rounded-xl border border-border bg-card/70 p-4"
+                  >
+                    <dt className="editorial-kicker">{label}</dt>
+                    <dd className="mt-2 text-base leading-7 text-card-foreground">
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </div>
+
         <Collapsible className="editorial-surface orbital-disclosure shadow-none">
           <div className="space-y-3 p-5 sm:p-6">
             <p className="text-sm leading-6 text-muted-foreground">
@@ -121,7 +246,6 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
           </div>
           <CollapsibleContent className="border-t border-border px-5 py-4 data-[state=closed]:animate-none data-[state=open]:animate-none sm:px-6">
             <div className="space-y-4">
-              <p className="editorial-kicker">Supporting detail</p>
               {content.supportingDetails.map((detail) => (
                 <p key={detail} className="editorial-prose">
                   {detail}

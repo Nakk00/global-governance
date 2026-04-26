@@ -1,12 +1,12 @@
 # generated: 2026-04-24T00:50:58+08:00
-# last_updated: 2026-04-26T23:02:00+08:00
+# last_updated: 2026-04-26T23:30:42+08:00
 # project: Global-Governance
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts
 
 generated: 2026-04-24T00:50:58+08:00
-last_updated: 2026-04-26T23:02:00+08:00
+last_updated: 2026-04-26T23:30:42+08:00
 project: Global-Governance
 project_key: NOKEY
 tracking_system: file-system
@@ -27,7 +27,7 @@ development_status:
   # Epic 2: UN Institutional Explorer
   epic-2: in-progress
   2-1-introduce-the-un-command-center: done
-  2-2-inspect-un-organs: backlog
+  2-2-inspect-un-organs: done
   2-3-compare-organs-across-devices: backlog
   epic-2-retrospective: optional
 
