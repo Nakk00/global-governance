@@ -6,133 +6,567 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+  --font-heading: "Libre Bodoni", serif;
+  --font-sans: "Public Sans", "Geist Variable", sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.25);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-3xl: calc(var(--radius) * 2);
+  --radius-4xl: calc(var(--radius) * 2.4);
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(0.962 0.022 255);
+  --foreground: oklch(0.232 0.04 257);
+  --card: oklch(0.988 0.012 260);
+  --card-foreground: oklch(0.232 0.04 257);
+  --popover: oklch(0.988 0.012 260);
+  --popover-foreground: oklch(0.232 0.04 257);
+  --primary: oklch(0.53 0.12 264);
+  --primary-foreground: oklch(0.985 0.008 255);
+  --secondary: oklch(0.93 0.022 255);
+  --secondary-foreground: oklch(0.26 0.04 257);
+  --muted: oklch(0.942 0.016 255);
+  --muted-foreground: oklch(0.49 0.03 257);
+  --accent: oklch(0.86 0.05 240);
+  --accent-foreground: oklch(0.24 0.04 257);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.84 0.03 255);
+  --input: oklch(0.84 0.03 255);
+  --ring: oklch(0.62 0.11 244);
+  --chart-1: oklch(0.63 0.13 250);
+  --chart-2: oklch(0.72 0.08 205);
+  --chart-3: oklch(0.75 0.1 310);
+  --chart-4: oklch(0.6 0.09 285);
+  --chart-5: oklch(0.54 0.08 235);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.955 0.02 255);
+  --sidebar-foreground: oklch(0.232 0.04 257);
+  --sidebar-primary: oklch(0.53 0.12 264);
+  --sidebar-primary-foreground: oklch(0.985 0.008 255);
+  --sidebar-accent: oklch(0.92 0.024 255);
+  --sidebar-accent-foreground: oklch(0.24 0.04 257);
+  --sidebar-border: oklch(0.84 0.03 255);
+  --sidebar-ring: oklch(0.62 0.11 244);
+
+  /* Editorial map: Orbital Diplomacy uses cool celestial fields, polished display type, and quiet reading surfaces. */
+  --editorial-canvas: oklch(0.962 0.022 255);
+  --editorial-ink: oklch(0.232 0.04 257);
+  --editorial-prose: oklch(0.39 0.03 257);
+  --editorial-surface: oklch(0.988 0.012 260);
+  --editorial-surface-raised: oklch(0.955 0.018 252);
+  /* Strategic Atlas becomes orbital wayfinding: route arcs, active rails, and celestial progress cues. */
+  --atlas-marker: oklch(0.53 0.12 264);
+  --atlas-marker-foreground: oklch(0.985 0.008 255);
+  --atlas-grid: oklch(0.8 0.04 255);
+  --atlas-glow: oklch(0.72 0.08 230);
+  /* Institutional Ledger becomes diplomatic archive: subdued conclusion cards and source-adjacent calm. */
+  --ledger-surface: oklch(0.948 0.018 246);
+  --ledger-border: oklch(0.73 0.04 250);
+  --ledger-ink: oklch(0.285 0.04 252);
+  --editorial-measure: 48rem;
+  --editorial-space-section: clamp(4.5rem, 8vw, 7rem);
+  --editorial-shadow:
+    0 22px 58px color-mix(in oklch, var(--atlas-marker) 12%, transparent),
+    0 8px 22px color-mix(in oklch, var(--foreground) 8%, transparent);
+  --orbital-gradient:
+    radial-gradient(
+      circle at top right,
+      color-mix(in oklch, var(--atlas-glow) 26%, transparent),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 14% 18%,
+      color-mix(in oklch, var(--atlas-marker) 12%, transparent),
+      transparent 22%
+    );
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.13 0.022 262);
+  --foreground: oklch(0.955 0.012 258);
+  --card: oklch(0.182 0.028 262);
+  --card-foreground: oklch(0.955 0.012 258);
+  --popover: oklch(0.182 0.028 262);
+  --popover-foreground: oklch(0.955 0.012 258);
+  --primary: oklch(0.74 0.1 248);
+  --primary-foreground: oklch(0.16 0.03 262);
+  --secondary: oklch(0.22 0.026 262);
+  --secondary-foreground: oklch(0.94 0.014 255);
+  --muted: oklch(0.225 0.024 262);
+  --muted-foreground: oklch(0.76 0.018 255);
+  --accent: oklch(0.31 0.05 241);
+  --accent-foreground: oklch(0.955 0.012 258);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(0.34 0.03 260);
+  --input: oklch(0.34 0.03 260);
+  --ring: oklch(0.72 0.09 236);
+  --chart-1: oklch(0.72 0.12 240);
+  --chart-2: oklch(0.72 0.08 205);
+  --chart-3: oklch(0.71 0.09 310);
+  --chart-4: oklch(0.64 0.08 278);
+  --chart-5: oklch(0.59 0.08 230);
+  --sidebar: oklch(0.182 0.028 262);
+  --sidebar-foreground: oklch(0.955 0.012 258);
+  --sidebar-primary: oklch(0.74 0.1 248);
+  --sidebar-primary-foreground: oklch(0.16 0.03 262);
+  --sidebar-accent: oklch(0.24 0.03 262);
+  --sidebar-accent-foreground: oklch(0.955 0.012 258);
+  --sidebar-border: oklch(0.34 0.03 260);
+  --sidebar-ring: oklch(0.72 0.09 236);
+
+  --editorial-canvas: oklch(0.13 0.022 262);
+  --editorial-ink: oklch(0.955 0.012 258);
+  --editorial-prose: oklch(0.82 0.015 255);
+  --editorial-surface: oklch(0.182 0.028 262);
+  --editorial-surface-raised: oklch(0.215 0.026 258);
+  --atlas-marker: oklch(0.74 0.1 248);
+  --atlas-marker-foreground: oklch(0.16 0.03 262);
+  --atlas-grid: oklch(0.33 0.03 257);
+  --atlas-glow: oklch(0.66 0.08 214);
+  --ledger-surface: oklch(0.2 0.026 252);
+  --ledger-border: oklch(0.4 0.032 250);
+  --ledger-ink: oklch(0.92 0.014 255);
+  --editorial-shadow:
+    0 24px 82px color-mix(in oklch, black 54%, transparent),
+    0 0 0 1px color-mix(in oklch, var(--atlas-marker) 8%, transparent);
+  --orbital-gradient:
+    radial-gradient(
+      circle at top right,
+      color-mix(in oklch, var(--atlas-marker) 22%, transparent),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 18% 20%,
+      color-mix(in oklch, var(--atlas-glow) 16%, transparent),
+      transparent 20%
+    );
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+    font-feature-settings:
+      "ss01" 1,
+      "cv01" 1;
+  }
   html {
     @apply font-sans;
     scroll-behavior: smooth;
     scroll-padding-top: 6rem;
-    }
+  }
+}
+
+@layer components {
+  .editorial-shell {
+    background:
+      var(--orbital-gradient),
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-canvas) 88%, var(--atlas-marker) 12%)
+          0%,
+        color-mix(in oklch, var(--editorial-canvas) 96%, black 4%) 42%,
+        var(--editorial-canvas) 100%
+      ),
+      var(--editorial-canvas);
+    color: var(--editorial-ink);
+  }
+
+  .editorial-container {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-12;
+  }
+
+  .editorial-section {
+    @apply scroll-mt-24 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background;
+    padding-block: var(--editorial-space-section);
+  }
+
+  .editorial-measure {
+    max-width: var(--editorial-measure);
+  }
+
+  .editorial-kicker {
+    @apply text-xs font-semibold uppercase;
+    color: color-mix(
+      in oklch,
+      var(--atlas-marker) 72%,
+      var(--editorial-ink) 28%
+    );
+    letter-spacing: 0.18em;
+  }
+
+  .editorial-display {
+    @apply font-heading text-5xl leading-none font-semibold text-balance sm:text-6xl lg:text-7xl;
+    color: var(--editorial-ink);
+    letter-spacing: -0.05em;
+  }
+
+  .editorial-heading {
+    @apply font-heading text-2xl leading-tight font-semibold text-balance sm:text-3xl;
+    color: var(--editorial-ink);
+    letter-spacing: -0.04em;
+  }
+
+  .editorial-lede {
+    @apply text-lg leading-8 font-medium;
+    color: color-mix(
+      in oklch,
+      var(--editorial-ink) 82%,
+      var(--atlas-glow) 18%
+    );
+  }
+
+  .editorial-prose {
+    @apply text-base leading-7;
+    color: var(--editorial-prose);
+  }
+
+  .editorial-surface {
+    @apply rounded-2xl border p-5;
+    background:
+      var(--orbital-gradient),
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-surface) 92%, transparent),
+        color-mix(in oklch, var(--editorial-surface-raised) 68%, var(--editorial-surface))
+      );
+    border-color: color-mix(in oklch, var(--border) 85%, var(--atlas-marker));
+    box-shadow: var(--editorial-shadow);
+  }
+
+  .editorial-summary {
+    background:
+      radial-gradient(
+        circle at top right,
+        color-mix(in oklch, var(--atlas-glow) 10%, transparent),
+        transparent 22%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-surface) 94%, transparent),
+        color-mix(
+          in oklch,
+          var(--editorial-surface-raised) 74%,
+          var(--editorial-surface)
+        )
+      );
+  }
+
+  .editorial-recap {
+    background: color-mix(
+      in oklch,
+      var(--ledger-surface) 72%,
+      var(--editorial-surface-raised) 28%
+    );
+    border-color: var(--ledger-border);
+    color: var(--ledger-ink);
+  }
+
+  .editorial-source {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(
+          in oklch,
+          var(--ledger-surface) 86%,
+          var(--editorial-surface) 14%
+        ),
+        var(--ledger-surface)
+      ),
+      var(--ledger-surface);
+    border-color: var(--ledger-border);
+  }
+
+  .editorial-transition {
+    @apply relative overflow-hidden rounded-3xl border py-8;
+    border-color: color-mix(in oklch, var(--atlas-grid) 72%, var(--atlas-marker));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-surface-raised) 68%, transparent),
+        color-mix(in oklch, var(--editorial-surface) 88%, transparent)
+      ),
+      linear-gradient(
+        90deg,
+        transparent,
+        color-mix(in oklch, var(--atlas-marker) 14%, transparent),
+        transparent
+      );
+  }
+
+  .editorial-transition::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        circle at 18% 50%,
+        color-mix(in oklch, var(--atlas-glow) 18%, transparent),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at 72% 46%,
+        color-mix(in oklch, var(--atlas-marker) 10%, transparent),
+        transparent 20%
+      );
+    pointer-events: none;
+  }
+
+  .orbital-nav-shell {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-surface) 84%, transparent),
+        color-mix(in oklch, var(--editorial-surface-raised) 86%, transparent)
+      ),
+      var(--orbital-gradient);
+    border-color: color-mix(in oklch, var(--atlas-grid) 70%, var(--border));
+    box-shadow: var(--editorial-shadow);
+  }
+
+  .orbital-link {
+    @apply rounded-full border border-transparent px-3 py-2 text-xs font-medium transition-colors lg:text-sm;
+    color: color-mix(in oklch, var(--muted-foreground) 84%, var(--foreground));
+  }
+
+  .orbital-link:hover {
+    background: color-mix(in oklch, var(--accent) 72%, transparent);
+    color: var(--foreground);
+  }
+
+  .orbital-link[data-state="active"] {
+    border-color: color-mix(in oklch, var(--atlas-marker) 48%, var(--border));
+    background: color-mix(in oklch, var(--atlas-marker) 18%, transparent);
+    color: var(--foreground);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklch, var(--atlas-marker) 22%, transparent);
+  }
+
+  .orbital-link[data-state="complete"] {
+    color: var(--foreground);
+  }
+
+  .orbital-hero-panel {
+    position: relative;
+  }
+
+  .orbital-hero-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        circle at 78% 20%,
+        color-mix(in oklch, var(--atlas-glow) 22%, transparent),
+        transparent 18%
+      ),
+      radial-gradient(
+        circle at 66% 34%,
+        color-mix(in oklch, var(--atlas-marker) 14%, transparent),
+        transparent 18%
+      );
+    pointer-events: none;
+  }
+
+  .orbital-hero-aside::before {
+    content: "";
+    position: absolute;
+    top: 10%;
+    right: -8%;
+    width: clamp(15rem, 30vw, 24rem);
+    aspect-ratio: 1;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklch, var(--atlas-grid) 55%, transparent);
+    box-shadow:
+      0 0 0 2.75rem color-mix(in oklch, var(--atlas-marker) 6%, transparent),
+      0 0 0 5.5rem color-mix(in oklch, var(--atlas-glow) 4%, transparent);
+    opacity: 0.8;
+    pointer-events: none;
+  }
+
+  .orbital-rail-card {
+    @apply relative overflow-hidden rounded-3xl border;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-surface-raised) 78%, transparent),
+        color-mix(in oklch, var(--editorial-surface) 94%, transparent)
+      ),
+      var(--orbital-gradient);
+    border-color: color-mix(in oklch, var(--atlas-grid) 72%, var(--border));
+    box-shadow: var(--editorial-shadow);
+  }
+
+  .orbital-rail-link {
+    @apply relative block rounded-2xl px-3 py-3 text-left transition-colors;
+    color: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
+  }
+
+  .orbital-rail-link:hover {
+    background: color-mix(in oklch, var(--accent) 68%, transparent);
+    color: var(--foreground);
+  }
+
+  .orbital-rail-link[data-state="active"] {
+    background: color-mix(in oklch, var(--atlas-marker) 14%, transparent);
+    color: var(--foreground);
+  }
+
+  .orbital-rail-link[data-state="complete"] {
+    color: var(--foreground);
+  }
+
+  .orbital-rail-marker {
+    @apply flex size-7 items-center justify-center rounded-full border text-[0.68rem] font-semibold;
+    border-color: color-mix(in oklch, var(--atlas-grid) 72%, var(--border));
+    background: color-mix(in oklch, var(--background) 58%, transparent);
+    color: var(--muted-foreground);
+  }
+
+  .orbital-rail-link[data-state="active"] .orbital-rail-marker {
+    border-color: color-mix(in oklch, var(--atlas-marker) 48%, var(--border));
+    background: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: 0 0 18px color-mix(in oklch, var(--atlas-marker) 28%, transparent);
+  }
+
+  .orbital-rail-link[data-state="complete"] .orbital-rail-marker {
+    color: var(--foreground);
+  }
+
+  .orbital-chip {
+    @apply inline-flex items-center rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase;
+    border-color: color-mix(in oklch, var(--atlas-grid) 70%, transparent);
+    color: color-mix(in oklch, var(--atlas-marker) 70%, var(--foreground));
+    letter-spacing: 0.18em;
+  }
+
+  .orbital-disclosure {
+    background:
+      radial-gradient(
+        circle at top right,
+        color-mix(in oklch, var(--atlas-glow) 10%, transparent),
+        transparent 22%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-surface-raised) 82%, transparent),
+        color-mix(in oklch, var(--editorial-surface) 95%, transparent)
+      ),
+      var(--orbital-gradient);
+  }
+
+  .orbital-grid-line {
+    background:
+      radial-gradient(
+        circle at 18% 50%,
+        color-mix(in oklch, var(--atlas-glow) 14%, transparent),
+        transparent 18%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--editorial-surface-raised) 72%, transparent),
+        color-mix(in oklch, var(--editorial-surface) 88%, transparent)
+      );
+  }
+
+  .editorial-source.orbital-grid-line {
+    background:
+      radial-gradient(
+        circle at 82% 18%,
+        color-mix(in oklch, var(--atlas-glow) 16%, transparent),
+        transparent 18%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--ledger-surface) 88%, transparent),
+        color-mix(in oklch, var(--editorial-surface-raised) 54%, var(--ledger-surface))
+      );
+  }
+
+  .editorial-primary-action {
+    @apply min-h-11 rounded-full px-4 font-semibold shadow-sm transition-colors;
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in oklch, var(--primary) 90%, var(--atlas-glow)),
+        var(--primary)
+      );
+    color: var(--primary-foreground);
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--atlas-marker) 14%, transparent),
+      0 14px 30px color-mix(in oklch, var(--atlas-marker) 18%, transparent);
+  }
+
+  .editorial-primary-action:hover {
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--primary) 82%, var(--atlas-glow)),
+      color-mix(in oklch, var(--primary) 90%, white 10%)
+    );
+  }
+
+  .editorial-secondary-action {
+    @apply min-h-11 rounded-full font-medium underline-offset-4 transition-colors;
+    color: color-mix(in oklch, var(--foreground) 78%, var(--muted-foreground));
+  }
+
+  .editorial-secondary-action:hover {
+    color: var(--foreground);
+    text-decoration-line: underline;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .orbital-hero-aside::before {
+    display: none;
   }
 }

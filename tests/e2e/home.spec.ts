@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, type Locator, test } from "@playwright/test"
 
 const chapterNames = [
   "Hero Narrative Frame",
@@ -54,6 +54,24 @@ const recapCues = [
     targetName: "Journey start",
   },
 ]
+
+const responsiveWidths = [360, 480, 768, 1024, 1440]
+
+async function visualStyleFor(locator: Locator) {
+  return locator.evaluate((element) => {
+    const style = window.getComputedStyle(element)
+
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      borderColor: style.borderColor,
+      borderRadius: style.borderRadius,
+      boxShadow: style.boxShadow,
+      color: style.color,
+      outlineStyle: style.outlineStyle,
+    }
+  })
+}
 
 test("home page opens the journey and continues in-page", async ({ page }) => {
   await page.goto("/")
@@ -212,7 +230,7 @@ test("home page respects reduced motion and keeps hero responsive", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" })
 
-  for (const width of [360, 480, 768, 1024, 1440]) {
+  for (const width of responsiveWidths) {
     await page.setViewportSize({ width, height: 820 })
     await page.goto("/")
 
@@ -254,6 +272,90 @@ test("home page respects reduced motion and keeps hero responsive", async ({
 
   await expect(page).toHaveURL(/#journey-start$/)
   await expect(journeyStart).toBeFocused()
+})
+
+test("editorial system applies shared surfaces and action hierarchy", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  const hero = page.locator('[data-editorial-surface="hero"]')
+  const transition = page
+    .locator('[data-editorial-surface="transition"]')
+    .first()
+  const narrative = page.locator('[data-editorial-surface="narrative"]').first()
+  const recap = narrative.locator('[data-editorial-surface="recap"]')
+  const sourceLanding = page.locator('[data-editorial-surface="source"]')
+
+  await expect(hero).toBeVisible()
+  await expect(transition).toBeVisible()
+  await expect(narrative).toBeVisible()
+  await expect(recap).toBeVisible()
+  await expect(sourceLanding).toBeVisible()
+
+  await expect(hero.locator('[data-action-priority="primary"]')).toHaveCount(1)
+  await expect(
+    page
+      .getByRole("navigation", { name: "Primary" })
+      .locator('[data-action-priority="primary"]')
+  ).toHaveCount(0)
+  await expect(
+    page
+      .getByRole("navigation", { name: "Primary" })
+      .locator('[data-action-priority="secondary"]')
+  ).toHaveCount(chapterNames.length)
+  await expect(recap.locator('[data-action-priority="primary"]')).toHaveCount(1)
+
+  const heroAction = hero.locator('[data-action-priority="primary"]')
+  const navAction = page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "UN Command Center" })
+  const heroActionStyle = await visualStyleFor(heroAction)
+  const navActionStyle = await visualStyleFor(navAction)
+
+  expect(heroActionStyle.backgroundColor).not.toBe(
+    navActionStyle.backgroundColor
+  )
+  expect(heroActionStyle.color).not.toBe(navActionStyle.color)
+
+  const narrativeSummaryStyle = await visualStyleFor(
+    page.locator("#global-governance-overview .editorial-summary")
+  )
+  const sourceSummaryStyle = await visualStyleFor(
+    page.locator("#conclusion-references .editorial-summary")
+  )
+  const transitionStyle = await visualStyleFor(
+    transition.locator("div").first()
+  )
+
+  expect(narrativeSummaryStyle.borderRadius).toBe(
+    sourceSummaryStyle.borderRadius
+  )
+  expect(sourceSummaryStyle.backgroundImage).not.toBe(
+    narrativeSummaryStyle.backgroundImage
+  )
+  expect(transitionStyle.backgroundImage).toContain("linear-gradient")
+})
+
+test("editorial system remains readable in light and dark mode", async ({
+  page,
+}) => {
+  for (const theme of ["light", "dark"]) {
+    await page.addInitScript((nextTheme) => {
+      window.localStorage.setItem("theme", nextTheme)
+    }, theme)
+    await page.goto("/")
+
+    await expect(page.locator("html")).toHaveClass(new RegExp(theme))
+
+    const bodyStyle = await visualStyleFor(page.locator("body"))
+    const sourceStyle = await visualStyleFor(
+      page.locator("#conclusion-references .editorial-summary")
+    )
+
+    expect(bodyStyle.color).not.toBe(bodyStyle.backgroundColor)
+    expect(sourceStyle.color).not.toBe(sourceStyle.backgroundColor)
+  }
 })
 
 test("core narrative renders summary-first sections with local synthesis", async ({
@@ -326,7 +428,9 @@ test("recap cues explain re-entry and use canonical next anchors", async ({
 
     if (cue.targetName === "Journey start") {
       await page.waitForTimeout(900)
-      await expect(page.getByText("Current chapter: Journey start")).toBeVisible()
+      await expect(
+        page.getByText("Current chapter: Journey start")
+      ).toBeVisible()
     }
   }
 })
@@ -387,7 +491,7 @@ test("full narrative stays readable across responsive checkpoints", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" })
 
-  for (const width of [360, 480, 768, 1024, 1440]) {
+  for (const width of responsiveWidths) {
     await page.setViewportSize({ width, height: 900 })
     await page.goto("/")
 

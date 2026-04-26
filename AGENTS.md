@@ -46,6 +46,8 @@
 
 - Use branch names that describe the story or intent, not temporary worktree state.
 - Preferred story branch pattern: `codex/story-<epic>-<story>-<short-slug>`.
+- For story implementation, continuation, review fixes, and push handoff, the agent must work on the corresponding story branch for that story and must not reuse a different story branch just because it is already checked out.
+- If the current branch does not match the story being worked on, the agent must create or switch to the correct story branch before committing, pushing, or opening a pull request.
 - Preferred non-story branch pattern: `codex/<type>/<short-slug>`.
 
 ## Push Handoff

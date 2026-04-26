@@ -18,25 +18,17 @@ export function App() {
         <section
           id={journeyStartContent.id}
           aria-label={journeyStartContent.navigationLabel}
-          className="mx-auto min-h-[42svh] w-full max-w-6xl scroll-mt-24 px-5 py-16 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:px-8 lg:px-12"
+          data-editorial-surface="journey-start"
+          className="editorial-section editorial-container min-h-[42svh]"
           tabIndex={-1}
         >
-          <div className="max-w-3xl space-y-4">
-            <p className="text-sm font-semibold text-muted-foreground">
-              {journeyStartContent.eyebrow}
-            </p>
-            <h2
-              id="journey-start-heading"
-              className="text-2xl leading-tight font-semibold tracking-normal text-balance sm:text-3xl"
-            >
+          <div className="editorial-surface editorial-measure space-y-4 rounded-[2rem] p-8 sm:p-10">
+            <p className="editorial-kicker">{journeyStartContent.eyebrow}</p>
+            <h2 id="journey-start-heading" className="editorial-heading">
               {journeyStartContent.title}
             </h2>
-            <p className="text-lg leading-8 font-medium text-foreground">
-              {journeyStartContent.summary}
-            </p>
-            <p className="text-base leading-7 text-muted-foreground">
-              {journeyStartContent.body}
-            </p>
+            <p className="editorial-lede">{journeyStartContent.summary}</p>
+            <p className="editorial-prose">{journeyStartContent.body}</p>
             <p className="max-w-2xl border-l border-border pl-4 text-sm leading-6 text-muted-foreground">
               {journeyStartContent.note}
             </p>
