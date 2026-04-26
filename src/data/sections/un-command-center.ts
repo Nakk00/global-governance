@@ -3,6 +3,17 @@ import type {
   NarrativeSectionContent,
 } from "@/data/sections/narrative-types"
 
+export type UNCommandCenterShellContent = {
+  introduction: string
+  summaryLabel: string
+  entryLabel: string
+  entryPrompt: string
+  controls: {
+    title: string
+    detail: string
+  }[]
+}
+
 export const unCommandCenter: NarrativeSectionContent = {
   id: "un-command-center",
   navigationLabel: "UN Command Center",
@@ -35,6 +46,27 @@ export const unCommandCenter: NarrativeSectionContent = {
     nextStepLabel: "Continue to Governance limits and enforcement",
     nextStepTargetId: "governance-limits",
   },
+}
+
+export const unCommandCenterShell: UNCommandCenterShellContent = {
+  introduction:
+    "This Command Center frames the United Nations as an institutional system within global governance: a place to explore how states debate, coordinate, authorize, document, and contest collective action.",
+  summaryLabel: "Command Center summary",
+  entryLabel: "Entry controls",
+  entryPrompt:
+    "Use these shell-level cues to begin exploring the system before the organ-by-organ tools arrive.",
+  controls: [
+    {
+      title: "Explore the Command Center",
+      detail:
+        "Start by reading the UN as a system of rooms: some rooms surface problems, some authorize action, and others turn mandates into repeatable work.",
+    },
+    {
+      title: "Why the UN matters",
+      detail:
+        "The UN matters because it makes coordination visible before agreement is easy, giving governments a shared place to argue, record positions, and keep negotiations from becoming only private pressure.",
+    },
+  ],
 }
 
 export const constraintsTransition: ChapterTransitionContent = {

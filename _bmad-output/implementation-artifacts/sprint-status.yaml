@@ -1,12 +1,12 @@
 # generated: 2026-04-24T00:50:58+08:00
-# last_updated: 2026-04-26T21:38:31+08:00
+# last_updated: 2026-04-26T23:02:00+08:00
 # project: Global-Governance
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts
 
 generated: 2026-04-24T00:50:58+08:00
-last_updated: 2026-04-26T21:38:31+08:00
+last_updated: 2026-04-26T23:02:00+08:00
 project: Global-Governance
 project_key: NOKEY
 tracking_system: file-system
@@ -14,7 +14,7 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   # Epic 1: Guided Learning Journey
-  epic-1: in-progress
+  epic-1: done
   1-1-set-up-initial-project-from-starter-template: done
   1-2-open-the-journey: done
   1-3-navigate-the-story: done
@@ -22,11 +22,11 @@ development_status:
   1-5-re-enter-with-recaps: done
   1-6-shape-the-editorial-system: done
   1-7-keep-the-core-journey-usable: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
   # Epic 2: UN Institutional Explorer
-  epic-2: backlog
-  2-1-introduce-the-un-command-center: backlog
+  epic-2: in-progress
+  2-1-introduce-the-un-command-center: done
   2-2-inspect-un-organs: backlog
   2-3-compare-organs-across-devices: backlog
   epic-2-retrospective: optional
