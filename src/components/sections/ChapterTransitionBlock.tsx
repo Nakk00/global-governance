@@ -9,7 +9,7 @@ export function ChapterTransitionBlock({
 }: ChapterTransitionBlockProps) {
   return (
     <div className="editorial-container" data-editorial-surface="transition">
-      <div className="editorial-transition orbital-grid-line px-6 sm:px-8">
+      <div className="editorial-transition orbital-grid-line px-5 sm:px-8">
         <div className="grid gap-5 md:grid-cols-[minmax(0,1.1fr)_minmax(16rem,0.65fr)] md:items-end">
           <div>
             <p className="editorial-kicker">{content.label}</p>

@@ -179,17 +179,26 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    min-width: 0;
   }
   body {
     @apply bg-background text-foreground;
     font-feature-settings:
       "ss01" 1,
       "cv01" 1;
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
   }
   html {
     @apply font-sans;
+    overflow-x: clip;
     scroll-behavior: smooth;
     scroll-padding-top: 6rem;
+  }
+
+  #root {
+    min-height: 100svh;
+    overflow-x: clip;
   }
 }
 
@@ -209,12 +218,12 @@
   }
 
   .editorial-container {
-    @apply mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-12;
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-8 lg:px-12;
   }
 
   .editorial-section {
     @apply scroll-mt-24 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background;
-    padding-block: var(--editorial-space-section);
+    padding-block: clamp(3.75rem, 8vw, var(--editorial-space-section));
   }
 
   .editorial-measure {
@@ -228,19 +237,19 @@
       var(--atlas-marker) 72%,
       var(--editorial-ink) 28%
     );
-    letter-spacing: 0.18em;
+    letter-spacing: 0;
   }
 
   .editorial-display {
-    @apply font-heading text-5xl leading-none font-semibold text-balance sm:text-6xl lg:text-7xl;
+    @apply font-heading text-4xl leading-tight font-semibold text-balance sm:text-5xl lg:text-6xl;
     color: var(--editorial-ink);
-    letter-spacing: -0.05em;
+    letter-spacing: 0;
   }
 
   .editorial-heading {
     @apply font-heading text-2xl leading-tight font-semibold text-balance sm:text-3xl;
     color: var(--editorial-ink);
-    letter-spacing: -0.04em;
+    letter-spacing: 0;
   }
 
   .editorial-lede {
@@ -362,6 +371,7 @@
 
   .orbital-link {
     @apply rounded-full border border-transparent px-3 py-2 text-xs font-medium transition-colors lg:text-sm;
+    min-block-size: 2.75rem;
     color: color-mix(in oklch, var(--muted-foreground) 84%, var(--foreground));
   }
 
@@ -435,6 +445,7 @@
 
   .orbital-rail-link {
     @apply relative block rounded-2xl px-3 py-3 text-left transition-colors;
+    min-block-size: 2.75rem;
     color: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
   }
 
@@ -474,7 +485,7 @@
     @apply inline-flex items-center rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase;
     border-color: color-mix(in oklch, var(--atlas-grid) 70%, transparent);
     color: color-mix(in oklch, var(--atlas-marker) 70%, var(--foreground));
-    letter-spacing: 0.18em;
+    letter-spacing: 0;
   }
 
   .orbital-disclosure {
@@ -521,7 +532,7 @@
   }
 
   .editorial-primary-action {
-    @apply min-h-11 rounded-full px-4 font-semibold shadow-sm transition-colors;
+    @apply min-h-11 rounded-full px-4 py-2 font-semibold shadow-sm transition-colors;
     background:
       linear-gradient(
         90deg,
@@ -543,7 +554,7 @@
   }
 
   .editorial-secondary-action {
-    @apply min-h-11 rounded-full font-medium underline-offset-4 transition-colors;
+    @apply min-h-11 rounded-full px-3 py-2 font-medium underline-offset-4 transition-colors;
     color: color-mix(in oklch, var(--foreground) 78%, var(--muted-foreground));
   }
 

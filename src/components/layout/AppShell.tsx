@@ -11,7 +11,7 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   return (
     <NavigationProvider>
-      <div className="editorial-shell min-h-svh overflow-x-clip">
+      <div className="editorial-shell min-h-svh overflow-x-clip [overflow-wrap:anywhere]">
         <Navbar />
         <SectionProgressRail />
         {children}

@@ -22,7 +22,7 @@ export function App() {
           className="editorial-section editorial-container min-h-[42svh]"
           tabIndex={-1}
         >
-          <div className="editorial-surface editorial-measure space-y-4 rounded-[2rem] p-8 sm:p-10">
+          <div className="editorial-surface editorial-measure space-y-4 rounded-[1.5rem] p-5 sm:rounded-[2rem] sm:p-10">
             <p className="editorial-kicker">{journeyStartContent.eyebrow}</p>
             <h2 id="journey-start-heading" className="editorial-heading">
               {journeyStartContent.title}

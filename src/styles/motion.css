@@ -1,1 +1,22 @@
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    scroll-behavior: auto;
+  }
 
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+
+  [data-editorial-surface="hero"] [aria-hidden="true"],
+  [data-editorial-surface="transition"]::before,
+  .orbital-hero-panel::before,
+  .orbital-hero-aside::before {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .orbital-hero-aside::before,
+  .editorial-transition::before {
+    display: none;
+  }
+}

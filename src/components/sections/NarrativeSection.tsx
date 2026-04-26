@@ -63,7 +63,7 @@ export function NarrativeSection({ content }: NarrativeSectionProps) {
             key={disclosure.title}
             className="editorial-surface orbital-disclosure shadow-none"
           >
-            <div className="space-y-3 p-5">
+            <div className="space-y-3 p-5 sm:p-6">
               <p className="text-sm leading-6 text-muted-foreground">
                 {disclosure.collapsedSummary}
               </p>
@@ -72,7 +72,7 @@ export function NarrativeSection({ content }: NarrativeSectionProps) {
                   type="button"
                   variant="outline"
                   data-action-priority="secondary"
-                  className="group w-full justify-between rounded-full text-left whitespace-normal sm:w-auto"
+                  className="group w-full justify-between rounded-2xl text-left whitespace-normal sm:w-auto sm:rounded-full"
                 >
                   {disclosure.title}
                   <ChevronDown
@@ -83,7 +83,7 @@ export function NarrativeSection({ content }: NarrativeSectionProps) {
                 </Button>
               </CollapsibleTrigger>
             </div>
-            <CollapsibleContent className="border-t border-border px-5 py-4 data-[state=closed]:animate-none data-[state=open]:animate-none">
+            <CollapsibleContent className="border-t border-border px-5 py-4 data-[state=closed]:animate-none data-[state=open]:animate-none sm:px-6">
               <div className="space-y-3">
                 {disclosure.details.map((detail) => (
                   <p key={detail} className="editorial-prose">

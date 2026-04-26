@@ -61,6 +61,9 @@
 - On every successful `git push`, when a pull request exists or is created, the agent must include the pull request link in the final user-facing response.
 - On every successful `git push`, the agent must also include a paste-ready pull request description when a PR has not already been created through a tool that fills the PR body.
 - Do not assume GitHub's compare page will auto-populate the PR description from the chat response. Unless the repo has a PR template or the agent opened the PR with a tool that set the body, provide the user with ready-to-paste PR body text in the final response.
+- When creating a pull request with `gh` from PowerShell, do not pass multiline PR bodies as a single quoted string with escaped `\n` sequences.
+- Prefer `gh pr create --body-file <path>` or a PowerShell here-string so GitHub receives real newlines and renders the markdown correctly.
+- After creating a pull request, the agent must verify the rendered PR body. If the formatting is broken, the agent must fix the PR body before reporting completion to the user.
 - If `gh` is unavailable, unauthenticated, lacks repo permission, or pull request creation fails for any reason, the agent must say so clearly in the final response and still provide the `PR Summary` plus a paste-ready PR title and description.
 
 ### Playwright Browser Install Policy
@@ -98,7 +101,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **Global-Governance** (1050 symbols, 1127 relationships, 2 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **Global-Governance** (1176 symbols, 1325 relationships, 9 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -194,5 +197,9 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Work in the Contexts area (16 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
+| Work in the Scripts area (15 symbols) | `.claude/skills/generated/scripts/SKILL.md` |
+| Work in the Layout area (8 symbols) | `.claude/skills/generated/layout/SKILL.md` |
+| Work in the Sections area (3 symbols) | `.claude/skills/generated/sections/SKILL.md` |
 
 <!-- gitnexus:end -->

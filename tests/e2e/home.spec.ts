@@ -1,4 +1,4 @@
-import { expect, type Locator, test } from "@playwright/test"
+import { expect, type Locator, type Page, test } from "@playwright/test"
 
 const chapterNames = [
   "Hero Narrative Frame",
@@ -56,6 +56,7 @@ const recapCues = [
 ]
 
 const responsiveWidths = [360, 480, 768, 1024, 1440]
+const storyWidths = [360, 768, 1440]
 
 async function visualStyleFor(locator: Locator) {
   return locator.evaluate((element) => {
@@ -71,6 +72,65 @@ async function visualStyleFor(locator: Locator) {
       outlineStyle: style.outlineStyle,
     }
   })
+}
+
+async function expectNoHorizontalOverflow(page: Page) {
+  const overflow = await page.evaluate(() => ({
+    body: document.body.scrollWidth,
+    document: document.documentElement.scrollWidth,
+    viewport: window.innerWidth,
+  }))
+
+  expect(overflow.body).toBeLessThanOrEqual(overflow.viewport)
+  expect(overflow.document).toBeLessThanOrEqual(overflow.viewport)
+}
+
+async function expectReadableBodyText(locator: Locator) {
+  const fontSize = await locator.evaluate((element) =>
+    Number.parseFloat(window.getComputedStyle(element).fontSize)
+  )
+
+  expect(fontSize).toBeGreaterThanOrEqual(16)
+}
+
+async function expectNoHorizontalOverflowAtTextScale(
+  page: Page,
+  fontSizePercent: number
+) {
+  await page.addStyleTag({
+    content: `html { font-size: ${fontSizePercent}% !important; }`,
+  })
+
+  await expectNoHorizontalOverflow(page)
+}
+
+async function expectTouchTarget(locator: Locator) {
+  const box = await locator.boundingBox()
+
+  expect(box).not.toBeNull()
+  expect(box!.width).toBeGreaterThanOrEqual(44)
+  expect(box!.height).toBeGreaterThanOrEqual(44)
+}
+
+async function expectVisibleFocus(locator: Locator) {
+  await expect(locator).toBeFocused()
+
+  const focusStyle = await locator.evaluate((element) => {
+    const style = window.getComputedStyle(element)
+
+    return {
+      boxShadow: style.boxShadow,
+      outlineColor: style.outlineColor,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: style.outlineWidth,
+    }
+  })
+
+  expect(
+    focusStyle.outlineStyle !== "none" ||
+      focusStyle.outlineWidth !== "0px" ||
+      focusStyle.boxShadow !== "none"
+  ).toBe(true)
 }
 
 test("home page opens the journey and continues in-page", async ({ page }) => {
@@ -225,6 +285,199 @@ test("mobile navigation is touch-friendly, dismissible, and resets at desktop", 
   await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible()
 })
 
+test("core journey has no horizontal overflow in default and reduced motion modes", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of storyWidths) {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto("/")
+
+      await expectNoHorizontalOverflow(page)
+      await expectReadableBodyText(
+        page.getByRole("region", { name: "Journey start" }).locator("p").nth(2)
+      )
+
+      const menuButton = page.getByRole("button", { name: "Open navigation" })
+      if (width < 768) {
+        await menuButton.click()
+        await expect(
+          page.getByRole("navigation", { name: "Mobile chapters" })
+        ).toBeVisible()
+        await expectNoHorizontalOverflow(page)
+      }
+
+      const disclosure = page.getByRole("button", {
+        name: /why rules still shape choices/i,
+      })
+      await disclosure.click()
+      await expect(disclosure).toHaveAttribute("aria-expanded", "true")
+      await expectNoHorizontalOverflow(page)
+
+      const recapCue = page
+        .getByRole("region", { name: "Global governance overview" })
+        .getByRole("link", { name: "Continue to UN Command Center" })
+      await recapCue.focus()
+      await expectVisibleFocus(recapCue)
+      await expectNoHorizontalOverflow(page)
+
+      const returnControl =
+        width >= 1280
+          ? page.getByRole("button", {
+              name: "Return to start from progress rail",
+            })
+          : width >= 768
+            ? page.getByRole("button", { name: "Return to start" })
+            : page.getByRole("button", { name: "Close navigation" })
+
+      await expect(returnControl).toBeVisible()
+      await expectTouchTarget(returnControl)
+      await expectNoHorizontalOverflow(page)
+    }
+  }
+})
+
+test("keyboard path exposes the active layout controls with visible focus", async ({
+  page,
+}) => {
+  for (const width of storyWidths) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto("/")
+
+    const heroCta = page.getByRole("link", { name: "Begin the journey" })
+    await heroCta.focus()
+    await expectVisibleFocus(heroCta)
+
+    if (width < 768) {
+      const menuButton = page.getByRole("button", { name: "Open navigation" })
+      await menuButton.focus()
+      await expectVisibleFocus(menuButton)
+      await page.keyboard.press("Enter")
+
+      const mobileLink = page
+        .getByRole("navigation", { name: "Mobile chapters" })
+        .getByRole("link", { name: "UN Command Center" })
+      await mobileLink.focus()
+      await expectVisibleFocus(mobileLink)
+    } else {
+      const primaryLink = page
+        .getByRole("navigation", { name: "Primary" })
+        .getByRole("link", { name: "UN Command Center" })
+      await primaryLink.focus()
+      await expectVisibleFocus(primaryLink)
+    }
+
+    if (width >= 1280) {
+      const railLink = page
+        .getByRole("navigation", { name: "Section progress" })
+        .getByRole("link", { name: "West Philippine Sea dossier" })
+      await railLink.focus()
+      await expectVisibleFocus(railLink)
+    }
+
+    const recapCue = page
+      .getByRole("region", { name: "Global governance overview" })
+      .getByRole("link", { name: "Continue to UN Command Center" })
+    await recapCue.focus()
+    await expectVisibleFocus(recapCue)
+
+    const returnControls = page.getByRole("button", {
+      name: /return to start/i,
+    })
+    if (width >= 768) {
+      const returnControl =
+        width >= 1280
+          ? page.getByRole("button", {
+              name: "Return to start from progress rail",
+            })
+          : returnControls.first()
+      await returnControl.focus()
+      await expectVisibleFocus(returnControl)
+    }
+  }
+})
+
+test("touch interactions keep controls usable without trapping reading flow", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 360, height: 740 },
+  })
+  const page = await context.newPage()
+
+  await page.setViewportSize({ width: 360, height: 740 })
+  await page.goto("/")
+
+  const heroCta = page.getByRole("link", { name: "Begin the journey" })
+  const menuButton = page.getByRole("button", { name: "Open navigation" })
+  await expectTouchTarget(heroCta)
+  await expectTouchTarget(menuButton)
+
+  await page.tap('a[href="#journey-start"]')
+  await expect(page).toHaveURL(/#journey-start$/)
+
+  await menuButton.tap()
+  const mobileNav = page.getByRole("navigation", { name: "Mobile chapters" })
+  await expect(mobileNav).toBeVisible()
+
+  for (const label of chapterNames) {
+    await expectTouchTarget(mobileNav.getByRole("link", { name: label }))
+  }
+
+  const mobileNavBox = await mobileNav.boundingBox()
+  const viewport = page.viewportSize()
+  expect(mobileNavBox).not.toBeNull()
+  expect(viewport).not.toBeNull()
+  expect(mobileNavBox!.height).toBeLessThanOrEqual(viewport!.height - 44)
+
+  await mobileNav
+    .getByRole("link", { name: "Governance limits and enforcement" })
+    .tap()
+  await expect(mobileNav).toBeHidden()
+
+  const disclosure = page.getByRole("button", {
+    name: /why rules still shape choices/i,
+  })
+  await expectTouchTarget(disclosure)
+  await disclosure.tap()
+  await expect(disclosure).toHaveAttribute("aria-expanded", "true")
+
+  const recapCue = page
+    .getByRole("region", { name: "Governance limits and enforcement" })
+    .getByRole("link", { name: "Continue to West Philippine Sea dossier" })
+  await expectTouchTarget(recapCue)
+  await expectNoHorizontalOverflow(page)
+
+  await page.goto("/#un-command-center")
+  await expectNoHorizontalOverflowAtTextScale(page, 125)
+
+  await context.close()
+})
+
+test("semantic landmarks and headings describe the core journey", async ({
+  page,
+}) => {
+  await page.goto("/")
+
+  await expect(page.getByRole("main")).toHaveCount(1)
+  await expect(page.getByRole("banner")).toHaveCount(1)
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible()
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Global Governance" })
+  ).toBeVisible()
+
+  for (const sectionName of ["Journey start", ...narrativeSections]) {
+    const region = page.getByRole("region", { name: sectionName })
+    await expect(region).toBeVisible()
+    await expect(region.getByRole("heading", { level: 2 })).toBeVisible()
+  }
+})
+
 test("home page respects reduced motion and keeps hero responsive", async ({
   page,
 }) => {
@@ -249,10 +502,22 @@ test("home page respects reduced motion and keeps hero responsive", async ({
       page.getByRole("button", { name: "Open navigation" })
     ).toBeVisible({ visible: width < 768 })
 
-    const hasHorizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth
-    )
-    expect(hasHorizontalOverflow).toBe(false)
+    await expectNoHorizontalOverflow(page)
+
+    const motionStyle = await page.evaluate(() => {
+      const htmlStyle = window.getComputedStyle(document.documentElement)
+      const heroAside = document.querySelector(".orbital-hero-aside")
+
+      return {
+        heroAsideBeforeDisplay: heroAside
+          ? window.getComputedStyle(heroAside, "::before").display
+          : "none",
+        scrollBehavior: htmlStyle.scrollBehavior,
+      }
+    })
+
+    expect(motionStyle.scrollBehavior).toBe("auto")
+    expect(motionStyle.heroAsideBeforeDisplay).toBe("none")
 
     for (const locator of [heading, continueLink]) {
       const box = await locator.boundingBox()
@@ -512,9 +777,6 @@ test("full narrative stays readable across responsive checkpoints", async ({
     await page.keyboard.press("Enter")
     await expect(disclosure).toHaveAttribute("aria-expanded", "true")
 
-    const hasHorizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > window.innerWidth
-    )
-    expect(hasHorizontalOverflow).toBe(false)
+    await expectNoHorizontalOverflow(page)
   }
 })
