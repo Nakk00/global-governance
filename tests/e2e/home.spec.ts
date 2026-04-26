@@ -204,6 +204,80 @@ test("desktop navigation jumps between chapter sections and restores history", a
   ).toBeFocused()
 })
 
+test("UN command center introduces an explorable shell with keyboard entry", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of storyWidths) {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto("/#un-command-center")
+
+      const commandCenter = page.getByRole("region", {
+        name: "UN Command Center",
+      })
+      const summary = commandCenter.getByRole("region", {
+        name: "Command Center summary",
+      })
+      const exploreControl = commandCenter.getByRole("button", {
+        name: "Explore the Command Center",
+      })
+      const whyControl = commandCenter.getByRole("button", {
+        name: "Why the UN matters",
+      })
+      const shellMapControl = commandCenter.getByRole("button", {
+        name: "Inside this section",
+      })
+
+      await expect(commandCenter).toBeVisible()
+      await expect(commandCenter).toBeFocused()
+      await expect(
+        commandCenter.getByRole("heading", {
+          name: "The UN gives global politics a shared address",
+        })
+      ).toBeVisible()
+      await expect(
+        commandCenter.getByText(/institutional system within global governance/i)
+      ).toBeVisible()
+      await expect(summary).toBeVisible()
+      await expect(exploreControl).toBeVisible()
+      await expect(whyControl).toBeVisible()
+      await expect(shellMapControl).toBeVisible()
+      await expectTouchTarget(exploreControl)
+      await expectTouchTarget(whyControl)
+      await expectTouchTarget(shellMapControl)
+
+      for (const control of [exploreControl, whyControl, shellMapControl]) {
+        await control.focus()
+        await expectVisibleFocus(control)
+      }
+
+      await expectNoHorizontalOverflow(page)
+      if (width >= 768) {
+        await expect(
+          page
+            .getByRole("navigation", { name: "Primary" })
+            .getByRole("link", { name: "UN Command Center" })
+        ).toHaveAttribute("aria-current", "location")
+        await expect(
+          page.getByText("Current chapter: UN Command Center").first()
+        ).toBeVisible()
+      } else {
+        await page.getByRole("button", { name: "Open navigation" }).click()
+        const mobileNav = page.getByRole("navigation", { name: "Mobile chapters" })
+
+        await expect(
+          mobileNav.getByRole("link", { name: "UN Command Center" })
+        ).toHaveAttribute("aria-current", "location")
+        await expect(
+          mobileNav.getByText("Current chapter: UN Command Center")
+        ).toBeVisible()
+      }
+    }
+  }
+})
+
 test("hash entry falls back predictably and keyboard users can activate navigation", async ({
   page,
 }) => {

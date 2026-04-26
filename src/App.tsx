@@ -1,4 +1,5 @@
 import { AppShell } from "@/components/layout/AppShell"
+import { UNCommandCenter } from "@/components/modules/UNCommandCenter/UNCommandCenter"
 import { ChapterTransitionBlock } from "@/components/sections/ChapterTransitionBlock"
 import { HeroNarrativeFrame } from "@/components/sections/HeroNarrativeFrame"
 import { NarrativeSection } from "@/components/sections/NarrativeSection"
@@ -9,6 +10,7 @@ import {
   journeyStartContent,
 } from "@/data/sections/core-narrative"
 import { heroContent } from "@/data/sections/hero-content"
+import { unCommandCenterShell } from "@/data/sections/un-command-center"
 
 export function App() {
   return (
@@ -39,7 +41,14 @@ export function App() {
 
           return (
             <div key={section.id}>
-              <NarrativeSection content={section} />
+              {section.id === "un-command-center" ? (
+                <UNCommandCenter
+                  content={section}
+                  shell={unCommandCenterShell}
+                />
+              ) : (
+                <NarrativeSection content={section} />
+              )}
               {transition ? (
                 <ChapterTransitionBlock content={transition} />
               ) : null}
