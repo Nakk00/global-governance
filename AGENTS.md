@@ -61,6 +61,9 @@
 - On every successful `git push`, when a pull request exists or is created, the agent must include the pull request link in the final user-facing response.
 - On every successful `git push`, the agent must also include a paste-ready pull request description when a PR has not already been created through a tool that fills the PR body.
 - Do not assume GitHub's compare page will auto-populate the PR description from the chat response. Unless the repo has a PR template or the agent opened the PR with a tool that set the body, provide the user with ready-to-paste PR body text in the final response.
+- When creating a pull request with `gh` from PowerShell, do not pass multiline PR bodies as a single quoted string with escaped `\n` sequences.
+- Prefer `gh pr create --body-file <path>` or a PowerShell here-string so GitHub receives real newlines and renders the markdown correctly.
+- After creating a pull request, the agent must verify the rendered PR body. If the formatting is broken, the agent must fix the PR body before reporting completion to the user.
 - If `gh` is unavailable, unauthenticated, lacks repo permission, or pull request creation fails for any reason, the agent must say so clearly in the final response and still provide the `PR Summary` plus a paste-ready PR title and description.
 
 ### Playwright Browser Install Policy
