@@ -22,12 +22,12 @@ export function Navbar() {
     (activeSectionId === journeyStartSection.id ? journeyStartSection : null)
 
   return (
-    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5">
-      <div className="editorial-container orbital-nav-shell flex min-h-16 flex-wrap items-center gap-3 rounded-full border px-4 py-2 sm:px-5">
+    <header className="sticky top-0 z-40 px-2 pt-3 sm:px-5">
+      <div className="editorial-container orbital-nav-shell flex min-h-16 flex-wrap items-center gap-3 rounded-3xl border px-3 py-2 sm:px-5 md:rounded-full">
         <a
           href={`#${defaultChapterId}`}
           data-action-priority="secondary"
-          className="rounded-full text-sm font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+          className="inline-flex min-h-11 items-center rounded-full px-2 text-sm font-semibold text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
           onClick={(event) => {
             event.preventDefault()
             navigateToSection(defaultChapterId)
@@ -38,7 +38,7 @@ export function Navbar() {
 
         <nav
           aria-label="Primary"
-          className="hidden min-w-0 flex-1 items-center justify-center gap-1 md:flex"
+          className="hidden min-w-0 flex-1 flex-wrap items-center justify-center gap-1 md:flex"
         >
           {chapterNavigation.map((item) => {
             const isActive = item.id === activeSectionId
@@ -51,7 +51,9 @@ export function Navbar() {
                 aria-current={isActive ? "location" : undefined}
                 data-action-priority="secondary"
                 data-complete={isComplete || undefined}
-                data-state={isActive ? "active" : isComplete ? "complete" : "idle"}
+                data-state={
+                  isActive ? "active" : isComplete ? "complete" : "idle"
+                }
                 className={cn(
                   "orbital-link min-h-11 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
                 )}

@@ -27,7 +27,7 @@ export function InsightRecapCard({
           <a
             href={`#${nextStep.targetId}`}
             data-action-priority="primary"
-            className="editorial-primary-action mt-3 inline-flex items-center text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+            className="editorial-primary-action mt-3 inline-flex w-full items-center justify-center text-center text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:w-auto"
             onClick={(event) => {
               event.preventDefault()
               navigateToSection(nextStep.targetId)

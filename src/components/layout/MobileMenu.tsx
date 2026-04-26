@@ -53,7 +53,7 @@ export function MobileMenu() {
         <nav
           id="mobile-chapter-navigation"
           aria-label="Mobile chapters"
-          className="orbital-nav-shell mt-2 max-h-[calc(100svh-4rem)] basis-full overflow-y-auto overscroll-contain rounded-3xl border px-4 py-4 md:hidden"
+          className="orbital-nav-shell mt-2 max-h-[calc(100svh-5.5rem)] basis-full overflow-y-auto overscroll-contain rounded-3xl border px-4 py-4 md:hidden"
         >
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             Current chapter:{" "}
@@ -71,9 +71,11 @@ export function MobileMenu() {
                   aria-current={isActive ? "location" : undefined}
                   data-action-priority="secondary"
                   data-complete={isComplete || undefined}
-                  data-state={isActive ? "active" : isComplete ? "complete" : "idle"}
+                  data-state={
+                    isActive ? "active" : isComplete ? "complete" : "idle"
+                  }
                   className={cn(
-                    "orbital-link flex min-h-11 items-center justify-between text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    "orbital-link flex min-h-11 items-center justify-between gap-3 text-sm whitespace-normal outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   )}
                   onClick={(event) => {
                     event.preventDefault()

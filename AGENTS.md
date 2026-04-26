@@ -98,7 +98,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **Global-Governance** (1050 symbols, 1127 relationships, 2 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **Global-Governance** (1176 symbols, 1325 relationships, 9 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -194,5 +194,9 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Work in the Contexts area (16 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
+| Work in the Scripts area (15 symbols) | `.claude/skills/generated/scripts/SKILL.md` |
+| Work in the Layout area (8 symbols) | `.claude/skills/generated/layout/SKILL.md` |
+| Work in the Sections area (3 symbols) | `.claude/skills/generated/sections/SKILL.md` |
 
 <!-- gitnexus:end -->

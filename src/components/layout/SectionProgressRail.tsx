@@ -14,10 +14,10 @@ export function SectionProgressRail() {
   } = useNavigation()
 
   return (
-    <aside className="pointer-events-none fixed top-28 right-4 z-30 hidden xl:block">
+    <aside className="pointer-events-none fixed top-28 right-4 z-30 hidden max-h-[calc(100svh-8rem)] xl:block">
       <nav
         aria-label="Section progress"
-        className="orbital-rail-card pointer-events-auto flex w-64 flex-col gap-2 px-4 py-4"
+        className="orbital-rail-card pointer-events-auto flex max-h-full w-64 flex-col gap-2 overflow-y-auto overscroll-contain px-4 py-4"
       >
         <div className="px-1">
           <p className="orbital-chip">Orbital route</p>
@@ -33,7 +33,9 @@ export function SectionProgressRail() {
               aria-current={isActive ? "location" : undefined}
               data-action-priority="secondary"
               data-complete={isComplete || undefined}
-              data-state={isActive ? "active" : isComplete ? "complete" : "idle"}
+              data-state={
+                isActive ? "active" : isComplete ? "complete" : "idle"
+              }
               className="orbital-rail-link group grid min-h-11 grid-cols-[1.75rem_minmax(0,1fr)] items-center gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
               onClick={(event) => {
                 event.preventDefault()
@@ -61,6 +63,7 @@ export function SectionProgressRail() {
           type="button"
           variant="ghost"
           className="editorial-secondary-action mt-1 min-h-11 justify-start rounded-full px-3 text-xs"
+          aria-label="Return to start from progress rail"
           data-action-priority="secondary"
           onClick={resetToTop}
         >
