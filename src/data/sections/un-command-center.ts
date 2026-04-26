@@ -14,6 +14,16 @@ export type UNCommandCenterShellContent = {
   }[]
 }
 
+export type UNOrganContent = {
+  id: string
+  label: string
+  summary: string
+  role: string
+  power: string
+  limit: string
+  whyItMatters: string
+}
+
 export const unCommandCenter: NarrativeSectionContent = {
   id: "un-command-center",
   navigationLabel: "UN Command Center",
@@ -47,6 +57,70 @@ export const unCommandCenter: NarrativeSectionContent = {
     nextStepTargetId: "governance-limits",
   },
 }
+
+export const unOrgans: UNOrganContent[] = [
+  {
+    id: "general-assembly",
+    label: "General Assembly",
+    summary: "The forum where every UN member state has a seat and a vote.",
+    role: "Turns global concerns into public debate, resolutions, budgets, and shared political signals.",
+    power:
+      "Can set agendas, approve budgets, elect members to UN bodies, and show where broad international support exists.",
+    limit:
+      "Its resolutions usually do not bind states by force, so influence depends on legitimacy, repetition, and diplomatic pressure.",
+    whyItMatters:
+      "It gives small and large states the same microphone, making global opinion visible even when agreement is incomplete.",
+  },
+  {
+    id: "security-council",
+    label: "Security Council",
+    summary: "The body with primary responsibility for peace and security.",
+    role: "Assesses threats, authorizes peace operations, imposes sanctions, and can approve collective security measures.",
+    power:
+      "Can issue binding decisions for member states and move faster than the wider UN when the council agrees.",
+    limit:
+      "The veto held by the five permanent members can block action, especially when major-power interests collide.",
+    whyItMatters:
+      "It shows the UN at its most operational and most political: capable of authorizing action, but shaped by power.",
+  },
+  {
+    id: "secretariat",
+    label: "Secretariat",
+    summary: "The administrative engine led by the Secretary-General.",
+    role: "Turns mandates into reports, coordination, field support, diplomacy, and the day-to-day work of the organization.",
+    power:
+      "Can gather information, keep negotiations moving, warn about risks, and make the UN system legible to states and publics.",
+    limit:
+      "It does not command states on its own and must work within mandates, budgets, and political consent.",
+    whyItMatters:
+      "It keeps the institution from being only a meeting hall by giving decisions a professional memory and operating capacity.",
+  },
+  {
+    id: "international-court",
+    label: "International Court of Justice",
+    summary: "The UN's principal judicial organ for disputes between states.",
+    role: "Interprets international law, settles legal disputes submitted by states, and issues advisory opinions.",
+    power:
+      "Can clarify legal obligations and create authoritative records that shape diplomacy, advocacy, and future behavior.",
+    limit:
+      "Its reach depends on state consent and follow-through; legal judgment does not automatically produce enforcement.",
+    whyItMatters:
+      "It helps move conflicts from pure power politics into legal argument, evidence, and public reasoning.",
+  },
+  {
+    id: "specialized-agencies",
+    label: "Specialized agencies",
+    summary:
+      "The technical bodies that coordinate work in fields such as health, labor, food, education, and development.",
+    role: "Provide expertise, standards, field programs, and coordination for problems that cross borders.",
+    power:
+      "Can pool knowledge, set technical norms, support national capacity, and keep cooperation running below headline politics.",
+    limit:
+      "They depend on mandates, funding, member-state cooperation, and trust in expert institutions.",
+    whyItMatters:
+      "They make global governance practical by turning broad goals into standards, data, advice, and services.",
+  },
+]
 
 export const unCommandCenterShell: UNCommandCenterShellContent = {
   introduction:

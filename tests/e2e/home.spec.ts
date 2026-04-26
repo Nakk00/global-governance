@@ -238,7 +238,9 @@ test("UN command center introduces an explorable shell with keyboard entry", asy
         })
       ).toBeVisible()
       await expect(
-        commandCenter.getByText(/institutional system within global governance/i)
+        commandCenter.getByText(
+          /institutional system within global governance/i
+        )
       ).toBeVisible()
       await expect(summary).toBeVisible()
       await expect(exploreControl).toBeVisible()
@@ -264,8 +266,23 @@ test("UN command center introduces an explorable shell with keyboard entry", asy
           page.getByText("Current chapter: UN Command Center").first()
         ).toBeVisible()
       } else {
-        await page.getByRole("button", { name: "Open navigation" }).click()
-        const mobileNav = page.getByRole("navigation", { name: "Mobile chapters" })
+        await page.waitForFunction(() => {
+          const section = document.getElementById("un-command-center")
+
+          if (!section) {
+            return false
+          }
+
+          return section.getBoundingClientRect().top <= 180
+        })
+        const openNavigation = page.getByRole("button", {
+          name: "Open navigation",
+        })
+        await expect(openNavigation).toBeVisible()
+        await openNavigation.click()
+        const mobileNav = page.getByRole("navigation", {
+          name: "Mobile chapters",
+        })
 
         await expect(
           mobileNav.getByRole("link", { name: "UN Command Center" })
@@ -276,6 +293,73 @@ test("UN command center introduces an explorable shell with keyboard entry", asy
       }
     }
   }
+})
+
+test("UN command center organ explorer updates selection and details", async ({
+  page,
+}) => {
+  await page.goto("/#un-command-center")
+
+  const commandCenter = page.getByRole("region", {
+    name: "UN Command Center",
+  })
+  const explorer = commandCenter.getByRole("region", {
+    name: "Inspect the rooms of the UN system",
+  })
+  const generalAssembly = explorer.getByRole("button", {
+    name: /General Assembly/i,
+  })
+  const securityCouncil = explorer.getByRole("button", {
+    name: /Security Council/i,
+  })
+
+  await expect(commandCenter).toBeFocused()
+  await expect(explorer).toBeVisible()
+  await expect(
+    explorer.getByRole("region", { name: "General Assembly details" })
+  ).toBeVisible()
+  await expect(generalAssembly).toHaveAttribute("aria-pressed", "true")
+  await expect(generalAssembly).toHaveAttribute("data-state", "selected")
+  await expect(
+    explorer
+      .getByRole("region", { name: "General Assembly details" })
+      .getByText(/every UN member state has a seat and a vote/i)
+  ).toBeVisible()
+  await expect(explorer.getByText("Role")).toBeVisible()
+  await expect(explorer.getByText("Scope of power")).toBeVisible()
+  await expect(explorer.getByText("Limitation")).toBeVisible()
+  await expect(explorer.getByText("Why it matters")).toBeVisible()
+
+  await securityCouncil.click()
+  await expect(securityCouncil).toHaveAttribute("aria-pressed", "true")
+  await expect(generalAssembly).toHaveAttribute("aria-pressed", "false")
+  await expect(
+    explorer.getByRole("region", { name: "Security Council details" })
+  ).toBeVisible()
+  await expect(
+    explorer.getByText(/binding decisions for member states/i)
+  ).toBeVisible()
+  await expect(
+    explorer.getByText(/veto held by the five permanent members/i)
+  ).toBeVisible()
+
+  await generalAssembly.focus()
+  await expectVisibleFocus(generalAssembly)
+  await page.keyboard.press("Tab")
+  await expect(securityCouncil).toBeFocused()
+  await expectVisibleFocus(securityCouncil)
+  await page.keyboard.press("Enter")
+  await expect(securityCouncil).toHaveAttribute("aria-pressed", "true")
+
+  await expect(
+    commandCenter.getByRole("region", { name: "Command Center summary" })
+  ).toBeVisible()
+  await expect(
+    commandCenter.getByRole("link", {
+      name: "Continue to Governance limits and enforcement",
+    })
+  ).toBeVisible()
+  await expect(page).toHaveURL(/#un-command-center$/)
 })
 
 test("hash entry falls back predictably and keyboard users can activate navigation", async ({
