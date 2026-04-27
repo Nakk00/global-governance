@@ -17,11 +17,14 @@ import {
 import { resolveNarrativeRecapCue } from "@/data/sections/core-narrative"
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
 import {
+  wpsEvidenceRegistry,
   wpsRulingRealityComparison,
   wpsTimelineEvents,
   type WpsDossierShellContent,
 } from "@/data/sections/west-philippine-sea-dossier"
 import { cn } from "@/lib/utils"
+
+import { WpsEvidenceSurface } from "./WpsEvidenceSurface"
 
 type WpsDossierProps = {
   content: NarrativeSectionContent
@@ -29,9 +32,12 @@ type WpsDossierProps = {
 }
 
 const entryIcons = [FileText, Scale]
+type OpenEvidenceKind = "timeline" | "comparison"
 
 export function WpsDossier({ content, shell }: WpsDossierProps) {
   const [openEntry, setOpenEntry] = useState<string | null>(null)
+  const [openEvidenceKind, setOpenEvidenceKind] =
+    useState<OpenEvidenceKind | null>(null)
   const [selectedEventId, setSelectedEventId] = useState(
     wpsTimelineEvents[0]?.id
   )
@@ -52,6 +58,16 @@ export function WpsDossier({ content, shell }: WpsDossierProps) {
     comparisonStates.find((state) => state.id === selectedComparisonStateId) ??
     comparisonStates[0] ??
     null
+  const selectedComparisonContextLabel =
+    selectedComparisonState?.label ??
+    selectedComparisonStateId ??
+    "Current comparison state"
+  const selectedEventEvidence = selectedEvent
+    ? (wpsEvidenceRegistry.timeline[selectedEvent.id] ?? [])
+    : []
+  const selectedComparisonEvidence = selectedComparisonState
+    ? (wpsEvidenceRegistry.comparison[selectedComparisonState.id] ?? [])
+    : []
 
   const handleComparisonKeyDown = (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -257,6 +273,16 @@ export function WpsDossier({ content, shell }: WpsDossierProps) {
                   </div>
                 ))}
               </dl>
+
+              <WpsEvidenceSurface
+                contextLabel={selectedEvent.label}
+                contextTypeLabel="Timeline event"
+                evidence={selectedEventEvidence}
+                isOpen={openEvidenceKind === "timeline"}
+                onOpenChange={(isOpen) =>
+                  setOpenEvidenceKind(isOpen ? "timeline" : null)
+                }
+              />
             </div>
           </div>
         </div>
@@ -379,6 +405,15 @@ export function WpsDossier({ content, shell }: WpsDossierProps) {
                   <p className="editorial-prose mt-3">
                     {selectedComparisonState.explanation}
                   </p>
+                  <WpsEvidenceSurface
+                    contextLabel={selectedComparisonState.label}
+                    contextTypeLabel="Comparison state"
+                    evidence={selectedComparisonEvidence}
+                    isOpen={openEvidenceKind === "comparison"}
+                    onOpenChange={(isOpen) =>
+                      setOpenEvidenceKind(isOpen ? "comparison" : null)
+                    }
+                  />
                 </>
               ) : (
                 <>
@@ -387,9 +422,18 @@ export function WpsDossier({ content, shell }: WpsDossierProps) {
                     The dossier shell still works without this comparison state.
                   </h4>
                   <p className="editorial-prose mt-3">
-                    The ruling and reality overview remains available above while
-                    the explanatory emphasis is refreshed.
+                    The ruling and reality overview remains available above
+                    while the explanatory emphasis is refreshed.
                   </p>
+                  <WpsEvidenceSurface
+                    contextLabel={selectedComparisonContextLabel}
+                    contextTypeLabel="Comparison state"
+                    evidence={[]}
+                    isOpen={openEvidenceKind === "comparison"}
+                    onOpenChange={(isOpen) =>
+                      setOpenEvidenceKind(isOpen ? "comparison" : null)
+                    }
+                  />
                 </>
               )}
             </div>

@@ -290,13 +290,15 @@ async function expectWpsComparisonLayout(page: Page, width: number) {
     expect(controlsBox!.width).toBeLessThanOrEqual(width)
     expect(detailsBox!.width).toBeLessThanOrEqual(width)
 
-    const controlBoxes = await controls.getByRole("radio").evaluateAll((items) =>
-      items.map((item) => {
-        const box = item.getBoundingClientRect()
+    const controlBoxes = await controls
+      .getByRole("radio")
+      .evaluateAll((items) =>
+        items.map((item) => {
+          const box = item.getBoundingClientRect()
 
-        return { x: box.x, y: box.y, width: box.width }
-      })
-    )
+          return { x: box.x, y: box.y, width: box.width }
+        })
+      )
 
     if (width >= 768) {
       expect(controlBoxes).toHaveLength(3)
@@ -305,6 +307,38 @@ async function expectWpsComparisonLayout(page: Page, width: number) {
       expect(controlBoxes[0].y).toBeLessThan(controlBoxes[1].y)
       expect(controlBoxes[1].y).toBeLessThan(controlBoxes[2].y)
     }
+  }
+}
+
+async function expectWpsEvidenceLayout(page: Page, width: number) {
+  const evidenceSurface = page.locator('[data-wps-evidence-surface=""]:visible')
+
+  await expect(evidenceSurface).toBeVisible()
+  await expectContainedWithinViewport(evidenceSurface, width)
+
+  const sourceCards = evidenceSurface.locator("article")
+  const unavailableState = evidenceSurface.getByText(
+    "Evidence is unavailable for this selection."
+  )
+
+  if ((await sourceCards.count()) > 0) {
+    const sourceCardBoxes = await sourceCards.evaluateAll((cards) =>
+      cards.map((card) => {
+        const box = card.getBoundingClientRect()
+
+        return { x: box.x, width: box.width }
+      })
+    )
+
+    for (const box of sourceCardBoxes) {
+      expect(box.x).toBeGreaterThanOrEqual(0)
+      expect(box.x + box.width).toBeLessThanOrEqual(width)
+    }
+
+    await expectReadableBodyText(sourceCards.first().locator("p").nth(2))
+  } else {
+    await expect(unavailableState).toBeVisible()
+    await expectReadableBodyText(unavailableState)
   }
 }
 
@@ -934,6 +968,133 @@ test("West Philippine Sea dossier timeline follows chronological selection", asy
         expect(
           buttonMotionStyle.transitionProperty === "none" ||
             buttonMotionStyle.transitionDuration <= 0.001
+        ).toBe(true)
+      }
+    }
+  }
+})
+
+test("West Philippine Sea dossier evidence stays local, accessible, and context-linked", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 980 })
+      await page.goto(
+        `/?evidence=${reducedMotion}-${width}#west-philippine-sea-dossier`
+      )
+
+      const dossier = page.getByRole("region", {
+        name: "West Philippine Sea dossier",
+      })
+      const timeline = dossier.getByRole("region", {
+        name: "Follow the dispute in order",
+      })
+      const comparison = dossier.getByRole("region", {
+        name: "Legal clarity met political limits",
+      })
+      const arbitration = timeline.getByRole("button", {
+        name: /2013\s+(Selected\s+)?Arbitration filing/i,
+      })
+      const timelineEvidenceTrigger = timeline.getByRole("button", {
+        name: "Inspect evidence for Scarborough Shoal incident",
+      })
+
+      await expect(timelineEvidenceTrigger).toBeVisible()
+      await timelineEvidenceTrigger.focus()
+      await expectVisibleFocus(timelineEvidenceTrigger)
+      await page.keyboard.press("Enter")
+
+      const scarboroughEvidence = timeline.getByRole("region", {
+        name: "Evidence for Scarborough Shoal incident",
+      })
+
+      await expect(scarboroughEvidence).toBeVisible()
+      await expect(scarboroughEvidence).toContainText(
+        "wps-src-2012-scarborough"
+      )
+      await expect(scarboroughEvidence).toContainText("Why it matters")
+      await expectWpsEvidenceLayout(page, width)
+      await expectNoHorizontalOverflow(page)
+      await expect(
+        dossier.getByRole("link", {
+          name: "Continue to Conclusion and references",
+        })
+      ).toBeVisible()
+
+      await arbitration.click()
+
+      const arbitrationEvidence = timeline.getByRole("region", {
+        name: "Evidence for Arbitration filing",
+      })
+
+      await expect(arbitrationEvidence).toBeVisible()
+      await expect(arbitrationEvidence).toContainText(
+        "wps-src-2013-arbitration-filing"
+      )
+      await expect(scarboroughEvidence).toBeHidden()
+      await expectNoHorizontalOverflow(page)
+
+      const updatedTimelineTrigger = timeline.getByRole("button", {
+        name: "Inspect evidence for Arbitration filing",
+      })
+      await comparison
+        .getByRole("radio", { name: /Governance lesson/i })
+        .click()
+
+      const comparisonEvidenceTrigger = comparison.getByRole("button", {
+        name: "Inspect evidence for Governance lesson",
+      })
+
+      await comparisonEvidenceTrigger.focus()
+      await expectVisibleFocus(comparisonEvidenceTrigger)
+      await page.keyboard.press("Enter")
+
+      const emptyEvidence = comparison.getByRole("region", {
+        name: "Evidence for Governance lesson",
+      })
+
+      await expect(emptyEvidence).toBeVisible()
+      await expect(emptyEvidence).toContainText(
+        "Evidence is unavailable for this selection."
+      )
+      await expect(emptyEvidence).toContainText(
+        "The current context remains Governance lesson"
+      )
+      await expect(updatedTimelineTrigger).toHaveAttribute(
+        "aria-expanded",
+        "false"
+      )
+      await expectWpsEvidenceLayout(page, width)
+      await expectNoHorizontalOverflow(page)
+
+      const closeComparisonEvidence = comparison.getByRole("button", {
+        name: "Close evidence for Governance lesson",
+      })
+
+      await closeComparisonEvidence.focus()
+      await expectVisibleFocus(closeComparisonEvidence)
+      await page.keyboard.press("Enter")
+      await expect(comparisonEvidenceTrigger).toBeFocused()
+      await expect(emptyEvidence).toBeHidden()
+
+      if (reducedMotion === "reduce") {
+        const motionStyle = await comparisonEvidenceTrigger.evaluate(
+          (element) => {
+            const style = window.getComputedStyle(element)
+
+            return {
+              transitionDuration: Number.parseFloat(style.transitionDuration),
+              transitionProperty: style.transitionProperty,
+            }
+          }
+        )
+
+        expect(
+          motionStyle.transitionProperty === "none" ||
+            motionStyle.transitionDuration <= 0.001
         ).toBe(true)
       }
     }

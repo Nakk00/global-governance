@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  wpsEvidenceRegistry,
   wpsRulingRealityComparison,
   wpsTimelineEvents,
 } from "./west-philippine-sea-dossier"
@@ -91,5 +92,61 @@ describe("wpsRulingRealityComparison", () => {
     expect(comparisonText).toMatch(/enforcement gap|enforcement|compliance/i)
     expect(comparisonText).toMatch(/political reality|power|political will/i)
     expect(comparisonText).toMatch(/governance lesson/i)
+  })
+})
+
+describe("wpsEvidenceRegistry", () => {
+  it("maps evidence entries to every timeline event and comparison state", () => {
+    expect(Object.keys(wpsEvidenceRegistry.timeline).sort()).toEqual(
+      wpsTimelineEvents.map((event) => event.id).sort()
+    )
+    expect(Object.keys(wpsEvidenceRegistry.comparison).sort()).toEqual(
+      wpsRulingRealityComparison.states.map((state) => state.id).sort()
+    )
+  })
+
+  it("keeps source ids, labels, metadata, summaries, and why-it-matters notes stable", () => {
+    const evidenceItems = [
+      ...Object.values(wpsEvidenceRegistry.timeline).flat(),
+      ...Object.values(wpsEvidenceRegistry.comparison).flat(),
+    ]
+
+    expect(evidenceItems.length).toBeGreaterThan(0)
+
+    for (const item of evidenceItems) {
+      expect(item.sourceId).toMatch(/^wps-src-[a-z0-9-]+$/)
+      expect(item.sourceLabel.length).toBeGreaterThan(12)
+      expect(item.summary.length).toBeGreaterThan(40)
+      expect(item.metadata.length).toBeGreaterThan(20)
+      expect(item.whyItMatters.length).toBeGreaterThan(40)
+    }
+  })
+
+  it("includes a typed empty-state path without removing the selected context key", () => {
+    expect(wpsEvidenceRegistry.comparison["governance-lesson"]).toEqual([])
+  })
+
+  it("keeps evidence copy supportive without duplicating timeline or comparison prose", () => {
+    for (const event of wpsTimelineEvents) {
+      const evidenceItems = wpsEvidenceRegistry.timeline[event.id]
+
+      for (const item of evidenceItems) {
+        expect(item.summary).not.toBe(event.summary)
+        expect(item.summary).not.toBe(event.context)
+        expect(item.summary).not.toBe(event.legalContext)
+        expect(item.summary).not.toBe(event.significance)
+        expect(item.whyItMatters).not.toBe(event.significance)
+      }
+    }
+
+    for (const state of wpsRulingRealityComparison.states) {
+      const evidenceItems = wpsEvidenceRegistry.comparison[state.id]
+
+      for (const item of evidenceItems) {
+        expect(item.summary).not.toBe(state.summary)
+        expect(item.summary).not.toBe(state.explanation)
+        expect(item.whyItMatters).not.toBe(state.explanation)
+      }
+    }
   })
 })

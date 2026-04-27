@@ -48,6 +48,19 @@ export type WpsRulingRealityComparison = {
   states: WpsRulingRealityComparisonState[]
 }
 
+export type WpsEvidenceItem = {
+  sourceId: string
+  sourceLabel: string
+  summary: string
+  metadata: string
+  whyItMatters: string
+}
+
+export type WpsEvidenceRegistry = {
+  timeline: Record<string, WpsEvidenceItem[]>
+  comparison: Record<string, WpsEvidenceItem[]>
+}
+
 export const wpsTimelineEvents: WpsTimelineEvent[] = [
   {
     id: "scarborough-shoal-incident",
@@ -147,6 +160,82 @@ export const wpsRulingRealityComparison: WpsRulingRealityComparison = {
         "This is not a generic conflict summary. It is a governance lesson about how institutions can create legal clarity while enforcement depends on political will and collective response.",
     },
   ],
+}
+
+export const wpsEvidenceRegistry: WpsEvidenceRegistry = {
+  timeline: {
+    "scarborough-shoal-incident": [
+      {
+        sourceId: "wps-src-2012-scarborough",
+        sourceLabel: "Scarborough Shoal standoff public record",
+        summary:
+          "A contemporary incident record showing how official vessels and access claims turned the shoal into a visible dispute.",
+        metadata: "2012 maritime incident; timeline source; contested access",
+        whyItMatters:
+          "It anchors the opening milestone in observable state behavior instead of treating the dispute as an abstract claim.",
+      },
+    ],
+    "arbitration-filing": [
+      {
+        sourceId: "wps-src-2013-arbitration-filing",
+        sourceLabel: "Philippines notification and statement of claim",
+        summary:
+          "The filing identifies the legal questions the Philippines brought under UNCLOS dispute settlement.",
+        metadata: "2013 legal filing; UNCLOS arbitration; case initiation",
+        whyItMatters:
+          "It shows how the dispute moved from maritime confrontation into an institutional process with defined questions.",
+      },
+    ],
+    "tribunal-ruling": [
+      {
+        sourceId: "wps-src-2016-tribunal-award",
+        sourceLabel: "South China Sea arbitral tribunal award",
+        summary:
+          "The award explains the tribunal's findings on maritime entitlements, historic-rights arguments, and the legal status of features.",
+        metadata: "2016 arbitral award; UNCLOS Annex VII; legal findings",
+        whyItMatters:
+          "It is the core legal source for the chapter's distinction between clarified rights and later compliance choices.",
+      },
+    ],
+    "enforcement-limits": [
+      {
+        sourceId: "wps-src-post-2016-compliance",
+        sourceLabel: "Post-award compliance and diplomacy record",
+        summary:
+          "A post-award source cluster tracking continued maritime pressure, diplomatic positioning, and public accountability.",
+        metadata:
+          "Post-2016 implementation context; diplomacy; enforcement limits",
+        whyItMatters:
+          "It supports the governance lesson that law can shape legitimacy while practical change still depends on state action.",
+      },
+    ],
+  },
+  comparison: {
+    "enforcement-gap": [
+      {
+        sourceId: "wps-src-comparison-enforcement-gap",
+        sourceLabel: "Tribunal award and post-award conduct comparison",
+        summary:
+          "A paired reading of the award and later conduct that separates legal clarification from enforcement capacity.",
+        metadata:
+          "Comparison source; legal outcome versus implementation; UNCLOS",
+        whyItMatters:
+          "It helps learners verify why the ruling mattered even though it did not automatically change behavior at sea.",
+      },
+    ],
+    "political-reality": [
+      {
+        sourceId: "wps-src-comparison-political-reality",
+        sourceLabel: "Diplomatic response and state behavior record",
+        summary:
+          "A governance-focused record of how states used diplomacy, reputation, and capacity after the award.",
+        metadata: "Comparison source; diplomacy; state behavior",
+        whyItMatters:
+          "It keeps the comparison grounded in political incentives rather than implying law and power are separate worlds.",
+      },
+    ],
+    "governance-lesson": [],
+  },
 }
 
 export const westPhilippineSeaDossier: NarrativeSectionContent = {
