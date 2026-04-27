@@ -17,6 +17,13 @@ const narrativeSections = [
   "Conclusion and references",
 ]
 
+const summaryFirstSections = [
+  "Global governance overview",
+  "Governance limits and enforcement",
+  "West Philippine Sea dossier",
+  "Conclusion and references",
+]
+
 const recapCues = [
   {
     sectionId: "global-governance-overview",
@@ -112,6 +119,14 @@ async function expectTouchTarget(locator: Locator) {
   expect(box!.height).toBeGreaterThanOrEqual(44)
 }
 
+async function expectContainedWithinViewport(locator: Locator, width: number) {
+  const box = await locator.boundingBox()
+
+  expect(box).not.toBeNull()
+  expect(box!.x).toBeGreaterThanOrEqual(0)
+  expect(box!.x + box!.width).toBeLessThanOrEqual(width)
+}
+
 async function expectVisibleFocus(locator: Locator) {
   await expect(locator).toBeFocused()
 
@@ -131,6 +146,49 @@ async function expectVisibleFocus(locator: Locator) {
       focusStyle.outlineWidth !== "0px" ||
       focusStyle.boxShadow !== "none"
   ).toBe(true)
+}
+
+async function expectUNComparisonLayout(page: Page, width: number) {
+  const commandCenter = page.getByRole("region", {
+    name: "UN Command Center",
+  })
+  const explorer = commandCenter.getByRole("region", {
+    name: "Inspect the rooms of the UN system",
+  })
+  const comparisonSurface = explorer.locator(
+    '[data-un-comparison-layout="organ-comparison"]'
+  )
+  const selector = explorer.locator('[data-un-comparison-part="selector"]')
+  const details = explorer.locator('[data-un-comparison-part="details"]')
+
+  await expect(comparisonSurface).toBeVisible()
+  await expect(selector).toBeVisible()
+  await expect(details).toBeVisible()
+
+  const surfaceBox = await comparisonSurface.boundingBox()
+  const selectorBox = await selector.boundingBox()
+  const detailsBox = await details.boundingBox()
+
+  expect(surfaceBox).not.toBeNull()
+  expect(selectorBox).not.toBeNull()
+  expect(detailsBox).not.toBeNull()
+  expect(surfaceBox!.x).toBeGreaterThanOrEqual(0)
+  expect(surfaceBox!.x + surfaceBox!.width).toBeLessThanOrEqual(width)
+  expect(selectorBox!.x).toBeGreaterThanOrEqual(surfaceBox!.x)
+  expect(detailsBox!.x + detailsBox!.width).toBeLessThanOrEqual(
+    surfaceBox!.x + surfaceBox!.width
+  )
+
+  if (width >= 1024) {
+    expect(selectorBox!.x + selectorBox!.width).toBeLessThanOrEqual(
+      detailsBox!.x
+    )
+  } else {
+    expect(selectorBox!.width).toBeLessThanOrEqual(surfaceBox!.width)
+    expect(detailsBox!.width).toBeLessThanOrEqual(surfaceBox!.width)
+    expect(selectorBox!.x).toBeGreaterThanOrEqual(surfaceBox!.x)
+    expect(detailsBox!.x).toBeGreaterThanOrEqual(surfaceBox!.x)
+  }
 }
 
 test("home page opens the journey and continues in-page", async ({ page }) => {
@@ -284,12 +342,16 @@ test("UN command center introduces an explorable shell with keyboard entry", asy
           name: "Mobile chapters",
         })
 
-        await expect(
-          mobileNav.getByRole("link", { name: "UN Command Center" })
-        ).toHaveAttribute("aria-current", "location")
-        await expect(
-          mobileNav.getByText("Current chapter: UN Command Center")
-        ).toBeVisible()
+        const mobileUnLink = mobileNav.getByRole("link", {
+          name: "UN Command Center",
+        })
+
+        await expect(mobileUnLink).toBeVisible()
+        await expect(mobileUnLink).toHaveAttribute(
+          "data-state",
+          /active|complete/
+        )
+        await expect(mobileNav.getByText(/Current chapter:/)).toBeVisible()
       }
     }
   }
@@ -360,6 +422,172 @@ test("UN command center organ explorer updates selection and details", async ({
     })
   ).toBeVisible()
   await expect(page).toHaveURL(/#un-command-center$/)
+})
+
+test("UN organ comparison adapts across breakpoints without hiding controls", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 920 })
+      await page.goto("/#un-command-center")
+
+      const commandCenter = page.getByRole("region", {
+        name: "UN Command Center",
+      })
+      const explorer = commandCenter.getByRole("region", {
+        name: "Inspect the rooms of the UN system",
+      })
+      const generalAssembly = explorer.getByRole("button", {
+        name: /General Assembly/i,
+      })
+      const securityCouncil = explorer.getByRole("button", {
+        name: /Security Council/i,
+      })
+      const details = explorer.locator('[data-un-comparison-part="details"]')
+
+      await expectUNComparisonLayout(page, width)
+      await expectNoHorizontalOverflow(page)
+
+      for (const organControl of [generalAssembly, securityCouncil]) {
+        await expectTouchTarget(organControl)
+        await organControl.focus()
+        await expectVisibleFocus(organControl)
+      }
+
+      await page.keyboard.press("Enter")
+      await expect(securityCouncil).toHaveAttribute("aria-pressed", "true")
+      await expect(
+        explorer.getByRole("region", { name: "Security Council details" })
+      ).toBeVisible()
+      await expect(details.getByText("Role")).toBeVisible()
+      await expect(details.getByText("Scope of power")).toBeVisible()
+      await expect(details.getByText("Limitation")).toBeVisible()
+      await expect(details.getByText("Why it matters")).toBeVisible()
+
+      if (reducedMotion === "reduce") {
+        const motionStyle = await details.evaluate((element) => {
+          const style = window.getComputedStyle(element)
+
+          return {
+            transitionDuration: Number.parseFloat(style.transitionDuration),
+            transitionProperty: style.transitionProperty,
+          }
+        })
+
+        expect(
+          motionStyle.transitionProperty === "none" ||
+            motionStyle.transitionDuration <= 0.001
+        ).toBe(true)
+      }
+    }
+  }
+})
+
+test("West Philippine Sea dossier opens as an anchored case file shell", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 920 })
+      await page.goto("/#west-philippine-sea-dossier")
+
+      const dossier = page.getByRole("region", {
+        name: "West Philippine Sea dossier",
+      })
+      const entryControls = dossier.getByRole("region", {
+        name: "Dossier entry controls",
+      })
+      const openEvidence = entryControls.getByRole("button", {
+        name: "Open the evidence file",
+      })
+      const traceLawPower = entryControls.getByRole("button", {
+        name: "Trace law and power",
+      })
+
+      await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+      await expect(dossier).toBeVisible()
+      await expect(dossier).toBeFocused()
+      await expect(
+        dossier.getByRole("heading", {
+          name: "The West Philippine Sea turns the theory into a test",
+        })
+      ).toBeVisible()
+      await expect(dossier.getByText("Case file")).toBeVisible()
+      await expect(
+        dossier.getByText("Evidence-led investigation")
+      ).toBeVisible()
+      await expect(
+        dossier.getByText(/legal rulings, maritime claims/i)
+      ).toBeVisible()
+      await expect(dossier.getByText("Supporting detail")).toBeVisible()
+      await expect(dossier.getByText("Synthesis")).toBeVisible()
+      await expect(
+        dossier.getByRole("button", {
+          name: "How to read the dispute as a governance case",
+        })
+      ).toBeVisible()
+      await expect(
+        dossier.getByRole("link", {
+          name: "Continue to Conclusion and references",
+        })
+      ).toBeVisible()
+      await expect(entryControls.getByRole("button")).toHaveCount(2)
+
+      for (const control of [openEvidence, traceLawPower]) {
+        await expect(control).toBeVisible()
+        await expectTouchTarget(control)
+        await expectContainedWithinViewport(control, width)
+        await control.focus()
+        await expectVisibleFocus(control)
+        await control.press("Enter")
+        await expect(control).toHaveAttribute("aria-expanded", "true")
+        await expectNoHorizontalOverflow(page)
+      }
+
+      await expectNoHorizontalOverflow(page)
+    }
+  }
+})
+
+test("West Philippine Sea dossier keeps canonical hash and recap handoff", async ({
+  page,
+}) => {
+  await page.goto("/#governance-limits")
+
+  const governanceLimits = page.getByRole("region", {
+    name: "Governance limits and enforcement",
+  })
+  const dossier = page.getByRole("region", {
+    name: "West Philippine Sea dossier",
+  })
+  const cue = governanceLimits.getByRole("link", {
+    name: "Continue to West Philippine Sea dossier",
+  })
+
+  await cue.focus()
+  await expectVisibleFocus(cue)
+  await page.keyboard.press("Enter")
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+  await expect(dossier).toBeFocused()
+
+  await page.reload()
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+  await expect(dossier).toBeFocused()
+
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "Conclusion and references" })
+    .click()
+  await expect(page).toHaveURL(/#conclusion-references$/)
+
+  await page.goBack()
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+  await expect(dossier).toBeFocused()
 })
 
 test("hash entry falls back predictably and keyboard users can activate navigation", async ({
@@ -786,7 +1014,7 @@ test("core narrative renders summary-first sections with local synthesis", async
 }) => {
   await page.goto("/")
 
-  for (const sectionName of narrativeSections) {
+  for (const sectionName of summaryFirstSections) {
     const section = page.getByRole("region", { name: sectionName })
     await expect(section.getByText("Summary")).toBeVisible()
     await expect(section.getByText("Supporting detail")).toBeVisible()

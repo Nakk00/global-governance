@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/layout/AppShell"
 import { UNCommandCenter } from "@/components/modules/UNCommandCenter/UNCommandCenter"
+import { WpsDossier } from "@/components/modules/WpsDossier/WpsDossier"
 import { ChapterTransitionBlock } from "@/components/sections/ChapterTransitionBlock"
 import { HeroNarrativeFrame } from "@/components/sections/HeroNarrativeFrame"
 import { NarrativeSection } from "@/components/sections/NarrativeSection"
@@ -11,6 +12,7 @@ import {
 } from "@/data/sections/core-narrative"
 import { heroContent } from "@/data/sections/hero-content"
 import { unCommandCenterShell } from "@/data/sections/un-command-center"
+import { wpsDossierShell } from "@/data/sections/west-philippine-sea-dossier"
 
 export function App() {
   return (
@@ -46,6 +48,8 @@ export function App() {
                   content={section}
                   shell={unCommandCenterShell}
                 />
+              ) : section.id === "west-philippine-sea-dossier" ? (
+                <WpsDossier content={section} shell={wpsDossierShell} />
               ) : (
                 <NarrativeSection content={section} />
               )}

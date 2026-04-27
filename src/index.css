@@ -322,6 +322,46 @@
     border-color: var(--ledger-border);
   }
 
+  .wps-dossier-shell {
+    @apply relative overflow-hidden rounded-3xl border;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--ledger-surface) 74%, var(--editorial-surface)),
+        color-mix(in oklch, var(--editorial-surface-raised) 82%, transparent)
+      ),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in oklch, var(--ledger-border) 28%, transparent) 0 1px,
+        transparent 1px 5.75rem
+      );
+    border-color: color-mix(in oklch, var(--ledger-border) 80%, var(--border));
+    box-shadow: var(--editorial-shadow);
+  }
+
+  .wps-dossier-label {
+    @apply w-fit rounded-full border px-3 py-1 text-xs font-semibold;
+    border-color: color-mix(in oklch, var(--ledger-border) 78%, var(--border));
+    background: color-mix(in oklch, var(--background) 62%, transparent);
+    color: color-mix(in oklch, var(--ledger-ink) 72%, var(--foreground));
+  }
+
+  .wps-dossier-summary,
+  .wps-dossier-ledger {
+    @apply min-w-0 rounded-2xl border p-4 sm:p-5;
+    border-color: color-mix(in oklch, var(--ledger-border) 70%, var(--border));
+    background: color-mix(in oklch, var(--card) 76%, transparent);
+  }
+
+  .wps-dossier-ledger {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklch, var(--ledger-surface) 88%, transparent),
+        color-mix(in oklch, var(--card) 76%, transparent)
+      );
+  }
+
   .editorial-transition {
     @apply relative overflow-hidden rounded-3xl border py-8;
     border-color: color-mix(in oklch, var(--atlas-grid) 72%, var(--atlas-marker));
