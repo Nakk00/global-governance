@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { wpsTimelineEvents } from "./west-philippine-sea-dossier"
+import {
+  wpsRulingRealityComparison,
+  wpsTimelineEvents,
+} from "./west-philippine-sea-dossier"
 
 describe("wpsTimelineEvents", () => {
   it("keeps the required case milestones in chronological source order", () => {
@@ -40,5 +43,53 @@ describe("wpsTimelineEvents", () => {
     expect(enforcement).toBeDefined()
     expect(enforcement?.legalContext).toMatch(/compliance|collective pressure/i)
     expect(enforcement?.significance).toMatch(/law|enforcement|power/i)
+  })
+})
+
+describe("wpsRulingRealityComparison", () => {
+  it("defines a stable default state with paired ruling and reality copy", () => {
+    const defaultState = wpsRulingRealityComparison.states.find(
+      (state) => state.id === wpsRulingRealityComparison.defaultStateId
+    )
+
+    expect(wpsRulingRealityComparison.thesisMode).toBe("fixed-dossier-thesis")
+    expect(defaultState).toBeDefined()
+    expect(wpsRulingRealityComparison.ruling.summary).toMatch(
+      /2016 arbitral award|UNCLOS/i
+    )
+    expect(wpsRulingRealityComparison.reality.summary).toMatch(
+      /enforcement|compliance|state choices/i
+    )
+  })
+
+  it("keeps every comparison state reviewable and governance-specific", () => {
+    expect(wpsRulingRealityComparison.states.length).toBeGreaterThanOrEqual(3)
+
+    for (const state of wpsRulingRealityComparison.states) {
+      expect(state.id).toMatch(/^[a-z0-9-]+$/)
+      expect(state.label.length).toBeGreaterThan(4)
+      expect(state.summary.length).toBeGreaterThan(20)
+      expect(state.explanation).toMatch(
+        /legal|law|institution|governance|enforcement|political/i
+      )
+    }
+  })
+
+  it("connects the legal outcome to the enforcement gap and political reality", () => {
+    const comparisonText = [
+      wpsRulingRealityComparison.ruling.summary,
+      wpsRulingRealityComparison.ruling.detail,
+      wpsRulingRealityComparison.reality.summary,
+      wpsRulingRealityComparison.reality.detail,
+      ...wpsRulingRealityComparison.states.flatMap((state) => [
+        state.summary,
+        state.explanation,
+      ]),
+    ].join(" ")
+
+    expect(comparisonText).toMatch(/legal clarity|legal ruling|legal outcome/i)
+    expect(comparisonText).toMatch(/enforcement gap|enforcement|compliance/i)
+    expect(comparisonText).toMatch(/political reality|power|political will/i)
+    expect(comparisonText).toMatch(/governance lesson/i)
   })
 })

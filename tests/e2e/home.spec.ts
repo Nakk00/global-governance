@@ -235,6 +235,79 @@ async function expectWpsTimelineLayout(page: Page, width: number) {
   }
 }
 
+async function expectWpsComparisonLayout(page: Page, width: number) {
+  const dossier = page.getByRole("region", {
+    name: "West Philippine Sea dossier",
+  })
+  const comparison = dossier.getByRole("region", {
+    name: "Legal clarity met political limits",
+  })
+  const pairedSurface = comparison.locator(
+    '[data-wps-comparison-layout="ruling-reality"]'
+  )
+  const controls = comparison.locator('[data-wps-comparison-part="controls"]')
+  const details = comparison.locator('[data-wps-comparison-part="details"]')
+  const ruling = pairedSurface.getByText("Legal or institutional ruling")
+  const reality = pairedSurface.getByText("Enforcement or geopolitical reality")
+
+  await expect(comparison).toBeVisible()
+  await expect(pairedSurface).toBeVisible()
+  await expect(controls).toBeVisible()
+  await expect(details).toBeVisible()
+  await expect(ruling).toBeVisible()
+  await expect(reality).toBeVisible()
+
+  const surfaceBox = await pairedSurface.boundingBox()
+  const controlsBox = await controls.boundingBox()
+  const detailsBox = await details.boundingBox()
+
+  expect(surfaceBox).not.toBeNull()
+  expect(controlsBox).not.toBeNull()
+  expect(detailsBox).not.toBeNull()
+  expect(surfaceBox!.x).toBeGreaterThanOrEqual(0)
+  expect(surfaceBox!.x + surfaceBox!.width).toBeLessThanOrEqual(width)
+  expect(controlsBox!.x).toBeGreaterThanOrEqual(0)
+  expect(controlsBox!.x + controlsBox!.width).toBeLessThanOrEqual(width)
+  expect(detailsBox!.x).toBeGreaterThanOrEqual(0)
+  expect(detailsBox!.x + detailsBox!.width).toBeLessThanOrEqual(width)
+
+  if (width >= 1024) {
+    const cards = await pairedSurface.locator("article").evaluateAll((items) =>
+      items.map((item) => {
+        const box = item.getBoundingClientRect()
+
+        return { x: box.x, y: box.y, width: box.width }
+      })
+    )
+
+    expect(cards).toHaveLength(2)
+    expect(cards[0].x + cards[0].width).toBeLessThanOrEqual(cards[1].x)
+    expect(Math.abs(cards[0].y - cards[1].y)).toBeLessThanOrEqual(2)
+    expect(controlsBox!.x + controlsBox!.width).toBeLessThanOrEqual(
+      detailsBox!.x
+    )
+  } else {
+    expect(controlsBox!.width).toBeLessThanOrEqual(width)
+    expect(detailsBox!.width).toBeLessThanOrEqual(width)
+
+    const controlBoxes = await controls.getByRole("radio").evaluateAll((items) =>
+      items.map((item) => {
+        const box = item.getBoundingClientRect()
+
+        return { x: box.x, y: box.y, width: box.width }
+      })
+    )
+
+    if (width >= 768) {
+      expect(controlBoxes).toHaveLength(3)
+      expect(controlBoxes[0].x).toBeCloseTo(controlBoxes[1].x, 0)
+      expect(controlBoxes[1].x).toBeCloseTo(controlBoxes[2].x, 0)
+      expect(controlBoxes[0].y).toBeLessThan(controlBoxes[1].y)
+      expect(controlBoxes[1].y).toBeLessThan(controlBoxes[2].y)
+    }
+  }
+}
+
 test("home page opens the journey and continues in-page", async ({ page }) => {
   await page.goto("/")
 
@@ -549,6 +622,9 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
       const timeline = dossier.getByRole("region", {
         name: "Follow the dispute in order",
       })
+      const comparison = dossier.getByRole("region", {
+        name: "Legal clarity met political limits",
+      })
       const openEvidence = entryControls.getByRole("button", {
         name: "Open the evidence file",
       })
@@ -569,6 +645,7 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
         dossier.getByText("Evidence-led investigation")
       ).toBeVisible()
       await expect(timeline).toBeVisible()
+      await expect(comparison).toBeVisible()
       await expect(
         dossier.getByText(/legal rulings, maritime claims/i)
       ).toBeVisible()
@@ -587,10 +664,14 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
       await expect(entryControls.getByRole("button")).toHaveCount(2)
 
       const timelineBox = await timeline.boundingBox()
+      const comparisonBox = await comparison.boundingBox()
       const entryBox = await entryControls.boundingBox()
 
       expect(timelineBox).not.toBeNull()
+      expect(comparisonBox).not.toBeNull()
       expect(entryBox).not.toBeNull()
+      expect(timelineBox!.y).toBeLessThan(comparisonBox!.y)
+      expect(comparisonBox!.y).toBeLessThan(entryBox!.y)
       expect(timelineBox!.y).toBeLessThan(entryBox!.y)
 
       for (const control of [openEvidence, traceLawPower]) {
@@ -605,6 +686,127 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
       }
 
       await expectNoHorizontalOverflow(page)
+    }
+  }
+})
+
+test("West Philippine Sea dossier compares the ruling and reality locally", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 920 })
+      await page.goto(
+        `/?comparison=${reducedMotion}-${width}#west-philippine-sea-dossier`
+      )
+
+      const dossier = page.getByRole("region", {
+        name: "West Philippine Sea dossier",
+      })
+      const comparison = dossier.getByRole("region", {
+        name: "Legal clarity met political limits",
+      })
+      const controls = comparison.locator(
+        '[data-wps-comparison-part="controls"]'
+      )
+      const details = comparison.locator('[data-wps-comparison-part="details"]')
+      const enforcementGap = controls.getByRole("radio", {
+        name: /Enforcement gap/i,
+      })
+      const politicalReality = controls.getByRole("radio", {
+        name: /Political reality/i,
+      })
+      const governanceLesson = controls.getByRole("radio", {
+        name: /Governance lesson/i,
+      })
+
+      await expectWpsComparisonLayout(page, width)
+      await expectNoHorizontalOverflow(page)
+      await expect(controls.getByRole("radio")).toHaveCount(3)
+      await expect(controls).not.toHaveAttribute("aria-describedby", /.+/)
+      await expect(enforcementGap).toHaveAttribute("aria-checked", "true")
+      await expect(enforcementGap).toHaveAttribute("tabindex", "0")
+      await expect(enforcementGap).toHaveAttribute("data-state", "selected")
+      await expect(politicalReality).toHaveAttribute("tabindex", "-1")
+      await expect(governanceLesson).toHaveAttribute("tabindex", "-1")
+      await expect(enforcementGap.getByText("Active")).toBeVisible()
+      await expect(
+        comparison.getByText(/2016 arbitral award rejected broad/i)
+      ).toBeVisible()
+      await expect(
+        comparison.getByText(/Activity and pressure at sea continued/i)
+      ).toBeVisible()
+      await expect(details).not.toHaveAttribute("aria-live", /.+/)
+      await expect(details).toContainText(/weak enforcement/i)
+      await expect(details).toContainText(/compliance, diplomacy/i)
+
+      for (const control of [
+        enforcementGap,
+        politicalReality,
+        governanceLesson,
+      ]) {
+        await expectTouchTarget(control)
+        await expectContainedWithinViewport(control, width)
+        await expect(control).toHaveAttribute(
+          "aria-controls",
+          /comparison-detail$/
+        )
+      }
+
+      await politicalReality.click()
+      await expect(politicalReality).toHaveAttribute("aria-checked", "true")
+      await expect(politicalReality).toHaveAttribute("tabindex", "0")
+      await expect(enforcementGap).toHaveAttribute("aria-checked", "false")
+      await expect(enforcementGap).toHaveAttribute("tabindex", "-1")
+      await expect(details).toContainText(/states still calculate interests/i)
+
+      await politicalReality.focus()
+      await expect(politicalReality).toBeFocused()
+      await expectVisibleFocus(politicalReality)
+      await page.keyboard.press("ArrowRight")
+      await expect(governanceLesson).toBeFocused()
+      await expect(governanceLesson).toHaveAttribute("aria-checked", "true")
+      await expect(governanceLesson).toHaveAttribute("tabindex", "0")
+      await expect(politicalReality).toHaveAttribute("tabindex", "-1")
+      await expect(governanceLesson.getByText("Active")).toBeVisible()
+      await expect(details).toContainText(/not a generic conflict summary/i)
+      await expect(
+        dossier.getByRole("link", {
+          name: "Continue to Conclusion and references",
+        })
+      ).toBeVisible()
+
+      if (reducedMotion === "reduce") {
+        const [detailMotionStyle, controlMotionStyle] = await Promise.all([
+          details.evaluate((element) => {
+            const style = window.getComputedStyle(element)
+
+            return {
+              transitionDuration: Number.parseFloat(style.transitionDuration),
+              transitionProperty: style.transitionProperty,
+            }
+          }),
+          governanceLesson.evaluate((element) => {
+            const style = window.getComputedStyle(element)
+
+            return {
+              transitionDuration: Number.parseFloat(style.transitionDuration),
+              transitionProperty: style.transitionProperty,
+            }
+          }),
+        ])
+
+        expect(
+          detailMotionStyle.transitionProperty === "none" ||
+            detailMotionStyle.transitionDuration <= 0.001
+        ).toBe(true)
+        expect(
+          controlMotionStyle.transitionProperty === "none" ||
+            controlMotionStyle.transitionDuration <= 0.001
+        ).toBe(true)
+      }
     }
   }
 })

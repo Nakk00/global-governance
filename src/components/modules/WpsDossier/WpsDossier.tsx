@@ -1,5 +1,11 @@
-import { useState } from "react"
-import { CalendarDays, ChevronDown, FileText, Scale } from "lucide-react"
+import { useState, type KeyboardEvent } from "react"
+import {
+  BadgeCheck,
+  CalendarDays,
+  ChevronDown,
+  FileText,
+  Scale,
+} from "lucide-react"
 
 import { InsightRecapCard } from "@/components/sections/InsightRecapCard"
 import { Button } from "@/components/ui/button"
@@ -11,6 +17,7 @@ import {
 import { resolveNarrativeRecapCue } from "@/data/sections/core-narrative"
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
 import {
+  wpsRulingRealityComparison,
   wpsTimelineEvents,
   type WpsDossierShellContent,
 } from "@/data/sections/west-philippine-sea-dossier"
@@ -28,13 +35,57 @@ export function WpsDossier({ content, shell }: WpsDossierProps) {
   const [selectedEventId, setSelectedEventId] = useState(
     wpsTimelineEvents[0]?.id
   )
+  const comparisonStates = wpsRulingRealityComparison.states
+  const [selectedComparisonStateId, setSelectedComparisonStateId] = useState(
+    wpsRulingRealityComparison.defaultStateId
+  )
   const headingId = `${content.id}-heading`
   const timelineHeadingId = `${content.id}-timeline-heading`
   const timelineDetailId = `${content.id}-timeline-detail`
+  const comparisonHeadingId = `${content.id}-comparison-heading`
+  const comparisonDetailId = `${content.id}-comparison-detail`
   const recapCue = resolveNarrativeRecapCue(content)
   const selectedEvent =
     wpsTimelineEvents.find((event) => event.id === selectedEventId) ??
     wpsTimelineEvents[0]
+  const selectedComparisonState =
+    comparisonStates.find((state) => state.id === selectedComparisonStateId) ??
+    comparisonStates[0] ??
+    null
+
+  const handleComparisonKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number
+  ) => {
+    const lastIndex = comparisonStates.length - 1
+    const keyToIndex: Record<string, number> = {
+      ArrowDown: Math.min(currentIndex + 1, lastIndex),
+      ArrowRight: Math.min(currentIndex + 1, lastIndex),
+      ArrowUp: Math.max(currentIndex - 1, 0),
+      ArrowLeft: Math.max(currentIndex - 1, 0),
+      Home: 0,
+      End: lastIndex,
+    }
+    const nextIndex = keyToIndex[event.key]
+
+    if (nextIndex === undefined) {
+      return
+    }
+
+    event.preventDefault()
+    const nextState = comparisonStates[nextIndex]
+
+    if (!nextState) {
+      return
+    }
+
+    setSelectedComparisonStateId(nextState.id)
+    const nextButton = event.currentTarget.ownerDocument.getElementById(
+      `${content.id}-comparison-${nextState.id}`
+    ) as HTMLButtonElement | null
+
+    nextButton?.focus()
+  }
 
   if (!selectedEvent) {
     return null
@@ -206,6 +257,141 @@ export function WpsDossier({ content, shell }: WpsDossierProps) {
                   </div>
                 ))}
               </dl>
+            </div>
+          </div>
+        </div>
+
+        <div
+          role="region"
+          aria-labelledby={comparisonHeadingId}
+          className="editorial-surface space-y-6"
+        >
+          <div className="space-y-2">
+            <p className="editorial-kicker">
+              {wpsRulingRealityComparison.eyebrow}
+            </p>
+            <h3
+              id={comparisonHeadingId}
+              className="text-2xl font-semibold tracking-normal text-foreground"
+            >
+              {wpsRulingRealityComparison.title}
+            </h3>
+            <p className="editorial-prose">
+              {wpsRulingRealityComparison.prompt}
+            </p>
+          </div>
+
+          <div
+            data-wps-comparison-layout="ruling-reality"
+            className="grid min-w-0 gap-4 lg:grid-cols-2"
+          >
+            {[
+              wpsRulingRealityComparison.ruling,
+              wpsRulingRealityComparison.reality,
+            ].map((side) => (
+              <article
+                key={side.label}
+                className="min-w-0 rounded-2xl border border-border bg-card/70 p-4 shadow-sm sm:p-5"
+              >
+                <p className="editorial-kicker">{side.label}</p>
+                <p className="mt-3 text-lg leading-7 font-semibold text-card-foreground">
+                  {side.summary}
+                </p>
+                <p className="mt-3 text-base leading-7 break-words text-muted-foreground">
+                  {side.detail}
+                </p>
+              </article>
+            ))}
+          </div>
+
+          <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(13rem,0.72fr)_minmax(0,1.28fr)] lg:items-start">
+            <div
+              role="radiogroup"
+              aria-label="Comparison emphasis"
+              data-wps-comparison-part="controls"
+              className="grid min-w-0 gap-3 lg:grid-cols-1"
+            >
+              {comparisonStates.map((state, index) => {
+                const isSelected = state.id === selectedComparisonState?.id
+                const stateButtonId = `${content.id}-comparison-${state.id}`
+
+                return (
+                  <Button
+                    key={state.id}
+                    id={stateButtonId}
+                    type="button"
+                    role="radio"
+                    variant={isSelected ? "default" : "outline"}
+                    aria-checked={isSelected}
+                    aria-controls={comparisonDetailId}
+                    tabIndex={isSelected ? 0 : -1}
+                    data-state={isSelected ? "selected" : "idle"}
+                    data-action-priority={isSelected ? "primary" : "secondary"}
+                    className={cn(
+                      "min-h-24 w-full min-w-0 justify-start gap-3 rounded-2xl px-4 py-3 text-left whitespace-normal motion-reduce:transition-none",
+                      isSelected &&
+                        "editorial-primary-action ring-2 ring-ring ring-offset-2 ring-offset-background"
+                    )}
+                    onClick={() => setSelectedComparisonStateId(state.id)}
+                    onKeyDown={(event) => handleComparisonKeyDown(event, index)}
+                  >
+                    <BadgeCheck
+                      aria-hidden="true"
+                      data-icon="inline-start"
+                      className="mt-1 shrink-0"
+                    />
+                    <span className="grid min-w-0 gap-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold">{state.label}</span>
+                        {isSelected ? (
+                          <span className="rounded-full border border-current px-2 py-0.5 text-[0.68rem] font-semibold">
+                            Active
+                          </span>
+                        ) : null}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-sm leading-6",
+                          isSelected
+                            ? "text-primary-foreground/90"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {state.summary}
+                      </span>
+                    </span>
+                  </Button>
+                )
+              })}
+            </div>
+
+            <div
+              id={comparisonDetailId}
+              data-wps-comparison-part="details"
+              className="min-w-0 rounded-2xl border border-border bg-background/50 p-4 shadow-sm transition-none sm:p-5"
+            >
+              {selectedComparisonState ? (
+                <>
+                  <p className="editorial-kicker">Current emphasis</p>
+                  <h4 className="mt-2 text-xl font-semibold text-foreground">
+                    {selectedComparisonState.label}
+                  </h4>
+                  <p className="editorial-prose mt-3">
+                    {selectedComparisonState.explanation}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="editorial-kicker">Comparison unavailable</p>
+                  <h4 className="mt-2 text-xl font-semibold text-foreground">
+                    The dossier shell still works without this comparison state.
+                  </h4>
+                  <p className="editorial-prose mt-3">
+                    The ruling and reality overview remains available above while
+                    the explanatory emphasis is refreshed.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
