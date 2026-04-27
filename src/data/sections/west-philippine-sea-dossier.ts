@@ -1,5 +1,17 @@
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
 
+export type WpsDossierShellContent = {
+  chapterLabel: string
+  investigationLabel: string
+  openingCue: string
+  entryLabel: string
+  entryPrompt: string
+  controls: {
+    title: string
+    detail: string
+  }[]
+}
+
 export const westPhilippineSeaDossier: NarrativeSectionContent = {
   id: "west-philippine-sea-dossier",
   navigationLabel: "West Philippine Sea dossier",
@@ -32,4 +44,26 @@ export const westPhilippineSeaDossier: NarrativeSectionContent = {
     nextStepLabel: "Continue to Conclusion and references",
     nextStepTargetId: "conclusion-references",
   },
+}
+
+export const wpsDossierShell: WpsDossierShellContent = {
+  chapterLabel: "Chapter: West Philippine Sea dossier",
+  investigationLabel: "Evidence-led investigation",
+  openingCue:
+    "Open the case as a continuation of the journey: the same question about rules and power now meets a concrete maritime dispute.",
+  entryLabel: "Dossier entry",
+  entryPrompt:
+    "Use these two entry points to begin the chapter before the later evidence tools arrive.",
+  controls: [
+    {
+      title: "Open the evidence file",
+      detail:
+        "Start with the record: claims, rulings, state behavior, and public consequences should be read as connected evidence, not as isolated headlines.",
+    },
+    {
+      title: "Trace law and power",
+      detail:
+        "Follow the tension this case exposes: legal clarity can shape claims and diplomacy even when enforcement still depends on political choices.",
+    },
+  ],
 }

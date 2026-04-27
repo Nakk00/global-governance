@@ -119,6 +119,14 @@ async function expectTouchTarget(locator: Locator) {
   expect(box!.height).toBeGreaterThanOrEqual(44)
 }
 
+async function expectContainedWithinViewport(locator: Locator, width: number) {
+  const box = await locator.boundingBox()
+
+  expect(box).not.toBeNull()
+  expect(box!.x).toBeGreaterThanOrEqual(0)
+  expect(box!.x + box!.width).toBeLessThanOrEqual(width)
+}
+
 async function expectVisibleFocus(locator: Locator) {
   await expect(locator).toBeFocused()
 
@@ -476,6 +484,110 @@ test("UN organ comparison adapts across breakpoints without hiding controls", as
       }
     }
   }
+})
+
+test("West Philippine Sea dossier opens as an anchored case file shell", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 920 })
+      await page.goto("/#west-philippine-sea-dossier")
+
+      const dossier = page.getByRole("region", {
+        name: "West Philippine Sea dossier",
+      })
+      const entryControls = dossier.getByRole("region", {
+        name: "Dossier entry controls",
+      })
+      const openEvidence = entryControls.getByRole("button", {
+        name: "Open the evidence file",
+      })
+      const traceLawPower = entryControls.getByRole("button", {
+        name: "Trace law and power",
+      })
+
+      await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+      await expect(dossier).toBeVisible()
+      await expect(dossier).toBeFocused()
+      await expect(
+        dossier.getByRole("heading", {
+          name: "The West Philippine Sea turns the theory into a test",
+        })
+      ).toBeVisible()
+      await expect(dossier.getByText("Case file")).toBeVisible()
+      await expect(
+        dossier.getByText("Evidence-led investigation")
+      ).toBeVisible()
+      await expect(
+        dossier.getByText(/legal rulings, maritime claims/i)
+      ).toBeVisible()
+      await expect(dossier.getByText("Supporting detail")).toBeVisible()
+      await expect(dossier.getByText("Synthesis")).toBeVisible()
+      await expect(
+        dossier.getByRole("button", {
+          name: "How to read the dispute as a governance case",
+        })
+      ).toBeVisible()
+      await expect(
+        dossier.getByRole("link", {
+          name: "Continue to Conclusion and references",
+        })
+      ).toBeVisible()
+      await expect(entryControls.getByRole("button")).toHaveCount(2)
+
+      for (const control of [openEvidence, traceLawPower]) {
+        await expect(control).toBeVisible()
+        await expectTouchTarget(control)
+        await expectContainedWithinViewport(control, width)
+        await control.focus()
+        await expectVisibleFocus(control)
+        await control.press("Enter")
+        await expect(control).toHaveAttribute("aria-expanded", "true")
+        await expectNoHorizontalOverflow(page)
+      }
+
+      await expectNoHorizontalOverflow(page)
+    }
+  }
+})
+
+test("West Philippine Sea dossier keeps canonical hash and recap handoff", async ({
+  page,
+}) => {
+  await page.goto("/#governance-limits")
+
+  const governanceLimits = page.getByRole("region", {
+    name: "Governance limits and enforcement",
+  })
+  const dossier = page.getByRole("region", {
+    name: "West Philippine Sea dossier",
+  })
+  const cue = governanceLimits.getByRole("link", {
+    name: "Continue to West Philippine Sea dossier",
+  })
+
+  await cue.focus()
+  await expectVisibleFocus(cue)
+  await page.keyboard.press("Enter")
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+  await expect(dossier).toBeFocused()
+
+  await page.reload()
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+  await expect(dossier).toBeFocused()
+
+  await page
+    .getByRole("navigation", { name: "Primary" })
+    .getByRole("link", { name: "Conclusion and references" })
+    .click()
+  await expect(page).toHaveURL(/#conclusion-references$/)
+
+  await page.goBack()
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+  await expect(dossier).toBeFocused()
 })
 
 test("hash entry falls back predictably and keyboard users can activate navigation", async ({

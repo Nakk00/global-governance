@@ -1,12 +1,12 @@
 # generated: 2026-04-24T00:50:58+08:00
-# last_updated: 2026-04-27T11:27:00+08:00
+# last_updated: 2026-04-27T12:06:26+08:00
 # project: Global-Governance
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts
 
 generated: 2026-04-24T00:50:58+08:00
-last_updated: 2026-04-27T11:27:00+08:00
+last_updated: 2026-04-27T12:16:17+08:00
 project: Global-Governance
 project_key: NOKEY
 tracking_system: file-system
@@ -25,15 +25,15 @@ development_status:
   epic-1-retrospective: done
 
   # Epic 2: UN Institutional Explorer
-  epic-2: in-progress
+  epic-2: done
   2-1-introduce-the-un-command-center: done
   2-2-inspect-un-organs: done
   2-3-compare-organs-across-devices: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
   # Epic 3: West Philippine Sea Case Dossier
-  epic-3: backlog
-  3-1-open-the-case-dossier: backlog
+  epic-3: in-progress
+  3-1-open-the-case-dossier: done
   3-2-follow-the-timeline: backlog
   3-3-compare-ruling-and-reality: backlog
   3-4-inspect-case-evidence: backlog
