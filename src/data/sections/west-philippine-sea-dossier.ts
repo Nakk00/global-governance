@@ -22,6 +22,32 @@ export type WpsTimelineEvent = {
   significance: string
 }
 
+export type WpsRulingRealityComparisonState = {
+  id: string
+  label: string
+  summary: string
+  explanation: string
+}
+
+export type WpsRulingRealityComparison = {
+  defaultStateId: string
+  thesisMode: "fixed-dossier-thesis"
+  eyebrow: string
+  title: string
+  prompt: string
+  ruling: {
+    label: string
+    summary: string
+    detail: string
+  }
+  reality: {
+    label: string
+    summary: string
+    detail: string
+  }
+  states: WpsRulingRealityComparisonState[]
+}
+
 export const wpsTimelineEvents: WpsTimelineEvent[] = [
   {
     id: "scarborough-shoal-incident",
@@ -76,6 +102,52 @@ export const wpsTimelineEvents: WpsTimelineEvent[] = [
       "This is the governance lesson: law can strengthen legitimacy and coordination, while enforcement still depends on power, strategy, and public accountability.",
   },
 ]
+
+export const wpsRulingRealityComparison: WpsRulingRealityComparison = {
+  defaultStateId: "enforcement-gap",
+  thesisMode: "fixed-dossier-thesis",
+  eyebrow: "Ruling versus reality",
+  title: "Legal clarity met political limits",
+  prompt:
+    "Compare what the tribunal clarified with what changed, and did not change, in state behavior after the award.",
+  ruling: {
+    label: "Legal or institutional ruling",
+    summary:
+      "The 2016 arbitral award rejected broad historic-rights claims within the nine-dash line and clarified how UNCLOS governs maritime entitlements.",
+    detail:
+      "The legal outcome strengthened the Philippines' position in diplomacy and public explanation by turning a contested claim into a documented institutional finding.",
+  },
+  reality: {
+    label: "Enforcement or geopolitical reality",
+    summary:
+      "Activity and pressure at sea continued because the tribunal did not command its own enforcement force and compliance depended on state choices.",
+    detail:
+      "The political reality is that legal clarity can raise costs, shape coalitions, and guide accountability, but it still meets power, strategy, and willingness to comply.",
+  },
+  states: [
+    {
+      id: "enforcement-gap",
+      label: "Enforcement gap",
+      summary: "Why the ruling did not automatically settle behavior",
+      explanation:
+        "The case demonstrates weak enforcement because the legal ruling clarified rights while practical change still depended on compliance, diplomacy, and pressure from other actors.",
+    },
+    {
+      id: "political-reality",
+      label: "Political reality",
+      summary: "Why power still shaped the outcome after legal clarity",
+      explanation:
+        "The ruling stayed tied to the dossier thesis: international law can define legitimate claims, but states still calculate interests, capacity, and reputational costs before changing conduct.",
+    },
+    {
+      id: "governance-lesson",
+      label: "Governance lesson",
+      summary: "What learners should take from the comparison",
+      explanation:
+        "This is not a generic conflict summary. It is a governance lesson about how institutions can create legal clarity while enforcement depends on political will and collective response.",
+    },
+  ],
+}
 
 export const westPhilippineSeaDossier: NarrativeSectionContent = {
   id: "west-philippine-sea-dossier",
