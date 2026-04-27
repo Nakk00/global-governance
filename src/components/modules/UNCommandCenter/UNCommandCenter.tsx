@@ -30,6 +30,10 @@ type UNCommandCenterProps = {
 
 const controlIcons = [Compass, Info]
 const organIcons = [Users, Scale, Compass, Landmark, Info]
+const comparisonFrame = {
+  selectorLabel: "Organ selector",
+  detailsLabel: "Comparison details",
+}
 
 export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
   const [selectedOrganId, setSelectedOrganId] = useState(unOrgans[0]?.id)
@@ -138,11 +142,16 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
             </p>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-start">
+          <div
+            data-un-comparison-layout="organ-comparison"
+            className="grid min-w-0 gap-4 lg:grid-cols-[minmax(16rem,0.85fr)_minmax(0,1.15fr)] lg:items-start xl:grid-cols-[minmax(18rem,0.78fr)_minmax(0,1.22fr)]"
+          >
             <div
               role="group"
               aria-labelledby={organExplorerHeadingId}
-              className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1"
+              aria-label={comparisonFrame.selectorLabel}
+              data-un-comparison-part="selector"
+              className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-1"
             >
               {unOrgans.map((organ, index) => {
                 const isSelected = organ.id === selectedOrgan.id
@@ -158,7 +167,7 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
                     data-state={isSelected ? "selected" : "idle"}
                     data-action-priority={isSelected ? "primary" : "secondary"}
                     className={cn(
-                      "min-h-24 w-full justify-start gap-3 rounded-2xl px-4 py-3 text-left whitespace-normal",
+                      "min-h-24 w-full min-w-0 justify-start gap-3 rounded-2xl px-4 py-3 text-left whitespace-normal",
                       isSelected && "editorial-primary-action"
                     )}
                     onClick={() => setSelectedOrganId(organ.id)}
@@ -191,17 +200,27 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
               role="region"
               aria-live="polite"
               aria-label={`${selectedOrgan.label} details`}
-              className="rounded-2xl border border-border bg-background/50 p-4 shadow-sm sm:p-5"
+              data-un-comparison-part="details"
+              className="min-w-0 rounded-2xl border border-border bg-background/50 p-4 shadow-sm transition-none sm:p-5"
             >
               <div className="space-y-3">
-                <p className="editorial-kicker">Selected organ</p>
-                <h4 className="text-xl font-semibold text-foreground">
-                  {selectedOrgan.label}
-                </h4>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 space-y-3">
+                    <p className="editorial-kicker">
+                      {comparisonFrame.detailsLabel}
+                    </p>
+                    <h4 className="text-xl font-semibold text-foreground">
+                      {selectedOrgan.label}
+                    </h4>
+                  </div>
+                  <span className="w-fit rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold tracking-normal text-muted-foreground">
+                    Selected organ
+                  </span>
+                </div>
                 <p className="editorial-prose">{selectedOrgan.summary}</p>
               </div>
 
-              <dl className="mt-5 grid gap-3">
+              <dl className="mt-5 grid min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {[
                   ["Role", selectedOrgan.role],
                   ["Scope of power", selectedOrgan.power],
@@ -210,10 +229,10 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
                 ].map(([label, value]) => (
                   <div
                     key={label}
-                    className="rounded-xl border border-border bg-card/70 p-4"
+                    className="min-w-0 rounded-xl border border-border bg-card/70 p-4"
                   >
                     <dt className="editorial-kicker">{label}</dt>
-                    <dd className="mt-2 text-base leading-7 text-card-foreground">
+                    <dd className="mt-2 text-base leading-7 break-words text-card-foreground">
                       {value}
                     </dd>
                   </div>
