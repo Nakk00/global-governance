@@ -12,6 +12,71 @@ export type WpsDossierShellContent = {
   }[]
 }
 
+export type WpsTimelineEvent = {
+  id: string
+  year: string
+  label: string
+  summary: string
+  context: string
+  legalContext: string
+  significance: string
+}
+
+export const wpsTimelineEvents: WpsTimelineEvent[] = [
+  {
+    id: "scarborough-shoal-incident",
+    year: "2012",
+    label: "Scarborough Shoal incident",
+    summary:
+      "A standoff near Scarborough Shoal brings maritime claims and state presence into sharper public view.",
+    context:
+      "Philippine and Chinese vessels faced one another around Scarborough Shoal, turning an already contested maritime space into a visible dispute over control, access, and official presence.",
+    legalContext:
+      "The incident raised questions about maritime entitlements, historic-rights claims, and how the UN Convention on the Law of the Sea frames rights at sea.",
+    significance:
+      "It made the dispute concrete for learners: governance questions were no longer abstract rules, but choices made by states on the water.",
+  },
+  {
+    id: "arbitration-filing",
+    year: "2013",
+    label: "Arbitration filing",
+    summary:
+      "The Philippines brings the dispute into compulsory arbitration under UNCLOS.",
+    context:
+      "The Philippines initiated arbitration to challenge parts of China's maritime claims and seek legal clarification without trying to settle sovereignty over land features.",
+    legalContext:
+      "The filing used UNCLOS dispute-settlement procedures to ask a tribunal to interpret maritime rights, entitlements, and the legal status of features.",
+    significance:
+      "It shows how a state can use institutions to narrow the argument, move from rhetoric to legal questions, and create a public record.",
+  },
+  {
+    id: "tribunal-ruling",
+    year: "2016",
+    label: "Tribunal ruling",
+    summary:
+      "The arbitral tribunal clarifies key maritime rights and rejects broad historic-rights claims.",
+    context:
+      "The tribunal issued its award after reviewing the legal claims and evidence presented in the case.",
+    legalContext:
+      "The ruling found no legal basis for broad historic-rights claims within the nine-dash line and clarified how UNCLOS treats maritime zones and features.",
+    significance:
+      "It gave legal clarity to the dispute and became a reference point for diplomacy, public explanation, and future claims-making.",
+  },
+  {
+    id: "enforcement-limits",
+    year: "Post-2016",
+    label: "Enforcement limits",
+    summary:
+      "Legal clarity does not automatically change behavior without political follow-through and enforcement capacity.",
+    context:
+      "After the ruling, tensions and contested activity continued, showing that a legal outcome can shape the debate without instantly settling conduct at sea.",
+    legalContext:
+      "International rulings can clarify obligations and rights, but institutions often depend on state compliance, diplomacy, and collective pressure for practical effect.",
+    significance:
+      "This is the governance lesson: law can strengthen legitimacy and coordination, while enforcement still depends on power, strategy, and public accountability.",
+  },
+]
+
 export const westPhilippineSeaDossier: NarrativeSectionContent = {
   id: "west-philippine-sea-dossier",
   navigationLabel: "West Philippine Sea dossier",
