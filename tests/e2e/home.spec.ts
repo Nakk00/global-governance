@@ -191,6 +191,50 @@ async function expectUNComparisonLayout(page: Page, width: number) {
   }
 }
 
+async function expectWpsTimelineLayout(page: Page, width: number) {
+  const dossier = page.getByRole("region", {
+    name: "West Philippine Sea dossier",
+  })
+  const timeline = dossier.getByRole("region", {
+    name: "Follow the dispute in order",
+  })
+  const timelineSurface = timeline.locator(
+    '[data-wps-timeline-layout="chronology"]'
+  )
+  const selector = timeline.locator('[data-wps-timeline-part="selector"]')
+  const details = timeline.locator('[data-wps-timeline-part="details"]')
+
+  await expect(timeline).toBeVisible()
+  await expect(timelineSurface).toBeVisible()
+  await expect(selector).toBeVisible()
+  await expect(details).toBeVisible()
+
+  const surfaceBox = await timelineSurface.boundingBox()
+  const selectorBox = await selector.boundingBox()
+  const detailsBox = await details.boundingBox()
+
+  expect(surfaceBox).not.toBeNull()
+  expect(selectorBox).not.toBeNull()
+  expect(detailsBox).not.toBeNull()
+  expect(surfaceBox!.x).toBeGreaterThanOrEqual(0)
+  expect(surfaceBox!.x + surfaceBox!.width).toBeLessThanOrEqual(width)
+  expect(selectorBox!.x).toBeGreaterThanOrEqual(surfaceBox!.x)
+  expect(detailsBox!.x + detailsBox!.width).toBeLessThanOrEqual(
+    surfaceBox!.x + surfaceBox!.width
+  )
+
+  if (width >= 1024) {
+    expect(selectorBox!.x + selectorBox!.width).toBeLessThanOrEqual(
+      detailsBox!.x
+    )
+  } else {
+    expect(selectorBox!.width).toBeLessThanOrEqual(surfaceBox!.width)
+    expect(detailsBox!.width).toBeLessThanOrEqual(surfaceBox!.width)
+    expect(selectorBox!.x).toBeGreaterThanOrEqual(surfaceBox!.x)
+    expect(detailsBox!.x).toBeGreaterThanOrEqual(surfaceBox!.x)
+  }
+}
+
 test("home page opens the journey and continues in-page", async ({ page }) => {
   await page.goto("/")
 
@@ -502,6 +546,9 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
       const entryControls = dossier.getByRole("region", {
         name: "Dossier entry controls",
       })
+      const timeline = dossier.getByRole("region", {
+        name: "Follow the dispute in order",
+      })
       const openEvidence = entryControls.getByRole("button", {
         name: "Open the evidence file",
       })
@@ -521,6 +568,7 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
       await expect(
         dossier.getByText("Evidence-led investigation")
       ).toBeVisible()
+      await expect(timeline).toBeVisible()
       await expect(
         dossier.getByText(/legal rulings, maritime claims/i)
       ).toBeVisible()
@@ -538,6 +586,13 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
       ).toBeVisible()
       await expect(entryControls.getByRole("button")).toHaveCount(2)
 
+      const timelineBox = await timeline.boundingBox()
+      const entryBox = await entryControls.boundingBox()
+
+      expect(timelineBox).not.toBeNull()
+      expect(entryBox).not.toBeNull()
+      expect(timelineBox!.y).toBeLessThan(entryBox!.y)
+
       for (const control of [openEvidence, traceLawPower]) {
         await expect(control).toBeVisible()
         await expectTouchTarget(control)
@@ -550,6 +605,135 @@ test("West Philippine Sea dossier opens as an anchored case file shell", async (
       }
 
       await expectNoHorizontalOverflow(page)
+    }
+  }
+})
+
+test("West Philippine Sea dossier timeline follows chronological selection", async ({
+  page,
+}) => {
+  const expectedMilestones = [
+    "2012 Scarborough Shoal incident",
+    "2013 Arbitration filing",
+    "2016 Tribunal ruling",
+    "Post-2016 Enforcement limits",
+  ]
+
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 920 })
+      await page.goto(
+        `/?timeline=${reducedMotion}-${width}#west-philippine-sea-dossier`
+      )
+
+      const dossier = page.getByRole("region", {
+        name: "West Philippine Sea dossier",
+      })
+      const timeline = dossier.getByRole("region", {
+        name: "Follow the dispute in order",
+      })
+      const selector = timeline.locator('[data-wps-timeline-part="selector"]')
+      const detail = timeline.locator('[data-wps-timeline-part="details"]')
+      const eventButtons = selector.getByRole("button")
+      const scarborough = selector.getByRole("button", {
+        name: /2012\s+(Selected\s+)?Scarborough Shoal incident/i,
+      })
+      const arbitration = selector.getByRole("button", {
+        name: /2013\s+(Selected\s+)?Arbitration filing/i,
+      })
+      const ruling = selector.getByRole("button", {
+        name: /2016\s+(Selected\s+)?Tribunal ruling/i,
+      })
+      const enforcement = selector.getByRole("button", {
+        name: /Post-2016\s+(Selected\s+)?Enforcement limits/i,
+      })
+
+      await expectWpsTimelineLayout(page, width)
+      await expectNoHorizontalOverflow(page)
+      await expect(eventButtons).toHaveCount(4)
+      await expect(scarborough).toHaveAttribute("aria-pressed", "true")
+      await expect(scarborough).toHaveAttribute("data-state", "selected")
+      await expect(scarborough.getByText("Selected")).toBeVisible()
+      await expect(detail).toContainText("Context")
+      await expect(detail).toContainText("Legal context")
+      await expect(detail).toContainText("Significance")
+      await expect(detail).toContainText(/vessels faced one another/i)
+      await expect(detail).toContainText(/UN Convention on the Law of the Sea/i)
+
+      const renderedMilestones = await eventButtons.evaluateAll((buttons) =>
+        buttons.map((button) =>
+          (button as HTMLElement).innerText
+            .replace(/\bSelected\b/g, "")
+            .replace(/\s+/g, " ")
+            .trim()
+        )
+      )
+
+      for (const [index, milestone] of expectedMilestones.entries()) {
+        expect(renderedMilestones[index].toLowerCase()).toContain(
+          milestone.toLowerCase()
+        )
+      }
+
+      for (const button of [scarborough, arbitration, ruling, enforcement]) {
+        await expectTouchTarget(button)
+        await expectContainedWithinViewport(button, width)
+        await expect(button).toHaveAttribute(
+          "aria-controls",
+          /timeline-detail$/
+        )
+      }
+
+      await arbitration.click()
+      await expect(arbitration).toHaveAttribute("aria-pressed", "true")
+      await expect(scarborough).toHaveAttribute("aria-pressed", "false")
+      await expect(detail).toContainText(/initiated arbitration/i)
+      await expect(detail).toContainText(/UNCLOS dispute-settlement/i)
+
+      await ruling.focus()
+      await expectVisibleFocus(ruling)
+      await page.keyboard.press("Tab")
+      await expect(enforcement).toBeFocused()
+      await expectVisibleFocus(enforcement)
+      await page.keyboard.press(" ")
+      await expect(enforcement).toBeFocused()
+      await expect(enforcement).toHaveAttribute("aria-pressed", "true")
+      await expect(enforcement).toHaveAttribute("data-state", "selected")
+      await expect(enforcement.getByText("Selected")).toBeVisible()
+      await expect(detail).toContainText(/legal outcome can shape the debate/i)
+      await expect(detail).toContainText(/state compliance, diplomacy/i)
+
+      if (reducedMotion === "reduce") {
+        const [detailMotionStyle, buttonMotionStyle] = await Promise.all([
+          detail.evaluate((element) => {
+            const style = window.getComputedStyle(element)
+
+            return {
+              transitionDuration: Number.parseFloat(style.transitionDuration),
+              transitionProperty: style.transitionProperty,
+            }
+          }),
+          enforcement.evaluate((element) => {
+            const style = window.getComputedStyle(element)
+
+            return {
+              transitionDuration: Number.parseFloat(style.transitionDuration),
+              transitionProperty: style.transitionProperty,
+            }
+          }),
+        ])
+
+        expect(
+          detailMotionStyle.transitionProperty === "none" ||
+            detailMotionStyle.transitionDuration <= 0.001
+        ).toBe(true)
+        expect(
+          buttonMotionStyle.transitionProperty === "none" ||
+            buttonMotionStyle.transitionDuration <= 0.001
+        ).toBe(true)
+      }
     }
   }
 })
