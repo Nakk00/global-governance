@@ -1588,6 +1588,100 @@ test("core narrative renders summary-first sections with local synthesis", async
   ).toBeVisible()
 })
 
+test("conclusion references are inspectable, keyboard-safe, and contained", async ({
+  page,
+}) => {
+  for (const reducedMotion of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion })
+
+    for (const width of [360, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto("/#conclusion-references")
+
+      const conclusion = page.getByRole("region", {
+        name: "Conclusion and references",
+      })
+      const trigger = conclusion.getByRole("button", {
+        name: "Inspect the sources",
+      })
+      const recapCue = conclusion.getByRole("link", {
+        name: "Return to Journey start",
+      })
+
+      await expect(conclusion).toBeFocused()
+      await expect(conclusion.getByText(/not world government/i)).toBeVisible()
+      await expect(
+        conclusion.getByText(
+          /sources below keep the closing claim inspectable/i
+        )
+      ).toBeVisible()
+      await expect(trigger).toBeVisible()
+      await expectTouchTarget(trigger)
+      await trigger.focus()
+      await expectVisibleFocus(trigger)
+      await page.keyboard.press("Enter")
+      await expect(trigger).toHaveAttribute("aria-expanded", "true")
+
+      const referenceSurface = conclusion.locator(
+        '[data-reference-surface="conclusion"]'
+      )
+      await expect(referenceSurface).toBeVisible()
+      await expectContainedWithinViewport(referenceSurface, width)
+      await expect(
+        conclusion.getByRole("article", {
+          name: "Charter of the United Nations",
+        })
+      ).toBeVisible()
+      await expect(
+        conclusion.getByText("gg-src-un-charter-institutions")
+      ).toBeVisible()
+      await expect(
+        conclusion.getByText(/why it matters:/i).first()
+      ).toBeVisible()
+      await expectNoHorizontalOverflow(page)
+
+      const sourceCards = referenceSurface.locator("article")
+      await expect(sourceCards).toHaveCount(3)
+
+      const sourceBoxes = await sourceCards.evaluateAll((cards) =>
+        cards.map((card) => {
+          const box = card.getBoundingClientRect()
+
+          return { x: box.x, width: box.width }
+        })
+      )
+
+      for (const box of sourceBoxes) {
+        expect(box.x).toBeGreaterThanOrEqual(0)
+        expect(box.x + box.width).toBeLessThanOrEqual(width)
+      }
+
+      const referencesBeforeRecap = await referenceSurface.evaluate(
+        (surface, cue) =>
+          Boolean(
+            surface.compareDocumentPosition(cue as Node) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+          ),
+        await recapCue.elementHandle()
+      )
+      expect(referencesBeforeRecap).toBe(true)
+
+      await page.keyboard.press("Escape")
+      await expect(trigger).toHaveAttribute("aria-expanded", "false")
+      await expect(trigger).toBeFocused()
+      await expectNoHorizontalOverflow(page)
+
+      await recapCue.focus()
+      await expectVisibleFocus(recapCue)
+      await page.keyboard.press("Enter")
+      await expect(page).toHaveURL(/#journey-start$/)
+      await expect(
+        page.getByRole("region", { name: "Journey start" })
+      ).toBeFocused()
+    }
+  }
+})
+
 test("recap cues explain re-entry and use canonical next anchors", async ({
   page,
 }) => {
