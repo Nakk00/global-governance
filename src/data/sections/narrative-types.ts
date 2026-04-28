@@ -2,6 +2,16 @@ export type NarrativeDisclosure = {
   title: string
   collapsedSummary: string
   details: string[]
+  references?: NarrativeReferenceSource[]
+  unavailableMessage?: string
+}
+
+export type NarrativeReferenceSource = {
+  sourceId: string
+  title: string
+  provenance: string
+  summary: string
+  whyItMatters: string
 }
 
 export type NarrativeRecapContent = {
