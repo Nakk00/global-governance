@@ -1,0 +1,172 @@
+import type {
+  ChatCitation,
+  ChatError,
+  ChatGrounding,
+  GroundedChatEnvelope,
+  GroundedChatRequest,
+  GroundedChatSuccess,
+} from "@/types/chat"
+
+const sourceTypes = new Set(["primary", "course", "case", "reference"])
+const userSafeErrorMessage =
+  "The assistant could not return a grounded answer right now. Please try again with a course question."
+
+function asRecord(value: unknown, label: string): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error(`Invalid grounded chat ${label}`)
+  }
+
+  return value as Record<string, unknown>
+}
+
+function requireString(value: unknown, label: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`Invalid grounded chat ${label}`)
+  }
+
+  return value.trim()
+}
+
+function optionalString(value: unknown, label: string): string | undefined {
+  if (value === undefined) {
+    return undefined
+  }
+
+  return requireString(value, label)
+}
+
+function parseCitation(value: unknown): ChatCitation {
+  const citation = asRecord(value, "citation")
+  const sourceType = requireString(citation.sourceType, "citation source type")
+
+  if (!sourceTypes.has(sourceType)) {
+    throw new Error("Invalid grounded chat citation source type")
+  }
+
+  return {
+    sourceId: requireString(citation.sourceId, "citation source id"),
+    title: requireString(citation.title, "citation title"),
+    shortTitle: requireString(citation.shortTitle, "citation short title"),
+    sourceType: sourceType as ChatCitation["sourceType"],
+    detail: requireString(citation.detail, "citation detail"),
+    url: optionalString(citation.url, "citation url"),
+  }
+}
+
+function parseGrounding(value: unknown): ChatGrounding {
+  const grounding = asRecord(value, "grounding")
+  const supportLevel = requireString(
+    grounding.supportLevel,
+    "grounding support level"
+  )
+
+  if (supportLevel !== "strong" && supportLevel !== "weak") {
+    throw new Error("Invalid grounded chat support level")
+  }
+
+  return {
+    supportLevel,
+    cue: requireString(grounding.cue, "grounding cue"),
+  }
+}
+
+function parseCitations(value: unknown): ChatCitation[] {
+  if (!Array.isArray(value)) {
+    throw new Error("Invalid grounded chat citations")
+  }
+
+  return value.map(parseCitation)
+}
+
+function parseSuccessData(value: unknown): GroundedChatSuccess {
+  const data = asRecord(value, "success data")
+  const state = requireString(data.state, "state")
+
+  if (state === "answered") {
+    const citations = parseCitations(data.citations)
+
+    if (citations.length === 0) {
+      throw new Error("Grounded answers require at least one citation")
+    }
+
+    return {
+      state,
+      answer: requireString(data.answer, "answer"),
+      grounding: parseGrounding(data.grounding),
+      citations,
+    }
+  }
+
+  if (state === "weakSupport") {
+    return {
+      state,
+      message: requireString(data.message, "weak-support message"),
+      nextStep: requireString(data.nextStep, "weak-support next step"),
+      grounding: parseGrounding(data.grounding),
+      citations: parseCitations(data.citations),
+    }
+  }
+
+  if (state === "deferredProtection") {
+    return {
+      state,
+      message: requireString(data.message, "deferred protection message"),
+    }
+  }
+
+  throw new Error("Invalid grounded chat state")
+}
+
+function parseError(value: unknown): ChatError {
+  const error = asRecord(value, "error")
+
+  return {
+    code: requireString(error.code, "error code"),
+    message: requireString(error.message, "error message"),
+  }
+}
+
+export function createChatRequest(
+  question: string,
+  context?: GroundedChatRequest["context"]
+): GroundedChatRequest {
+  const trimmedQuestion = question.trim()
+
+  if (trimmedQuestion.length === 0) {
+    throw new Error("A course question is required")
+  }
+
+  return {
+    question: trimmedQuestion,
+    ...(context ? { context } : {}),
+  }
+}
+
+export function parseGroundedChatEnvelope(
+  value: unknown
+): GroundedChatEnvelope {
+  const envelope = asRecord(value, "response envelope")
+
+  if (envelope.success === true) {
+    return {
+      success: true,
+      data: parseSuccessData(envelope.data),
+    }
+  }
+
+  if (envelope.success === false) {
+    return {
+      success: false,
+      error: parseError(envelope.error),
+    }
+  }
+
+  throw new Error("Invalid grounded chat envelope")
+}
+
+export function toUserSafeChatError(): ChatError {
+  return {
+    code: "grounded_chat_unavailable",
+    message: userSafeErrorMessage,
+  }
+}

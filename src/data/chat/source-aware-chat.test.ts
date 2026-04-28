@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  getSourceAwareChatStarterPrompts,
   resolveStarterPromptState,
   sourceAwareChatStarterPrompts,
 } from "./source-aware-chat"
@@ -37,5 +38,21 @@ describe("source-aware chat starter prompts", () => {
       ]).status
     ).toBe("fallback")
     expect(resolveStarterPromptState("not prompts").status).toBe("fallback")
+  })
+
+  it("returns chapter-safe prompts for constrained sections", () => {
+    const heroPrompts = getSourceAwareChatStarterPrompts("hero-narrative-frame")
+    const limitsPrompts = getSourceAwareChatStarterPrompts("governance-limits")
+
+    expect(heroPrompts).toHaveLength(4)
+    expect(heroPrompts.map((prompt) => prompt.id)).toContain(
+      "un-coordination-role"
+    )
+    expect(heroPrompts.map((prompt) => prompt.id)).not.toContain("un-limits")
+
+    expect(limitsPrompts).toHaveLength(4)
+    expect(limitsPrompts.map((prompt) => prompt.id)).toContain(
+      "security-council-limits"
+    )
   })
 })

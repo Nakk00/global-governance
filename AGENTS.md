@@ -16,19 +16,28 @@
 - Keep static assets under `public/` and isolate heavy media or 3D assets so they can be lazy-loaded.
 - Store checked-in Playwright E2E specs under `tests/e2e`.
 - Store shared Playwright fixtures, mocks, and support utilities under `tests/playwright`.
+- Create `tests/playwright` the first time shared Playwright support code is needed; do not scatter those helpers across feature folders.
 
 ## Verification
 
 - Default project checks are `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
-- When formatting-sensitive changes land, also run `pnpm format`.
+- When formatting-sensitive TypeScript or TSX changes land, also run `pnpm format`.
+- Do not assume `pnpm format` covers Markdown, JSON, YAML, CSS, or other non-TS assets unless the script is expanded to include them.
 - For scaffold or infrastructure changes, also verify the app boots locally with `pnpm dev` when the task calls for runtime confirmation.
+- Use `pnpm test:unit` for frontend Vitest coverage under `src/`.
+- Use `pnpm test:functions` for Supabase Edge Function Vitest coverage under `supabase/functions/tests`.
+- The repo-managed Vitest scope is frontend unit and component tests under `src/**/*.test.ts` and `src/**/*.test.tsx`; checked-in Playwright specs under `tests/e2e` must stay excluded from plain `pnpm exec vitest run`.
 - Keep frontend unit and component tests co-located as `*.test.ts` or `*.test.tsx`.
 - Keep Supabase Edge Function tests under `supabase/functions/tests`.
 - Do not invent Next.js-specific verification steps for this repo.
+- Use `pnpm test:e2e` as the default fast Playwright suite; it excludes live chat backend checks and keeps chat requests mocked where the spec intends UI-only coverage.
+- Use `pnpm test:chat:live` when work touches `functions/v1/chat`, grounding rules, section scoping, chat request wiring, or local Supabase integration. This workflow expects a real local chat backend, typically started with `pnpm supabase:dev`.
+- Use `pnpm test:e2e:all` only when you intentionally want both the mocked Playwright suite and the tagged live chat coverage in one run.
 
 ### Unit and Component Testing
 
 - Vitest is the repo-managed baseline for frontend unit and component testing in this project.
+- Plain `pnpm exec vitest run` should be safe for this repo and must not attempt to execute Playwright specs from `tests/e2e`.
 - When a story explicitly requires checked-in unit or component tests, use the repo-managed Vitest baseline and keep tests co-located as `*.test.ts` or `*.test.tsx`.
 - Use unit or component tests for isolated behavior, rendering logic, state handling, data shaping, and boundary conditions that do not require a full browser workflow.
 - Do not default every story to unit-test generation; add checked-in unit or component tests when the story scope, acceptance criteria, changed logic, or regression risk clearly justify them.
@@ -96,12 +105,15 @@
 - Use the repo-managed Playwright baseline for those generated E2E tests.
 - Save generated Playwright specs under `tests/e2e` and any shared Playwright support code under `tests/playwright`.
 - Align generated E2E tests with the project context coverage expectations for accessibility, reduced motion, responsive behavior, and chat fallback, refusal, weak-support, or cooldown states when applicable.
+- Keep source-aware chat coverage split intentionally:
+  - `pnpm test:e2e` covers mocked UI behavior and interaction states.
+  - `pnpm test:chat:live` covers the real local Supabase chat path without mocking `functions/v1/chat`.
 - Do not generate checked-in E2E scripts for every story by default; use them when the story scope, acceptance criteria, or verification needs clearly call for end-to-end coverage.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **Global-Governance** (1176 symbols, 1325 relationships, 9 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **Global-Governance** (1545 symbols, 1857 relationships, 21 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -197,9 +209,12 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Work in the Chat area (18 symbols) | `.claude/skills/generated/chat/SKILL.md` |
 | Work in the Contexts area (16 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
 | Work in the Scripts area (15 symbols) | `.claude/skills/generated/scripts/SKILL.md` |
-| Work in the Layout area (8 symbols) | `.claude/skills/generated/layout/SKILL.md` |
-| Work in the Sections area (3 symbols) | `.claude/skills/generated/sections/SKILL.md` |
+| Work in the Sections area (10 symbols) | `.claude/skills/generated/sections/SKILL.md` |
+| Work in the Layout area (9 symbols) | `.claude/skills/generated/layout/SKILL.md` |
+| Work in the _shared area (7 symbols) | `.claude/skills/generated/shared/SKILL.md` |
+| Work in the E2e area (5 symbols) | `.claude/skills/generated/e2e/SKILL.md` |
 
 <!-- gitnexus:end -->
