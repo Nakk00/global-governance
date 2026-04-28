@@ -92,6 +92,36 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow.document).toBeLessThanOrEqual(overflow.viewport)
 }
 
+async function waitForScrollIdle(page: Page) {
+  await page.waitForFunction(
+    () =>
+      new Promise((resolve) => {
+        let lastScrollY = window.scrollY
+        let stableFrames = 0
+
+        function checkScroll() {
+          const currentScrollY = window.scrollY
+
+          if (Math.abs(currentScrollY - lastScrollY) <= 1) {
+            stableFrames += 1
+          } else {
+            stableFrames = 0
+            lastScrollY = currentScrollY
+          }
+
+          if (stableFrames >= 3) {
+            resolve(true)
+            return
+          }
+
+          window.requestAnimationFrame(checkScroll)
+        }
+
+        window.requestAnimationFrame(checkScroll)
+      })
+  )
+}
+
 async function expectReadableBodyText(locator: Locator) {
   const fontSize = await locator.evaluate((element) =>
     Number.parseFloat(window.getComputedStyle(element).fontSize)
@@ -411,6 +441,120 @@ test("desktop navigation jumps between chapter sections and restores history", a
   await expect(
     page.getByRole("region", { name: "UN Command Center" })
   ).toBeFocused()
+})
+
+test("source-aware chat opens from the shell without disrupting the learning flow", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 820 })
+  await page.goto("/#west-philippine-sea-dossier")
+
+  const trigger = page.getByRole("button", {
+    name: "Open source-aware chat",
+  })
+  const dossier = page.getByRole("region", {
+    name: "West Philippine Sea dossier",
+  })
+
+  await expect(dossier).toBeFocused()
+  await page.waitForFunction(() => window.scrollY > 1000)
+  await waitForScrollIdle(page)
+  await page.evaluate(() => window.scrollBy(0, 120))
+  await waitForScrollIdle(page)
+  const scrollBefore = await page.evaluate(() => window.scrollY)
+
+  await trigger.focus()
+  await expectVisibleFocus(trigger)
+  await page.keyboard.press("Enter")
+
+  const panel = page.getByRole("region", {
+    name: "Source-aware academic chat",
+  })
+  const input = panel.getByRole("textbox", { name: "Course question" })
+  const prompt = panel.getByRole("button", {
+    name: "Ruling and reality",
+  })
+
+  await expect(panel).toBeVisible()
+  await expect(input).toBeFocused()
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+  const scrollAfterOpen = await page.evaluate(() => window.scrollY)
+  expect(Math.abs(scrollAfterOpen - scrollBefore)).toBeLessThanOrEqual(2)
+  await expect(
+    panel.getByText(/bounded to the Global Governance learning experience/i)
+  ).toBeVisible()
+  await expect(panel.getByText("Suggested prompts")).toBeVisible()
+
+  await prompt.click()
+  await expect(input).toHaveValue(
+    "Connect the West Philippine Sea ruling to the gap between legal clarity and political enforcement."
+  )
+  await expect(
+    panel.getByText(/grounded answers and citations arrive/i)
+  ).toBeVisible()
+  await expect(
+    panel.getByRole("button", {
+      name: "Ask",
+    })
+  ).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+
+  await page.keyboard.press("Escape")
+  await expect(panel).toBeHidden()
+  await expect(trigger).toBeFocused()
+  await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+})
+
+test("source-aware chat remains contained on mobile and reduced motion", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" })
+
+  for (const width of [360, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 820 })
+    await page.goto("/")
+
+    const trigger = page.getByRole("button", {
+      name: "Open source-aware chat",
+    })
+    await expect(trigger).toBeVisible()
+    await expectTouchTarget(trigger)
+    await trigger.click()
+
+    const panel = page.getByRole("region", {
+      name: "Source-aware academic chat",
+    })
+    await expect(panel).toBeVisible()
+    await expectContainedWithinViewport(panel, width)
+    await expectReadableBodyText(
+      panel.getByRole("textbox", { name: "Course question" })
+    )
+    await expectNoHorizontalOverflow(page)
+    await expect(
+      panel.getByRole("button", { name: "Open source-aware chat" })
+    ).toHaveCount(0)
+
+    const transitionDurationMs = await panel.evaluate((element) => {
+      const duration = window.getComputedStyle(element).transitionDuration
+
+      return duration.endsWith("ms")
+        ? Number.parseFloat(duration)
+        : Number.parseFloat(duration) * 1000
+    })
+    expect(transitionDurationMs).toBeLessThanOrEqual(0.01)
+
+    await panel.getByRole("button", { name: "Close source-aware chat" }).focus()
+    await expectVisibleFocus(
+      panel.getByRole("button", { name: "Close source-aware chat" })
+    )
+    await page.keyboard.press("Tab")
+    await expectVisibleFocus(
+      panel.getByRole("textbox", { name: "Course question" })
+    )
+
+    await page.keyboard.press("Escape")
+    await expect(trigger).toBeFocused()
+  }
 })
 
 test("UN command center introduces an explorable shell with keyboard entry", async ({
