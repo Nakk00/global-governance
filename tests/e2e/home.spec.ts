@@ -447,6 +447,48 @@ test("source-aware chat opens from the shell without disrupting the learning flo
   page,
 }) => {
   await page.setViewportSize({ width: 1024, height: 820 })
+  let releaseGroundedAnswer!: () => void
+  const groundedAnswerReady = new Promise<void>((resolve) => {
+    releaseGroundedAnswer = resolve
+  })
+
+  await page.route("**/functions/v1/chat", async (route) => {
+    await groundedAnswerReady
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: {
+          state: "answered",
+          answer:
+            "Global governance coordinates rules and institutions without becoming world government.",
+          grounding: {
+            supportLevel: "strong",
+            cue: "Grounded with 2 approved sources",
+          },
+          citations: [
+            {
+              sourceId: "gg-src-un-charter-institutions",
+              title: "Charter of the United Nations",
+              shortTitle: "UN Charter",
+              sourceType: "primary",
+              detail:
+                "The Charter supplies the institutional coordination frame used in the course.",
+              url: "https://www.un.org/en/about-us/un-charter/full-text",
+            },
+            {
+              sourceId: "gg-src-global-governance-course-frame",
+              title: "Global Governance Course Frame",
+              shortTitle: "Course frame",
+              sourceType: "course",
+              detail:
+                "The course distinguishes global governance from world government.",
+            },
+          ],
+        },
+      }),
+    })
+  })
   await page.goto("/#west-philippine-sea-dossier")
 
   const trigger = page.getByRole("button", {
@@ -489,13 +531,33 @@ test("source-aware chat opens from the shell without disrupting the learning flo
   await expect(input).toHaveValue(
     "Connect the West Philippine Sea ruling to the gap between legal clarity and political enforcement."
   )
+  await expect(input).toBeFocused()
   await expect(
-    panel.getByText(/grounded answers and citations arrive/i)
+    panel.getByText(/answers stay inside the approved course materials/i)
+  ).toBeVisible()
+  await page.keyboard.press("Enter")
+  await expect(panel.getByRole("button", { name: "Asking" })).toBeVisible()
+  await expect(
+    panel.getByText(/checking approved materials for a grounded answer/i)
+  ).toBeVisible()
+  releaseGroundedAnswer()
+  await expect(
+    panel.getByText(
+      /global governance coordinates rules and institutions without becoming world government/i
+    )
   ).toBeVisible()
   await expect(
-    panel.getByRole("button", {
-      name: "Ask",
-    })
+    panel.getByText("Grounded with 2 approved sources")
+  ).toBeVisible()
+  const sourceChip = panel.getByRole("button", { name: /UN Charter/i })
+  await expect(sourceChip).toBeVisible()
+  await sourceChip.focus()
+  await expectVisibleFocus(sourceChip)
+  await page.keyboard.press("Enter")
+  await expect(sourceChip).toHaveAttribute("aria-expanded", "true")
+  await expect(panel.getByText("gg-src-un-charter-institutions")).toBeVisible()
+  await expect(
+    panel.getByText(/institutional coordination frame/i)
   ).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
@@ -503,6 +565,67 @@ test("source-aware chat opens from the shell without disrupting the learning flo
   await expect(panel).toBeHidden()
   await expect(trigger).toBeFocused()
   await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
+})
+
+test("source-aware chat keeps shift enter for multiline prompts", async ({
+  page,
+}) => {
+  await page.goto("/")
+  await page.getByRole("button", { name: "Open source-aware chat" }).click()
+
+  const panel = page.getByRole("region", {
+    name: "Source-aware academic chat",
+  })
+  const input = panel.getByRole("textbox", { name: "Course question" })
+
+  await input.fill("Explain global governance")
+  await page.keyboard.press("Shift+Enter")
+  await input.pressSequentially("with one example")
+
+  await expect(input).toHaveValue("Explain global governance\nwith one example")
+})
+
+test("source-aware chat shows weak support without unsupported certainty", async ({
+  page,
+}) => {
+  await page.route("**/functions/v1/chat", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: {
+          state: "weakSupport",
+          message:
+            "I can connect this to the course, but the approved materials do not support a confident answer.",
+          nextStep:
+            "Try asking about global governance, the UN system, or the West Philippine Sea case.",
+          grounding: {
+            supportLevel: "weak",
+            cue: "Limited support in approved materials",
+          },
+          citations: [],
+        },
+      }),
+    })
+  })
+
+  await page.goto("/")
+  await page.getByRole("button", { name: "Open source-aware chat" }).click()
+
+  const panel = page.getByRole("region", {
+    name: "Source-aware academic chat",
+  })
+  const input = panel.getByRole("textbox", { name: "Course question" })
+
+  await input.fill("What should happen tomorrow?")
+  await panel.getByRole("button", { name: "Ask" }).click()
+  await expect(
+    panel.getByText(/approved materials do not support a confident answer/i)
+  ).toBeVisible()
+  await expect(
+    panel.getByText(/try asking about global governance/i)
+  ).toBeVisible()
+  await expectNoHorizontalOverflow(page)
 })
 
 test("source-aware chat remains contained on mobile and reduced motion", async ({
