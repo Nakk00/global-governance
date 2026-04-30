@@ -309,6 +309,9 @@ export function SourceAwareChat({
                 <GroundedAnswerSurface
                   response={answerState.response}
                   expandedSourceId={expandedSourceId}
+                  onRefocusQuestion={() =>
+                    inputRef.current?.focus({ preventScroll: true })
+                  }
                   onToggleSource={(sourceId) =>
                     setExpandedSourceId((current) =>
                       current === sourceId ? null : sourceId
@@ -341,12 +344,14 @@ export function SourceAwareChat({
 type GroundedAnswerSurfaceProps = {
   response: GroundedChatSuccess
   expandedSourceId: string | null
+  onRefocusQuestion: () => void
   onToggleSource: (sourceId: string) => void
 }
 
 function GroundedAnswerSurface({
   response,
   expandedSourceId,
+  onRefocusQuestion,
   onToggleSource,
 }: GroundedAnswerSurfaceProps) {
   const detailsId = useId()
@@ -363,10 +368,45 @@ function GroundedAnswerSurface({
     )
   }
 
-  if (response.state === "deferredProtection") {
+  if (response.state === "refused") {
     return (
-      <article className="rounded-xl border border-border bg-background/80 p-3 text-sm leading-6 text-muted-foreground">
-        {response.message}
+      <article className="space-y-3 rounded-xl border border-sky-500/40 bg-sky-500/10 p-3 text-sm leading-6">
+        <p className="font-semibold text-card-foreground">
+          Course boundary reached
+        </p>
+        <p className="text-foreground">{response.message}</p>
+        <p className="text-muted-foreground">{response.nextStep}</p>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          onClick={onRefocusQuestion}
+        >
+          Rephrase a course question
+        </Button>
+      </article>
+    )
+  }
+
+  if (response.state === "cooldown") {
+    return (
+      <article className="space-y-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm leading-6">
+        <p className="font-semibold text-card-foreground">
+          Assistant temporarily limited
+        </p>
+        <p className="text-foreground">{response.message}</p>
+        <p className="text-muted-foreground">
+          {response.nextStep} Retry in about {response.retryAfterSeconds}{" "}
+          seconds.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          className="min-h-11"
+          onClick={onRefocusQuestion}
+        >
+          Try again shortly
+        </Button>
       </article>
     )
   }

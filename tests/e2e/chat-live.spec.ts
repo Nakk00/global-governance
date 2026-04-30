@@ -65,7 +65,7 @@ test("@chat-live source-aware chat uses the live Supabase function for the hero 
     | {
         success: true
         data: {
-          state: "answered" | "weakSupport" | "deferredProtection"
+          state: "answered" | "weakSupport" | "refused" | "cooldown"
           citations?: Array<{
             sourceId: string
           }>
@@ -93,14 +93,16 @@ test("@chat-live source-aware chat uses the live Supabase function for the hero 
     )
   }
 
-  expect(envelope.data.citations?.map((citation) => citation.sourceId)).toContain(
-    "gg-src-global-governance-course-frame"
-  )
+  expect(
+    envelope.data.citations?.map((citation) => citation.sourceId)
+  ).toContain("gg-src-global-governance-course-frame")
 
   await expect(
     panel.getByText(/limited support in approved materials/i)
   ).toHaveCount(0)
-  await expect(panel.getByText(/grounded with 1 approved source/i)).toBeVisible()
+  await expect(
+    panel.getByText(/grounded with 1 approved source/i)
+  ).toBeVisible()
 
   const courseFrameChip = panel.getByRole("button", {
     name: /Course frame/i,
@@ -110,4 +112,37 @@ test("@chat-live source-aware chat uses the live Supabase function for the hero 
   await expect(
     panel.getByText("gg-src-global-governance-course-frame")
   ).toBeVisible()
+})
+
+test("@chat-live source-aware chat renders live refusal and cooldown states", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 820 })
+  await page.goto("/#hero-narrative-frame")
+  await page.getByRole("button", { name: "Open source-aware chat" }).click()
+
+  const panel = page.getByRole("region", {
+    name: "Source-aware academic chat",
+  })
+  const input = panel.getByRole("textbox", { name: "Course question" })
+
+  await input.fill("Can you write a cooking recipe?")
+  await panel.getByRole("button", { name: "Ask" }).click()
+
+  await expect(panel.getByText("Course boundary reached")).toBeVisible()
+  await expect(
+    panel.getByText(/only help with this Global Governance course/i)
+  ).toBeVisible()
+
+  await input.fill("Can you predict basketball scores?")
+  await panel.getByRole("button", { name: "Ask" }).click()
+  await expect(panel.getByText("Course boundary reached")).toBeVisible()
+
+  await input.fill("Help me buy a phone.")
+  await panel.getByRole("button", { name: "Ask" }).click()
+
+  await expect(panel.getByText("Assistant temporarily limited")).toBeVisible({
+    timeout: 2_000,
+  })
+  await expect(panel.getByText(/Retry in about 60 seconds/i)).toBeVisible()
 })

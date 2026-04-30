@@ -13,6 +13,43 @@ const chatEndpoint =
     : import.meta.env.DEV
       ? "http://127.0.0.1:54321/functions/v1/chat"
       : "/functions/v1/chat"
+const anonymousSessionStorageKey = "global-governance-chat-session"
+let inMemoryAnonymousSessionId: string | undefined
+
+function createAnonymousSessionId() {
+  if (globalThis.crypto && "randomUUID" in globalThis.crypto) {
+    return globalThis.crypto.randomUUID()
+  }
+
+  return `anon-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function getAnonymousSessionId() {
+  try {
+    if (typeof globalThis.localStorage === "undefined") {
+      inMemoryAnonymousSessionId ??= createAnonymousSessionId()
+
+      return inMemoryAnonymousSessionId
+    }
+
+    const existing = globalThis.localStorage
+      .getItem(anonymousSessionStorageKey)
+      ?.trim()
+
+    if (existing) {
+      return existing
+    }
+
+    const nextSessionId = createAnonymousSessionId()
+    globalThis.localStorage.setItem(anonymousSessionStorageKey, nextSessionId)
+
+    return nextSessionId
+  } catch {
+    inMemoryAnonymousSessionId ??= createAnonymousSessionId()
+
+    return inMemoryAnonymousSessionId
+  }
+}
 
 export async function requestGroundedAnswer(
   question: string,
@@ -25,10 +62,15 @@ export async function requestGroundedAnswer(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-Anonymous-Session-Id": getAnonymousSessionId(),
       },
       body: JSON.stringify(request),
     })
     const envelope = parseGroundedChatEnvelope(await response.json())
+
+    if (envelope.success && envelope.data.state === "cooldown") {
+      return envelope.data
+    }
 
     if (!response.ok || !envelope.success) {
       throw new Error(

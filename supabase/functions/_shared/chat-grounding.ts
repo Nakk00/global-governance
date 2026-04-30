@@ -38,6 +38,19 @@ type GroundedChatEnvelope =
             }
             citations: ChatCitation[]
           }
+        | {
+            state: "refused"
+            code: "off_topic"
+            message: string
+            nextStep: string
+          }
+        | {
+            state: "cooldown"
+            code: "rate_limited" | "abuse_cooldown"
+            message: string
+            nextStep: string
+            retryAfterSeconds: number
+          }
     }
   | {
       success: false
@@ -265,6 +278,42 @@ export function createChatErrorEnvelope(
     error: {
       code,
       message,
+    },
+  }
+}
+
+export function createRefusedChatResponse(): GroundedChatEnvelope {
+  return {
+    success: true,
+    data: {
+      state: "refused",
+      code: "off_topic",
+      message:
+        "I can only help with this Global Governance course and its approved materials.",
+      nextStep:
+        "Rephrase the question around global governance, the UN system, approved sources, or the West Philippine Sea case.",
+    },
+  }
+}
+
+export function createCooldownChatResponse({
+  code,
+  retryAfterSeconds,
+}: {
+  code: "rate_limited" | "abuse_cooldown"
+  retryAfterSeconds: number
+}): GroundedChatEnvelope {
+  return {
+    success: true,
+    data: {
+      state: "cooldown",
+      code,
+      message:
+        code === "abuse_cooldown"
+          ? "The assistant is temporarily limited after repeated boundary triggers."
+          : "The assistant is temporarily limited after repeated submissions.",
+      nextStep: "Wait briefly, then ask a course-focused question.",
+      retryAfterSeconds,
     },
   }
 }

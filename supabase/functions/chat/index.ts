@@ -1,13 +1,19 @@
 import {
   assembleGroundedChatResponse,
   createChatErrorEnvelope,
+  createCooldownChatResponse,
+  createRefusedChatResponse,
   retrieveApprovedSources,
 } from "../_shared/chat-grounding.ts"
+import {
+  evaluateChatProtection,
+  resolveAnonymousSessionId,
+} from "../_shared/chat-protection.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
+    "authorization, x-client-info, apikey, content-type, x-anonymous-session-id",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 }
 
@@ -73,6 +79,34 @@ Deno.serve(async (request) => {
           headers: corsHeaders,
         }
       )
+    }
+
+    const protectionDecision = await evaluateChatProtection({
+      sessionId: await resolveAnonymousSessionId(request),
+      question,
+      currentSectionId: context?.currentSectionId,
+    })
+
+    if (protectionDecision.state === "cooldown") {
+      return Response.json(
+        createCooldownChatResponse({
+          code: protectionDecision.code,
+          retryAfterSeconds: protectionDecision.retryAfterSeconds,
+        }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Retry-After": `${protectionDecision.retryAfterSeconds}`,
+          },
+        }
+      )
+    }
+
+    if (protectionDecision.state === "refused") {
+      return Response.json(createRefusedChatResponse(), {
+        headers: corsHeaders,
+      })
     }
 
     return Response.json(

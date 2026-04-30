@@ -78,6 +78,59 @@ describe("grounded chat contract", () => {
     expect(parsed.data.citations).toEqual([])
   })
 
+  it("keeps off-topic refusal as a typed successful state without citations", () => {
+    const parsed = parseGroundedChatEnvelope({
+      success: true,
+      data: {
+        state: "refused",
+        code: "off_topic",
+        message:
+          "I can only help with this Global Governance course and its approved materials.",
+        nextStep:
+          "Rephrase the question around the UN, global governance, or the West Philippine Sea case.",
+      },
+    })
+
+    expect(parsed.success).toBe(true)
+    if (!parsed.success) {
+      throw new Error("Expected successful envelope")
+    }
+    expect(parsed.data.state).toBe("refused")
+    if (parsed.data.state !== "refused") {
+      throw new Error("Expected refusal")
+    }
+
+    expect(parsed.data.code).toBe("off_topic")
+    expect(parsed.data.nextStep).toMatch(/rephrase/i)
+    expect("citations" in parsed.data).toBe(false)
+  })
+
+  it("keeps cooldown as a typed successful state with retry guidance", () => {
+    const parsed = parseGroundedChatEnvelope({
+      success: true,
+      data: {
+        state: "cooldown",
+        code: "abuse_cooldown",
+        message:
+          "The assistant is temporarily limited after repeated boundary triggers.",
+        nextStep: "Wait briefly, then ask a course-focused question.",
+        retryAfterSeconds: 60,
+      },
+    })
+
+    expect(parsed.success).toBe(true)
+    if (!parsed.success) {
+      throw new Error("Expected successful envelope")
+    }
+    expect(parsed.data.state).toBe("cooldown")
+    if (parsed.data.state !== "cooldown") {
+      throw new Error("Expected cooldown")
+    }
+
+    expect(parsed.data.retryAfterSeconds).toBe(60)
+    expect(parsed.data.nextStep).toMatch(/course-focused/i)
+  })
+
   it("rejects malformed response shapes before React state commits them", () => {
     expect(() =>
       parseGroundedChatEnvelope({
@@ -93,6 +146,22 @@ describe("grounded chat contract", () => {
         },
       })
     ).toThrow(/citation/i)
+  })
+
+  it("rejects malformed protection payloads before React state commits them", () => {
+    expect(() =>
+      parseGroundedChatEnvelope({
+        success: true,
+        data: {
+          state: "cooldown",
+          code: "rate_limited",
+          message:
+            "The assistant is temporarily limited after repeated submissions.",
+          nextStep: "Try again shortly.",
+          retryAfterSeconds: 0,
+        },
+      })
+    ).toThrow(/retry/i)
   })
 
   it("formats requests without privileged retrieval details", () => {
