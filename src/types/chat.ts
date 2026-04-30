@@ -36,15 +36,26 @@ export type GroundedChatWeakSupport = {
   citations: ChatCitation[]
 }
 
-export type GroundedChatDeferredProtection = {
-  state: "deferredProtection"
+export type GroundedChatRefusal = {
+  state: "refused"
+  code: "off_topic"
   message: string
+  nextStep: string
+}
+
+export type GroundedChatCooldown = {
+  state: "cooldown"
+  code: "rate_limited" | "abuse_cooldown"
+  message: string
+  nextStep: string
+  retryAfterSeconds: number
 }
 
 export type GroundedChatSuccess =
   | GroundedChatAnswer
   | GroundedChatWeakSupport
-  | GroundedChatDeferredProtection
+  | GroundedChatRefusal
+  | GroundedChatCooldown
 
 export type ChatError = {
   code: string

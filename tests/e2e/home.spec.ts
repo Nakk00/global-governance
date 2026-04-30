@@ -628,6 +628,112 @@ test("source-aware chat shows weak support without unsupported certainty", async
   await expectNoHorizontalOverflow(page)
 })
 
+test("source-aware chat renders calm refusal with a rephrase action", async ({
+  page,
+}) => {
+  await page.route("**/functions/v1/chat", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: {
+          state: "refused",
+          code: "off_topic",
+          message:
+            "I can only help with this Global Governance course and its approved materials.",
+          nextStep:
+            "Rephrase the question around global governance, the UN system, approved sources, or the West Philippine Sea case.",
+        },
+      }),
+    })
+  })
+
+  await page.goto("/#un-command-center")
+  await page.getByRole("button", { name: "Open source-aware chat" }).click()
+
+  const panel = page.getByRole("region", {
+    name: "Source-aware academic chat",
+  })
+  const input = panel.getByRole("textbox", { name: "Course question" })
+  const commandCenter = page.getByRole("region", { name: "UN Command Center" })
+
+  await input.fill("Can you recommend a phone?")
+  await panel.getByRole("button", { name: "Ask" }).click()
+
+  await expect(panel.getByText("Course boundary reached")).toBeVisible()
+  await expect(
+    panel.getByText(/only help with this Global Governance course/i)
+  ).toBeVisible()
+  await expect(
+    panel.getByText(/Rephrase the question around global governance/i)
+  ).toBeVisible()
+
+  const rephrase = panel.getByRole("button", {
+    name: "Rephrase a course question",
+  })
+  await rephrase.focus()
+  await expectVisibleFocus(rephrase)
+  await page.keyboard.press("Enter")
+  await expect(input).toBeFocused()
+  await expect(commandCenter.getByText(/Security Council/i)).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+})
+
+test("source-aware chat renders cooldown quickly without blocking the page", async ({
+  page,
+}) => {
+  await page.route("**/functions/v1/chat", async (route) => {
+    await route.fulfill({
+      status: 429,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: {
+          state: "cooldown",
+          code: "rate_limited",
+          message:
+            "The assistant is temporarily limited after repeated submissions.",
+          nextStep: "Wait briefly, then ask a course-focused question.",
+          retryAfterSeconds: 60,
+        },
+      }),
+    })
+  })
+
+  await page.emulateMedia({ reducedMotion: "reduce" })
+
+  for (const width of [360, 480, 768, 1024, 1280]) {
+    await page.setViewportSize({ width, height: 820 })
+    await page.goto("/#governance-limits")
+    await page.getByRole("button", { name: "Open source-aware chat" }).click()
+
+    const panel = page.getByRole("region", {
+      name: "Source-aware academic chat",
+    })
+    const input = panel.getByRole("textbox", { name: "Course question" })
+
+    await input.fill("How does the UN coordinate global governance?")
+    await panel.getByRole("button", { name: "Ask" }).click()
+
+    await expect(panel.getByText("Assistant temporarily limited")).toBeVisible({
+      timeout: 2_000,
+    })
+    await expect(panel.getByText(/Retry in about 60 seconds/i)).toBeVisible()
+
+    const retry = panel.getByRole("button", { name: "Try again shortly" })
+    await retry.focus()
+    await expectVisibleFocus(retry)
+    await expectContainedWithinViewport(panel, width)
+    await expectNoHorizontalOverflow(page)
+    await expect(
+      page
+        .getByRole("region", { name: "Governance limits and enforcement" })
+        .getByRole("link", { name: "Continue to West Philippine Sea dossier" })
+    ).toBeVisible()
+    await page.keyboard.press("Escape")
+  }
+})
+
 test("source-aware chat remains contained on mobile and reduced motion", async ({
   page,
 }) => {

@@ -35,6 +35,19 @@ function optionalString(value: unknown, label: string): string | undefined {
   return requireString(value, label)
 }
 
+function requirePositiveInteger(value: unknown, label: string): number {
+  if (
+    typeof value !== "number" ||
+    !Number.isInteger(value) ||
+    value < 1 ||
+    value > 300
+  ) {
+    throw new Error(`Invalid grounded chat ${label}`)
+  }
+
+  return value
+}
+
 function parseCitation(value: unknown): ChatCitation {
   const citation = asRecord(value, "citation")
   const sourceType = requireString(citation.sourceType, "citation source type")
@@ -107,10 +120,37 @@ function parseSuccessData(value: unknown): GroundedChatSuccess {
     }
   }
 
-  if (state === "deferredProtection") {
+  if (state === "refused") {
+    const code = requireString(data.code, "refusal code")
+
+    if (code !== "off_topic") {
+      throw new Error("Invalid grounded chat refusal code")
+    }
+
     return {
       state,
-      message: requireString(data.message, "deferred protection message"),
+      code,
+      message: requireString(data.message, "refusal message"),
+      nextStep: requireString(data.nextStep, "refusal next step"),
+    }
+  }
+
+  if (state === "cooldown") {
+    const code = requireString(data.code, "cooldown code")
+
+    if (code !== "rate_limited" && code !== "abuse_cooldown") {
+      throw new Error("Invalid grounded chat cooldown code")
+    }
+
+    return {
+      state,
+      code,
+      message: requireString(data.message, "cooldown message"),
+      nextStep: requireString(data.nextStep, "cooldown next step"),
+      retryAfterSeconds: requirePositiveInteger(
+        data.retryAfterSeconds,
+        "cooldown retry seconds"
+      ),
     }
   }
 
