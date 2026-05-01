@@ -5,11 +5,10 @@ type ProtectionRecord = {
 }
 
 export interface ProtectionStore {
-  get(sessionId: string): Promise<ProtectionRecord | undefined> | ProtectionRecord | undefined
-  set(
-    sessionId: string,
-    record: ProtectionRecord
-  ): Promise<void> | void
+  get(
+    sessionId: string
+  ): Promise<ProtectionRecord | undefined> | ProtectionRecord | undefined
+  set(sessionId: string, record: ProtectionRecord): Promise<void> | void
   delete?(sessionId: string): Promise<void> | void
   clear?(): Promise<void> | void
 }
@@ -119,11 +118,15 @@ export function createMemoryProtectionStore(): ProtectionStore {
   }
 }
 
-export function resetProtectionStore(store: ProtectionStore): Promise<void> | void {
+export function resetProtectionStore(
+  store: ProtectionStore
+): Promise<void> | void {
   return store.clear?.()
 }
 
-export async function resolveAnonymousSessionId(request: Request): Promise<string> {
+export async function resolveAnonymousSessionId(
+  request: Request
+): Promise<string> {
   const forwardedFor = request.headers.get("x-forwarded-for")?.trim()
   const userAgent = request.headers.get("user-agent")?.trim()
   const firstForwardedAddress = forwardedFor?.split(",")[0]?.trim()
@@ -262,11 +265,15 @@ function isCourseBoundaryQuestion(
 ): boolean {
   const normalizedQuestion = question.toLowerCase()
   const sectionKeywords = currentSectionId
-    ? sectionBoundaryKeywords[currentSectionId] ?? []
+    ? (sectionBoundaryKeywords[currentSectionId] ?? [])
     : []
   const boundaryKeywords = [...courseBoundaryKeywords, ...sectionKeywords]
 
-  if (boundaryKeywords.some((keyword) => matchesKeywordBoundary(normalizedQuestion, keyword))) {
+  if (
+    boundaryKeywords.some((keyword) =>
+      matchesKeywordBoundary(normalizedQuestion, keyword)
+    )
+  ) {
     return true
   }
 
@@ -276,8 +283,8 @@ function isCourseBoundaryQuestion(
 
   return Boolean(
     currentSectionId &&
-      question.trim().split(/\s+/).length <= 8 &&
-      followUpQuestionPattern.test(question)
+    question.trim().split(/\s+/).length <= 8 &&
+    followUpQuestionPattern.test(question)
   )
 }
 
@@ -305,13 +312,17 @@ async function getProtectionStore(): Promise<ProtectionStore> {
 }
 
 function getRedisUrl(): string | undefined {
-  const maybeDeno = globalThis as { Deno?: { env?: { get(name: string): string | undefined } } }
+  const maybeDeno = globalThis as {
+    Deno?: { env?: { get(name: string): string | undefined } }
+  }
   const redisUrl = maybeDeno.Deno?.env?.get("REDIS_URL")?.trim()
 
   return redisUrl && redisUrl.length > 0 ? redisUrl : undefined
 }
 
-async function createRedisProtectionStore(redisUrl: string): Promise<ProtectionStore> {
+async function createRedisProtectionStore(
+  redisUrl: string
+): Promise<ProtectionStore> {
   const { createClient } = await import("npm:redis")
   const client = createClient({ url: redisUrl })
 
@@ -366,7 +377,9 @@ function toRedisKey(sessionId: string): string {
   return `chat-protection:${sessionId}`
 }
 
-function enforceTrackedSessionLimit(records: Map<string, ProtectionRecord>): void {
+function enforceTrackedSessionLimit(
+  records: Map<string, ProtectionRecord>
+): void {
   if (records.size <= maxTrackedSessions) {
     return
   }
@@ -384,7 +397,10 @@ function enforceTrackedSessionLimit(records: Map<string, ProtectionRecord>): voi
     return leftFreshness - rightFreshness
   })
 
-  for (const [sessionId] of sessionsByFreshness.slice(0, records.size - maxTrackedSessions)) {
+  for (const [sessionId] of sessionsByFreshness.slice(
+    0,
+    records.size - maxTrackedSessions
+  )) {
     records.delete(sessionId)
   }
 }
