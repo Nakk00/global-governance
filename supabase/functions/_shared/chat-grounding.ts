@@ -1,16 +1,12 @@
-type ChatSourceType = "primary" | "course" | "case" | "reference"
+import {
+  getServerChatApprovedSources,
+  getServerSectionSourceMap,
+  type ServerApprovedSource,
+} from "./approved-source-bundle.ts"
 
-type ApprovedSource = {
-  sourceId: string
-  title: string
-  shortTitle: string
-  sourceType: ChatSourceType
-  detail: string
-  url?: string
-  keywords: string[]
-}
+type ApprovedSource = ServerApprovedSource
 
-type ChatCitation = Omit<ApprovedSource, "keywords">
+type ChatCitation = Omit<ApprovedSource, "keywords" | "sectionIds">
 type GroundedChatContext = {
   currentSectionId?: string
 }
@@ -60,37 +56,6 @@ type GroundedChatEnvelope =
       }
     }
 
-const approvedSources: ApprovedSource[] = [
-  {
-    sourceId: "gg-src-un-charter-institutions",
-    title: "Charter of the United Nations",
-    shortTitle: "UN Charter",
-    sourceType: "primary",
-    detail:
-      "The Charter explains the UN purposes, sovereign equality, and institutional coordination role used in the course.",
-    url: "https://www.un.org/en/about-us/un-charter/full-text",
-    keywords: ["un", "charter", "security", "council", "coordinate"],
-  },
-  {
-    sourceId: "gg-src-global-governance-course-frame",
-    title: "Global Governance Course Frame",
-    shortTitle: "Course frame",
-    sourceType: "course",
-    detail:
-      "The course distinguishes global governance from world government and frames institutions as coordination tools.",
-    keywords: ["global", "governance", "government", "institution"],
-  },
-  {
-    sourceId: "gg-src-wps-arbitral-ruling",
-    title: "West Philippine Sea Arbitral Ruling",
-    shortTitle: "WPS ruling",
-    sourceType: "case",
-    detail:
-      "The case material connects legal clarity to the political limits of enforcement in maritime disputes.",
-    keywords: ["west", "philippine", "sea", "wps", "ruling", "arbitral"],
-  },
-]
-
 const sourceInspectionKeywords = ["approved", "source", "sources", "inspect"]
 const speculativeKeywords = [
   "should",
@@ -102,25 +67,8 @@ const speculativeKeywords = [
   "vote",
   "ought",
 ]
-const sectionSourceMap: Record<string, string[]> = {
-  "journey-start": ["gg-src-global-governance-course-frame"],
-  "hero-narrative-frame": ["gg-src-global-governance-course-frame"],
-  "global-governance-overview": ["gg-src-global-governance-course-frame"],
-  "un-command-center": [
-    "gg-src-un-charter-institutions",
-    "gg-src-global-governance-course-frame",
-  ],
-  "governance-limits": [
-    "gg-src-un-charter-institutions",
-    "gg-src-global-governance-course-frame",
-  ],
-  "west-philippine-sea-dossier": ["gg-src-wps-arbitral-ruling"],
-  "conclusion-references": [
-    "gg-src-un-charter-institutions",
-    "gg-src-global-governance-course-frame",
-    "gg-src-wps-arbitral-ruling",
-  ],
-}
+const approvedSources = getServerChatApprovedSources()
+const sectionSourceMap = getServerSectionSourceMap()
 
 function getScopedSources(currentSectionId?: string) {
   const sourceIds =

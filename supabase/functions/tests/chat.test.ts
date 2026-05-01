@@ -6,6 +6,7 @@ import {
   createRefusedChatResponse,
   retrieveApprovedSources,
 } from "../_shared/chat-grounding"
+import { approvedSourceBundleIdentity } from "../_shared/approved-source-bundle"
 import {
   createMemoryProtectionStore,
   evaluateChatProtection,
@@ -13,6 +14,22 @@ import {
 } from "../_shared/chat-protection"
 
 describe("chat grounding edge helpers", () => {
+  it("uses the versioned approved-source bundle mirror for server retrieval", () => {
+    expect(approvedSourceBundleIdentity).toEqual({
+      bundleId: "global-governance-approved-sources",
+      bundleVersion: "2026.05.01",
+    })
+
+    expect(
+      retrieveApprovedSources(
+        "Explain the West Philippine Sea arbitral ruling",
+        {
+          currentSectionId: "west-philippine-sea-dossier",
+        }
+      ).map((source) => source.sourceId)
+    ).toEqual(["gg-src-south-china-sea-award"])
+  })
+
   it("packages approved-source answers with citation metadata", () => {
     const sources = retrieveApprovedSources(
       "How does the UN coordinate global governance?"
@@ -136,12 +153,14 @@ describe("chat grounding edge helpers", () => {
 
     for (let index = 0; index < 10; index += 1) {
       expect(
-        (await evaluateChatProtection({
-          sessionId: "window-session",
-          question: "How does the UN coordinate global governance?",
-          now: 1_000 + index,
-          store,
-        })).state
+        (
+          await evaluateChatProtection({
+            sessionId: "window-session",
+            question: "How does the UN coordinate global governance?",
+            now: 1_000 + index,
+            store,
+          })
+        ).state
       ).toBe("allowed")
     }
 

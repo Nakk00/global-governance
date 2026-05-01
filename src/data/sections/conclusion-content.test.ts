@@ -4,6 +4,7 @@ import {
   conclusionContent,
   hasCompleteConclusionReferences,
 } from "./conclusion-content"
+import { getConclusionReferenceSources } from "../source-bundles/approved-source-bundle"
 import type { NarrativeReferenceSource } from "./narrative-types"
 
 const [referenceDisclosure] = conclusionContent.disclosures
@@ -23,7 +24,12 @@ describe("conclusionContent", () => {
   it("models at least three approved references with stable source metadata", () => {
     const references = referenceDisclosure.references ?? []
 
-    expect(references.length).toBeGreaterThanOrEqual(3)
+    expect(references).toEqual(getConclusionReferenceSources())
+    expect(references.map((source) => source.sourceId)).toEqual([
+      "gg-src-un-charter-institutions",
+      "gg-src-south-china-sea-award",
+      "gg-src-sustainable-development-report",
+    ])
 
     for (const source of references) {
       expect(source.sourceId).toMatch(/^gg-src-[a-z0-9-]+$/)

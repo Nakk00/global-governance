@@ -1386,7 +1386,7 @@ test("West Philippine Sea dossier evidence stays local, accessible, and context-
 
       await expect(scarboroughEvidence).toBeVisible()
       await expect(scarboroughEvidence).toContainText(
-        "wps-src-2012-scarborough"
+        "gg-src-scarborough-standoff-record"
       )
       await expect(scarboroughEvidence).toContainText("Why it matters")
       await expectWpsEvidenceLayout(page, width)
@@ -1405,7 +1405,7 @@ test("West Philippine Sea dossier evidence stays local, accessible, and context-
 
       await expect(arbitrationEvidence).toBeVisible()
       await expect(arbitrationEvidence).toContainText(
-        "wps-src-2013-arbitration-filing"
+        "gg-src-philippines-arbitration-filing"
       )
       await expect(scarboroughEvidence).toBeHidden()
       await expectNoHorizontalOverflow(page)

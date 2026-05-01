@@ -1,3 +1,4 @@
+import { resolveApprovedSourceId } from "@/data/source-bundles/approved-source-bundle"
 import type {
   ChatCitation,
   ChatError,
@@ -57,7 +58,9 @@ function parseCitation(value: unknown): ChatCitation {
   }
 
   return {
-    sourceId: requireString(citation.sourceId, "citation source id"),
+    sourceId: resolveApprovedSourceId(
+      requireString(citation.sourceId, "citation source id")
+    ),
     title: requireString(citation.title, "citation title"),
     shortTitle: requireString(citation.shortTitle, "citation short title"),
     sourceType: sourceType as ChatCitation["sourceType"],
