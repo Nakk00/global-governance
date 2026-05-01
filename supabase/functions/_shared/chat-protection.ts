@@ -127,6 +127,12 @@ export function resetProtectionStore(
 export async function resolveAnonymousSessionId(
   request: Request
 ): Promise<string> {
+  const explicitSession = request.headers.get("x-anonymous-session-id")?.trim()
+
+  if (explicitSession) {
+    return await hashSessionKey(`local:${explicitSession.slice(0, 120)}`)
+  }
+
   const forwardedFor = request.headers.get("x-forwarded-for")?.trim()
   const userAgent = request.headers.get("user-agent")?.trim()
   const firstForwardedAddress = forwardedFor?.split(",")[0]?.trim()
@@ -137,12 +143,6 @@ export async function resolveAnonymousSessionId(
 
   if (networkFingerprint) {
     return await hashSessionKey(networkFingerprint)
-  }
-
-  const explicitSession = request.headers.get("x-anonymous-session-id")?.trim()
-
-  if (explicitSession) {
-    return await hashSessionKey(`local:${explicitSession.slice(0, 120)}`)
   }
 
   return await hashSessionKey(`local:${userAgent ?? "unknown"}`)
