@@ -5,6 +5,7 @@ import {
   wpsRulingRealityComparison,
   wpsTimelineEvents,
 } from "./west-philippine-sea-dossier"
+import { getDossierEvidenceSources } from "../source-bundles/approved-source-bundle"
 
 describe("wpsTimelineEvents", () => {
   it("keeps the required case milestones in chronological source order", () => {
@@ -110,11 +111,16 @@ describe("wpsEvidenceRegistry", () => {
       ...Object.values(wpsEvidenceRegistry.timeline).flat(),
       ...Object.values(wpsEvidenceRegistry.comparison).flat(),
     ]
+    const bundleEvidenceIds = getDossierEvidenceSources().map(
+      (source) => source.sourceId
+    )
 
-    expect(evidenceItems.length).toBeGreaterThan(0)
+    expect(evidenceItems.map((item) => item.sourceId).sort()).toEqual(
+      [...bundleEvidenceIds].sort()
+    )
 
     for (const item of evidenceItems) {
-      expect(item.sourceId).toMatch(/^wps-src-[a-z0-9-]+$/)
+      expect(item.sourceId).toMatch(/^gg-src-[a-z0-9-]+$/)
       expect(item.sourceLabel.length).toBeGreaterThan(12)
       expect(item.summary.length).toBeGreaterThan(40)
       expect(item.metadata.length).toBeGreaterThan(20)

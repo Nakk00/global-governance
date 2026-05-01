@@ -48,6 +48,39 @@ describe("grounded chat contract", () => {
     })
   })
 
+  it("normalizes citation aliases to canonical approved-source ids", () => {
+    const parsed = parseGroundedChatEnvelope({
+      success: true,
+      data: {
+        state: "answered",
+        answer:
+          "The award clarified legal rights while enforcement still depended on state behavior.",
+        grounding: {
+          supportLevel: "strong",
+          cue: "Grounded in approved course materials",
+        },
+        citations: [
+          {
+            sourceId: "gg-src-wps-arbitral-ruling",
+            title: "South China Sea Arbitration Award",
+            shortTitle: "SCS award",
+            sourceType: "case",
+            detail:
+              "The case material connects legal clarity to political enforcement limits.",
+          },
+        ],
+      },
+    })
+
+    expect(parsed.success).toBe(true)
+    if (!parsed.success || parsed.data.state !== "answered") {
+      throw new Error("Expected answered state")
+    }
+    expect(parsed.data.citations[0].sourceId).toBe(
+      "gg-src-south-china-sea-award"
+    )
+  })
+
   it("keeps insufficient support as a typed successful weak-support state", () => {
     const parsed = parseGroundedChatEnvelope({
       success: true,

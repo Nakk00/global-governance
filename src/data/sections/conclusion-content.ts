@@ -2,6 +2,7 @@ import type {
   NarrativeDisclosure,
   NarrativeSectionContent,
 } from "@/data/sections/narrative-types"
+import { getConclusionReferenceSources } from "@/data/source-bundles/approved-source-bundle"
 
 export function hasCompleteConclusionReferences(
   disclosure: NarrativeDisclosure
@@ -44,38 +45,7 @@ export const conclusionContent: NarrativeSectionContent = {
       ],
       unavailableMessage:
         "Source support is temporarily unavailable. The conclusion remains readable, but the approved references need complete metadata before they can be inspected here.",
-      references: [
-        {
-          sourceId: "gg-src-un-charter-institutions",
-          title: "Charter of the United Nations",
-          provenance:
-            "Foundational UN treaty; institutional design; primary source",
-          summary:
-            "Defines the UN's purposes, organs, member obligations, and Security Council structure that frame the chapter's institutional overview.",
-          whyItMatters:
-            "It grounds the thesis that global governance coordinates states through shared institutions rather than replacing state sovereignty.",
-        },
-        {
-          sourceId: "gg-src-south-china-sea-award",
-          title: "South China Sea Arbitration Award",
-          provenance:
-            "2016 UNCLOS tribunal award; legal record; West Philippine Sea case",
-          summary:
-            "Clarifies maritime entitlements and legal findings while showing that legal judgment and political enforcement remain different problems.",
-          whyItMatters:
-            "It supports the journey's central tension: rules can clarify claims and strengthen accountability even when enforcement is contested.",
-        },
-        {
-          sourceId: "gg-src-sustainable-development-report",
-          title: "UN Sustainable Development Goals Report",
-          provenance:
-            "UN public progress report; accountability evidence; policy snapshot",
-          summary:
-            "Tracks shared goals, uneven progress, and the public evidence governments use to compare commitments against visible outcomes.",
-          whyItMatters:
-            "It shows why global governance still matters in practice: common measures help people argue, organize, and demand better conduct.",
-        },
-      ],
+      references: getConclusionReferenceSources(),
     },
   ],
   synthesis:
