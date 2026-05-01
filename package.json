@@ -14,6 +14,8 @@
     "supabase:functions": "supabase functions serve --env-file .env.local --no-verify-jwt",
     "supabase:functions:chat": "supabase functions serve chat --env-file .env.local --no-verify-jwt",
     "supabase:dev": "pnpm supabase:start && pnpm supabase:functions:chat",
+    "chatbot:prepare-ingestion": "node --experimental-strip-types scripts/chatbot/prepare-ingestion.ts",
+    "chatbot:validate-set": "node --experimental-strip-types scripts/chatbot/validate-chatbot-set.ts",
     "test:unit": "vitest run",
     "test:functions": "vitest run -c supabase/functions/vitest.config.ts",
     "test:e2e": "playwright test --grep-invert @chat-live",
@@ -24,6 +26,7 @@
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",
+    "@ladybugdb/core": "0.15.3",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.0",
     "@tailwindcss/vite": "^4.2.1",

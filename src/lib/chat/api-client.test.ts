@@ -143,12 +143,10 @@ describe("requestGroundedAnswer", () => {
     await requestGroundedAnswer("Explain the UN")
     await requestGroundedAnswer("Explain the UN again")
 
-    const firstSessionId = fetchMock.mock.calls[0]?.[1]?.headers?.[
-      "X-Anonymous-Session-Id"
-    ]
-    const secondSessionId = fetchMock.mock.calls[1]?.[1]?.headers?.[
-      "X-Anonymous-Session-Id"
-    ]
+    const firstSessionId =
+      fetchMock.mock.calls[0]?.[1]?.headers?.["X-Anonymous-Session-Id"]
+    const secondSessionId =
+      fetchMock.mock.calls[1]?.[1]?.headers?.["X-Anonymous-Session-Id"]
 
     expect(firstSessionId).toBeTruthy()
     expect(secondSessionId).toBe(firstSessionId)

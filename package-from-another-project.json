@@ -1,0 +1,57 @@
+{
+  "name": "attendance-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "predev": "pnpm check:env",
+    "dev": "next dev",
+    "prebuild": "pnpm check:env",
+    "build": "next build",
+    "start": "next start",
+    "supabase:start": "supabase start --ignore-health-check",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
+    "supabase:db:reset": "supabase db reset",
+    "supabase:bootstrap-users": "tsx scripts/bootstrap-local-auth-users.ts",
+    "supabase:reset:full": "pnpm supabase:db:reset && pnpm supabase:bootstrap-users",
+    "supabase:reset:safe": "tsx scripts/supabase-reset-safe.ts",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "check:env": "tsx scripts/verify-env.ts",
+    "sync:types": "tsx scripts/sync-types.ts",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:e2e:2-7": "node tests/e2e/e2e-story-2-7-playwright.mjs",
+    "test:e2e:2-7:fast": "tsx scripts/run-story-2-7-e2e-fast.ts",
+    "test:e2e:2-7:strict": "tsx scripts/run-story-2-7-e2e-strict.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.100.1",
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "playwright": "^1.59.1",
+    "supabase": "^2.93.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.20.6",
+    "typescript": "^5",
+    "vitest": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=20.9.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.33.0"
+}

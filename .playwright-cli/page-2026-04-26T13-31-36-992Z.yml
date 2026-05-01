@@ -1,0 +1,163 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Global Governance" [ref=e6] [cursor=pointer]:
+        - /url: "#hero-narrative-frame"
+      - button "Open navigation" [ref=e207]:
+        - img
+  - main [ref=e39]:
+    - region "Global Governance" [ref=e40]:
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Interactive learning journey
+        - generic [ref=e44]:
+          - heading "Global Governance" [level=1] [ref=e45]
+          - paragraph [ref=e46]: Step into an interactive guide to the institutions, tensions, and choices that shape how countries cooperate when no single government is in charge.
+        - link "Begin the journey" [ref=e47] [cursor=pointer]:
+          - /url: "#journey-start"
+          - text: Begin the journey
+          - img
+    - region "Journey start" [ref=e62]:
+      - generic [ref=e63]:
+        - paragraph [ref=e64]: Orientation
+        - heading "A guide to cooperation without a world government" [level=2] [ref=e65]
+        - paragraph [ref=e66]: "Global governance starts with a simple tension: shared problems cross borders, but political authority still belongs mostly to states."
+        - paragraph [ref=e67]: This journey follows how countries use institutions, law, norms, and pressure to coordinate action even when no single global authority can command everyone.
+        - paragraph [ref=e68]: No account needed. The core narrative is open from the first screen so a first-time visitor can read, scroll, and return to any chapter by anchor link.
+    - generic [ref=e69]:
+      - region "Global governance overview" [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - paragraph [ref=e73]: Big idea
+            - heading "Global governance is coordination under constraint" [level=2] [ref=e74]
+            - generic [ref=e75]:
+              - paragraph [ref=e76]: Summary
+              - paragraph [ref=e77]: Global governance is not a world state. It is the network of rules, institutions, negotiations, habits, and public pressure that helps states manage problems they cannot solve alone.
+            - paragraph [ref=e78]: "The key idea is cooperation without a single sovereign: states keep authority, but they also build systems that make joint action more likely."
+          - generic [ref=e79]:
+            - paragraph [ref=e80]: Supporting detail
+            - paragraph [ref=e81]: Some problems are practical, like disease surveillance, shipping standards, climate risk, or financial stability. Others are political, like disputes over territory, security, trade, and human rights.
+            - paragraph [ref=e82]: "The system works through many layers at once: treaties set expectations, institutions organize forums, experts produce evidence, and governments weigh the costs of ignoring shared rules."
+          - generic [ref=e84]:
+            - paragraph [ref=e85]: Governance includes formal law, institutional routines, diplomatic habits, and reputational pressure.
+            - button "What counts as governance?" [ref=e86]:
+              - text: What counts as governance?
+              - img
+          - complementary [ref=e87]:
+            - paragraph [ref=e88]: Key takeaway
+            - paragraph [ref=e89]: "This chapter established global governance as coordination under constraint: useful tools for shared problems, not a world government."
+            - generic [ref=e90]:
+              - paragraph [ref=e91]: Next step
+              - link "Continue to UN Command Center" [ref=e92] [cursor=pointer]:
+                - /url: "#un-command-center"
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - paragraph [ref=e97]: "Next: Institutions"
+          - paragraph [ref=e98]: From the big idea to the main room
+        - paragraph [ref=e99]: Once the system needs a place to debate, monitor, and coordinate, institutions become the operating rooms of global governance.
+    - generic [ref=e100]:
+      - region "UN Command Center" [active] [ref=e101]:
+        - generic [ref=e102]:
+          - generic [ref=e103]:
+            - paragraph [ref=e104]: Institutions
+            - heading "The UN gives global politics a shared address" [level=2] [ref=e105]
+            - generic [ref=e106]:
+              - paragraph [ref=e107]: Summary
+              - paragraph [ref=e108]: The United Nations does not govern the world, but it gives states a standing place to debate crises, set norms, coordinate agencies, and turn disputes into procedures instead of pure escalation.
+            - paragraph [ref=e109]: The UN matters because it makes international politics more organized, visible, and repeatable, even when states disagree sharply.
+          - generic [ref=e110]:
+            - paragraph [ref=e111]: Supporting detail
+            - paragraph [ref=e112]: The General Assembly gives every member state a forum. The Security Council focuses on peace and security. The Secretariat turns mandates into administrative work, while specialized agencies handle technical cooperation.
+            - paragraph [ref=e113]: These bodies do different jobs, so the UN is best read as a system of rooms rather than a single actor with one will.
+          - generic [ref=e115]:
+            - paragraph [ref=e116]: UN organs split agenda-setting, security decisions, administration, legal interpretation, and specialized cooperation.
+            - button "How the rooms divide the work" [ref=e117]:
+              - text: How the rooms divide the work
+              - img
+          - complementary [ref=e118]:
+            - paragraph [ref=e119]: Key takeaway
+            - paragraph [ref=e120]: "This chapter showed the UN as a shared address for world politics: a system of rooms that organizes debate, norms, and coordination."
+            - generic [ref=e121]:
+              - paragraph [ref=e122]: Next step
+              - link "Continue to Governance limits and enforcement" [ref=e123] [cursor=pointer]:
+                - /url: "#governance-limits"
+      - generic [ref=e126]:
+        - generic [ref=e127]:
+          - paragraph [ref=e128]: "Next: Constraints"
+          - paragraph [ref=e129]: Institutions do not remove politics
+        - paragraph [ref=e130]: The next layer asks why rules and institutions can still matter when enforcement is uneven and powerful states can resist pressure.
+    - generic [ref=e131]:
+      - region "Governance limits and enforcement" [ref=e132]:
+        - generic [ref=e133]:
+          - generic [ref=e134]:
+            - paragraph [ref=e135]: Constraints
+            - heading "Rules matter, but they do not enforce themselves" [level=2] [ref=e136]
+            - generic [ref=e137]:
+              - paragraph [ref=e138]: Summary
+              - paragraph [ref=e139]: International law and institutions can narrow what states can credibly claim, justify, or ignore, but enforcement often depends on consent, coalitions, leverage, and political will.
+            - paragraph [ref=e140]: The limit is not that rules are meaningless; the limit is that rules need actors to interpret, defend, and apply them.
+          - generic [ref=e141]:
+            - paragraph [ref=e142]: Supporting detail
+            - paragraph [ref=e143]: States may comply because they value stability, need cooperation in other areas, want legitimacy, or fear costs from partners and publics.
+            - paragraph [ref=e144]: They may resist when a rule threatens security interests, domestic political narratives, economic gains, or territorial claims.
+          - generic [ref=e146]:
+            - paragraph [ref=e147]: Law and institutions can narrow the menu of acceptable behavior even when they cannot force a state by themselves.
+            - button "Why rules still shape choices" [ref=e148]:
+              - text: Why rules still shape choices
+              - img
+          - complementary [ref=e149]:
+            - paragraph [ref=e150]: Key takeaway
+            - paragraph [ref=e151]: "This chapter established the central limit: rules matter, but they need actors, pressure, and political will to make them usable."
+            - generic [ref=e152]:
+              - paragraph [ref=e153]: Next step
+              - link "Continue to West Philippine Sea dossier" [ref=e154] [cursor=pointer]:
+                - /url: "#west-philippine-sea-dossier"
+      - generic [ref=e157]:
+        - generic [ref=e158]:
+          - paragraph [ref=e159]: "Next: Case file"
+          - paragraph [ref=e160]: Put the system under pressure
+        - paragraph [ref=e161]: "A regional dispute can show the full pattern at once: law, institutions, national interest, public claims, and enforcement limits colliding in real time."
+    - region "West Philippine Sea dossier" [ref=e163]:
+      - generic [ref=e164]:
+        - generic [ref=e165]:
+          - paragraph [ref=e166]: Case file
+          - heading "The West Philippine Sea turns the theory into a test" [level=2] [ref=e167]
+          - generic [ref=e168]:
+            - paragraph [ref=e169]: Summary
+            - paragraph [ref=e170]: The West Philippine Sea dispute shows how legal rulings, maritime claims, regional diplomacy, and state behavior interact when institutions clarify rules but cannot instantly settle power politics.
+          - paragraph [ref=e171]: "The case matters because it makes the abstract tension visible: rules can clarify rights, while enforcement still depends on political strategy and collective response."
+        - generic [ref=e172]:
+          - paragraph [ref=e173]: Supporting detail
+          - paragraph [ref=e174]: A case dossier approach helps separate the legal question from the political question. What does the rule say? Who accepts it? What behavior changes, and what behavior continues?
+          - paragraph [ref=e175]: It also shows why public explanation matters. Citizens need more than slogans; they need a way to connect institutions, evidence, and consequences.
+        - generic [ref=e177]:
+          - paragraph [ref=e178]: Track claims, legal findings, state behavior, diplomatic response, and public consequences as separate but connected layers.
+          - button "How to read the dispute as a governance case" [ref=e179]:
+            - text: How to read the dispute as a governance case
+            - img
+        - complementary [ref=e180]:
+          - paragraph [ref=e181]: Key takeaway
+          - paragraph [ref=e182]: This chapter tested the theory in a real dispute, where law clarifies claims while politics shapes what changes on the water.
+          - generic [ref=e183]:
+            - paragraph [ref=e184]: Next step
+            - link "Continue to Conclusion and references" [ref=e185] [cursor=pointer]:
+              - /url: "#conclusion-references"
+    - region "Conclusion and references" [ref=e187]:
+      - generic [ref=e188]:
+        - generic [ref=e189]:
+          - paragraph [ref=e190]: Wrap-up
+          - heading "Global governance is the work of making shared rules usable" [level=2] [ref=e191]
+          - generic [ref=e192]:
+            - paragraph [ref=e193]: Summary
+            - paragraph [ref=e194]: The project’s thesis is that global governance is not world government; it is the practical, contested work of coordinating states through institutions, law, norms, evidence, and public accountability.
+          - paragraph [ref=e195]: When learners can see both the promise and the limits of the system, they can judge international problems with more clarity and less fatalism.
+        - generic [ref=e196]:
+          - paragraph [ref=e197]: Supporting detail
+          - paragraph [ref=e198]: The core narrative begins with shared problems, moves through the UN as a coordination system, confronts enforcement limits, and tests the pattern through the West Philippine Sea.
+          - paragraph [ref=e199]: The reference space remains here as a landing point for later source work, but the page closes the story before it becomes a document dump.
+        - complementary [ref=e200]:
+          - paragraph [ref=e201]: Key takeaway
+          - paragraph [ref=e202]: "This chapter closed the journey with the thesis intact: global governance is imperfect, contested, and still worth understanding."
+          - generic [ref=e203]:
+            - paragraph [ref=e204]: Next step
+            - link "Return to Journey start" [ref=e205] [cursor=pointer]:
+              - /url: "#journey-start"

@@ -1,6 +1,6 @@
 ---
 name: scripts
-description: "Skill for the Scripts area of Global-Governance. 15 symbols across 2 files."
+description: "Skill for the Scripts area of global-governance-docuweb. 15 symbols across 2 files."
 ---
 
 # Scripts

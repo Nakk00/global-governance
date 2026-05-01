@@ -1,6 +1,6 @@
 ---
 name: contexts
-description: "Skill for the Contexts area of Global-Governance. 16 symbols across 3 files."
+description: "Skill for the Contexts area of global-governance-docuweb. 16 symbols across 3 files."
 ---
 
 # Contexts
@@ -56,10 +56,12 @@ Start here when exploring this area:
 
 | Flow | Type | Steps |
 |------|------|-------|
-| `NavigationProvider → IsChapterId` | intra_community | 4 |
+| `WpsDossier → IsChapterId` | cross_community | 4 |
 | `NarrativeSection → IsChapterId` | cross_community | 4 |
-| `NavigationProvider → GetHashSectionId` | intra_community | 3 |
+| `UNCommandCenter → IsChapterId` | cross_community | 4 |
+| `NavigationProvider → IsChapterId` | intra_community | 3 |
 | `UpdateActiveSection → IsChapterId` | intra_community | 3 |
+| `ReconcileHash → IsChapterId` | intra_community | 3 |
 
 ## How to Explore
 

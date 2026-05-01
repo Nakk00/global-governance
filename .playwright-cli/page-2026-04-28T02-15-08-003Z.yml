@@ -1,0 +1,418 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Global Governance" [ref=e6] [cursor=pointer]:
+        - /url: "#hero-narrative-frame"
+      - navigation "Primary" [ref=e7]:
+        - link "Hero Narrative Frame" [ref=e8] [cursor=pointer]:
+          - /url: "#hero-narrative-frame"
+        - link "Global governance overview" [ref=e9] [cursor=pointer]:
+          - /url: "#global-governance-overview"
+        - link "UN Command Center" [ref=e10] [cursor=pointer]:
+          - /url: "#un-command-center"
+        - link "Governance limits and enforcement" [ref=e11] [cursor=pointer]:
+          - /url: "#governance-limits"
+        - link "West Philippine Sea dossier" [ref=e12] [cursor=pointer]:
+          - /url: "#west-philippine-sea-dossier"
+        - link "Conclusion and references" [ref=e13] [cursor=pointer]:
+          - /url: "#conclusion-references"
+      - generic [ref=e14]:
+        - paragraph [ref=e15]: "Current chapter: West Philippine Sea dossier"
+        - button "Return to start" [ref=e16]:
+          - img
+  - complementary:
+    - navigation "Section progress" [ref=e17]:
+      - paragraph [ref=e19]: Orbital route
+      - link "Hero Narrative Frame" [ref=e20] [cursor=pointer]:
+        - /url: "#hero-narrative-frame"
+        - generic [ref=e21]: "1"
+        - generic [ref=e22]: Hero Narrative Frame
+      - link "Global governance overview" [ref=e23] [cursor=pointer]:
+        - /url: "#global-governance-overview"
+        - generic [ref=e24]: "2"
+        - generic [ref=e25]: Global governance overview
+      - link "UN Command Center" [ref=e26] [cursor=pointer]:
+        - /url: "#un-command-center"
+        - generic [ref=e27]: "3"
+        - generic [ref=e28]: UN Command Center
+      - link "Governance limits and enforcement" [ref=e29] [cursor=pointer]:
+        - /url: "#governance-limits"
+        - generic [ref=e30]: "4"
+        - generic [ref=e31]: Governance limits and enforcement
+      - link "West Philippine Sea dossier" [ref=e32] [cursor=pointer]:
+        - /url: "#west-philippine-sea-dossier"
+        - generic [ref=e33]: "5"
+        - generic [ref=e34]: West Philippine Sea dossier
+      - link "Conclusion and references" [ref=e35] [cursor=pointer]:
+        - /url: "#conclusion-references"
+        - generic [ref=e36]: "6"
+        - generic [ref=e37]: Conclusion and references
+      - button "Return to start from progress rail" [ref=e38]:
+        - img
+        - text: Return to start
+  - main [ref=e39]:
+    - region "Global Governance" [ref=e40]:
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - paragraph [ref=e43]: Interactive learning journey
+          - generic [ref=e44]:
+            - heading "Global Governance" [level=1] [ref=e45]
+            - paragraph [ref=e46]: Step into an interactive guide to the institutions, tensions, and choices that shape how countries cooperate when no single government is in charge.
+          - link "Begin the journey" [ref=e47] [cursor=pointer]:
+            - /url: "#journey-start"
+            - text: Begin the journey
+            - img
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - paragraph [ref=e51]: Orbital route
+            - paragraph [ref=e52]: Institutions, power, cooperation, disputes, and choices in one guided flow.
+          - generic [ref=e55]:
+            - paragraph [ref=e56]:
+              - generic [ref=e57]: "1"
+              - text: Entry vector
+            - paragraph [ref=e58]:
+              - generic [ref=e59]: "2"
+              - text: Institutional gravity
+            - paragraph [ref=e60]:
+              - generic [ref=e61]: "3"
+              - text: Regional collision
+    - region "Journey start" [ref=e62]:
+      - generic [ref=e63]:
+        - paragraph [ref=e64]: Orientation
+        - heading "A guide to cooperation without a world government" [level=2] [ref=e65]
+        - paragraph [ref=e66]: "Global governance starts with a simple tension: shared problems cross borders, but political authority still belongs mostly to states."
+        - paragraph [ref=e67]: This journey follows how countries use institutions, law, norms, and pressure to coordinate action even when no single global authority can command everyone.
+        - paragraph [ref=e68]: No account needed. The core narrative is open from the first screen so a first-time visitor can read, scroll, and return to any chapter by anchor link.
+    - generic [ref=e69]:
+      - region "Global governance overview" [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - paragraph [ref=e73]: Big idea
+            - heading "Global governance is coordination under constraint" [level=2] [ref=e74]
+            - generic [ref=e75]:
+              - paragraph [ref=e76]: Summary
+              - paragraph [ref=e77]: Global governance is not a world state. It is the network of rules, institutions, negotiations, habits, and public pressure that helps states manage problems they cannot solve alone.
+            - paragraph [ref=e78]: "The key idea is cooperation without a single sovereign: states keep authority, but they also build systems that make joint action more likely."
+          - generic [ref=e79]:
+            - paragraph [ref=e80]: Supporting detail
+            - paragraph [ref=e81]: Some problems are practical, like disease surveillance, shipping standards, climate risk, or financial stability. Others are political, like disputes over territory, security, trade, and human rights.
+            - paragraph [ref=e82]: "The system works through many layers at once: treaties set expectations, institutions organize forums, experts produce evidence, and governments weigh the costs of ignoring shared rules."
+          - generic [ref=e84]:
+            - paragraph [ref=e85]: Governance includes formal law, institutional routines, diplomatic habits, and reputational pressure.
+            - button "What counts as governance?" [ref=e86]:
+              - text: What counts as governance?
+              - img
+          - complementary [ref=e87]:
+            - paragraph [ref=e88]: Key takeaway
+            - paragraph [ref=e89]: "This chapter established global governance as coordination under constraint: useful tools for shared problems, not a world government."
+            - generic [ref=e90]:
+              - paragraph [ref=e91]: Next step
+              - link "Continue to UN Command Center" [ref=e92] [cursor=pointer]:
+                - /url: "#un-command-center"
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - paragraph [ref=e97]: "Next: Institutions"
+          - paragraph [ref=e98]: From the big idea to the main room
+        - paragraph [ref=e99]: Once the system needs a place to debate, monitor, and coordinate, institutions become the operating rooms of global governance.
+    - generic [ref=e100]:
+      - region "UN Command Center" [ref=e101]:
+        - generic [ref=e102]:
+          - generic [ref=e103]:
+            - paragraph [ref=e104]: Institutions
+            - heading "The UN gives global politics a shared address" [level=2] [ref=e105]
+            - paragraph [ref=e106]: "This Command Center frames the United Nations as an institutional system within global governance: a place to explore how states debate, coordinate, authorize, document, and contest collective action."
+            - region "Command Center summary" [ref=e107]:
+              - paragraph [ref=e108]: Summary
+              - paragraph [ref=e109]: The United Nations does not govern the world, but it gives states a standing place to debate crises, set norms, coordinate agencies, and turn disputes into procedures instead of pure escalation.
+          - region "Command Center entry controls" [ref=e110]:
+            - generic [ref=e111]:
+              - paragraph [ref=e112]: Entry controls
+              - paragraph [ref=e113]: Use these shell-level cues to begin exploring the system before the organ-by-organ tools arrive.
+            - generic [ref=e114]:
+              - button "Explore the Command Center" [ref=e116]:
+                - generic [ref=e117]:
+                  - img
+                  - generic [ref=e118]: Explore the Command Center
+                - img
+              - button "Why the UN matters" [ref=e120]:
+                - generic [ref=e121]:
+                  - img
+                  - generic [ref=e122]: Why the UN matters
+                - img
+          - region "Inspect the rooms of the UN system" [ref=e123]:
+            - generic [ref=e124]:
+              - paragraph [ref=e125]: Organ explorer
+              - heading "Inspect the rooms of the UN system" [level=3] [ref=e126]
+              - paragraph [ref=e127]: Select an organ to compare what it does, where its authority comes from, and where politics still limits the room.
+            - generic [ref=e128]:
+              - group "Inspect the rooms of the UN system" [ref=e129]:
+                - button "General Assembly The forum where every UN member state has a seat and a vote." [pressed] [ref=e130]:
+                  - img
+                  - generic [ref=e131]:
+                    - generic [ref=e132]: General Assembly
+                    - generic [ref=e133]: The forum where every UN member state has a seat and a vote.
+                - button "Security Council The body with primary responsibility for peace and security." [ref=e134]:
+                  - img
+                  - generic [ref=e135]:
+                    - generic [ref=e136]: Security Council
+                    - generic [ref=e137]: The body with primary responsibility for peace and security.
+                - button "Secretariat The administrative engine led by the Secretary-General." [ref=e138]:
+                  - img
+                  - generic [ref=e139]:
+                    - generic [ref=e140]: Secretariat
+                    - generic [ref=e141]: The administrative engine led by the Secretary-General.
+                - button "International Court of Justice The UN's principal judicial organ for disputes between states." [ref=e142]:
+                  - img
+                  - generic [ref=e143]:
+                    - generic [ref=e144]: International Court of Justice
+                    - generic [ref=e145]: The UN's principal judicial organ for disputes between states.
+                - button "Specialized agencies The technical bodies that coordinate work in fields such as health, labor, food, education, and development." [ref=e146]:
+                  - img
+                  - generic [ref=e147]:
+                    - generic [ref=e148]: Specialized agencies
+                    - generic [ref=e149]: The technical bodies that coordinate work in fields such as health, labor, food, education, and development.
+              - region "General Assembly details" [ref=e150]:
+                - generic [ref=e151]:
+                  - generic [ref=e152]:
+                    - generic [ref=e153]:
+                      - paragraph [ref=e154]: Comparison details
+                      - heading "General Assembly" [level=4] [ref=e155]
+                    - generic [ref=e156]: Selected organ
+                  - paragraph [ref=e157]: The forum where every UN member state has a seat and a vote.
+                - generic [ref=e158]:
+                  - generic [ref=e159]:
+                    - term [ref=e160]: Role
+                    - definition [ref=e161]: Turns global concerns into public debate, resolutions, budgets, and shared political signals.
+                  - generic [ref=e162]:
+                    - term [ref=e163]: Scope of power
+                    - definition [ref=e164]: Can set agendas, approve budgets, elect members to UN bodies, and show where broad international support exists.
+                  - generic [ref=e165]:
+                    - term [ref=e166]: Limitation
+                    - definition [ref=e167]: Its resolutions usually do not bind states by force, so influence depends on legitimacy, repetition, and diplomatic pressure.
+                  - generic [ref=e168]:
+                    - term [ref=e169]: Why it matters
+                    - definition [ref=e170]: It gives small and large states the same microphone, making global opinion visible even when agreement is incomplete.
+          - generic [ref=e172]:
+            - paragraph [ref=e173]: Open a short map of the institutions this shell will unpack next.
+            - button "Inside this section" [ref=e174]:
+              - text: Inside this section
+              - img
+          - complementary [ref=e175]:
+            - paragraph [ref=e176]: Key takeaway
+            - paragraph [ref=e177]: "This chapter showed the UN as a shared address for world politics: a system of rooms that organizes debate, norms, and coordination."
+            - generic [ref=e178]:
+              - paragraph [ref=e179]: Next step
+              - link "Continue to Governance limits and enforcement" [ref=e180] [cursor=pointer]:
+                - /url: "#governance-limits"
+      - generic [ref=e183]:
+        - generic [ref=e184]:
+          - paragraph [ref=e185]: "Next: Constraints"
+          - paragraph [ref=e186]: Institutions do not remove politics
+        - paragraph [ref=e187]: The next layer asks why rules and institutions can still matter when enforcement is uneven and powerful states can resist pressure.
+    - generic [ref=e188]:
+      - region "Governance limits and enforcement" [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - paragraph [ref=e192]: Constraints
+            - heading "Rules matter, but they do not enforce themselves" [level=2] [ref=e193]
+            - generic [ref=e194]:
+              - paragraph [ref=e195]: Summary
+              - paragraph [ref=e196]: International law and institutions can narrow what states can credibly claim, justify, or ignore, but enforcement often depends on consent, coalitions, leverage, and political will.
+            - paragraph [ref=e197]: The limit is not that rules are meaningless; the limit is that rules need actors to interpret, defend, and apply them.
+          - generic [ref=e198]:
+            - paragraph [ref=e199]: Supporting detail
+            - paragraph [ref=e200]: States may comply because they value stability, need cooperation in other areas, want legitimacy, or fear costs from partners and publics.
+            - paragraph [ref=e201]: They may resist when a rule threatens security interests, domestic political narratives, economic gains, or territorial claims.
+          - generic [ref=e203]:
+            - paragraph [ref=e204]: Law and institutions can narrow the menu of acceptable behavior even when they cannot force a state by themselves.
+            - button "Why rules still shape choices" [ref=e205]:
+              - text: Why rules still shape choices
+              - img
+          - complementary [ref=e206]:
+            - paragraph [ref=e207]: Key takeaway
+            - paragraph [ref=e208]: "This chapter established the central limit: rules matter, but they need actors, pressure, and political will to make them usable."
+            - generic [ref=e209]:
+              - paragraph [ref=e210]: Next step
+              - link "Continue to West Philippine Sea dossier" [ref=e211] [cursor=pointer]:
+                - /url: "#west-philippine-sea-dossier"
+      - generic [ref=e214]:
+        - generic [ref=e215]:
+          - paragraph [ref=e216]: "Next: Case file"
+          - paragraph [ref=e217]: Put the system under pressure
+        - paragraph [ref=e218]: "A regional dispute can show the full pattern at once: law, institutions, national interest, public claims, and enforcement limits colliding in real time."
+    - region "West Philippine Sea dossier" [active] [ref=e220]:
+      - generic [ref=e221]:
+        - generic [ref=e222]:
+          - generic [ref=e223]:
+            - generic [ref=e224]:
+              - paragraph [ref=e225]: Case file
+              - heading "The West Philippine Sea turns the theory into a test" [level=2] [ref=e226]
+            - paragraph [ref=e227]: "Chapter: West Philippine Sea dossier"
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - paragraph [ref=e230]: "Open the case as a continuation of the journey: the same question about rules and power now meets a concrete maritime dispute."
+              - region "Dossier summary" [ref=e231]:
+                - paragraph [ref=e232]: Summary
+                - paragraph [ref=e233]: The West Philippine Sea dispute shows how legal rulings, maritime claims, regional diplomacy, and state behavior interact when institutions clarify rules but cannot instantly settle power politics.
+            - complementary "Dossier frame" [ref=e234]:
+              - paragraph [ref=e235]: Evidence-led investigation
+              - paragraph [ref=e236]: Read the case through rules, evidence, behavior, and public stakes.
+        - region "Follow the dispute in order" [ref=e237]:
+          - generic [ref=e238]:
+            - paragraph [ref=e239]: Case timeline
+            - heading "Follow the dispute in order" [level=3] [ref=e240]
+            - paragraph [ref=e241]: Select each milestone to connect the facts, the legal setting, and the governance lesson.
+          - generic [ref=e242]:
+            - group "Follow the dispute in order" [ref=e243]:
+              - button "2012 Selected Scarborough Shoal incident A standoff near Scarborough Shoal brings maritime claims and state presence into sharper public view." [pressed] [ref=e244]:
+                - img
+                - generic [ref=e245]:
+                  - generic [ref=e246]:
+                    - generic [ref=e247]: "2012"
+                    - generic [ref=e248]: Selected
+                  - generic [ref=e249]: Scarborough Shoal incident
+                  - generic [ref=e250]: A standoff near Scarborough Shoal brings maritime claims and state presence into sharper public view.
+              - button "2013 Arbitration filing The Philippines brings the dispute into compulsory arbitration under UNCLOS." [ref=e251]:
+                - img
+                - generic [ref=e252]:
+                  - generic [ref=e254]: "2013"
+                  - generic [ref=e255]: Arbitration filing
+                  - generic [ref=e256]: The Philippines brings the dispute into compulsory arbitration under UNCLOS.
+              - button "2016 Tribunal ruling The arbitral tribunal clarifies key maritime rights and rejects broad historic-rights claims." [ref=e257]:
+                - img
+                - generic [ref=e258]:
+                  - generic [ref=e260]: "2016"
+                  - generic [ref=e261]: Tribunal ruling
+                  - generic [ref=e262]: The arbitral tribunal clarifies key maritime rights and rejects broad historic-rights claims.
+              - button "Post-2016 Enforcement limits Legal clarity does not automatically change behavior without political follow-through and enforcement capacity." [ref=e263]:
+                - img
+                - generic [ref=e264]:
+                  - generic [ref=e266]: Post-2016
+                  - generic [ref=e267]: Enforcement limits
+                  - generic [ref=e268]: Legal clarity does not automatically change behavior without political follow-through and enforcement capacity.
+            - region "2012 Selected Scarborough Shoal incident A standoff near Scarborough Shoal brings maritime claims and state presence into sharper public view." [ref=e269]:
+              - generic [ref=e270]:
+                - generic [ref=e271]:
+                  - paragraph [ref=e272]: Selected milestone
+                  - 'heading "2012: Scarborough Shoal incident" [level=4] [ref=e273]'
+                - generic [ref=e274]: Chronology
+              - generic [ref=e275]:
+                - generic [ref=e276]:
+                  - term [ref=e277]: Context
+                  - definition [ref=e278]: Philippine and Chinese vessels faced one another around Scarborough Shoal, turning an already contested maritime space into a visible dispute over control, access, and official presence.
+                - generic [ref=e279]:
+                  - term [ref=e280]: Legal context
+                  - definition [ref=e281]: The incident raised questions about maritime entitlements, historic-rights claims, and how the UN Convention on the Law of the Sea frames rights at sea.
+                - generic [ref=e282]:
+                  - term [ref=e283]: Significance
+                  - definition [ref=e284]: "It made the dispute concrete for learners: governance questions were no longer abstract rules, but choices made by states on the water."
+              - button "Inspect evidence for Scarborough Shoal incident" [ref=e286]:
+                - generic [ref=e287]:
+                  - img
+                  - generic [ref=e288]: Inspect evidence for Scarborough Shoal incident
+                - img
+        - region "Legal clarity met political limits" [ref=e289]:
+          - generic [ref=e290]:
+            - paragraph [ref=e291]: Ruling versus reality
+            - heading "Legal clarity met political limits" [level=3] [ref=e292]
+            - paragraph [ref=e293]: Compare what the tribunal clarified with what changed, and did not change, in state behavior after the award.
+          - generic [ref=e294]:
+            - article [ref=e295]:
+              - paragraph [ref=e296]: Legal or institutional ruling
+              - paragraph [ref=e297]: The 2016 arbitral award rejected broad historic-rights claims within the nine-dash line and clarified how UNCLOS governs maritime entitlements.
+              - paragraph [ref=e298]: The legal outcome strengthened the Philippines' position in diplomacy and public explanation by turning a contested claim into a documented institutional finding.
+            - article [ref=e299]:
+              - paragraph [ref=e300]: Enforcement or geopolitical reality
+              - paragraph [ref=e301]: Activity and pressure at sea continued because the tribunal did not command its own enforcement force and compliance depended on state choices.
+              - paragraph [ref=e302]: The political reality is that legal clarity can raise costs, shape coalitions, and guide accountability, but it still meets power, strategy, and willingness to comply.
+          - generic [ref=e303]:
+            - radiogroup "Comparison emphasis" [ref=e304]:
+              - radio "Enforcement gap Active Why the ruling did not automatically settle behavior" [checked] [ref=e305]:
+                - img
+                - generic [ref=e306]:
+                  - generic [ref=e307]:
+                    - generic [ref=e308]: Enforcement gap
+                    - generic [ref=e309]: Active
+                  - generic [ref=e310]: Why the ruling did not automatically settle behavior
+              - radio "Political reality Why power still shaped the outcome after legal clarity" [ref=e311]:
+                - img
+                - generic [ref=e312]:
+                  - generic [ref=e314]: Political reality
+                  - generic [ref=e315]: Why power still shaped the outcome after legal clarity
+              - radio "Governance lesson What learners should take from the comparison" [ref=e316]:
+                - img
+                - generic [ref=e317]:
+                  - generic [ref=e319]: Governance lesson
+                  - generic [ref=e320]: What learners should take from the comparison
+            - generic [ref=e321]:
+              - paragraph [ref=e322]: Current emphasis
+              - heading "Enforcement gap" [level=4] [ref=e323]
+              - paragraph [ref=e324]: The case demonstrates weak enforcement because the legal ruling clarified rights while practical change still depended on compliance, diplomacy, and pressure from other actors.
+              - button "Inspect evidence for Enforcement gap" [ref=e326]:
+                - generic [ref=e327]:
+                  - img
+                  - generic [ref=e328]: Inspect evidence for Enforcement gap
+                - img
+        - region "Dossier entry controls" [ref=e329]:
+          - generic [ref=e330]:
+            - paragraph [ref=e331]: Dossier entry
+            - paragraph [ref=e332]: Use these two entry points to begin the chapter before the later evidence tools arrive.
+          - generic [ref=e333]:
+            - button "Open the evidence file" [ref=e335]:
+              - generic [ref=e336]:
+                - img
+                - generic [ref=e337]: Open the evidence file
+              - img
+            - button "Trace law and power" [ref=e339]:
+              - generic [ref=e340]:
+                - img
+                - generic [ref=e341]: Trace law and power
+              - img
+        - generic [ref=e342]:
+          - paragraph [ref=e343]: Supporting detail
+          - paragraph [ref=e344]: "The case matters because it makes the abstract tension visible: rules can clarify rights, while enforcement still depends on political strategy and collective response."
+          - paragraph [ref=e345]: A case dossier approach helps separate the legal question from the political question. What does the rule say? Who accepts it? What behavior changes, and what behavior continues?
+          - paragraph [ref=e346]: It also shows why public explanation matters. Citizens need more than slogans; they need a way to connect institutions, evidence, and consequences.
+        - generic [ref=e348]:
+          - paragraph [ref=e349]: Track claims, legal findings, state behavior, diplomatic response, and public consequences as separate but connected layers.
+          - button "How to read the dispute as a governance case" [ref=e350]:
+            - text: How to read the dispute as a governance case
+            - img
+        - generic [ref=e351]:
+          - paragraph [ref=e352]: Synthesis
+          - paragraph [ref=e353]: "The case shows the central lesson of the journey: global governance is strongest when law, institutions, evidence, and public accountability reinforce one another."
+        - complementary [ref=e354]:
+          - paragraph [ref=e355]: Key takeaway
+          - paragraph [ref=e356]: This chapter tested the theory in a real dispute, where law clarifies claims while politics shapes what changes on the water.
+          - generic [ref=e357]:
+            - paragraph [ref=e358]: Next step
+            - link "Continue to Conclusion and references" [ref=e359] [cursor=pointer]:
+              - /url: "#conclusion-references"
+    - region "Conclusion and references" [ref=e361]:
+      - generic [ref=e362]:
+        - generic [ref=e363]:
+          - paragraph [ref=e364]: Wrap-up
+          - heading "Global governance is the work of making shared rules usable" [level=2] [ref=e365]
+          - generic [ref=e366]:
+            - paragraph [ref=e367]: Summary
+            - paragraph [ref=e368]: The project’s thesis is that global governance is not world government; it is the practical, contested work of coordinating states through institutions, law, norms, evidence, and public accountability.
+          - paragraph [ref=e369]: When learners can see both the promise and the limits of the system, they can judge international problems with more clarity and less fatalism.
+        - generic [ref=e370]:
+          - paragraph [ref=e371]: Supporting detail
+          - paragraph [ref=e372]: The core narrative begins with shared problems, moves through the UN as a coordination system, confronts enforcement limits, and tests the pattern through the West Philippine Sea.
+          - paragraph [ref=e373]: "The sources below keep the closing claim inspectable: they show the institutional design, legal limits, and public-accountability record behind the journey."
+        - generic [ref=e375]:
+          - paragraph [ref=e376]: Open three approved source notes that anchor the thesis without turning the ending into a document dump.
+          - button "Inspect the sources" [ref=e377]:
+            - text: Inspect the sources
+            - img
+        - complementary [ref=e378]:
+          - paragraph [ref=e379]: Key takeaway
+          - paragraph [ref=e380]: "This chapter closed the journey with the thesis intact: global governance is imperfect, contested, and still worth understanding."
+          - generic [ref=e381]:
+            - paragraph [ref=e382]: Next step
+            - link "Return to Journey start" [ref=e383] [cursor=pointer]:
+              - /url: "#journey-start"
+  - button "Open source-aware chat" [ref=e386]:
+    - img
+    - text: Open source-aware chat
