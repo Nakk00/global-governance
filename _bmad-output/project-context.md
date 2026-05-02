@@ -2,6 +2,7 @@
 project_name: 'Global-Governance'
 user_name: 'Nakko'
 date: '2026-04-24'
+last_edited: '2026-05-02'
 sections_completed: ['technology_stack', 'language_specific_rules', 'framework_specific_rules', 'testing_rules', 'code_quality_style_rules', 'development_workflow_rules', 'critical_dont_miss_rules']
 status: 'complete'
 rule_count: 77
@@ -23,7 +24,8 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Motion as the default animation system, Lenis for scroll feel, and GSAP only for isolated showcase scenes.
 - React Three Fiber and `@react-three/drei` for selective 3D or premium presentation moments.
 - Vercel for frontend hosting and preview deployments.
-- Supabase for Storage, Postgres + pgvector, Edge Functions, and CLI-driven local backend workflows.
+- Django as the backend orchestration layer for chat, retrieval, validation, admin operations, and privileged source stewardship.
+- Supabase for Auth, Storage, Postgres + pgvector, and CLI-driven local data workflows.
 - Redis as a server-side protection layer for public-chat rate limiting, abuse counters, and cooldowns.
 - `pnpm` as the documented package runner.
 - Do not assume Next.js as the baseline. The documented architecture is React + Vite SPA-first.
@@ -57,7 +59,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 ### Testing Rules
 
 - Keep frontend unit and component tests co-located as `*.test.ts` or `*.test.tsx`.
-- Keep Supabase Edge Function tests under `supabase/functions/tests` when applicable.
+- Keep Django backend tests under `backend/tests` when applicable.
 - Put end-to-end or smoke scripts in a dedicated top-level testing area, not inside content folders.
 - Test the shared API envelope and typed async states, especially `idle`, `loading`, `success`, `weakSupport`, `refused`, and `error`.
 - Cover chat-specific behavior explicitly: grounded answers, off-topic refusal, weak-support fallback, and rate-limit or cooldown states.
@@ -78,36 +80,36 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Keep shared UI primitives from shadcn/ui only in `src/components/ui`.
 - Keep flagship composites in feature folders, not in `ui`.
 - Keep source content definitions in `src/data`, not scattered inside components.
-- Put shared helpers in `src/lib`; put server-only function helpers in the Supabase functions workspace.
+- Put shared helpers in `src/lib`; put server-only backend helpers in `backend/common`.
 - Store database migrations only under `supabase/migrations`.
-- Store Edge Functions only under `supabase/functions/<function-name>/index.ts`.
-- Store shared Edge Function utilities under `supabase/functions/_shared`.
+- Store Django backend code only under `backend/`.
+- Keep Supabase project configuration and storage support material under `supabase/`.
 - Keep static public assets under `public/`, and isolate heavy media or 3D assets so they can be lazy-loaded by feature modules.
 - Check new architecture-relevant files against this document before merge and correct pattern violations in the active change instead of deferring them.
 
 ### Development Workflow Rules
 
 - Use the approved starter path first: `pnpm dlx shadcn@latest init -t vite`.
-- Treat frontend development as a Vite workflow and local backend/data work as a Supabase CLI workflow.
-- Keep the frontend app, Supabase migrations, and Supabase Edge Functions deployed independently.
-- Use reviewed Supabase migrations and reviewed Edge Function deployments instead of ad hoc dashboard edits.
+- Treat frontend development as a Vite workflow and local backend/data work as a Django plus Supabase workflow.
+- Keep the frontend app, Django backend, and Supabase migrations deployed independently.
+- Use reviewed frontend deployments, reviewed Django deployments, and reviewed Supabase migrations instead of ad hoc dashboard edits.
 - Keep browser-safe public variables separate from frontend build-time variables, server-only secrets, and local development secrets.
-- Keep `.env` conventions aligned with both Vercel and Supabase workflows.
+- Keep `.env` conventions aligned with Vercel, Django, and Supabase workflows.
 - Use Vercel preview deployments and runtime visibility for frontend delivery checks.
-- Use Supabase logs for Edge Function, database, and ingestion debugging.
-- Keep maintainer actions in local scripts, Supabase CLI workflows, and protected project access; do not add a public maintainer dashboard in the MVP.
+- Use Django and Supabase logs for chat, database, auth, and ingestion debugging.
+- Keep maintainer actions in protected Django admin flows plus local scripts; do not add a public maintainer dashboard in the learner-facing MVP path.
 - Keep the architecture modular, but do not split the MVP into microservices.
 - Treat clean-clone reproducibility as a requirement for the chatbot-related workflow and setup path.
 
 ### Critical Don't-Miss Rules
 
 - Keep repo-managed presentation content separate from Supabase-managed chatbot knowledge data; never write chatbot corpus data from browser code.
-- Keep privileged retrieval, service-role access, ingestion, and citation packaging inside Supabase Edge Functions; frontend chat code may only format requests and parse responses.
+- Keep privileged retrieval, service-role access, ingestion, citation packaging, and maintainer-only source mutations inside Django; frontend chat code may only format requests and parse responses.
 - Treat off-topic refusal, weak-support, and cooldown states as typed successful responses, not transport failures; use the shared response envelope consistently.
 - Keep the core learning flow usable when chat, premium visuals, or showcase scenes fail; non-chat content must remain interactive.
 - Keep `shadcn/ui` primitives in the shared UI layer and feature composites in feature-owned folders; do not mix the two.
 - Preserve the documented naming and folder conventions exactly; do not mix `snake_case`, `camelCase`, and `PascalCase` for the same kind of artifact.
-- Do not introduce a global store, React Router, or a public maintainer dashboard in the MVP unless the architecture is explicitly updated first.
+- Do not introduce a global store, React Router, or a public maintainer dashboard in the learner-facing MVP unless the architecture is explicitly updated first.
 - Keep Redis server-side only and never use it as the source of truth for documents, chunks, embeddings, or citations.
 - Do not broadly cache grounded chat answers in the MVP; citation integrity matters more than cache hit rate.
 - Keep reduced-motion behavior and lazy-loading intact from the start; GSAP scenes and heavy media must stay isolated or optional.
@@ -131,4 +133,4 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Review it quarterly for outdated rules.
 - Remove rules that become obvious over time.
 
-Last Updated: 2026-04-24
+Last Updated: 2026-05-02

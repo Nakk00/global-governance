@@ -113,7 +113,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **global-governance-docuweb** (3489 symbols, 4060 relationships, 48 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **global-governance-docuweb** (4150 symbols, 4818 relationships, 51 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -151,13 +151,5 @@ This project is indexed by GitNexus as **global-governance-docuweb** (3489 symbo
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the _shared area (55 symbols) | `.claude/skills/generated/shared/SKILL.md` |
-| Work in the Chat area (21 symbols) | `.claude/skills/generated/chat/SKILL.md` |
-| Work in the Contexts area (16 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
-| Work in the Scripts area (15 symbols) | `.claude/skills/generated/scripts/SKILL.md` |
-| Work in the Source-bundles area (10 symbols) | `.claude/skills/generated/source-bundles/SKILL.md` |
-| Work in the Sections area (10 symbols) | `.claude/skills/generated/sections/SKILL.md` |
-| Work in the Layout area (8 symbols) | `.claude/skills/generated/layout/SKILL.md` |
-| Work in the E2e area (5 symbols) | `.claude/skills/generated/e2e/SKILL.md` |
 
 <!-- gitnexus:end -->

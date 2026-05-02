@@ -1,0 +1,25 @@
+from django.conf import settings
+from django.test import SimpleTestCase, override_settings
+
+
+class SettingsImportTests(SimpleTestCase):
+    def test_backend_apps_are_registered(self):
+        expected_apps = {
+            "chatbot.apps.ChatbotConfig",
+            "retrieval.apps.RetrievalConfig",
+            "ingestion.apps.IngestionConfig",
+            "validation.apps.ValidationConfig",
+            "audit.apps.AuditConfig",
+            "sources.apps.SourcesConfig",
+        }
+
+        self.assertTrue(expected_apps.issubset(set(settings.INSTALLED_APPS)))
+
+    def test_development_debug_stays_disabled_for_json_contracts(self):
+        self.assertFalse(settings.DEBUG)
+
+    def test_frontend_chat_endpoint_is_not_django_owned_yet(self):
+        self.assertEqual(
+            settings.PUBLIC_CHAT_CUTOVER_STATUS,
+            "deferred-supabase-edge-function-default",
+        )

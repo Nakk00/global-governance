@@ -11,6 +11,12 @@ inputDocuments:
   - _bmad-output/planning-artifacts/ux-color-themes.html
   - _bmad-output/planning-artifacts/ux-design-directions.html
   - archive/docs/planning-artifacts/global_governance_version_c_build_roadmap.md
+lastEdited: '2026-05-02'
+editHistory:
+  - date: '2026-05-02'
+    summary: 'Rebaselined Epic 5 and supporting requirements for the approved Django chatbot-backend pivot and private maintainer admin operations.'
+  - date: '2026-05-02'
+    summary: 'Patched Epic 5 and Epic 6 story coverage to close operational, validation, and future-scope gaps found in review.'
 ---
 
 # Global-Governance - Epic Breakdown
@@ -102,41 +108,41 @@ This document provides the complete epic and story breakdown for Global-Governan
 
 - Starter template: Use the shadcn/ui Vite scaffold and treat `pnpm dlx shadcn@latest init -t vite` as the first implementation story.
 - Frontend foundation: Build the site as a React + Vite + TypeScript SPA with Tailwind CSS, Motion, Lenis, shadcn/ui, React Icons, React Three Fiber, and `@react-three/drei`.
-- Hosting split: Deploy the frontend on Vercel and use Supabase as the backend/data platform for Storage, Postgres, pgvector, and Edge Functions.
+- Hosting split: Deploy the frontend on Vercel, use Django as the backend orchestration layer, and use Supabase as the data platform for Auth, Storage, Postgres, and pgvector.
 - Content split: Keep repo-managed presentation content separate from the chatbot knowledge base so site copy and retrieval data can evolve independently.
 - Source of truth: Store visible educational page copy in typed repo content modules and keep approved chatbot source files in Supabase Storage.
 - Retrieval store: Store chunked retrieval records, embeddings, and citation data in Supabase Postgres with pgvector.
 - Validation boundary: Use TypeScript types internally and runtime schema validation at ingestion, chat request/response, citation payload, and source metadata boundaries.
-- API style: Use REST-style HTTP JSON endpoints with the approved route families for chat, retrieval, topic checks, ingestion, and prompt suggestions.
-- No learner auth: The MVP must not require learner authentication or expose a public maintainer dashboard.
-- Maintainer workflow: Keep maintainer actions in local scripts, Supabase CLI workflows, and protected project access.
+- API style: Use REST-style HTTP JSON endpoints with the approved Django route families for public chat, prompt suggestions, admin source stewardship, ingestion, validation, and audit review.
+- No learner auth: The MVP must not require learner authentication or expose a public maintainer dashboard in the learner-facing flow.
+- Maintainer workflow: Support maintainer actions through protected Django admin APIs, a private stewardship surface, and local scripts for reproducible operational workflows.
 - Security boundary: Keep public read access limited to what the frontend must render and protect source writes, ingestion, and retrieval behind service-role or maintainer-only execution contexts.
 - Data protection: Enable Row Level Security for Supabase tables so public clients cannot mutate chatbot source data.
 - Secret handling: Store service credentials only in server-side environments and platform secrets, and separate public browser keys from private ingestion and orchestration secrets.
-- Server-side orchestration: Run chat, retrieval, topic guard checks, and ingestion logic server-side through Edge Functions only.
+- Server-side orchestration: Run chat, retrieval, topic guard checks, safety checks, ingestion logic, and protected admin actions server-side through Django.
 - Protection layer: Use Redis in the MVP only for public-chat rate limiting, abuse counters, cooldown flags, and short-lived support state.
 - Cache policy: Do not use Redis as the source of truth for approved documents, chunks, embeddings, or citations, and do not broadly cache grounded chat answers in the MVP.
 - State management: Use local component state by default and thin React contexts only for cross-cutting concerns such as navigation state, reduced-motion preferences, chat panel state, and future Student / Expert mode.
 - Routing: Use a single-page anchor-navigation architecture in the MVP and avoid React Router unless the project expands into separate page flows later.
 - Performance: Lazy-load hero 3D assets, chatbot logic, optional showcase animation code, and any module not needed for first render.
 - Motion policy: Keep GSAP out of the default path unless a specific sequence requires it, and keep the main narrative readable even if premium feature chunks are delayed or fail.
-- Test placement: Co-locate frontend unit/component tests or keep them under `src/tests`, place Edge Function tests under `supabase/functions/tests`, and keep any smoke validation scripts in a dedicated top-level testing area.
+- Test placement: Co-locate frontend unit/component tests or keep them under `src/tests`, place Django backend tests under `backend/tests`, and keep any smoke validation scripts in a dedicated top-level testing area.
 - Response envelope: Standardize all API responses on a consistent `{ success, data, error }` envelope and use typed success states for off-topic, weak-support, and refusal outcomes.
 - Error handling: Separate user-safe messages from debug details, return structured server errors with stable codes, and avoid exposing raw stack traces in the UI.
 - Loading states: Use explicit `idle`, `loading`, `success`, `weakSupport`, `refused`, and `error` states, and place loading UI close to the affected surface.
-- Deployment workflow: Use reviewed Supabase migrations and Edge Function deployments instead of ad hoc dashboard edits.
+- Deployment workflow: Use reviewed frontend deployments, Django service deployments, and Supabase migrations instead of ad hoc dashboard edits.
 - Environment config: Separate browser-safe variables, frontend build-time variables, server-only secrets, and local development secrets, and document `.env` conventions clearly.
-- Monitoring: Use Vercel runtime visibility for frontend delivery concerns and Supabase logs for Edge Functions, database, and ingestion debugging.
+- Monitoring: Use Vercel runtime visibility for frontend delivery concerns plus Django and Supabase logs for chat, auth, database, and ingestion debugging.
 - Reproducibility: Support clean-clone local chatbot setup within 30 minutes and deterministic ingestion behavior for approved-source materials.
-- File organization: Organize frontend code by feature boundary, keep shared UI primitives in `src/components/ui`, feature composites in feature-owned folders, and shared Edge Function helpers in `supabase/functions/_shared`.
+- File organization: Organize frontend code by feature boundary, keep shared UI primitives in `src/components/ui`, feature composites in feature-owned folders, and shared backend helpers in `backend/common`.
 - Content ownership: Keep frontend code from writing directly to chatbot corpus tables.
 
 ### Boundary Alignment Notes
 
 - Browser clients may call only the public chat and suggestion endpoints plus static content delivery.
 - Ingestion endpoints remain maintainer-only operational surfaces and must never be called directly from normal learner UI flows.
-- Supabase Edge Functions remain the only layer allowed to orchestrate privileged retrieval, service-role access, model calls, and source bundle formatting.
-- Redis remains a server-side protection service only, accessed from Edge Functions and never from the browser.
+- Django remains the only layer allowed to orchestrate privileged retrieval, service-role access, model calls, source bundle formatting, and protected maintainer operations.
+- Redis remains a server-side protection service only, accessed from Django and never from the browser.
 - Local development may use a disposable Redis instance or mocked adapter so frontend and content workflows remain runnable when protection services are offline.
 
 **System Context:**
@@ -144,13 +150,15 @@ This document provides the complete epic and story breakdown for Global-Governan
 ```mermaid
 flowchart LR
   U[Browser / Learner] --> F[Vite Frontend on Vercel]
-  M[Maintainer CLI / Scripts] --> SF[Supabase Edge Functions]
-  F --> SF
-  SF --> S[(Supabase Storage)]
-  SF --> P[(Supabase Postgres + pgvector)]
-  SF --> R[(Redis protection layer)]
-  SF --> L[External model providers]
-  R -. rate limits / cooldowns .- SF
+  A[Maintainer Admin UI] --> F
+  M[Maintainer CLI / Scripts] --> D[Django Backend]
+  F --> D
+  D --> SA[Supabase Auth]
+  D --> S[(Supabase Storage)]
+  D --> P[(Supabase Postgres + pgvector)]
+  D --> R[(Redis protection layer)]
+  D --> L[External model providers]
+  R -. rate limits / cooldowns .- D
 ```
 
 ### UX Design Requirements
@@ -285,8 +293,10 @@ UX-DR26-35: Epic 1, Epic 2, Epic 3, Epic 4, Epic 5, Epic 6 - source credibility,
 ### Implementation Enablement Notes
 
 - Story 1.1 is the initial project-foundation bootstrap story. It exists to establish the approved starter template and shared frontend scaffold.
-- Story 5.5 is the maintainer-workflow bootstrap story. It exists to establish the clean-clone setup path and local operational workflow.
-- These two stories are intentionally split between product foundation and maintainer operations so implementation ownership stays easy to scan.
+- Story 5.4 is the backend-foundation pivot story. It establishes the Django service boundary before deeper chatbot implementation continues.
+- Story 5.11 is the maintainer-workflow bootstrap story. It exists to establish the clean-clone setup path and local operational workflow after the Django-backed chatbot path and demo rehearsal plan are in place.
+- Story 5.12 is the operational-hardening story. It closes the release, audit, security, and observability gaps that must exist before the Django-backed stack is considered demo-ready.
+- These setup and pivot stories are intentionally separated between product foundation, backend rebaseline, and maintainer operations so implementation ownership stays easy to scan.
 
 ### Epic 1: Guided Learning Journey
 Learners can move through a complete, section-based learning experience with clear orientation, layered explanation, recap support, and a strong opening-to-conclusion narrative.
@@ -305,7 +315,7 @@ Learners can ask bounded questions, inspect approved sources, and use references
 **FRs covered:** FR6, FR23, FR24, FR25, FR26, FR27, FR28, FR29, FR30, FR31, FR32, FR33, FR34
 
 ### Epic 5: Content Stewardship and Demo Reliability
-Maintainers can manage approved source material, validate chatbot behavior, and rehearse a stable classroom demo that keeps the core experience reliable.
+Maintainers can manage approved source material, operate the Django-backed chatbot stack safely, and rehearse a stable classroom demo that keeps the core experience reliable.
 **FRs covered:** FR35, FR36, FR37, FR38, FR39, FR40, FR41, FR42
 
 ### Epic 6: Adaptive Presentation and Future Expansion
@@ -336,7 +346,7 @@ So that the learning journey begins from the documented Vite, TypeScript, Tailwi
 
 **Given** the starter setup is complete
 **When** I inspect the app boundary and helper folders
-**Then** browser-facing code remains separated from Edge Function helpers
+**Then** browser-facing code remains separated from privileged backend helpers
 **And** no privileged retrieval or Redis logic is exposed directly to the frontend
 
 **Given** the project depends on approved frontend libraries
@@ -967,6 +977,16 @@ So that the assistant can answer from structured, searchable materials.
 **Then** the file is processed successfully into the retrieval store
 **And** unsupported inputs are rejected or handled clearly
 
+**Given** I submit a mixed or partially invalid ingestion batch
+**When** one or more documents fail normalization, chunking, or embedding preparation
+**Then** the workflow reports which items failed and why
+**And** it does not leave the retrieval store in a silent partial-write state
+
+**Given** I retry an already ingested document or re-run the same batch
+**When** the source material is unchanged or duplicated by mistake
+**Then** the workflow handles the duplicate deterministically through idempotent reuse, replacement, or an explicit maintainer decision
+**And** it does not create conflicting retrieval records for the same approved source version
+
 **Given** I prepare retrieval data for chatbot use
 **When** the process completes
 **Then** the resulting chunks, embeddings, and citation data are available in the intended storage layer
@@ -1005,7 +1025,195 @@ So that I can trust it before a demo or review.
 **Then** sampled answers do not contradict the PRD's approved definitions or case facts
 **And** the chatbot remains clearly bounded to the project scope
 
-### Story 5.4: Rehearse Demo Readiness
+### Story 5.4: Establish the Django Backend Foundation
+
+As a maintainer,
+I want a dedicated Django backend foundation for the chatbot and admin stack,
+So that future backend work happens behind one consistent, secure orchestration boundary.
+
+**Acceptance Criteria:**
+
+**Given** the backend foundation story is implemented
+**When** I inspect the repository structure
+**Then** the Django project, backend app boundaries, shared backend utilities, and environment conventions are present in their documented locations
+**And** the frontend remains separated from privileged backend code
+
+**Given** the Django service is configured
+**When** I start the local development workflow
+**Then** the frontend, Django service, and Supabase local dependencies can run together in the documented setup path
+**And** the backend can reach the intended Supabase services through server-only configuration
+
+**Given** a public chat request or protected admin request reaches the backend
+**When** the request is processed
+**Then** the Django layer owns request validation, response envelopes, and downstream orchestration
+**And** privileged model, retrieval, or service-role work is not exposed to the browser
+
+**Given** untrusted input reaches an external backend boundary
+**When** chat, ingestion, citation packaging, or source metadata handling begins
+**Then** runtime schema validation is applied before deeper orchestration continues
+**And** invalid payloads return structured user-safe errors instead of propagating malformed state
+
+### Story 5.5: Add Supabase Auth Admin Authentication and Django Authorization
+
+As a maintainer,
+I want private maintainer authentication and protected Django authorization,
+So that approved-source operations remain restricted without adding learner accounts.
+
+**Acceptance Criteria:**
+
+**Given** I access a protected maintainer route
+**When** I am not authenticated as an approved maintainer
+**Then** the request is denied with a clear protected-route response
+**And** no source mutation action is performed
+
+**Given** I sign in as an approved maintainer
+**When** I call a protected admin endpoint
+**Then** Django verifies the Supabase Auth identity before allowing the action
+**And** the endpoint applies maintainer-only authorization checks consistently
+
+**Given** maintainer access needs to be granted, changed, or revoked
+**When** an administrator updates the approved-maintainer list or role mapping
+**Then** the change becomes effective through a documented server-side provisioning path
+**And** removed maintainers lose access without requiring learner-facing auth changes
+
+**Given** a learner uses the public learning experience
+**When** they browse the site and use public chat flows
+**Then** no learner sign-in is required
+**And** the private maintainer auth boundary remains invisible from the learner-facing path
+
+### Story 5.6: Build the Private Source Stewardship Dashboard
+
+As a maintainer,
+I want a private source stewardship surface,
+So that I can review approved materials, ingestion state, and validation readiness without exposing admin tooling publicly.
+
+**Acceptance Criteria:**
+
+**Given** I access the maintainer dashboard as an authenticated maintainer
+**When** the dashboard loads
+**Then** I can review approved sources, source metadata, and current readiness state in one private surface
+**And** the dashboard is not linked from the public learner flow
+
+**Given** I need to review source changes
+**When** I inspect a source entry
+**Then** I can see approval status, relevant metadata, and change visibility sufficient for stewardship review
+**And** the experience supports source governance without requiring direct database access
+
+**Given** I need to understand how a source reached its current state
+**When** I inspect the source history
+**Then** I can see approval lineage, change provenance, and the maintainer action trail relevant to that source
+**And** stewardship review does not depend on hidden tribal knowledge
+
+**Given** I need operational visibility
+**When** I inspect ingestion or validation records
+**Then** I can see job status, recent runs, and actionable outcomes
+**And** the dashboard remains scoped to source stewardship rather than becoming a general public CMS
+
+### Story 5.7: Orchestrate Retrieval-Backed Grounded Answers in Django
+
+As a maintainer,
+I want the live chatbot to retrieve approved chunks and assemble answers through Django,
+So that grounded responses are based on the ingestion pipeline rather than heuristic bundle matching.
+
+**Acceptance Criteria:**
+
+**Given** I submit an on-topic course question
+**When** the live chat path runs
+**Then** Django embeds the query, retrieves candidate chunks from the ingestion-backed retrieval store, and assembles citations from retrieved support
+**And** it does not rely on keyword-only bundle matching for final grounding
+
+**Given** retrieved support is strong
+**When** answer assembly completes
+**Then** the returned answer is grounded in the selected context and cites the canonical approved source ids backing that context
+**And** the chat response preserves the existing typed success envelope
+
+**Given** retrieved support is weak
+**When** the retrieval set is insufficient
+**Then** the system returns the existing weak-support state instead of fabricating certainty
+**And** the fallback remains visible in the current UI
+
+**Given** I inspect the live orchestration path
+**When** I compare the request lifecycle to the approved architecture
+**Then** retrieval, citation assembly, and response packaging remain testable through Django-owned services
+**And** the public frontend still communicates only through the documented API boundary
+
+### Story 5.8: Add Topic Guard, Safety Guard, and Guided Chat Suggestions in Django
+
+As a maintainer,
+I want the live chat stack to apply explicit topic and safety controls with server-driven prompt guidance through Django,
+So that the assistant stays bounded before retrieval and safe before final response delivery.
+
+**Acceptance Criteria:**
+
+**Given** I submit an off-topic prompt
+**When** the chat request is evaluated
+**Then** an explicit topic-guard step determines the prompt is outside approved scope
+**And** the response returns the existing typed refusal contract without entering full grounded-answer generation
+
+**Given** a retrieved answer draft contains unsafe or inappropriate content
+**When** the safety guard runs
+**Then** the user receives a neutral safe fallback or safe reformulation
+**And** no unsafe content is returned as the final answer
+
+**Given** the chat panel needs suggested prompts
+**When** the suggestions endpoint is called
+**Then** Django returns approved, section-aware prompt suggestions from a server contract
+**And** the frontend can render them as guided prompt cards or follow-up suggestions without introducing privileged logic into browser components
+
+**Given** section-aware prompt suggestions are unavailable, empty, or temporarily degraded
+**When** the chat surface asks for suggestions
+**Then** the system returns a safe fallback set or a clear empty-state contract
+**And** the learner does not see a broken prompt-suggestion area
+
+**Given** validation suites run
+**When** backend, runner, and live browser checks execute
+**Then** off-topic handling, safety fallback, and suggestion behavior are covered alongside the existing boundary states
+**And** the flow remains within the chatbot latency and fallback expectations already defined for MVP use
+
+### Story 5.9: Redesign the Source-Aware Chat Experience
+
+As a learner,
+I want the chatbot to feel like a premium course assistant with visible history and guided entry states,
+So that I can ask follow-up questions confidently and use the chat naturally during the learning flow and demo.
+
+**Acceptance Criteria:**
+
+**Given** I open the source-aware chat before asking a question
+**When** the panel appears
+**Then** I see a premium assistant intro state using the approved navy, gold, and teal direction, visible trust cues, and the provided atmospheric background asset
+**And** the framing remains readable, source-aware, and academically bounded
+
+**Given** I ask multiple in-scope questions in one open session
+**When** each response returns
+**Then** a visible message list preserves the order of learner questions and assistant responses inside the chat surface
+**And** earlier responses remain inspectable until the session is closed or refreshed
+
+**Given** a response includes citations or fallback states
+**When** I inspect a message in the thread
+**Then** source chips, weak-support messaging, refusal states, and cooldown states stay attached to the relevant assistant message
+**And** the evidence and fallback UI remain keyboard accessible
+
+**Given** server-driven prompt suggestions are available from the current chat contract
+**When** the redesigned surface renders them
+**Then** it can present them as guided topic cards or follow-up suggestions without adding privileged logic to browser components
+**And** selecting them helps the learner enter the conversation quickly
+
+**Given** the MVP chat contract remains retrieval-backed and section-aware
+**When** the redesigned surface preserves prior exchanges
+**Then** transcript continuity stays session-local to the frontend instead of depending on hidden backend memory or cross-session persistence
+**And** the current typed response envelope remains unchanged
+
+**Given** I refresh the page or open the site in a new tab
+**When** session-local transcript continuity is no longer available
+**Then** the chat starts from a clear fresh-session state or an explicitly restored local session state
+**And** the UI never implies hidden backend memory that the MVP does not provide
+
+**Given** I use the redesigned chat on mobile or with reduced motion enabled
+**When** the premium surface loads
+**Then** it stays readable across the target breakpoints, introduces no horizontal scrolling, and suppresses nonessential motion
+**And** the main learning flow remains usable outside the chat surface
+
+### Story 5.10: Rehearse Demo Readiness
 
 As a maintainer,
 I want to validate the full learning flow and interactive modules in a demo rehearsal,
@@ -1038,22 +1246,22 @@ So that I can present the site without broken core states.
 **Then** no core section shows placeholder content during the scripted demo
 **And** the site feels complete enough for classroom review
 
-### Story 5.5: Bootstrap the Working Environment
+### Story 5.11: Bootstrap the Working Environment
 
 As a maintainer,
-I want a documented clean-clone setup for the project foundation and chatbot workflow,
+I want a documented clean-clone setup for the project foundation and Django-backed chatbot workflow,
 So that I can start from scratch and reach a working local environment quickly.
 
 **Acceptance Criteria:**
 
 **Given** I clone the repository on a clean workstation
 **When** I follow the documented setup steps
-**Then** I can establish the frontend foundation and supporting workflow without manual code changes
+**Then** I can establish the frontend foundation, Django service, and supporting workflow without manual code changes
 **And** the setup completes within the expected time budget
 
 **Given** the project foundation is initialized
 **When** I inspect the app structure
-**Then** the frontend scaffold, shared component structure, and environment conventions are in place
+**Then** the frontend scaffold, backend scaffold, shared component structure, and environment conventions are in place
 **And** the setup matches the approved implementation direction
 
 **Given** the local environment requires secrets or configuration
@@ -1063,13 +1271,51 @@ So that I can start from scratch and reach a working local environment quickly.
 
 **Given** I review the workflow documentation
 **When** I prepare to work on the chatbot pipeline
-**Then** I can understand the local path for content preparation, validation, and review
-**And** I do not need a public maintainer dashboard to proceed
+**Then** I can understand the local path for content preparation, validation, admin stewardship, and review
+**And** I do not need to improvise missing operational setup steps
 
 **Given** I complete the setup once
 **When** I repeat it on the same clean clone
 **Then** the workflow remains reproducible and consistent
 **And** the setup path is practical for future maintainers
+
+### Story 5.12: Harden Operational Guardrails and Release Readiness
+
+As a maintainer,
+I want the Django-backed stack to include explicit security, audit, observability, and release guardrails,
+So that the project remains reviewable, supportable, and safe to ship beyond a one-off local demo.
+
+**Acceptance Criteria:**
+
+**Given** protected chatbot source tables and operational records exist
+**When** I inspect the Supabase data-protection posture
+**Then** Row Level Security and related policies prevent public mutation of approved-source data
+**And** unauthorized write attempts fail in validation checks
+
+**Given** a maintainer or reviewer needs to inspect operational decisions
+**When** I review audit-facing records for ingestion, approval, validation, or protected admin actions
+**Then** the system exposes a documented audit-review path with enough history to understand what happened
+**And** reviewer access does not require direct database spelunking
+
+**Given** the repository and deployment environments are prepared for release
+**When** I validate environment handling
+**Then** browser-safe values, server-only secrets, and local-development secrets remain separated
+**And** secret-scan checks find no high-confidence service credentials in source-controlled code
+
+**Given** the stack is running in local or hosted form
+**When** a frontend delivery issue, Django failure, ingestion problem, or chat incident occurs
+**Then** Vercel, Django, and Supabase logs provide enough observability to diagnose the issue
+**And** the operational workflow documents where maintainers should look first
+
+**Given** I prepare a reviewed release
+**When** frontend deployments, Django service deployments, and Supabase migrations move toward demo or production use
+**Then** the release follows the documented reviewed workflow instead of ad hoc dashboard edits
+**And** the corresponding verification commands and smoke checks are part of the release path
+
+**Given** the protection layer is enabled for public chat and protected routes
+**When** Redis-backed rate limits, abuse counters, cooldown flags, or local fallback adapters are exercised
+**Then** the system enforces the intended protection behavior without becoming the source of truth for documents or citations
+**And** local workflows remain runnable when the protection layer is unavailable
 
 ## Epic 6: Adaptive Presentation and Future Expansion
 
@@ -1086,7 +1332,7 @@ So that I can study the topic at the depth that fits my current needs.
 **Given** explanation depth features are enabled
 **When** I switch between simplified and expanded content
 **Then** the affected sections update to reflect the chosen depth
-**And** the meaning of the content stays consistent across modes
+**And** the meaning and educational accuracy stay consistent across modes
 
 **Given** I review core sections in different depth modes
 **When** the mode changes
@@ -1121,7 +1367,7 @@ So that the site can become richer over time while staying reliable.
 **Then** the core experience still works on its own
 **And** missing enhancements do not create broken states
 
-**Given** richer chatbot guidance features are introduced
+**Given** deeper chatbot guidance or continuity features are introduced beyond the MVP premium history surface
 **When** I ask questions
 **Then** the assistant can present more helpful guidance or prompts without losing its grounded role
 **And** the core trust rules still apply
@@ -1143,6 +1389,11 @@ So that applied global governance exploration can be added without rebuilding th
 **When** I view the scenario shell
 **Then** it shows the structure for a guided applied-learning scenario
 **And** it remains clearly separate from the core MVP learning flow
+
+**Given** the simulator shell is not yet ready for public use
+**When** the current MVP navigation renders
+**Then** no unfinished simulator entry is presented as a core path
+**And** future-only navigation remains gated behind an explicit feature flag or maintainer-controlled reveal
 
 **Given** a scenario is selected
 **When** the shell renders

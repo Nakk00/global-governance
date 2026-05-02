@@ -12,6 +12,9 @@ node_modules
 dist
 dist-ssr
 *.local
+backend/.venv/
+__pycache__/
+*.pyc
 
 # Local environment files
 .env

@@ -29,6 +29,8 @@ editHistory:
     changes: Aligned motion guidance with the PRD so Motion remains the default interaction model, Lenis handles scroll feel, and GSAP stays limited to rare showcase scenes with reduced-motion priority.
   - date: 2026-04-23
     changes: Removed duplicate core-experience narrative, standardized Global Governance naming, added PRD traceability, and replaced the design-direction summary with an auditable comparison matrix.
+  - date: 2026-05-02
+    changes: Clarified that the public learner experience remains login-free while any private maintainer or source-stewardship tooling stays outside the public UX flow.
 ---
 
 # UX Design Specification: Global Governance
@@ -302,11 +304,11 @@ Module-specific accents should then be layered selectively. The West Philippine 
 
 ### MVP
 
-The MVP should ship with a simplified hero narrative frame, guided scrollytelling, the UN Command Center, the West Philippine Sea Interactive Dossier, source-aware chatbot support, recap moments, references, and responsive accessibility. The opening hero should establish identity and momentum without requiring the full Living Globe implementation or any live Student / Expert mode switch.
+The MVP should ship with a simplified hero narrative frame, guided scrollytelling, the UN Command Center, the West Philippine Sea Interactive Dossier, source-aware chatbot support as a flagship premium clarification surface, recap moments, references, and responsive accessibility. The opening hero should establish identity and momentum without requiring the full Living Globe implementation or any live Student / Expert mode switch. The public learner experience should remain login-free, and any maintainer-only stewardship tooling should stay outside this primary UX path.
 
 ### Post-MVP
 
-The post-MVP layer should introduce the full Living Globe Hero, Student / Expert mode, richer chatbot source interaction, and additional presentation polish. These are expansion features, not launch blockers for the initial experience.
+The post-MVP layer should introduce the full Living Globe Hero, Student / Expert mode, deeper chatbot source interaction, answer-depth variation, optional continuity beyond the MVP session-local history model, and additional presentation polish. These are expansion features, not launch blockers for the initial experience.
 
 ### Naming Conventions
 
@@ -501,13 +503,14 @@ The gap is not in basic UI primitives. The gap is in the experience-defining com
 
 ### Source-Aware Chat Panel
 
-**Purpose:** Give users trusted clarification without breaking the educational framing.  
-**Usage:** Persistent support tool available throughout the experience.  
-**Anatomy:** Entry button or dock, chat panel, prompt suggestions, message list, answer body, source chips or source drawer, fallback messaging.  
-**States:** Closed, open, idle, loading, answered, weak-support fallback, off-topic refusal, rate-limited cooldown, and error recovery.  
-**Variants:** Floating panel on desktop and bottom-sheet style presentation on mobile.  
-**Accessibility:** Focus management for open/close states, labelled input, accessible source toggles, and clear announcement of loading, fallback, and cooldown states.  
-**Interaction Behavior:** Users ask a question, receive a bounded answer, inspect sources if needed, then return to the main narrative without losing place. If public-chat protection rules trigger, the panel should explain the cooldown calmly and offer an obvious retry path.
+**Purpose:** Give users trusted clarification through a premium course-assistant surface without breaking the educational framing.  
+**Usage:** Persistent support tool available throughout the experience, including as a presentation-safe re-entry point when users need clarification.  
+**Anatomy:** Entry dock or button, premium intro state, trust badges, guided topic cards from server-driven suggestions, message list, grounded answer body, source chips or source drawer, composer, and fallback messaging.  
+**States:** Closed, open-intro, threaded conversation, loading, answered, weak-support fallback, off-topic refusal, rate-limited cooldown, and error recovery.  
+**Variants:** Floating panel on desktop and bottom-sheet style presentation on mobile, while preserving the same transcript model.  
+**Visual Direction:** Use the diplomatic navy, muted gold, and teal palette with atmospheric world-map or institutional texture assets when available, while keeping typography and contrast readable.  
+**Accessibility:** Focus management for open/close states, labelled input, accessible source toggles, visible thread ordering, and clear announcement of loading, fallback, and cooldown states.  
+**Interaction Behavior:** Users can enter through guided topic cards, ask multiple follow-up questions in one session, keep prior responses visible in a session-local thread, inspect sources inline, and return to the main narrative without losing place. If public-chat protection rules trigger, the panel should explain the cooldown calmly and offer an obvious retry path. Future Student / Expert answer-depth behavior should layer onto this surface only after the core grounded retrieval path is complete, and it must preserve source visibility, typed fallback states, and the premium assistant framing. Any private maintainer dashboard or source-stewardship tooling should remain outside this learner-facing interaction pattern.
 
 ### Insight Recap Card
 

@@ -1,12 +1,12 @@
 # generated: 2026-04-24T00:50:58+08:00
-# last_updated: 2026-05-01T21:12:00+08:00
+# last_updated: 2026-05-02T10:30:00+08:00
 # project: Global-Governance
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts
 
 generated: 2026-04-24T00:50:58+08:00
-last_updated: 2026-05-01T21:12:00+08:00
+last_updated: 2026-05-02T21:07:59+08:00
 project: Global-Governance
 project_key: NOKEY
 tracking_system: file-system
@@ -52,8 +52,14 @@ development_status:
   5-1-manage-approved-source-bundles: done
   5-2-prepare-sources-for-ingestion: done
   5-3-validate-chatbot-boundaries: done
-  5-4-rehearse-demo-readiness: backlog
-  5-5-bootstrap-the-working-environment: backlog
+  5-4-establish-the-django-backend-foundation: done
+  5-5-add-supabase-auth-admin-authentication-and-django-authorization: backlog
+  5-6-build-the-private-source-stewardship-dashboard: backlog
+  5-7-orchestrate-retrieval-backed-grounded-answers-in-django: backlog
+  5-8-add-topic-guard-safety-guard-and-guided-chat-suggestions-in-django: backlog
+  5-9-redesign-the-source-aware-chat-experience: backlog
+  5-10-rehearse-demo-readiness: backlog
+  5-11-bootstrap-the-working-environment: backlog
   epic-5-retrospective: optional
 
   # Epic 6: Adaptive Presentation and Future Expansion

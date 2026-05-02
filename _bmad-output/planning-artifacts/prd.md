@@ -14,8 +14,11 @@ stepsCompleted:
   - step-10-nonfunctional
   - step-11-polish
   - step-12-complete
+  - step-e-01-discovery
+  - step-e-02-review
+  - step-e-03-edit
 inputDocuments:
-  - archive/docs/planning-artifacts/global_governance_website_prd.md
+  - _bmad-output/planning-artifacts/product-brief-Global-Governance.md
   - archive/docs/planning-artifacts/global_governance_version_c_feature_pitch.md
   - archive/docs/planning-artifacts/global_governance_version_c_build_roadmap.md
   - archive/docs/planning-artifacts/global_governance_chatbot_architecture_spec.md
@@ -24,13 +27,15 @@ inputDocuments:
 workflowType: 'prd'
 workflow: 'edit'
 date: 2026-04-22
-lastEdited: 2026-04-23
+lastEdited: 2026-05-02
 editHistory:
   - date: 2026-04-23
     changes: Motion remains the primary animation system; Lenis handles scroll feel; GSAP is limited to selective showcase scenes.
   - date: 2026-04-23
     changes: Validation fixes applied for measurability, scope clarity, edtech compliance detail, and tool-agnostic non-functional requirements.
-briefCount: 0
+  - date: 2026-05-02
+    changes: Rebaselined the PRD for the approved Django chatbot-backend pivot, private maintainer authentication boundary, and source-stewardship admin operations.
+briefCount: 1
 researchCount: 0
 brainstormingCount: 0
 projectDocsCount: 0
@@ -51,6 +56,8 @@ technicalImplementationDifficulty: high
 ## Executive Summary
 
 Global Governance Website is a greenfield educational web application for GNED-07: The Contemporary World. It teaches Global Governance through a premium single-page experience that combines academically grounded content, guided scrollytelling, interactive institutional exploration, and a grounded AI assistant. The primary users are students who need to understand and present the topic clearly, classmates who need a more accessible way to learn it, and evaluators who need to see academic rigor alongside strong execution.
+
+The public learning experience remains login-free. Behind that public surface, the project may also include private maintainer operations for approved-source stewardship, with Django serving as the backend orchestration layer for chatbot, ingestion, retrieval, validation, and admin-protected workflows.
 
 The product solves a comprehension gap. Global Governance is often taught as an abstract system of institutions, principles, and legal concepts that students can describe but struggle to connect to real-world power, enforcement limits, and consequences. This product addresses that gap by making the system visible, interactive, and concrete through structured explanation, exploration of the United Nations, and a West Philippine Sea case study that shows how global governance works and where it breaks down. The intended result is a learning experience that improves understanding, presentation quality, and retention more effectively than a traditional report, slide deck, or static website.
 
@@ -105,13 +112,15 @@ Technical success is measured against the performance, reliability, accessibilit
 
 ### MVP - Minimum Viable Product
 
-The MVP should include the complete academic learning flow, a responsive single-page structure, a polished core visual system, scrollytelling, the UN Command Center, the West Philippine Sea Interactive Dossier, and a grounded chatbot integrated into the site. It should also include a strong hero section, even if the most advanced version of the Living Globe Hero is simplified in the initial release.
+The MVP should include the complete academic learning flow, a responsive single-page structure, a polished core visual system, scrollytelling, the UN Command Center, the West Philippine Sea Interactive Dossier, and a grounded chatbot integrated into the site as a premium source-aware course assistant with guided prompt entry and session-local message history. It should also include a strong hero section, even if the most advanced version of the Living Globe Hero is simplified in the initial release.
+
+The public site should remain a React + Vite single-page educational experience with no learner login requirement. The chatbot backend should be implemented through Django-based orchestration over approved sources, and the maintainer side may include private authenticated source-stewardship operations when needed to support the chatbot trust model.
 
 The MVP must prove the central concept: Global Governance can be taught more effectively through an interactive, academically grounded, premium web experience than through static presentation formats.
 
 ### Growth Features (Post-MVP)
 
-Post-MVP growth should strengthen the premium experience rather than redefine the product. This includes the full Living Globe Hero implementation, Student / Expert Mode, richer motion polish, more refined chatbot UX, and additional presentation details that deepen clarity and memorability without changing the core educational flow.
+Post-MVP growth should strengthen the premium experience rather than redefine the product. This includes the full Living Globe Hero implementation, Student / Expert Mode, richer motion polish, deeper chatbot source interaction, future chatbot answer-depth alignment for Student / Expert mode, optional continuity beyond the MVP session-local history model, and additional presentation details that deepen clarity and memorability without changing the core educational flow.
 
 Any future motion polish should keep Motion as the default animation engine and keep GSAP limited to isolated showcase sequences only.
 
@@ -122,7 +131,8 @@ These features should make the product more distinctive and adaptive while build
 The current PRD does not include:
 - a general-purpose open-domain assistant
 - a full CMS or multi-user publishing platform
-- LMS integration, classroom analytics, or account systems unless project scope changes
+- learner account systems, LMS integration, or classroom analytics
+- a student-facing authenticated dashboard or portal
 - multiple heavy 3D scenes or showcase animation sequences beyond the selectively approved moments
 - the Global Governance Simulator as an MVP commitment
 
@@ -164,9 +174,9 @@ This journey reveals requirements for academic clarity, visible source disciplin
 
 A project maintainer prepares the site for demo, review, or future iteration. Their goal is not general learning but confidence that the product is stable, accurate, and controllable. They need to manage approved source material, verify chatbot behavior, check that content and interactions are working correctly, and ensure the system is ready for a live presentation environment.
 
-Their work begins before the demo: reviewing content, confirming that approved materials are available to the chatbot pipeline, and validating that the local development environment for the chatbot pipeline is functioning as expected. They test the chatbot with likely questions, confirm that off-topic or unsupported prompts are handled safely, verify that source-aware behavior is working, and make sure the must-have interactive sections are loading and behaving reliably. They also check for broken content flow, missing assets, navigation issues, and performance problems that could damage confidence during a live presentation.
+Their work begins before the demo: reviewing content, confirming that approved materials are available to the chatbot pipeline, and validating that the local development environment for the chatbot pipeline is functioning as expected. They may work through both reproducible local workflows and a private authenticated admin surface used for approved-source stewardship. They test the chatbot with likely questions, confirm that off-topic or unsupported prompts are handled safely, verify that source-aware behavior is working, review ingestion and validation status, and make sure the must-have interactive sections are loading and behaving reliably. They also check for broken content flow, missing assets, navigation issues, and performance problems that could damage confidence during a live presentation.
 
-The journey succeeds when the maintainer can trust the site as a dependable presentation asset rather than a fragile prototype, with clear confidence that both the educational flow and the chatbot experience will hold up under live use.
+The journey succeeds when the maintainer can trust the site as a dependable presentation asset rather than a fragile prototype, with clear confidence that both the educational flow and the chatbot experience will hold up under live use, and that protected source changes can be made safely without exposing admin operations to normal learners.
 
 This journey reveals requirements for content maintainability, approved-source management, reliable local development workflows, chatbot testability, graceful fallback behavior, source validation, and presentation-readiness checks across the whole experience.
 
@@ -202,7 +212,7 @@ Content review and demo rehearsal should confirm that each anchor appears in the
 
 ### Technical Constraints
 
-The product should favor privacy-minimizing interaction patterns. If no account system is required, the MVP should avoid introducing one. If chat logs or prompt histories are retained during development, they should be limited, intentional, and easy to inspect or clear.
+The product should favor privacy-minimizing interaction patterns. Learners should not need accounts in the MVP. If private maintainer authentication is introduced for source stewardship or admin operations, it should remain separate from the learner experience, limited in scope, and justified by the chatbot trust model. If chat logs or prompt histories are retained during development, they should be limited, intentional, and easy to inspect or clear.
 
 The chatbot introduces additional edtech-specific constraints. It must remain topic-bounded, readable, and appropriate for student learning. It should not behave like a general-purpose assistant, should not invent academic support, and should provide source-aware responses that reinforce trust and instructional value.
 
@@ -210,13 +220,13 @@ Accessibility and readability are also technical constraints on the frontend imp
 
 ### Integration Requirements
 
-The MVP should support an approved-source content pipeline that allows project materials to be prepared, ingested, and retrieved consistently for chatbot use. Approved-source storage, local development, and retrieval workflows should support this academic-source management without requiring production-scale system complexity.
+The MVP should support an approved-source content pipeline that allows project materials to be prepared, ingested, and retrieved consistently for chatbot use. Django should serve as the backend orchestration layer for chatbot, ingestion, retrieval, validation, and admin-protected operations, while Supabase should remain the platform for authentication, storage, Postgres data, and pgvector-backed retrieval data. Approved-source storage, local development, and retrieval workflows should support this academic-source management without requiring production-scale system complexity.
 
-If future integrations are considered, they should remain secondary to the core educational experience. LMS integration, classroom analytics, or user-account features should not be treated as MVP requirements unless the project scope changes significantly.
+If future integrations are considered, they should remain secondary to the core educational experience. LMS integration, classroom analytics, or learner-account features should not be treated as MVP requirements unless the project scope changes significantly.
 
 ### Risk Mitigations
 
-The biggest domain-specific risks are academic inaccuracy, inaccessible presentation, and loss of trust in the chatbot. These should be mitigated by approved-source discipline, visible references, strong content review, bounded chatbot behavior, and accessibility-conscious design decisions.
+The biggest domain-specific risks are academic inaccuracy, inaccessible presentation, loss of trust in the chatbot, and backend scope creep once private admin operations are introduced. These should be mitigated by approved-source discipline, visible references, strong content review, bounded chatbot behavior, accessibility-conscious design decisions, and keeping the admin surface tightly limited to source stewardship rather than general content management.
 
 Another risk is building an experience that looks premium but teaches poorly. This should be mitigated by prioritizing clarity, structure, comprehension reinforcement, and real-world grounding over spectacle. The project should also avoid unnecessary personal-data collection so the educational experience remains low-friction and lower-risk.
 
@@ -260,7 +270,7 @@ Because the project is presentation-driven and interaction-heavy, the web applic
 
 ### Technical Architecture Considerations
 
-The application should be implemented as an SPA with clear section-based navigation and strong client-side state handling for interactive modules such as the UN Command Center, Student / Expert mode, and the grounded chatbot interface. The architecture should support progressive enhancement of premium interaction without making the entire experience dependent on heavy rendering at all times.
+The application should be implemented as an SPA with clear section-based navigation and strong client-side state handling for interactive modules such as the UN Command Center, Student / Expert mode, and the grounded chatbot interface. The public site should remain frontend-first and login-free for learners, while Django should own the backend orchestration for chatbot, ingestion, retrieval, validation, and any private maintainer-admin flows. The architecture should support progressive enhancement of premium interaction without making the entire experience dependent on heavy rendering at all times.
 
 ### Animation Architecture
 
@@ -314,7 +324,7 @@ The MVP should prove one clear claim: a premium, academically grounded web exper
 
 The scoping philosophy should be lean but impressive. The MVP must deliver the strongest educational value and the clearest showcase moments while deferring features that increase complexity without being necessary to prove the core concept. The MVP should optimize for proof of educational value, not maximum feature breadth.
 
-**Resource Requirements:** A practical MVP requires frontend implementation strength, content/research discipline, and chatbot pipeline support. In team terms, the ideal delivery model is one frontend-focused builder, one content/research owner, and one technical contributor who can support the grounded chatbot and local workflow. If built by a smaller team or a single primary builder, scope discipline becomes critical and the premium layer should remain selectively implemented.
+**Resource Requirements:** A practical MVP requires frontend implementation strength, content/research discipline, and chatbot pipeline support. With the approved backend pivot, the project also requires Django-oriented backend implementation capacity for authentication verification, source stewardship, ingestion, retrieval orchestration, and protected admin operations. In team terms, the ideal delivery model is one frontend-focused builder, one content/research owner, and one technical contributor who can support the grounded chatbot, Django service layer, and local workflow. If built by a smaller team or a single primary builder, scope discipline becomes critical and the premium layer should remain selectively implemented.
 
 ### MVP Feature Set (Phase 1)
 
@@ -330,7 +340,11 @@ The scoping philosophy should be lean but impressive. The MVP must deliver the s
 - strong hero section that establishes premium quality, even if the most advanced globe implementation is simplified initially
 - interactive UN Command Center
 - West Philippine Sea Interactive Dossier
-- grounded chatbot that answers only from approved sources
+- grounded chatbot that answers only from approved sources through server-side retrieval over ingested approved materials, with explicit topic-bounded and safety-aware response handling
+- premium source-aware chat surface with guided prompt cards, visible trust cues, and session-local message history that preserves typed answer and fallback states across one visit
+- Django as the backend orchestration layer for chatbot, ingestion, retrieval, validation, and protected maintainer operations
+- Supabase Auth for private maintainer authentication only
+- a focused private admin surface for approved-source stewardship, ingestion visibility, and validation support
 - Public chatbot protection for rate limiting, abuse counters, and short-lived cooldown state
 - clear references and source visibility
 - responsive layout across desktop and mobile
@@ -338,14 +352,24 @@ The scoping philosophy should be lean but impressive. The MVP must deliver the s
 - stable performance on ordinary student hardware
 - demo-ready reliability for core navigation, content flow, and chatbot interaction
 
-The MVP should be considered successful only if it already feels like a complete educational product rather than a partial prototype with disconnected showcase pieces. The chatbot MVP should remain narrow and trustworthy: limited approved-source coverage, topic-bounded behavior, readable answers, fast-enough perceived responsiveness, safe fallback handling, and public-chat protection suitable for anonymous classroom or demo use. The MVP includes a shared protection layer for anonymous usage with rate limiting, abuse counters, and short-lived cooldowns. Broad grounded-answer caching remains out of scope for the MVP because citation integrity matters more than cache hit rate. The hero should establish quality and identity, but advanced visual sophistication should never delay or weaken the core learning modules.
+The approved default five-model baseline for implementation planning is:
+
+- generation: `nvidia/llama-3_3-nemotron-super-49b-v1_5`
+- embeddings: `nvidia/llama-nemotron-embed-1b-v2`
+- rerank: `nvidia/llama-nemotron-rerank-1b-v2`
+- topic guard: `nvidia/llama-3_1-nemoguard-8b-topic-control`
+- safety guard: `nvidia/llama-3_1-nemotron-safety-guard-8b-v3`
+
+These model selections are the planning baseline and may be revised only if testing exposes material availability, latency, pricing, licensing, or deployment constraints.
+
+The MVP should be considered successful only if it already feels like a complete educational product rather than a partial prototype with disconnected showcase pieces. The chatbot MVP should remain narrow and trustworthy: limited approved-source coverage, topic-bounded behavior, readable answers, fast-enough perceived responsiveness, safe fallback handling, a premium course-assistant presentation, session-local transcript continuity, and public-chat protection suitable for anonymous classroom or demo use. The MVP includes a shared protection layer for anonymous usage with rate limiting, abuse counters, and short-lived cooldowns. Broad grounded-answer caching remains out of scope for the MVP because citation integrity matters more than cache hit rate, and cross-session chat memory remains out of scope until the contract is deliberately expanded. The hero should establish quality and identity, but advanced visual sophistication should never delay or weaken the core learning modules.
 
 ### Post-MVP Features
 
 **Phase 2 (Post-MVP):**
 - full Living Globe Hero implementation
 - Student / Expert Mode
-- richer chatbot user experience, including stronger prompt guidance and more polished source interaction
+- deeper chatbot source interaction, answer-depth variation, and optional cross-session continuity beyond the MVP session-local history model
 - expanded motion polish and premium visual refinement
 - stronger presentation transitions and secondary interaction enhancements
 
@@ -392,7 +416,7 @@ The main resource risk is trying to build the full Version C vision at once. Thi
 - FR14: Learners can compare institutional roles and limitations within the United Nations without relying on long-form static text alone.
 - FR15: Learners can explore the West Philippine Sea case through an interactive dossier or timeline-based experience.
 - FR16: Learners can examine the relationship between legal rulings, geopolitical realities, and weak enforcement within the case study.
-- FR17: Learners can use interactive elements that reinforce understanding of the topic rather than merely decorate the experience.
+- FR17: Learners can use interactive elements that reveal or compare institutional roles, case-study facts, or source-backed explanations without interrupting the surrounding learning flow.
 
 ### Comprehension Support & Adaptive Depth
 
@@ -400,7 +424,7 @@ The main resource risk is trying to build the full Version C vision at once. Thi
 - FR19: Learners can access section recaps, visible hierarchy, and next-step cues that help them re-enter the main learning flow after reviewing a section or module.
 - FR20: Learners can access simplified and expanded explanation depth through adaptive depth features when those features are enabled.
 - FR21: Learners can reinforce understanding through synthesis, recap, or clarification moments within the experience.
-- FR22: Learners can engage with a hero or opening experience that establishes context, identity, and tone for the topic.
+- FR22: Learners can engage with a hero or opening experience that introduces the central question of global governance, presents a clear call to continue into the learning flow, and preserves readable text and usable navigation on the reference demo device.
 
 ### Grounded Chatbot Assistance
 
@@ -422,21 +446,21 @@ The main resource risk is trying to build the full Version C vision at once. Thi
 
 ### Maintainer & Content Stewardship
 
-- FR35: Maintainers can define and manage the set of approved materials used to support the chatbot experience.
-- FR36: Maintainers can prepare project content and source materials for use in the chatbot support flow.
-- FR37: Maintainers can validate that the chatbot behaves within topic boundaries and that public-chat protection rules behave correctly before demo or review use.
-- FR38: Maintainers can verify that major interactive sections, content flows, and educational modules are functioning before presentation.
-- FR39: Maintainers can validate demo readiness across the learning flow, interactive modules, and chatbot reliability before live use.
-- FR40: Maintainers can update or refine educational content without redesigning the full product structure.
-- FR41: Maintainers can support local development and validation workflows for the chatbot-related experience.
+- FR35: Authorized maintainers can sign in to private operational flows used for approved-source stewardship without requiring learner authentication.
+- FR36: Maintainers can define, inspect, and manage the set of approved materials used to support the chatbot experience.
+- FR37: Maintainers can prepare, upload, or update approved source materials for use in the chatbot support flow through protected workflows.
+- FR38: Maintainers can trigger or review ingestion, retrieval-readiness, validation status, and source-support checks for approved materials.
+- FR39: Maintainers can validate that the chatbot behaves within topic boundaries and that public-chat protection rules behave correctly before demo or review use.
+- FR40: Maintainers can verify that major interactive sections, content flows, and educational modules are functioning before presentation and can validate demo readiness across the learning flow, interactive modules, and chatbot reliability before live use.
+- FR41: Maintainers can support local development, authenticated admin operations, and validation workflows for the chatbot-related experience without redesigning the full product structure.
 
 ### Presentation Quality & Future Expansion
 
 - FR42: The product can support a classroom-demo walkthrough that presents the core learning flow, flagship modules, references, and chatbot interaction with no placeholder content in core sections and no broken UI states during the scripted demo.
-- FR43: The product can add enhanced presentation features beyond the MVP while preserving successful completion of the core learning flow in scripted walkthrough testing.
+- FR43: The product can add enhanced presentation features beyond the MVP while preserving successful completion of the core learning flow and continued compliance with NFR13, NFR14, and NFR15 in scripted walkthrough testing.
 - FR44: The product can support a Student / Expert mode that changes explanation depth when that feature is introduced.
 - FR45: The product can support richer chatbot guidance and educational assistance in post-MVP phases.
-- FR46: The product can support a future scenario-based simulator that allows learners to explore global governance through applied interactive decision or exploration flows.
+- FR46: The product can support a future scenario-based simulator that lets learners step through at least one governance scenario, inspect the participating actors and institutions, and review a summary of governance constraints, tradeoffs, and outcomes.
 
 ## Non-Functional Requirements
 
@@ -452,12 +476,12 @@ The main resource risk is trying to build the full Version C vision at once. Thi
 
 The MVP public chatbot is intentionally treated as a public endpoint rather than a private classroom-only tool. It therefore includes a shared protection layer for anonymous usage, with rate limiting, abuse counters, and short-lived cooldown state while keeping grounded answer generation and citation integrity as the higher priority over broad answer caching.
 
-- NFR6: The product shall not require user account creation, shall not store names, emails, or student IDs in persistent logs, and shall retain any development chat logs only in anonymized or session-scoped form that maintainers can delete.
-- NFR7: Approved source materials, chatbot-related content assets, and supporting data stores shall be writable only by designated maintainers, and unauthorized write attempts shall be denied in access-control tests.
+- NFR6: The product shall not require learner account creation, shall not store names, emails, or student IDs in learner-facing persistent logs, and shall retain any development chat logs only in anonymized or session-scoped form that maintainers can delete. If private maintainer authentication is used, it shall be limited to approved source stewardship and protected operations only.
+- NFR7: Approved source materials, chatbot-related content assets, and supporting data stores shall be writable only by authorized maintainers through authenticated admin operations or protected maintainer workflows, and unauthorized write attempts shall be denied in access-control tests.
 - NFR8: All data exchanged between the client, backend, and data services shall use encrypted transport, with HTTPS and TLS 1.2 or higher and no plain-HTTP requests in security checks.
 - NFR9: In a validation set of off-topic prompts, the chatbot shall refuse or redirect 100% of requests; in grounded-answer tests, factual claims shall map to approved source material before being presented as authoritative.
 - NFR10: The public chatbot shall allow no more than 10 submissions per 60-second window per anonymous session and shall enforce a 60-second cooldown after 3 consecutive abuse-triggering prompts, without requiring learner accounts.
-- NFR11: Environment variables and service credentials shall be kept outside source-controlled application code, with secret-scan validation returning zero high-confidence secrets in the repository.
+- NFR11: Environment variables and service credentials shall be kept outside source-controlled application code, with secret-scan validation returning zero high-confidence secrets in the repository. Service-role credentials and private tokens shall remain server-side in protected backend environments only.
 - NFR12: Approved source bundles shall be versioned, and any change to approved materials shall be detectable in a pre-release content diff before new answers are generated from them.
 
 ### Reliability
@@ -477,7 +501,7 @@ The MVP public chatbot is intentionally treated as a public endpoint rather than
 
 ### Integration
 
-- NFR22: A maintainer shall be able to set up the chatbot-related local workflow from a clean clone by following the documented steps successfully on the reference workstation within 30 minutes, including source bundle preparation and protection configuration, with no manual code changes required.
+- NFR22: A maintainer shall be able to set up the chatbot-related local workflow from a clean clone by following the documented setup steps successfully on the reference workstation within 30 minutes, including application setup, backend-service setup, data-platform integration, source bundle preparation, and protection configuration, with no manual code changes required.
 - NFR23: An approved source document processed twice with unchanged input shall produce the same retrievable chunk set and metadata, and ingestion shall succeed for all supported file types in the validation set.
 - NFR24: In a fixed validation question set, 100% of factual chatbot answers shall cite approved materials, and every cited source shall exist in the retrieval set used for that response.
 - NFR25: With any nonessential integration disabled, the user shall still be able to access all core sections and complete the main learning flow in a smoke test without page restart or manual recovery.
