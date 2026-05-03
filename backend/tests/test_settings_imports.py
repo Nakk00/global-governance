@@ -11,6 +11,7 @@ class SettingsImportTests(SimpleTestCase):
             "validation.apps.ValidationConfig",
             "audit.apps.AuditConfig",
             "sources.apps.SourcesConfig",
+            "accounts.apps.AccountsConfig",
         }
 
         self.assertTrue(expected_apps.issubset(set(settings.INSTALLED_APPS)))
@@ -23,3 +24,8 @@ class SettingsImportTests(SimpleTestCase):
             settings.PUBLIC_CHAT_CUTOVER_STATUS,
             "deferred-supabase-edge-function-default",
         )
+
+    def test_supabase_auth_settings_are_available(self):
+        self.assertEqual(settings.SUPABASE_JWT_AUDIENCE, "authenticated")
+        self.assertEqual(settings.SUPABASE_JWT_ROLE, "authenticated")
+        self.assertGreater(settings.SUPABASE_JWKS_CACHE_SECONDS, 0)

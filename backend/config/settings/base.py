@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "validation.apps.ValidationConfig",
     "audit.apps.AuditConfig",
     "sources.apps.SourcesConfig",
+    "accounts.apps.AccountsConfig",
 ]
 
 MIDDLEWARE = [
@@ -60,3 +61,11 @@ SECURE_PROXY_SSL_HEADER = None
 USE_X_FORWARDED_HOST = False
 PUBLIC_CHAT_CUTOVER_STATUS = "deferred-supabase-edge-function-default"
 MAX_EXTERNAL_JSON_BODY_BYTES = 16 * 1024
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_JWT_ISSUER = os.environ.get("SUPABASE_JWT_ISSUER", "")
+SUPABASE_JWT_AUDIENCE = os.environ.get("SUPABASE_JWT_AUDIENCE", "authenticated")
+SUPABASE_JWT_ROLE = os.environ.get("SUPABASE_JWT_ROLE", "authenticated")
+SUPABASE_JWKS_URL = os.environ.get("SUPABASE_JWKS_URL", "")
+SUPABASE_JWKS_CACHE_SECONDS = int(os.environ.get("SUPABASE_JWKS_CACHE_SECONDS", "300"))
+SUPABASE_REST_TIMEOUT_SECONDS = float(os.environ.get("SUPABASE_REST_TIMEOUT_SECONDS", "5"))

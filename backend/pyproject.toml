@@ -5,6 +5,8 @@ description = "Django orchestration boundary for Global Governance chatbot and a
 requires-python = ">=3.12,<3.15"
 dependencies = [
   "Django==5.2.13",
+  "cryptography==46.0.3",
+  "PyJWT==2.10.1",
   "pytest==9.0.3",
   "pytest-django==4.12.0",
 ]

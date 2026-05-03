@@ -11,6 +11,7 @@ from common.validation import (
     validate_json_object,
     validate_request_size,
 )
+from accounts.views import admin_me
 
 
 def method_not_allowed_response(*, allowed: str) -> JsonResponse:
@@ -54,22 +55,7 @@ def reserved_chat(request: HttpRequest) -> JsonResponse:
 
 
 def reserved_admin(request: HttpRequest) -> JsonResponse:
-    if request.method != "GET":
-        return method_not_allowed_response(allowed="GET")
-
-    authorization = request.headers.get("Authorization", "").strip()
-    if not authorization:
-        return error_response(
-            code="admin_auth_required",
-            message="Admin access requires an authenticated maintainer request.",
-            status=401,
-        )
-
-    return error_response(
-        code="admin_cutover_deferred",
-        message="Django admin orchestration is reserved for a later authorization story.",
-        status=501,
-    )
+    return admin_me(request)
 
 
 def not_found(request: HttpRequest, exception: Exception | None = None) -> JsonResponse:

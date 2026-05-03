@@ -24,6 +24,9 @@ REQUIRED_SERVER_ENV = (
     EnvRequirement("DJANGO_SECRET_KEY", "Django signing secret for this backend."),
     EnvRequirement("SUPABASE_URL", "Server-side Supabase API URL."),
     EnvRequirement("SUPABASE_SERVICE_ROLE_KEY", "Server-only Supabase service role key."),
+    EnvRequirement("SUPABASE_JWT_ISSUER", "Expected Supabase Auth JWT issuer."),
+    EnvRequirement("SUPABASE_JWT_AUDIENCE", "Expected Supabase Auth JWT audience."),
+    EnvRequirement("SUPABASE_JWKS_URL", "Supabase Auth JWKS endpoint for token verification."),
 )
 
 

@@ -36,7 +36,7 @@ class RouteGuardTests(SimpleTestCase):
         response = self.client.get("/_internal/admin/")
 
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json()["error"]["code"], "admin_auth_required")
+        self.assertEqual(response.json()["error"]["code"], "admin_auth_missing")
 
     def test_reserved_chat_wrong_method_uses_safe_envelope(self):
         response = self.client.get("/_internal/chat/")
