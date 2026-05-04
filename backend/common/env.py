@@ -43,19 +43,24 @@ def load_env_file(path: Path) -> None:
 
 
 def validate_required_env() -> None:
-    missing = [requirement.key for requirement in REQUIRED_SERVER_ENV if not os.environ.get(requirement.key)]
+    missing = [
+        requirement.key
+        for requirement in REQUIRED_SERVER_ENV
+        if not os.environ.get(requirement.key)
+    ]
     if not missing:
         return
 
     formatted = ", ".join(missing)
     raise RuntimeCheckError(
         "Missing required Django backend environment values: "
-        f"{formatted}. Create backend/.env from backend/.env.example and keep these values server-only."
+        f"{formatted}. Create backend/.env from backend/.env.example "
+        "and keep these values server-only."
     )
 
 
 def validate_python_runtime() -> None:
-    if sys.version_info < (3, 12):
+    if (sys.version_info.major, sys.version_info.minor) < (3, 12):
         raise RuntimeCheckError(
             "The Django backend requires Python 3.12 or newer. "
             "Install Python 3.12 and create the backend virtual environment again."

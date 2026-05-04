@@ -58,12 +58,17 @@ Fill `backend/.env` with server-only values from the local Supabase stack. Do no
 Backend checks and local service commands:
 
 ```bash
+pnpm backend:lint
+pnpm backend:format
+pnpm backend:typecheck
+pnpm backend:security
 pnpm backend:check
 pnpm backend:test
 pnpm backend:dev
 ```
 
 `pnpm backend:test` uses pytest with `pytest-django` and reads its Django settings from `backend/pyproject.toml`.
+`pnpm backend:lint` and `pnpm backend:format` run Ruff, `pnpm backend:typecheck` runs MyPy with Django stubs, and `pnpm backend:security` runs `pip-audit` against `backend/requirements.txt`.
 
 To start the local Supabase stack, Supabase chat Edge Function, Django service, and Vite frontend through one explicit command path on Windows PowerShell:
 

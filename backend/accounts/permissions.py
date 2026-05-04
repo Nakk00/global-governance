@@ -5,9 +5,9 @@ from dataclasses import dataclass
 from django.http import HttpRequest
 
 from accounts.auth import (
-    ADMIN_VERIFIER_UNAVAILABLE,
     ADMIN_MAINTAINER_INACTIVE,
     ADMIN_MAINTAINER_UNAUTHORIZED,
+    ADMIN_VERIFIER_UNAVAILABLE,
     AdminAuthError,
     TokenVerifier,
     get_supabase_jwt_verifier,
@@ -48,7 +48,11 @@ def authorize_admin_request(
             message="The admin auth boundary is temporarily unavailable.",
             status=503,
         ) from error
-    if profile is None or profile.email.lower() != claims.email.lower() or profile.role not in AUTHORIZED_ADMIN_ROLES:
+    if (
+        profile is None
+        or profile.email.lower() != claims.email.lower()
+        or profile.role not in AUTHORIZED_ADMIN_ROLES
+    ):
         raise AdminAuthError(
             code=ADMIN_MAINTAINER_UNAUTHORIZED,
             message="The authenticated user is not authorized for this admin boundary.",

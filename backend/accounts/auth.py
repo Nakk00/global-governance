@@ -1,25 +1,31 @@
 from __future__ import annotations
 
+import importlib
 from dataclasses import dataclass
 from time import monotonic
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
 from django.conf import settings
 from django.http import HttpRequest
 
+imported_jwt_module: Any | None
+
 try:
-    import jwt
-    from jwt import PyJWKClient
-    from jwt.exceptions import InvalidTokenError, PyJWKClientError
+    imported_jwt_module = importlib.import_module("jwt")
+    from jwt import PyJWKClient as imported_pyjwk_client
+    from jwt.exceptions import InvalidTokenError as imported_invalid_token_error
+    from jwt.exceptions import PyJWKClientError as imported_pyjwk_client_error
 except ImportError:  # pragma: no cover - exercised through verifier-unavailable tests.
-    jwt = None
-    PyJWKClient = None
+    imported_jwt_module = None
+    PyJWKClientClass: Any | None = None
+    JwtInvalidTokenError: type[Exception] = Exception
+    JwtPyJWKClientError: type[Exception] = Exception
+else:
+    PyJWKClientClass = imported_pyjwk_client
+    JwtInvalidTokenError = imported_invalid_token_error
+    JwtPyJWKClientError = imported_pyjwk_client_error
 
-    class InvalidTokenError(Exception):
-        pass
-
-    class PyJWKClientError(Exception):
-        pass
+jwt_module: Any | None = imported_jwt_module
 
 
 ADMIN_AUTH_MISSING = "admin_auth_missing"
@@ -48,8 +54,7 @@ class AdminAuthError(ValueError):
 
 
 class TokenVerifier(Protocol):
-    def verify(self, token: str) -> VerifiedSupabaseClaims:
-        ...
+    def verify(self, token: str) -> VerifiedSupabaseClaims: ...
 
 
 class SupabaseJwtVerifier:
@@ -71,7 +76,7 @@ class SupabaseJwtVerifier:
         self._client_expires_at = 0.0
 
     def verify(self, token: str) -> VerifiedSupabaseClaims:
-        if jwt is None or PyJWKClient is None:
+        if jwt_module is None or PyJWKClientClass is None:
             raise AdminAuthError(
                 code=ADMIN_VERIFIER_UNAVAILABLE,
                 message="Admin token verification is not available.",
@@ -80,7 +85,7 @@ class SupabaseJwtVerifier:
 
         try:
             signing_key = self._jwks_client().get_signing_key_from_jwt(token)
-            payload = jwt.decode(
+            payload = jwt_module.decode(
                 token,
                 signing_key.key,
                 algorithms=["ES256", "RS256"],
@@ -88,7 +93,7 @@ class SupabaseJwtVerifier:
                 issuer=self.issuer,
                 options={"require": ["exp", "iss", "aud", "sub", "role", "email"]},
             )
-        except (InvalidTokenError, PyJWKClientError, ValueError) as error:
+        except (JwtInvalidTokenError, JwtPyJWKClientError, ValueError) as error:
             self.refresh_keys()
             raise AdminAuthError(
                 code=ADMIN_AUTH_INVALID,
@@ -105,7 +110,10 @@ class SupabaseJwtVerifier:
     def _jwks_client(self) -> Any:
         now = monotonic()
         if self._client is None or now >= self._client_expires_at:
-            self._client = PyJWKClient(self.jwks_url, cache_jwk_set=True, lifespan=self.cache_seconds)
+            assert PyJWKClientClass is not None
+            self._client = PyJWKClientClass(
+                self.jwks_url, cache_jwk_set=True, lifespan=self.cache_seconds
+            )
             self._client_expires_at = now + self.cache_seconds
         return self._client
 
@@ -116,7 +124,9 @@ class SupabaseJwtVerifier:
         audience = payload.get("aud")
         issuer = payload.get("iss")
 
-        if not all(isinstance(value, str) and value.strip() for value in (subject, email, role, issuer)):
+        if not all(
+            isinstance(value, str) and value.strip() for value in (subject, email, role, issuer)
+        ):
             raise AdminAuthError(
                 code=ADMIN_AUTH_INVALID,
                 message="Use a valid Supabase Auth bearer token.",
@@ -136,10 +146,10 @@ class SupabaseJwtVerifier:
             )
 
         return VerifiedSupabaseClaims(
-            subject=subject,
-            email=email,
+            subject=cast(str, subject),
+            email=cast(str, email),
             role=role,
-            issuer=issuer,
+            issuer=cast(str, issuer),
             audience=audience,
         )
 

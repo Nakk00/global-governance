@@ -1109,6 +1109,118 @@ So that I can review approved materials, ingestion state, and validation readine
 **Then** I can see job status, recent runs, and actionable outcomes
 **And** the dashboard remains scoped to source stewardship rather than becoming a general public CMS
 
+**Given** I access the private maintainer route family
+**When** I move between dashboard, sources, ingestion, validation, and audit views
+**Then** each route remains protected by maintainer authentication and authorization
+**And** no route is exposed through public learner navigation
+
+**Given** the dashboard loads
+**When** I review readiness cards and source detail sections
+**Then** I can see source readiness, latest ingestion state, validation summary, recent audit activity, and demo-readiness blockers
+**And** the dashboard helps answer whether the chatbot is ready for demo
+
+**Given** I inspect a source detail view
+**When** metadata, version, ingestion, chunk, citation, validation, and audit summaries are available
+**Then** I can understand source state without direct database access
+**And** the view remains source-stewardship scoped rather than becoming a general CMS
+
+### Story 5.6A: Add Protected Source Mutation Workflows
+
+As a maintainer,
+I want protected source upload, editing, archiving, and ingest actions in the private dashboard,
+So that I can keep approved materials current without leaving the authenticated stewardship flow.
+
+**Acceptance Criteria:**
+
+**Given** I am an authenticated authorized maintainer
+**When** I upload a supported approved-source file with the required metadata
+**Then** the source is stored through protected server-side operations
+**And** the learner-facing experience exposes no public write path
+
+**And** the uploaded source starts as draft and inactive
+**And** it is not available for chatbot retrieval until review, ingestion, validation, and explicit activation are complete
+
+**Given** I need to correct or refine a source record
+**When** I edit metadata or archive a source from the private dashboard
+**Then** the change is persisted through protected admin APIs
+**And** prior stewardship history remains auditable
+
+**Given** I activate, disable, or archive a source
+**When** the protected action completes
+**Then** retrieval eligibility changes only according to that lifecycle update
+**And** an audit event records who changed what and when
+
+**Given** I need retrieval data to reflect a source change
+**When** I trigger ingest or re-ingest for that source
+**Then** the job runs through the protected ingestion path
+**And** I can review job state and outcomes from the dashboard
+
+**Given** my session is invalid, expired, revoked, or unauthorized
+**When** I attempt a protected source mutation
+**Then** the request is denied safely
+**And** no learner-facing route or public UI gains access to the workflow
+
+**Given** an upload, metadata edit, or ingest request fails validation
+**When** the API responds
+**Then** the UI receives a user-safe error code and clear recovery path
+**And** raw server traces are never exposed
+
+### Story 5.6B: Inspect Retrieval Chunks and Citations
+
+As a maintainer,
+I want to inspect chunks and citations generated from approved source versions,
+So that I can verify what the chatbot can retrieve and cite before demo.
+
+**Acceptance Criteria:**
+
+**Given** I inspect a source with completed ingestion
+**When** I open the chunk view
+**Then** I can review chunk identifiers, ordering, page or heading context, token or size cues, active state, and text previews
+**And** the experience supports chunk inspection without direct database access
+
+**Given** I inspect citation support for a source
+**When** I open the citation view
+**Then** I can review citation identifiers, citation labels, source-version linkage, page or section context, linked chunk references, and active state
+**And** I can tell what label the chatbot will show to learners
+
+**Given** chunk or citation records are missing, partial, stale, or inactive
+**When** I review the inspection surfaces
+**Then** the UI shows clear empty, partial-data, or degraded-state messaging
+**And** the maintainer can distinguish absence of support from a generic loading failure
+
+**Given** I use these inspection views on desktop, tablet, or keyboard-only navigation
+**When** the layouts adapt
+**Then** the tables, previews, filters, and detail surfaces remain readable and keyboard accessible
+**And** the private surface stays operational rather than decorative
+
+### Story 5.6C: Run Admin Validation Checks
+
+As a maintainer,
+I want to run validation sets and inspect validation history from the private admin surface,
+So that I can verify grounded, weak-support, refusal, and citation behavior before demo.
+
+**Acceptance Criteria:**
+
+**Given** I select a validation set from the private admin surface
+**When** I trigger a validation run
+**Then** the run executes through protected Django workflows
+**And** the system stores summary and per-question outcomes for later review
+
+**Given** a validation run completes
+**When** I inspect the results
+**Then** I can review pass, weak-support, refused, failed, and error outcomes
+**And** I can inspect question text, expected state, actual state, retrieved source support, citation support, and latency when available
+
+**Given** a validation run surfaces weak support, refusal mismatches, or failures
+**When** I review the result history
+**Then** I can identify which questions need source, ingestion, or policy follow-up
+**And** the dashboard keeps the result history understandable over multiple runs
+
+**Given** validation data is empty, stale, partially unavailable, or temporarily failing
+**When** I open the validation area
+**Then** the UI presents explicit empty, partial-data, retryable, and outage states
+**And** the maintainer can still distinguish readiness uncertainty from total system breakage
+
 ### Story 5.7: Orchestrate Retrieval-Backed Grounded Answers in Django
 
 As a maintainer,

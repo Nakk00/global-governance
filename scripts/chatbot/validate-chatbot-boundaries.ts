@@ -3,7 +3,7 @@ import {
   normalizeSourceIds,
   protectionValidationCases,
   sourceIdsMatch,
-} from "../../tests/playwright/chat-boundary-cases.ts"
+} from "../../tests/support/chat-boundary-cases.ts"
 
 type ChatEnvelope =
   | {

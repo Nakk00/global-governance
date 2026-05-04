@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from accounts.views import admin_me
 from common.responses import error_response, success_response
 from common.validation import (
     BoundaryValidationError,
@@ -11,7 +12,6 @@ from common.validation import (
     validate_json_object,
     validate_request_size,
 )
-from accounts.views import admin_me
 
 
 def method_not_allowed_response(*, allowed: str) -> JsonResponse:

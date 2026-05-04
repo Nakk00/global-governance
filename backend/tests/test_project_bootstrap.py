@@ -34,11 +34,15 @@ class ProjectBootstrapTests(SimpleTestCase):
             self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
 
     def test_entry_points_override_inherited_settings_module(self):
-        with mock.patch.dict(os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True):
+        with mock.patch.dict(
+            os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True
+        ):
             importlib.reload(importlib.import_module("config.asgi"))
             self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
 
-        with mock.patch.dict(os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True):
+        with mock.patch.dict(
+            os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True
+        ):
             importlib.reload(importlib.import_module("config.wsgi"))
             self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
 

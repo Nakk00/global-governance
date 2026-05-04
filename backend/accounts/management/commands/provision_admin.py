@@ -44,8 +44,8 @@ class Command(BaseCommand):
             raise CommandError("Supabase admin profile operation failed.") from error
 
         state = "active" if profile.is_active else "inactive"
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"{action} saved for {profile.email} ({profile.supabase_user_id}) as {profile.role}, {state}."
-            )
+        summary = (
+            f"{action} saved for {profile.email} "
+            f"({profile.supabase_user_id}) as {profile.role}, {state}."
         )
+        self.stdout.write(self.style.SUCCESS(summary))

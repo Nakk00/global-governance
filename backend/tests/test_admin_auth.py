@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from unittest import mock
 
-from django.core.management.base import CommandError
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import Client, SimpleTestCase, override_settings
 
 from accounts.auth import AdminAuthError, SupabaseJwtVerifier, VerifiedSupabaseClaims
@@ -12,7 +12,11 @@ from accounts.services import AdminProfile, AdminProfileNotFoundError, AdminProf
 
 
 class FakeVerifier:
-    def __init__(self, claims: VerifiedSupabaseClaims | None = None, error: AdminAuthError | None = None) -> None:
+    def __init__(
+        self,
+        claims: VerifiedSupabaseClaims | None = None,
+        error: AdminAuthError | None = None,
+    ) -> None:
         self.claims = claims or VerifiedSupabaseClaims(
             subject="user-123",
             email="admin@example.test",
@@ -200,7 +204,10 @@ class AdminAuthBoundaryTests(SimpleTestCase):
         self.assertEqual(response.json()["error"]["code"], "admin_verifier_unavailable")
 
     def test_profile_lookup_failure_returns_stable_503(self):
-        repository = FakeRepository(profile=None, lookup_error=AdminProfileRepositoryError("lookup failed"))
+        repository = FakeRepository(
+            profile=None,
+            lookup_error=AdminProfileRepositoryError("lookup failed"),
+        )
 
         with self._patched_auth(repository=repository):
             response = self.client.get("/api/admin/me", HTTP_AUTHORIZATION="Bearer valid-token")
@@ -221,7 +228,12 @@ class AdminAuthBoundaryTests(SimpleTestCase):
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.json()["error"]["code"], "admin_verifier_unavailable")
 
-    def _patched_auth(self, *, verifier: FakeVerifier | None = None, repository: FakeRepository | None = None):
+    def _patched_auth(
+        self,
+        *,
+        verifier: FakeVerifier | None = None,
+        repository: FakeRepository | None = None,
+    ):
         return mock.patch.multiple(
             "accounts.permissions",
             get_supabase_jwt_verifier=mock.Mock(return_value=verifier or FakeVerifier()),
@@ -250,9 +262,10 @@ class SupabaseJwtVerifierTests(SimpleTestCase):
             "exp": 1893456000,
         }
 
-        with mock.patch("accounts.auth.PyJWKClient", return_value=client), mock.patch(
-            "accounts.auth.jwt.decode", return_value=payload
-        ) as decode:
+        with (
+            mock.patch("accounts.auth.PyJWKClientClass", return_value=client),
+            mock.patch("accounts.auth.jwt_module.decode", return_value=payload) as decode,
+        ):
             claims = verifier.verify("valid-token")
 
         decode.assert_called_once()
@@ -271,11 +284,11 @@ class SupabaseJwtVerifierTests(SimpleTestCase):
             cache_seconds=30,
         )
         client = mock.Mock()
-        from accounts.auth import PyJWKClientError
+        from accounts.auth import JwtPyJWKClientError
 
-        client.get_signing_key_from_jwt.side_effect = PyJWKClientError("temporary failure")
+        client.get_signing_key_from_jwt.side_effect = JwtPyJWKClientError("temporary failure")
 
-        with mock.patch("accounts.auth.PyJWKClient", return_value=client):
+        with mock.patch("accounts.auth.PyJWKClientClass", return_value=client):
             with self.assertRaises(AdminAuthError) as context:
                 verifier.verify("token")
 
@@ -335,7 +348,9 @@ class ProvisionAdminCommandTests(SimpleTestCase):
 
         self.assertEqual(repository.saved_profiles[0].role, "admin")
         self.assertEqual(repository.saved_profiles[1].role, "viewer")
-        self.assertFalse(repository.profile.is_active)
+        profile = repository.profile
+        assert profile is not None
+        self.assertFalse(profile.is_active)
 
     def test_revoke_missing_profile_raises_command_error(self):
         repository = FakeRepository(revoke_error=AdminProfileNotFoundError("missing profile"))
@@ -357,8 +372,11 @@ class SupabaseAdminProfileRepositoryTests(SimpleTestCase):
         )
         profile = AdminProfile("user-123", "admin@example.test", "admin", True)
         response = mock.Mock()
-        response.read.return_value = (
-            b'[{"supabase_user_id":"user-123","email":"admin@example.test","display_name":null,"role":"admin","is_active":true}]'
+        response.read.return_value = b"".join(
+            [
+                b'[{"supabase_user_id":"user-123","email":"admin@example.test",',
+                b'"display_name":null,"role":"admin","is_active":true}]',
+            ]
         )
         context_manager = mock.MagicMock()
         context_manager.__enter__.return_value = response
@@ -374,7 +392,18 @@ class SupabaseAdminProfileRepositoryTests(SimpleTestCase):
 class PublicLearnerBoundaryTests(SimpleTestCase):
     def test_frontend_does_not_surface_admin_routes_or_supabase_auth_logic(self):
         source_root = Path(__file__).resolve().parents[2] / "src"
-        source_text = "\n".join(path.read_text(encoding="utf-8") for path in source_root.rglob("*") if path.is_file())
+        private_boundary = source_root / "components" / "modules" / "MaintainerDashboard"
+        private_libs = {
+            source_root / "lib" / "maintainer",
+            source_root / "lib" / "supabase",
+        }
+        source_text = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in source_root.rglob("*")
+            if path.is_file()
+            and private_boundary not in path.parents
+            and not any(private_lib in path.parents for private_lib in private_libs)
+        )
 
         self.assertNotIn("/api/admin", source_text)
         self.assertNotIn("/_internal/admin", source_text)

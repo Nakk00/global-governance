@@ -32,17 +32,13 @@ class AdminProfile:
 
 
 class AdminProfileRepository(Protocol):
-    def get_by_supabase_user_id(self, supabase_user_id: str) -> AdminProfile | None:
-        ...
+    def get_by_supabase_user_id(self, supabase_user_id: str) -> AdminProfile | None: ...
 
-    def record_login(self, supabase_user_id: str) -> None:
-        ...
+    def record_login(self, supabase_user_id: str) -> None: ...
 
-    def upsert(self, profile: AdminProfile) -> AdminProfile:
-        ...
+    def upsert(self, profile: AdminProfile) -> AdminProfile: ...
 
-    def revoke(self, supabase_user_id: str) -> AdminProfile:
-        ...
+    def revoke(self, supabase_user_id: str) -> AdminProfile: ...
 
 
 class SupabaseAdminProfileRepository:
@@ -125,7 +121,9 @@ class SupabaseAdminProfileRepository:
         if prefer:
             headers["Prefer"] = prefer
 
-        request = Request(urljoin(self.supabase_url, path), data=body, headers=headers, method=method)
+        request = Request(
+            urljoin(self.supabase_url, path), data=body, headers=headers, method=method
+        )
         try:
             with urlopen(request, timeout=settings.SUPABASE_REST_TIMEOUT_SECONDS) as response:
                 content = response.read().decode("utf-8")

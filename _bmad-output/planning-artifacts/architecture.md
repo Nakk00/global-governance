@@ -189,8 +189,14 @@ Use two distinct data domains.
 - Model the stewardship layer explicitly instead of implying it emerges automatically from retrieval tables:
   - `sources`
   - `source_versions`
+  - `source_chunks`
+  - `source_citations`
+  - `chunk_citations`
   - `ingestion_jobs`
+  - `validation_sets`
+  - `validation_questions`
   - `validation_runs`
+  - `validation_results`
   - `audit_logs`
 - Keep retrieval data separate from the main rendered page content so chatbot ingestion and site copy can evolve without forcing the entire site architecture to change.
 
@@ -262,13 +268,38 @@ Use two distinct data domains.
 - `GET /api/admin/me`
 - `GET /api/admin/sources`
 - `POST /api/admin/sources/upload`
+- `GET /api/admin/sources/{sourceId}`
 - `PATCH /api/admin/sources/{sourceId}`
+- `POST /api/admin/sources/{sourceId}/activate`
+- `POST /api/admin/sources/{sourceId}/disable`
+- `POST /api/admin/sources/{sourceId}/archive`
 - `POST /api/admin/sources/{sourceId}/ingest`
 - `GET /api/admin/ingestion-jobs`
+- `GET /api/admin/ingestion-jobs/{jobId}`
+- `POST /api/admin/ingestion-jobs/{jobId}/retry`
+- `GET /api/admin/sources/{sourceId}/chunks`
+- `GET /api/admin/sources/{sourceId}/citations`
+- `GET /api/admin/chunks/{chunkId}`
+- `GET /api/admin/citations/{citationId}`
+- `GET /api/admin/validation-sets`
 - `POST /api/admin/validation-runs`
+- `GET /api/admin/validation-runs`
+- `GET /api/admin/validation-runs/{runId}`
 - `GET /api/admin/audit-logs`
+- `GET /api/admin/audit-logs/{auditLogId}`
 
 These routes are served through Django, which acts as the single orchestration boundary between the frontend and Supabase-backed data services.
+
+**Admin route family guidance:**
+- If a private maintainer UI is present, use a clearly private route family such as:
+  - `/maintainer/login`
+  - `/maintainer/dashboard`
+  - `/maintainer/sources`
+  - `/maintainer/sources/:sourceId`
+  - `/maintainer/ingestion`
+  - `/maintainer/validation`
+  - `/maintainer/audit-logs`
+- Keep these routes undiscoverable from public learner navigation and treat hidden routing only as a UX choice, not as a security mechanism.
 
 **Chat request lifecycle contract:**
 - The MVP chat path is non-streaming by default unless implementation proves streaming is required to meet the responsiveness target.
@@ -299,6 +330,7 @@ These routes are served through Django, which acts as the single orchestration b
 - Frontend talks only to approved backend endpoints and never directly to privileged retrieval operations.
 - Django coordinates with Supabase Auth, Storage, Postgres, Redis, and external model providers.
 - Keep model orchestration behind one backend boundary so the frontend stays presentation-focused.
+- For admin uploads, prefer Django-mediated file handling in the MVP unless source size or storage constraints justify signed upload URLs. Uploaded sources should begin as draft and inactive, and they should only become retrieval-eligible after review, ingestion, validation, and explicit activation.
 
 ### Frontend Architecture
 

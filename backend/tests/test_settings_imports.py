@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.test import SimpleTestCase, override_settings
+from django.test import SimpleTestCase
 
 
 class SettingsImportTests(SimpleTestCase):

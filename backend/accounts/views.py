@@ -40,6 +40,10 @@ def admin_me(request: HttpRequest) -> JsonResponse:
 
 def _has_unexpected_body(request: HttpRequest) -> bool:
     content_length = request.headers.get("Content-Length")
-    if content_length and content_length.isdigit() and int(content_length) > settings.MAX_EXTERNAL_JSON_BODY_BYTES:
+    if (
+        content_length
+        and content_length.isdigit()
+        and int(content_length) > settings.MAX_EXTERNAL_JSON_BODY_BYTES
+    ):
         return True
     return bool(request.body.strip())
