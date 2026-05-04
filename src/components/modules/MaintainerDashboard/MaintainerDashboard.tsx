@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { MaintainerLogin } from "@/components/modules/MaintainerDashboard/MaintainerLogin"
 import {
   fetchAdminMe,
   fetchSourceDetail,
@@ -37,7 +38,6 @@ import {
   clearSupabaseSession,
   getSupabaseSession,
   isSupabaseSessionExpired,
-  signInWithPassword,
   type SupabaseSession,
 } from "@/lib/supabase/browser-client"
 
@@ -250,6 +250,10 @@ export function MaintainerDashboard() {
     )
   }
 
+  if (gate.state === "signedOut") {
+    return <MaintainerLogin onSignedIn={resolveGate} />
+  }
+
   if (gate.state !== "ready") {
     return (
       <MaintainerFrame>
@@ -359,13 +363,9 @@ function AccessStateView({
   gate,
   onRetry,
 }: {
-  gate: Exclude<GateState, { state: "loading" | "ready" }>
+  gate: Exclude<GateState, { state: "loading" | "ready" | "signedOut" }>
   onRetry: () => void
 }) {
-  if (gate.state === "signedOut") {
-    return <MaintainerSignIn onSignedIn={onRetry} />
-  }
-
   const titleByState = {
     expiredSession: "Session expired",
     unauthorized: "Maintainer access required",
@@ -390,65 +390,6 @@ function AccessStateView({
         <RefreshCcw className="size-4" aria-hidden="true" />
         Retry access check
       </button>
-    </section>
-  )
-}
-
-function MaintainerSignIn({ onSignedIn }: { onSignedIn: () => void }) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setSubmitting(true)
-    setError(null)
-    try {
-      await signInWithPassword({ email, password })
-      onSignedIn()
-    } catch {
-      setError("The maintainer sign-in request could not be completed.")
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <section className="mx-auto w-full max-w-md rounded-lg border bg-card p-6">
-      <h1 className="text-2xl font-semibold">Maintainer sign in</h1>
-      <form className="mt-6 space-y-4" onSubmit={submit}>
-        <label className="block text-sm font-medium">
-          Email
-          <input
-            className="mt-2 min-h-11 w-full rounded-md border bg-background px-3"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </label>
-        <label className="block text-sm font-medium">
-          Password
-          <input
-            className="mt-2 min-h-11 w-full rounded-md border bg-background px-3"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
-        </label>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        <button
-          className="min-h-11 w-full rounded-md bg-primary px-4 py-2 font-semibold text-primary-foreground"
-          type="submit"
-          disabled={submitting}
-        >
-          {submitting ? "Signing in" : "Sign in"}
-        </button>
-      </form>
     </section>
   )
 }

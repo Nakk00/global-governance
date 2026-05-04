@@ -18,6 +18,7 @@ import {
   clearSupabaseSession,
   getSupabaseSession,
   isSupabaseSessionExpired,
+  signInWithPassword,
 } from "@/lib/supabase/browser-client"
 
 import { MaintainerDashboard } from "./MaintainerDashboard"
@@ -56,6 +57,7 @@ const mockedUploadSource = vi.mocked(uploadSource)
 const mockedClearSupabaseSession = vi.mocked(clearSupabaseSession)
 const mockedGetSupabaseSession = vi.mocked(getSupabaseSession)
 const mockedIsSupabaseSessionExpired = vi.mocked(isSupabaseSessionExpired)
+const mockedSignInWithPassword = vi.mocked(signInWithPassword)
 
 const session = {
   accessToken: "maintainer-token",
@@ -221,8 +223,84 @@ describe("MaintainerDashboard", () => {
     render(<MaintainerDashboard />)
 
     expect(
-      await screen.findByRole("heading", { name: "Maintainer sign in" })
+      await screen.findByRole("heading", { name: "Maintainer Sign In" })
     ).toBeVisible()
+    expect(screen.getByText("Global Governance")).toBeVisible()
+    expect(screen.getByText("Education for a connected world")).toBeVisible()
+    expect(screen.getByText("Authorized maintainers only")).toBeVisible()
+    expect(screen.getByText("Forgot password?")).toBeVisible()
+  })
+
+  it("toggles password visibility from the sign-in gate", async () => {
+    const user = userEvent.setup()
+    mockedGetSupabaseSession.mockReturnValue(null)
+
+    render(<MaintainerDashboard />)
+
+    const passwordInput = await screen.findByLabelText("Password")
+    expect(passwordInput).toHaveAttribute("type", "password")
+
+    await user.click(screen.getByRole("button", { name: "Show password" }))
+    expect(passwordInput).toHaveAttribute("type", "text")
+
+    await user.click(screen.getByRole("button", { name: "Hide password" }))
+    expect(passwordInput).toHaveAttribute("type", "password")
+  })
+
+  it("shows loading and disables submit while signing in", async () => {
+    const user = userEvent.setup()
+    mockedGetSupabaseSession.mockReturnValue(null)
+    mockedSignInWithPassword.mockImplementation(() => new Promise(() => {}))
+
+    render(<MaintainerDashboard />)
+
+    await user.type(await screen.findByLabelText("Email"), "admin@example.test")
+    await user.type(screen.getByLabelText("Password"), "secret-password")
+    await user.click(screen.getByRole("button", { name: "Sign In" }))
+
+    expect(screen.getByRole("button", { name: "Signing in" })).toBeDisabled()
+    expect(mockedSignInWithPassword).toHaveBeenCalledWith({
+      email: "admin@example.test",
+      password: "secret-password",
+    })
+  })
+
+  it("surfaces a user-safe sign-in error", async () => {
+    const user = userEvent.setup()
+    mockedGetSupabaseSession.mockReturnValue(null)
+    mockedSignInWithPassword.mockRejectedValue(new Error("auth failed"))
+
+    render(<MaintainerDashboard />)
+
+    await user.type(await screen.findByLabelText("Email"), "admin@example.test")
+    await user.type(screen.getByLabelText("Password"), "wrong-password")
+    await user.click(screen.getByRole("button", { name: "Sign In" }))
+
+    expect(
+      await screen.findByText(
+        "The maintainer sign-in request could not be completed."
+      )
+    ).toBeVisible()
+  })
+
+  it("reruns the Django admin gate after successful sign-in", async () => {
+    const user = userEvent.setup()
+    mockedGetSupabaseSession.mockReturnValue(null)
+    mockedSignInWithPassword.mockImplementation(async () => {
+      mockedGetSupabaseSession.mockReturnValue(session)
+      return session
+    })
+
+    render(<MaintainerDashboard />)
+
+    await user.type(await screen.findByLabelText("Email"), "admin@example.test")
+    await user.type(screen.getByLabelText("Password"), "correct-password")
+    await user.click(screen.getByRole("button", { name: "Sign In" }))
+
+    expect(
+      await screen.findByRole("heading", { name: "Maintainer dashboard" })
+    ).toBeVisible()
+    expect(mockedFetchAdminMe).toHaveBeenCalledWith(session)
   })
 
   it.each([
@@ -318,7 +396,7 @@ describe("MaintainerDashboard", () => {
     expect(mockedClearSupabaseSession).toHaveBeenCalled()
     await waitFor(() =>
       expect(
-        screen.getByRole("heading", { name: "Maintainer sign in" })
+        screen.getByRole("heading", { name: "Maintainer Sign In" })
       ).toBeVisible()
     )
   })
