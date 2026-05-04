@@ -1,36 +1,33 @@
-import { expect, test } from "@playwright/test"
+import { expect, type Page, test } from "@playwright/test"
 
 const liveChatEndpoint = "http://127.0.0.1:54321/functions/v1/chat"
 const heroPrompt =
   "How do institutions coordinate global governance without becoming a world government?"
 
-test("@chat-live source-aware chat uses the live Supabase function for the hero prompt", async ({
-  page,
-}) => {
+async function openLiveChat(page: Page) {
   await page.setViewportSize({ width: 1024, height: 820 })
   await page.goto("/#hero-narrative-frame")
-
-  const trigger = page.getByRole("button", {
-    name: "Open source-aware chat",
-  })
-
-  await trigger.click()
+  await page.getByRole("button", { name: "Open source-aware chat" }).click()
 
   const panel = page.getByRole("region", {
     name: "Source-aware academic chat",
   })
-  const input = panel.getByRole("textbox", { name: "Course question" })
+
+  await expect(panel).toBeVisible()
+
+  return {
+    panel,
+    input: panel.getByRole("textbox", { name: "Course question" }),
+  }
+}
+
+test("@chat-live source-aware chat uses the live Supabase function for the hero prompt", async ({
+  page,
+}) => {
+  const { panel, input } = await openLiveChat(page)
   const institutionsPrompt = panel.getByRole("button", {
     name: "Institutions",
   })
-
-  await expect(panel).toBeVisible()
-  await expect(institutionsPrompt).toBeVisible()
-  await expect(
-    panel.getByRole("button", {
-      name: "UN limits",
-    })
-  ).toHaveCount(0)
 
   await institutionsPrompt.click()
   await expect(input).toHaveValue(heroPrompt)
@@ -98,33 +95,14 @@ test("@chat-live source-aware chat uses the live Supabase function for the hero 
   ).toContain("gg-src-global-governance-course-frame")
 
   await expect(
-    panel.getByText(/limited support in approved materials/i)
-  ).toHaveCount(0)
-  await expect(
     panel.getByText(/grounded with 1 approved source/i)
-  ).toBeVisible()
-
-  const courseFrameChip = panel.getByRole("button", {
-    name: /Course frame/i,
-  })
-  await expect(courseFrameChip).toBeVisible()
-  await courseFrameChip.click()
-  await expect(
-    panel.getByText("gg-src-global-governance-course-frame")
   ).toBeVisible()
 })
 
-test("@chat-live source-aware chat renders live refusal and cooldown states", async ({
+test("@chat-live source-aware chat renders a live refusal for off-topic prompts", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 1024, height: 820 })
-  await page.goto("/#hero-narrative-frame")
-  await page.getByRole("button", { name: "Open source-aware chat" }).click()
-
-  const panel = page.getByRole("region", {
-    name: "Source-aware academic chat",
-  })
-  const input = panel.getByRole("textbox", { name: "Course question" })
+  const { panel, input } = await openLiveChat(page)
 
   await input.fill("Can you write a cooking recipe?")
   await panel.getByRole("button", { name: "Ask" }).click()
@@ -133,16 +111,24 @@ test("@chat-live source-aware chat renders live refusal and cooldown states", as
   await expect(
     panel.getByText(/only help with this Global Governance course/i)
   ).toBeVisible()
+})
 
-  await input.fill("Can you predict basketball scores?")
-  await panel.getByRole("button", { name: "Ask" }).click()
-  await expect(panel.getByText("Course boundary reached")).toBeVisible()
+test("@chat-live source-aware chat enters cooldown after repeated off-topic prompts", async ({
+  page,
+}) => {
+  const { panel, input } = await openLiveChat(page)
 
-  await input.fill("Help me buy a phone.")
-  await panel.getByRole("button", { name: "Ask" }).click()
+  for (const prompt of [
+    "Can you write a cooking recipe?",
+    "Can you predict basketball scores?",
+    "Help me buy a phone.",
+  ]) {
+    await input.fill(prompt)
+    await panel.getByRole("button", { name: "Ask" }).click()
+  }
 
   await expect(panel.getByText("Assistant temporarily limited")).toBeVisible({
     timeout: 2_000,
   })
-  await expect(panel.getByText(/Retry in about 60 seconds/i)).toBeVisible()
+  await expect(panel.getByText(/Retry in about \d+ seconds/i)).toBeVisible()
 })

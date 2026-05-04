@@ -41,5 +41,7 @@ class ResponseEnvelopeTests(SimpleTestCase):
 
         self.assertFalse(envelope["success"])
         self.assertEqual(envelope["error"]["code"], "internal_error")
-        self.assertEqual(envelope["error"]["message"], "The backend could not complete the request.")
+        self.assertEqual(
+            envelope["error"]["message"], "The backend could not complete the request."
+        )
         self.assertNotIn("database secret leaked", str(envelope))

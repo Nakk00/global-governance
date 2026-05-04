@@ -5,7 +5,7 @@ import {
   normalizeSourceIds,
   protectionValidationCases,
   sourceIdsMatch,
-} from "../../../tests/playwright/chat-boundary-cases"
+} from "../../../tests/support/chat-boundary-cases"
 import {
   assembleGroundedChatResponse,
   createCooldownChatResponse,

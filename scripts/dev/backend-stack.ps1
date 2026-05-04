@@ -6,6 +6,40 @@ function Require-Command($Name, $Hint) {
   }
 }
 
+function Get-DescendantProcessIds([int]$ParentId) {
+  $children = @(Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq $ParentId })
+  $ids = @()
+
+  foreach ($child in $children) {
+    $ids += $child.ProcessId
+    $ids += Get-DescendantProcessIds -ParentId $child.ProcessId
+  }
+
+  return $ids
+}
+
+function Stop-ProcessTree($Process) {
+  if (-not $Process) {
+    return
+  }
+
+  foreach ($childId in (Get-DescendantProcessIds -ParentId $Process.Id | Select-Object -Unique)) {
+    try {
+      Stop-Process -Id $childId -Force -ErrorAction Stop
+    }
+    catch {
+    }
+  }
+
+  try {
+    if (-not $Process.HasExited) {
+      Stop-Process -Id $Process.Id -Force -ErrorAction Stop
+    }
+  }
+  catch {
+  }
+}
+
 Require-Command "pnpm" "Install pnpm before running the local stack."
 
 if (-not (Test-Path "backend/.env")) {
@@ -28,9 +62,9 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $processes = @()
-$processes += Start-Process -FilePath "pnpm" -ArgumentList "supabase:functions:chat" -NoNewWindow -PassThru
+$processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "pnpm supabase:functions:chat" -WorkingDirectory (Get-Location).Path -NoNewWindow -PassThru
 $processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $backendPythonScript, "backend/manage.py", "runserver", "127.0.0.1:8000", "--settings=config.settings.development" -NoNewWindow -PassThru
-$processes += Start-Process -FilePath "pnpm" -ArgumentList "dev" -NoNewWindow -PassThru
+$processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "pnpm dev -- --host 127.0.0.1" -WorkingDirectory (Get-Location).Path -NoNewWindow -PassThru
 
 Write-Host "Started Supabase chat function, Django at http://127.0.0.1:8000, and Vite."
 Write-Host "Press Ctrl+C to stop this coordinator, then stop child processes if needed."
@@ -55,8 +89,6 @@ try {
 }
 finally {
   foreach ($process in $processes) {
-    if (-not $process.HasExited) {
-      Stop-Process -Id $process.Id
-    }
+    Stop-ProcessTree -Process $process
   }
 }

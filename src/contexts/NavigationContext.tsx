@@ -34,18 +34,29 @@ const focusSection = (sectionId: string) => {
 }
 
 const getHashSectionId = () => window.location.hash.replace(/^#/, "")
+const SCROLL_ANCHOR_OFFSET = 180
+const PROGRAMMATIC_NAVIGATION_HOLD_MS = 800
+
+const getSectionDocumentTop = (sectionId: string) => {
+  const section = document.getElementById(sectionId)
+
+  return section ? section.getBoundingClientRect().top + window.scrollY : null
+}
 
 export function NavigationProvider({ children }: NavigationProviderProps) {
   const [activeSectionId, setActiveSectionId] = useState(defaultChapterId)
   const activeSectionIdRef = useRef(activeSectionId)
   const programmaticNavigationUntilRef = useRef(0)
+  const programmaticNavigationTargetRef = useRef<string | null>(null)
 
   useEffect(() => {
     activeSectionIdRef.current = activeSectionId
   }, [activeSectionId])
 
   const setActiveAndFocus = useCallback((sectionId: string) => {
-    programmaticNavigationUntilRef.current = Date.now() + 800
+    programmaticNavigationUntilRef.current =
+      Date.now() + PROGRAMMATIC_NAVIGATION_HOLD_MS
+    programmaticNavigationTargetRef.current = sectionId
     setActiveSectionId(sectionId)
     focusSection(sectionId)
   }, [])
@@ -129,7 +140,31 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
         return
       }
 
-      const anchorLine = window.scrollY + 180
+      const anchorLine = window.scrollY + SCROLL_ANCHOR_OFFSET
+      const programmaticTarget = programmaticNavigationTargetRef.current
+
+      if (programmaticTarget && isChapterId(programmaticTarget)) {
+        const targetIndex = getChapterIndex(programmaticTarget)
+        const targetTop = getSectionDocumentTop(programmaticTarget)
+        const nextChapterId = chapterNavigation[targetIndex + 1]?.id
+        const nextTop = nextChapterId
+          ? getSectionDocumentTop(nextChapterId)
+          : Number.POSITIVE_INFINITY
+
+        if (
+          targetTop !== null &&
+          anchorLine >= targetTop &&
+          anchorLine < (nextTop ?? Number.POSITIVE_INFINITY)
+        ) {
+          setActiveSectionId((current) =>
+            current === programmaticTarget ? current : programmaticTarget
+          )
+          return
+        }
+
+        programmaticNavigationTargetRef.current = null
+      }
+
       const hashSectionId = getHashSectionId()
       if (
         hashSectionId &&

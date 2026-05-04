@@ -45,7 +45,9 @@ def exception_to_error_envelope(exception: Exception) -> dict[str, Any]:
     )
 
 
-def success_response(data: Any, *, status: int = 200, meta: dict[str, Any] | None = None) -> JsonResponse:
+def success_response(
+    data: Any, *, status: int = 200, meta: dict[str, Any] | None = None
+) -> JsonResponse:
     return JsonResponse(success_envelope(data, meta=meta), status=status)
 
 

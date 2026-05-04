@@ -116,6 +116,10 @@ The MVP should include the complete academic learning flow, a responsive single-
 
 The public site should remain a React + Vite single-page educational experience with no learner login requirement. The chatbot backend should be implemented through Django-based orchestration over approved sources, and the maintainer side may include private authenticated source-stewardship operations when needed to support the chatbot trust model.
 
+The private admin side should be treated as a maintainer-only trust-and-readiness console. Its MVP role is to protect the grounded chatbot model by supporting approved-source stewardship, ingestion readiness, chunk and citation inspection, validation runs, audit history, and demo-readiness checks. It is not a public CMS, learner dashboard, analytics portal, LMS, or general AI control panel.
+
+MVP admin capabilities may include private maintainer login, protected route access, readiness overview, source list and source detail views, source upload as draft, metadata editing, enable or disable or archive actions, ingestion trigger and status visibility, chunk and citation inspection, validation runner and validation history, audit logs, protected Django APIs, runtime validation, user-safe errors, and tests for protected admin behavior.
+
 The MVP must prove the central concept: Global Governance can be taught more effectively through an interactive, academically grounded, premium web experience than through static presentation formats.
 
 ### Growth Features (Post-MVP)
@@ -133,6 +137,9 @@ The current PRD does not include:
 - a full CMS or multi-user publishing platform
 - learner account systems, LMS integration, or classroom analytics
 - a student-facing authenticated dashboard or portal
+- public source submission, internet crawling, or auto-approval of uploaded sources
+- a general AI playground, simulator controls, or broad cross-session learner memory in the admin MVP
+- admin links surfaced inside public learner navigation
 - multiple heavy 3D scenes or showcase animation sequences beyond the selectively approved moments
 - the Global Governance Simulator as an MVP commitment
 
@@ -449,9 +456,9 @@ The main resource risk is trying to build the full Version C vision at once. Thi
 - FR35: Authorized maintainers can sign in to private operational flows used for approved-source stewardship without requiring learner authentication.
 - FR36: Maintainers can define, inspect, and manage the set of approved materials used to support the chatbot experience.
 - FR37: Maintainers can prepare, upload, or update approved source materials for use in the chatbot support flow through protected workflows.
-- FR38: Maintainers can trigger or review ingestion, retrieval-readiness, validation status, and source-support checks for approved materials.
-- FR39: Maintainers can validate that the chatbot behaves within topic boundaries and that public-chat protection rules behave correctly before demo or review use.
-- FR40: Maintainers can verify that major interactive sections, content flows, and educational modules are functioning before presentation and can validate demo readiness across the learning flow, interactive modules, and chatbot reliability before live use.
+- FR38: Maintainers can trigger or review ingestion, retrieval-readiness, validation status, source-support checks, and chunk or citation inspection for approved materials, while keeping uploaded or changed sources draft or inactive until review, ingestion, validation, and explicit activation are complete.
+- FR39: Maintainers can validate that the chatbot behaves within topic boundaries and that public-chat protection rules behave correctly before demo or review use, including through a private validation workflow that records summary and per-question outcomes across grounded, weak-support, refusal, and failure states.
+- FR40: Maintainers can verify that major interactive sections, content flows, and educational modules are functioning before presentation, validate demo readiness across the learning flow, interactive modules, and chatbot reliability before live use, and inspect audit history for protected source and validation actions so stewardship changes remain reviewable and explainable.
 - FR41: Maintainers can support local development, authenticated admin operations, and validation workflows for the chatbot-related experience without redesigning the full product structure.
 
 ### Presentation Quality & Future Expansion

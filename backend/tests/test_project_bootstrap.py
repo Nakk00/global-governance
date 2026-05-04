@@ -34,11 +34,15 @@ class ProjectBootstrapTests(SimpleTestCase):
             self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
 
     def test_entry_points_override_inherited_settings_module(self):
-        with mock.patch.dict(os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True):
+        with mock.patch.dict(
+            os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True
+        ):
             importlib.reload(importlib.import_module("config.asgi"))
             self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
 
-        with mock.patch.dict(os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True):
+        with mock.patch.dict(
+            os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True
+        ):
             importlib.reload(importlib.import_module("config.wsgi"))
             self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
 
@@ -48,6 +52,9 @@ class ProjectBootstrapTests(SimpleTestCase):
         self.assertIn("DJANGO_SECRET_KEY", keys)
         self.assertIn("SUPABASE_URL", keys)
         self.assertIn("SUPABASE_SERVICE_ROLE_KEY", keys)
+        self.assertIn("SUPABASE_JWT_ISSUER", keys)
+        self.assertIn("SUPABASE_JWT_AUDIENCE", keys)
+        self.assertIn("SUPABASE_JWKS_URL", keys)
         self.assertNotIn("VITE_SUPABASE_ANON_KEY", keys)
 
     def test_missing_required_env_reports_actionable_message(self):
@@ -65,6 +72,9 @@ class ProjectBootstrapTests(SimpleTestCase):
             "DJANGO_SECRET_KEY": "dev-secret",
             "SUPABASE_URL": "http://127.0.0.1:54321",
             "SUPABASE_SERVICE_ROLE_KEY": "server-only",
+            "SUPABASE_JWT_ISSUER": "http://127.0.0.1:54321/auth/v1",
+            "SUPABASE_JWT_AUDIENCE": "authenticated",
+            "SUPABASE_JWKS_URL": "http://127.0.0.1:54321/auth/v1/.well-known/jwks.json",
         }
 
         with mock.patch.dict(os.environ, environment, clear=True):

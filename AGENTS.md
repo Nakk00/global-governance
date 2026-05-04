@@ -21,18 +21,52 @@
 ## Verification
 
 - Default project checks are `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
+- Default backend Python checks are `pnpm backend:lint`, `pnpm backend:typecheck`, `pnpm backend:security`, `pnpm backend:test`, and `pnpm backend:check`.
 - When formatting-sensitive TypeScript or TSX changes land, also run `pnpm format`.
+- When formatting-sensitive Python changes land, also run `pnpm backend:format`.
 - Do not assume `pnpm format` covers Markdown, JSON, YAML, CSS, or other non-TS assets unless the script is expanded to include them.
+- Do not assume `pnpm backend:format` covers frontend files or non-Python assets.
 - For scaffold or infrastructure changes, also verify the app boots locally with `pnpm dev` when the task calls for runtime confirmation.
 - Use `pnpm test:unit` for frontend Vitest coverage under `src/`.
 - Use `pnpm test:functions` for Supabase Edge Function Vitest coverage under `supabase/functions/tests`.
+- Use `pnpm backend:lint` for Python Ruff linting under `backend/`.
+- Use `pnpm backend:typecheck` for Python MyPy type checking under `backend/`.
+- Use `pnpm backend:security` for Python dependency vulnerability scanning against `backend/requirements.txt`.
+- Use `pnpm backend:test` for Django and backend pytest coverage under `backend/tests`.
+- Use `pnpm backend:check` for Django framework and configuration validation.
 - The repo-managed Vitest scope is frontend unit and component tests under `src/**/*.test.ts` and `src/**/*.test.tsx`; checked-in Playwright specs under `tests/e2e` must stay excluded from plain `pnpm exec vitest run`.
 - Keep frontend unit and component tests co-located as `*.test.ts` or `*.test.tsx`.
 - Keep Supabase Edge Function tests under `supabase/functions/tests`.
+- Keep Django backend tests under `backend/tests`.
 - Do not invent Next.js-specific verification steps for this repo.
 - Use `pnpm test:e2e` as the default fast Playwright suite; it excludes live chat backend checks and keeps chat requests mocked where the spec intends UI-only coverage.
-- Use `pnpm test:chat:live` when work touches `functions/v1/chat`, grounding rules, section scoping, chat request wiring, or local Supabase integration. This workflow expects a real local chat backend, typically started with `pnpm supabase:dev`.
+- Use `pnpm test:chat:live` when work touches the `/functions/v1/chat` endpoint, the `supabase/functions/chat` Edge Function, grounding rules, section scoping, chat request wiring, or local Supabase integration. This workflow expects a real local chat backend, typically started with `pnpm supabase:dev`.
 - Use `pnpm test:e2e:all` only when you intentionally want both the mocked Playwright suite and the tagged live chat coverage in one run.
+- Use `pnpm test:e2e:mocked` when you intentionally want the full mocked Playwright suite without live chat coverage.
+- Use `pnpm test:e2e:journey` for the slower mocked browser flows tagged `@journey`.
+- Use `pnpm test:e2e:layout` for optional mocked browser coverage tagged `@layout`, including responsive, focus, and containment sweeps.
+- Keep Playwright intent tags explicit: use `@smoke` for the default fast lane, `@journey` for slower mocked multi-step flows, `@layout` for optional browser-only layout or accessibility sweeps, and `@chat-live` for real local chat backend coverage.
+- When a page-level Playwright file grows broad, split specs by intent instead of collecting everything in one mega-spec. Keep default-lane smoke checks in a dedicated `@smoke` file and move slower journey or layout coverage into separate tagged files.
+
+### Test Layer Strategy
+
+- Prefer the fastest test layer that can prove the behavior with confidence.
+- Use `pnpm test:unit` for frontend rendering logic, local state transitions, parser or adapter behavior, session-local UI behavior, and accessibility semantics that do not require a full browser workflow.
+- Use `pnpm test:functions` for Supabase Edge Function request validation, response envelopes, grounding rules, refusal, weak-support, and cooldown contracts, retrieval parity, and public-chat protection logic.
+- Use `pnpm backend:test` for Django route guards, admin auth, permission checks, request validation, and backend response envelopes for maintainer workflows.
+- Use `pnpm test:e2e` for a small mocked browser journey layer. Do not use default Playwright coverage as the primary layer for business-rule matrices, contract validation, or repeated breakpoint sweeps when faster layers can cover the same behavior.
+- Use `pnpm test:chat:live` for a minimal live-chat canary layer that proves real endpoint wiring and a small number of critical user-visible states.
+- If slower mocked browser coverage is still needed for layout, responsive, or broader accessibility sweeps, tag it separately and keep it out of the default `pnpm test:e2e` lane.
+- When a Playwright test grows into rule matrices, repeated viewport loops, or deep state validation, move that coverage into Vitest or pytest and keep only the browser-confidence portion in E2E.
+- Keep `tests/playwright` helpers browser-specific. Shared non-browser test fixtures or case tables should live under a neutral top-level `tests/` support area.
+
+### Verification Selection
+
+- For narrow frontend logic or UI-state changes, start with `pnpm test:unit`.
+- For Supabase Function or chat-contract changes, start with `pnpm test:functions` and add `pnpm test:chat:live` only when the real `/functions/v1/chat` path or local integration is affected.
+- For Django-only maintainer or backend changes, start with `pnpm backend:test` and add the other backend Python checks when the change touches auth, configuration, or shared backend utilities.
+- For browser journey, navigation, or mocked chat-surface changes, use `pnpm test:e2e`.
+- Reserve `pnpm test:e2e:all` for intentional full browser validation, release rehearsal, or work that spans both mocked and live browser coverage.
 
 ### Unit and Component Testing
 
@@ -78,9 +112,9 @@
 ### Playwright Browser Install Policy
 
 - Playwright is the repo-managed baseline for checked-in end-to-end automation in this project.
-- Do **not** run `npx playwright install chromium` by default.
+- Do **not** run `pnpm exec playwright install chromium` by default.
 - First verify browser availability with:
-  - `npx playwright install --dry-run` (check existing install location), or
+  - `pnpm exec playwright install --dry-run` (check existing install location), or
   - a real launch check (for example `require("playwright").chromium.launch(...)`).
 - Only install Chromium when those checks show it is missing or not launchable.
 
@@ -107,13 +141,15 @@
 - Align generated E2E tests with the project context coverage expectations for accessibility, reduced motion, responsive behavior, and chat fallback, refusal, weak-support, or cooldown states when applicable.
 - Keep source-aware chat coverage split intentionally:
   - `pnpm test:e2e` covers mocked UI behavior and interaction states.
-  - `pnpm test:chat:live` covers the real local Supabase chat path without mocking `functions/v1/chat`.
+  - `pnpm test:chat:live` covers the real local Supabase chat path without mocking the `/functions/v1/chat` endpoint.
 - Do not generate checked-in E2E scripts for every story by default; use them when the story scope, acceptance criteria, or verification needs clearly call for end-to-end coverage.
+
+> GitNexus refresh note: if you need to reanalyze or refresh the GitNexus-managed section below, strictly use `gitnexus analyze --force --embeddings --skills` and ignore `npx gitnexus analyze`.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **global-governance-docuweb** (4150 symbols, 4818 relationships, 51 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **global-governance-docuweb** (4854 symbols, 5808 relationships, 57 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

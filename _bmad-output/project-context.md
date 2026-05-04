@@ -105,6 +105,11 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 - Keep repo-managed presentation content separate from Supabase-managed chatbot knowledge data; never write chatbot corpus data from browser code.
 - Keep privileged retrieval, service-role access, ingestion, citation packaging, and maintainer-only source mutations inside Django; frontend chat code may only format requests and parse responses.
+- Treat the admin side as a private source-stewardship and demo-readiness console, not a CMS, learner dashboard, LMS, analytics portal, simulator control panel, or general AI playground.
+- Keep admin routes under a clearly private route family such as `/maintainer/*`; never link them from public learner navigation.
+- Admin browser code may call protected Django endpoints after maintainer auth, but it must never mutate Supabase Storage, retrieval tables, chunk tables, citation tables, validation records, or audit logs directly.
+- Uploaded sources should not auto-activate for retrieval; they should pass review, ingestion, validation, and explicit activation.
+- Dangerous source actions such as activate, disable, archive, ingest, and re-ingest should create audit records.
 - Treat off-topic refusal, weak-support, and cooldown states as typed successful responses, not transport failures; use the shared response envelope consistently.
 - Keep the core learning flow usable when chat, premium visuals, or showcase scenes fail; non-chat content must remain interactive.
 - Keep `shadcn/ui` primitives in the shared UI layer and feature composites in feature-owned folders; do not mix the two.

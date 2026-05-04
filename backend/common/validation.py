@@ -34,7 +34,9 @@ def require_json_content_type(request: HttpRequest) -> None:
 
 def validate_request_size(request: HttpRequest, *, max_bytes: int) -> None:
     content_length = request.headers.get("Content-Length")
-    body_length = int(content_length) if content_length and content_length.isdigit() else len(request.body)
+    body_length = (
+        int(content_length) if content_length and content_length.isdigit() else len(request.body)
+    )
     if body_length > max_bytes:
         raise BoundaryValidationError(
             code="payload_too_large",

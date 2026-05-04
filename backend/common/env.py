@@ -24,6 +24,9 @@ REQUIRED_SERVER_ENV = (
     EnvRequirement("DJANGO_SECRET_KEY", "Django signing secret for this backend."),
     EnvRequirement("SUPABASE_URL", "Server-side Supabase API URL."),
     EnvRequirement("SUPABASE_SERVICE_ROLE_KEY", "Server-only Supabase service role key."),
+    EnvRequirement("SUPABASE_JWT_ISSUER", "Expected Supabase Auth JWT issuer."),
+    EnvRequirement("SUPABASE_JWT_AUDIENCE", "Expected Supabase Auth JWT audience."),
+    EnvRequirement("SUPABASE_JWKS_URL", "Supabase Auth JWKS endpoint for token verification."),
 )
 
 
@@ -40,19 +43,24 @@ def load_env_file(path: Path) -> None:
 
 
 def validate_required_env() -> None:
-    missing = [requirement.key for requirement in REQUIRED_SERVER_ENV if not os.environ.get(requirement.key)]
+    missing = [
+        requirement.key
+        for requirement in REQUIRED_SERVER_ENV
+        if not os.environ.get(requirement.key)
+    ]
     if not missing:
         return
 
     formatted = ", ".join(missing)
     raise RuntimeCheckError(
         "Missing required Django backend environment values: "
-        f"{formatted}. Create backend/.env from backend/.env.example and keep these values server-only."
+        f"{formatted}. Create backend/.env from backend/.env.example "
+        "and keep these values server-only."
     )
 
 
 def validate_python_runtime() -> None:
-    if sys.version_info < (3, 12):
+    if (sys.version_info.major, sys.version_info.minor) < (3, 12):
         raise RuntimeCheckError(
             "The Django backend requires Python 3.12 or newer. "
             "Install Python 3.12 and create the backend virtual environment again."

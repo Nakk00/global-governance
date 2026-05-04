@@ -4,6 +4,7 @@ from django.conf import settings
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from accounts.views import admin_me
 from common.responses import error_response, success_response
 from common.validation import (
     BoundaryValidationError,
@@ -54,22 +55,7 @@ def reserved_chat(request: HttpRequest) -> JsonResponse:
 
 
 def reserved_admin(request: HttpRequest) -> JsonResponse:
-    if request.method != "GET":
-        return method_not_allowed_response(allowed="GET")
-
-    authorization = request.headers.get("Authorization", "").strip()
-    if not authorization:
-        return error_response(
-            code="admin_auth_required",
-            message="Admin access requires an authenticated maintainer request.",
-            status=401,
-        )
-
-    return error_response(
-        code="admin_cutover_deferred",
-        message="Django admin orchestration is reserved for a later authorization story.",
-        status=501,
-    )
+    return admin_me(request)
 
 
 def not_found(request: HttpRequest, exception: Exception | None = None) -> JsonResponse:

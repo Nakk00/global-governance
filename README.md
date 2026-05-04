@@ -58,12 +58,17 @@ Fill `backend/.env` with server-only values from the local Supabase stack. Do no
 Backend checks and local service commands:
 
 ```bash
+pnpm backend:lint
+pnpm backend:format
+pnpm backend:typecheck
+pnpm backend:security
 pnpm backend:check
 pnpm backend:test
 pnpm backend:dev
 ```
 
 `pnpm backend:test` uses pytest with `pytest-django` and reads its Django settings from `backend/pyproject.toml`.
+`pnpm backend:lint` and `pnpm backend:format` run Ruff, `pnpm backend:typecheck` runs MyPy with Django stubs, and `pnpm backend:security` runs `pip-audit` against `backend/requirements.txt`.
 
 To start the local Supabase stack, Supabase chat Edge Function, Django service, and Vite frontend through one explicit command path on Windows PowerShell:
 
@@ -72,3 +77,25 @@ pnpm dev:backend-stack
 ```
 
 The startup path fails before serving Django if `backend/.env` is missing, required server-only values are absent, the Python runtime is unsupported, or local Supabase is unavailable.
+
+## Django Admin Auth Boundary
+
+Protected maintainer calls use a Supabase Auth access token:
+
+```bash
+curl http://127.0.0.1:8000/api/admin/me `
+  -H "Authorization: Bearer <supabase_access_token>"
+```
+
+`GET /api/admin/me` verifies the token against the configured Supabase issuer, audience, role, expiry, subject, email, and JWKS endpoint, then authorizes the maintainer against the backend-only `admin_profiles` table. The temporary `/_internal/admin/` route delegates to the same handler for compatibility.
+
+Maintainer access is provisioned server-side only:
+
+```bash
+cd backend
+python manage.py provision_admin grant --supabase-user-id <uuid> --email maintainer@example.com --role admin
+python manage.py provision_admin update --supabase-user-id <uuid> --email maintainer@example.com --role viewer --inactive
+python manage.py provision_admin revoke --supabase-user-id <uuid>
+```
+
+The learner-facing SPA and public chat remain login-free. Do not add admin links or privileged auth logic to `src/`; keep service-role credentials and `admin_profiles` mutations in Django or Supabase migrations.

@@ -306,6 +306,8 @@ Module-specific accents should then be layered selectively. The West Philippine 
 
 The MVP should ship with a simplified hero narrative frame, guided scrollytelling, the UN Command Center, the West Philippine Sea Interactive Dossier, source-aware chatbot support as a flagship premium clarification surface, recap moments, references, and responsive accessibility. The opening hero should establish identity and momentum without requiring the full Living Globe implementation or any live Student / Expert mode switch. The public learner experience should remain login-free, and any maintainer-only stewardship tooling should stay outside this primary UX path.
 
+When a private maintainer surface is present in the MVP, it should behave like a restrained operational companion to the public experience rather than a second public-facing product. It should support `/maintainer/login`, `/maintainer/dashboard`, `/maintainer/sources`, `/maintainer/sources/:sourceId`, `/maintainer/ingestion`, `/maintainer/validation`, and `/maintainer/audit-logs`, while staying absent from learner navigation, chatbot framing, and public references flow.
+
 ### Post-MVP
 
 The post-MVP layer should introduce the full Living Globe Hero, Student / Expert mode, deeper chatbot source interaction, answer-depth variation, optional continuity beyond the MVP session-local history model, and additional presentation polish. These are expansion features, not launch blockers for the initial experience.
@@ -451,6 +453,17 @@ The gap is not in basic UI primitives. The gap is in the experience-defining com
 
 ### Custom Components
 
+### Maintainer Stewardship Console
+
+**Purpose:** Provide a private operational surface for approved-source stewardship, validation readiness, and audit traceability.  
+**Usage:** Available only to authenticated maintainers outside the public learner journey.  
+**Anatomy:** Protected login, readiness overview cards, source table, source detail, ingestion status list, chunk viewer, citation viewer, validation run list, audit history, protected action controls, and user-safe error states.  
+**States:** Signed out, loading, authorized, unauthorized, inactive, expired session, revoked session, empty data, partial data, processing, completed, failed, and retryable outage.  
+**Variants:** Desktop-first operational layout with tablet-safe collapse patterns and mobile containment for emergency or review use.  
+**Visual Direction:** Use a calmer operational expression of the existing Global Governance palette and typography, with Institutional Ledger structure and Strategic Atlas hierarchy cues. Avoid showcase motion, 3D framing, marketing-style hero treatment, or playful AI-control language.  
+**Accessibility:** Keyboard-first tables, filters, dialogs, forms, drawers, and status controls; visible focus states; readable badge semantics; reduced-motion containment; and explicit loading or error announcements.  
+**Interaction Behavior:** The console should help maintainers answer whether the chatbot is ready for demo by exposing source status, ingestion readiness, chunk and citation inspectability, validation results, audit history, and protected next actions without becoming a general CMS. Status badges should cover Draft, Approved, Active, Disabled, Archived, Pending, Processing, Completed, Failed, Pass, Weak Support, Refused, and Error.
+
 ### Hero Narrative Frame
 
 **Purpose:** Establish the topic, tone, and first major call to continue into the learning journey.  
@@ -539,6 +552,7 @@ The component strategy should follow a layered model. Standard interaction primi
 The practical rule should be:
 - Use design-system primitives for structure, controls, overlays, and accessibility scaffolding.
 - Build custom composites for story flow, institutional exploration, case-study storytelling, and source-aware learning.
+- For the private maintainer surface, use design-system primitives for tables, forms, badges, dialogs, sheets, alerts, skeletons, and filters, then layer only the minimum custom composition needed for readiness scanning and stewardship review.
 - Reuse tokens for spacing, typography, radius, surface treatment, and motion timing across both layers.
 - Treat mobile responsiveness and keyboard access as first-class requirements for every custom component.
 
