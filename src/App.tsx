@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react"
+
 import { AppShell } from "@/components/layout/AppShell"
 import { UNCommandCenter } from "@/components/modules/UNCommandCenter/UNCommandCenter"
 import { WpsDossier } from "@/components/modules/WpsDossier/WpsDossier"
@@ -13,11 +15,22 @@ import {
 import { heroContent } from "@/data/sections/hero-content"
 import { unCommandCenterShell } from "@/data/sections/un-command-center"
 import { wpsDossierShell } from "@/data/sections/west-philippine-sea-dossier"
-import { MaintainerDashboard } from "@/components/modules/MaintainerDashboard/MaintainerDashboard"
+
+const MaintainerDashboard = lazy(() =>
+  import("@/components/modules/MaintainerDashboard/MaintainerDashboard").then(
+    (module) => ({ default: module.MaintainerDashboard })
+  )
+)
 
 export function App() {
   if (window.location.pathname === "/maintainer") {
-    return <MaintainerDashboard />
+    return (
+      <Suspense
+        fallback={<main className="min-h-svh bg-background text-foreground" />}
+      >
+        <MaintainerDashboard />
+      </Suspense>
+    )
   }
 
   return (

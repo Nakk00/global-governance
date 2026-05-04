@@ -286,8 +286,12 @@ test("@smoke maintainer route keeps auth-gate fallbacks visible", async ({
 }) => {
   await page.goto("/maintainer")
   await expect(
-    page.getByRole("heading", { name: "Maintainer sign in" })
+    page.getByRole("heading", { name: "Maintainer Sign In" })
   ).toBeVisible()
+  await expect(page.getByText("Global Governance")).toBeVisible()
+  await expect(page.getByText("Authorized maintainers only")).toBeVisible()
+  await expect(page.getByText("Forgot password?")).toBeVisible()
+  await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
 
   const expiredPage = await page.context().newPage()
   await seedSession(expiredPage)
