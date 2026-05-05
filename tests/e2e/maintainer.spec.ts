@@ -129,6 +129,63 @@ const citationDetail = {
   linkedChunks: chunkInspection.chunks,
 }
 
+const validationSets = {
+  defaultSetId: "demo-readiness-v1",
+  sets: [
+    {
+      validationSetId: "demo-readiness-v1",
+      name: "Demo Readiness v1",
+      description: "Baseline demo checks.",
+      version: 1,
+      isDefault: true,
+      questionCount: 5,
+      createdBy: "system-seed",
+      createdAt: "2026-05-05T00:00:00Z",
+      updatedAt: "2026-05-05T00:00:00Z",
+    },
+  ],
+}
+
+const validationRun = {
+  runId: "val-run-1",
+  validationSetId: "demo-readiness-v1",
+  validationSetName: "Demo Readiness v1",
+  validationSetVersion: 1,
+  status: "completed",
+  totalCount: 5,
+  passCount: 1,
+  weakSupportCount: 1,
+  refusedCount: 1,
+  failedCount: 1,
+  errorCount: 1,
+  averageLatencyMs: 685,
+  createdBy: "admin@example.test",
+  createdAt: "2026-05-05T00:00:00Z",
+  startedAt: "2026-05-05T00:00:01Z",
+  completedAt: "2026-05-05T00:00:05Z",
+  sourceSnapshotIds: ["gg-src-un-charter-institutions@active"],
+  state: "ready",
+  notes: "Immutable validation run completed.",
+  results: [
+    {
+      resultId: "result-pass",
+      validationQuestionId: "demo-q-grounded-un-charter",
+      questionText: "What is the UN Security Council's role?",
+      expectedState: "grounded",
+      actualState: "grounded",
+      outcome: "pass",
+      answerPreview: "The Security Council has primary responsibility...",
+      retrievedSourceIds: ["gg-src-un-charter-institutions"],
+      citationIds: ["ref-un-charter"],
+      supportScore: 0.93,
+      latencyMs: 840,
+      notes: "Expected grounded answer matched.",
+      createdAt: "2026-05-05T00:00:05Z",
+    },
+  ],
+  auditEvents: [],
+}
+
 async function seedSession(page: Page) {
   await page.addInitScript((storedSession) => {
     window.localStorage.setItem(
@@ -161,6 +218,43 @@ async function mockMaintainerApi(page: Page) {
       body: JSON.stringify({
         success: true,
         data: dashboard,
+        error: null,
+        meta: {},
+      }),
+    })
+  })
+  await page.route("**/api/admin/validation-sets", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: validationSets,
+        error: null,
+        meta: {},
+      }),
+    })
+  })
+  await page.route("**/api/admin/validation-runs", async (route) => {
+    await route.fulfill({
+      status: route.request().method() === "POST" ? 201 : 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data:
+          route.request().method() === "POST"
+            ? validationRun
+            : { runs: [validationRun] },
+        error: null,
+        meta: {},
+      }),
+    })
+  })
+  await page.route("**/api/admin/validation-runs/*", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: validationRun,
         error: null,
         meta: {},
       }),
@@ -420,6 +514,39 @@ test("@smoke maintainer retrieval inspection opens chunks and citations without 
   await page.getByRole("button", { name: "Inspect citation" }).click()
   await expect(
     page.getByRole("button", { name: "Copy citation label" })
+  ).toBeVisible()
+  await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
+  const mainScrollWidth = await page
+    .locator("main")
+    .evaluate((element) => element.scrollWidth)
+  expect(mainScrollWidth).toBeLessThanOrEqual(390)
+})
+
+test("@smoke maintainer validation workbench runs and inspects readiness checks", async ({
+  page,
+}) => {
+  await seedSession(page)
+  await mockMaintainerApi(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+
+  await page.goto("/maintainer/validation")
+  await expect(
+    page.getByRole("heading", { name: "Validation workbench" })
+  ).toBeVisible()
+  await expect(page.getByLabel("Validation set")).toHaveValue(
+    "demo-readiness-v1"
+  )
+  await expect(page.getByText("weakSupport")).toBeVisible()
+  await page.getByRole("button", { name: "Run validation" }).click()
+  await expect(
+    page.getByText("Validation run created as a new immutable history record.")
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Inspect result" }).click()
+  await expect(
+    page.getByRole("dialog", { name: "Validation result detail" })
+  ).toBeVisible()
+  await expect(
+    page.getByText("Expected grounded answer matched.")
   ).toBeVisible()
   await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
   const mainScrollWidth = await page

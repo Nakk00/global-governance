@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   Archive,
+  AlertTriangle,
   CheckCircle2,
   Copy,
+  Eye,
   FileUp,
   Link2,
   Loader2,
@@ -29,11 +31,15 @@ import {
   fetchAdminMe,
   fetchChunkDetail,
   fetchCitationDetail,
+  fetchValidationRunDetail,
+  fetchValidationRuns,
+  fetchValidationSets,
   fetchSourceChunks,
   fetchSourceCitations,
   fetchSourceDetail,
   fetchStewardshipDashboard,
   ingestSource,
+  launchValidationRun,
   MaintainerApiError,
   mutateSourceLifecycle,
   updateSourceMetadata,
@@ -53,6 +59,10 @@ import {
   type SourceUploadPayload,
   type StewardshipDashboard,
   type StewardshipEvent,
+  type ValidationResult,
+  type ValidationRunDetail,
+  type ValidationRunSummary,
+  type ValidationSet,
 } from "@/lib/maintainer/api"
 import {
   clearSupabaseSession,
@@ -76,6 +86,8 @@ type DashboardState =
   | { state: "empty" }
   | { state: "outage"; message: string }
   | { state: "ready"; dashboard: StewardshipDashboard }
+
+type DashboardViewMode = "sources" | "validation"
 
 type DetailState =
   | { state: "idle" }
@@ -136,9 +148,34 @@ type InspectionDetailState =
   | { state: "ready"; kind: "citation"; detail: CitationDetail }
   | { state: "outage"; message: string }
 
+type ValidationWorkbenchState =
+  | { state: "loading" }
+  | { state: "empty"; message: string }
+  | { state: "outage"; message: string; retryable: boolean }
+  | {
+      state: "ready"
+      sets: ValidationSet[]
+      selectedSetId: string
+      runs: ValidationRunSummary[]
+      activeRun: ValidationRunDetail | null
+      isLaunching: boolean
+      notice: string | null
+      alert: ValidationWorkbenchAlert | null
+    }
+
+type ValidationWorkbenchAlert = {
+  title: string
+  message: string
+  tone: "info" | "warning" | "error"
+}
+
 const INSPECTION_ROW_LIMIT = 50
 
-export function MaintainerDashboard() {
+export function MaintainerDashboard({
+  initialView = "sources",
+}: {
+  initialView?: DashboardViewMode
+} = {}) {
   const [gate, setGate] = useState<GateState>({ state: "loading" })
   const [dashboardState, setDashboardState] = useState<DashboardState>({
     state: "loading",
@@ -357,6 +394,7 @@ export function MaintainerDashboard() {
         <DashboardView
           dashboard={dashboardState.dashboard}
           session={gate.session}
+          initialView={initialView}
           selectedSourceId={selectedSourceId}
           detailState={detailState}
           mutationState={mutationState}
@@ -446,6 +484,7 @@ function AccessStateView({
 function DashboardView({
   dashboard,
   session,
+  initialView,
   selectedSourceId,
   detailState,
   mutationState,
@@ -458,6 +497,7 @@ function DashboardView({
 }: {
   dashboard: StewardshipDashboard
   session: SupabaseSession
+  initialView: DashboardViewMode
   selectedSourceId: string | null
   detailState: DetailState
   mutationState: MutationState
@@ -471,6 +511,7 @@ function DashboardView({
   onIngestSource: (sourceId: string) => void
   onRetrySourceDetail: (sourceId: string) => void
 }) {
+  const [viewMode, setViewMode] = useState<DashboardViewMode>(initialView)
   const selectedSource = useMemo(
     () =>
       dashboard.sources.find(
@@ -480,56 +521,692 @@ function DashboardView({
   )
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.9fr)]">
-      <section className="space-y-6">
-        <OverviewCards dashboard={dashboard} />
-        <MutationStatus state={mutationState} />
-        <SourceUploadPanel
-          mutationState={mutationState}
-          onSubmit={onUploadSource}
-        />
-        <SourceTable
-          sources={dashboard.sources}
-          selectedSourceId={selectedSource?.sourceId ?? null}
-          onSelectSource={onSelectSource}
-        />
-        <OperationalRecords
-          ingestionRuns={dashboard.ingestionRuns}
-          validationRuns={dashboard.validationRuns}
-          auditEvents={dashboard.auditEvents}
-        />
-      </section>
-      <aside aria-label="Source detail and history" className="space-y-4">
-        {detailState.state === "loading" ? (
-          <SectionSkeleton label="Loading source history" />
-        ) : detailState.state === "ready" ? (
-          <SourceDetailPanel
-            source={detailState.source}
-            session={session}
-            mutationState={mutationState}
-            onUpdateSource={onUpdateSource}
-            onLifecycleAction={onLifecycleAction}
-            onIngestSource={onIngestSource}
+    <div className="space-y-5">
+      <nav className="flex flex-wrap gap-2" aria-label="Maintainer sections">
+        <Button
+          type="button"
+          variant={viewMode === "sources" ? "default" : "outline"}
+          onClick={() => setViewMode("sources")}
+        >
+          Source stewardship
+        </Button>
+        <Button
+          type="button"
+          variant={viewMode === "validation" ? "default" : "outline"}
+          onClick={() => setViewMode("validation")}
+        >
+          Validation workbench
+        </Button>
+      </nav>
+      {viewMode === "validation" ? (
+        <ValidationWorkbench session={session} />
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.9fr)]">
+          <section className="space-y-6">
+            <OverviewCards dashboard={dashboard} />
+            <MutationStatus state={mutationState} />
+            <SourceUploadPanel
+              mutationState={mutationState}
+              onSubmit={onUploadSource}
+            />
+            <SourceTable
+              sources={dashboard.sources}
+              selectedSourceId={selectedSource?.sourceId ?? null}
+              onSelectSource={onSelectSource}
+            />
+            <OperationalRecords
+              ingestionRuns={dashboard.ingestionRuns}
+              validationRuns={dashboard.validationRuns}
+              auditEvents={dashboard.auditEvents}
+            />
+          </section>
+          <aside aria-label="Source detail and history" className="space-y-4">
+            {detailState.state === "loading" ? (
+              <SectionSkeleton label="Loading source history" />
+            ) : detailState.state === "ready" ? (
+              <SourceDetailPanel
+                source={detailState.source}
+                session={session}
+                mutationState={mutationState}
+                onUpdateSource={onUpdateSource}
+                onLifecycleAction={onLifecycleAction}
+                onIngestSource={onIngestSource}
+              />
+            ) : detailState.state === "empty" ? (
+              <SectionState
+                title="Source unavailable"
+                body={detailState.message}
+              />
+            ) : detailState.state === "outage" ? (
+              <RetryState
+                message={detailState.message}
+                onRetry={() =>
+                  selectedSource
+                    ? onRetrySourceDetail(selectedSource.sourceId)
+                    : null
+                }
+              />
+            ) : (
+              <SectionState
+                title="Select a source"
+                body="Choose an approved source to inspect its metadata and action trail."
+              />
+            )}
+          </aside>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ValidationWorkbench({ session }: { session: SupabaseSession }) {
+  const [state, setState] = useState<ValidationWorkbenchState>({
+    state: "loading",
+  })
+  const [selectedResult, setSelectedResult] = useState<ValidationResult | null>(
+    null
+  )
+  const selectedSetIdRef = useRef<string | null>(null)
+
+  const loadValidation = useCallback(
+    async (preferredRunId?: string, preferredSetId?: string) => {
+      setState((current) =>
+        current.state === "ready"
+          ? { ...current, notice: null, alert: null }
+          : { state: "loading" }
+      )
+      try {
+        const [setList, runList] = await Promise.all([
+          fetchValidationSets(session),
+          fetchValidationRuns(session),
+        ])
+        if (!setList.sets.length) {
+          setState({
+            state: "empty",
+            message:
+              "No validation sets are available. Seed Demo Readiness v1 before checking demo readiness.",
+          })
+          return
+        }
+        const rememberedSetId = preferredSetId ?? selectedSetIdRef.current
+        const selectedSetId = setList.sets.some(
+          (set) => set.validationSetId === rememberedSetId
+        )
+          ? rememberedSetId!
+          : (setList.defaultSetId ?? setList.sets[0].validationSetId)
+        const activeRunSummary =
+          runList.runs.find((run) => run.runId === preferredRunId) ??
+          runList.runs.find((run) => run.validationSetId === selectedSetId) ??
+          null
+        let activeRun: ValidationRunDetail | null = null
+        let alert: ValidationWorkbenchAlert | null = null
+
+        if (activeRunSummary) {
+          try {
+            activeRun = await fetchValidationRunDetail(
+              activeRunSummary.runId,
+              session
+            )
+            alert = validationAlertForRun(activeRun)
+          } catch (error) {
+            alert = validationDetailAlert(error)
+          }
+        }
+
+        if (preferredRunId && !activeRunSummary && !alert) {
+          alert = {
+            title: "Validation run not found",
+            message:
+              "The requested validation run is no longer available. Choose another immutable history record.",
+            tone: "error",
+          }
+        }
+
+        setState({
+          state: "ready",
+          sets: setList.sets,
+          selectedSetId: activeRunSummary?.validationSetId ?? selectedSetId,
+          runs: runList.runs,
+          activeRun,
+          isLaunching: false,
+          alert,
+          notice:
+            activeRun || activeRunSummary || alert
+              ? null
+              : "No validation runs exist for this set yet. Launch a run to create immutable history.",
+        })
+      } catch (error) {
+        setState({
+          state: "outage",
+          message:
+            error instanceof Error
+              ? error.message
+              : "The validation workbench could not load.",
+          retryable: true,
+        })
+      }
+    },
+    [session]
+  )
+
+  useEffect(() => {
+    if (state.state === "ready") {
+      selectedSetIdRef.current = state.selectedSetId
+    }
+  }, [state])
+
+  useEffect(() => {
+    // Validation contracts load after the same private maintainer gate as source stewardship.
+    void loadValidation()
+  }, [loadValidation])
+
+  useEffect(() => {
+    if (
+      state.state !== "ready" ||
+      !state.activeRun ||
+      !["queued", "processing"].includes(state.activeRun.status)
+    ) {
+      return
+    }
+    const timer = window.setTimeout(() => {
+      void loadValidation(state.activeRun?.runId)
+    }, 2000)
+    return () => window.clearTimeout(timer)
+  }, [loadValidation, state])
+
+  async function runSelectedSet() {
+    if (state.state !== "ready") {
+      return
+    }
+    setState((current) =>
+      current.state === "ready"
+        ? { ...current, isLaunching: true, notice: null, alert: null }
+        : current
+    )
+    try {
+      const run = await launchValidationRun(state.selectedSetId, session)
+      try {
+        const runList = await fetchValidationRuns(session)
+        setState((current) =>
+          current.state === "ready"
+            ? {
+                ...current,
+                selectedSetId: run.validationSetId,
+                runs: runList.runs,
+                activeRun: run,
+                isLaunching: false,
+                notice:
+                  "Validation run created as a new immutable history record.",
+                alert: validationAlertForRun(run),
+              }
+            : current
+        )
+      } catch {
+        setState((current) =>
+          current.state === "ready"
+            ? {
+                ...current,
+                selectedSetId: run.validationSetId,
+                activeRun: run,
+                isLaunching: false,
+                notice:
+                  "Validation run created, but run history could not be refreshed. Retry to sync the latest record list.",
+                alert: {
+                  title: "Validation history refresh needed",
+                  message:
+                    "The latest immutable run completed, but the history list could not be refreshed right now.",
+                  tone: "warning",
+                },
+              }
+            : current
+        )
+      }
+    } catch (error) {
+      setState((current) =>
+        current.state === "ready"
+          ? {
+              ...current,
+              isLaunching: false,
+              notice:
+                error instanceof Error
+                  ? error.message
+                  : "The validation run could not be launched.",
+              alert: validationDetailAlert(error),
+            }
+          : current
+      )
+    }
+  }
+
+  if (state.state === "loading") {
+    return <SectionSkeleton label="Loading validation readiness records" />
+  }
+  if (state.state === "empty") {
+    return <SectionState title="Validation data empty" body={state.message} />
+  }
+  if (state.state === "outage") {
+    return (
+      <RetryState
+        message={state.message}
+        onRetry={() => {
+          void loadValidation()
+        }}
+      />
+    )
+  }
+
+  const activeSet = state.sets.find(
+    (set) => set.validationSetId === state.selectedSetId
+  )
+  const activeRun = state.activeRun
+
+  return (
+    <section className="space-y-5" aria-labelledby="validation-heading">
+      <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 md:flex-row md:items-end md:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold text-muted-foreground uppercase">
+            Demo readiness
+          </p>
+          <h2 id="validation-heading" className="mt-2 text-xl font-semibold">
+            Validation workbench
+          </h2>
+          <label className="mt-4 block max-w-md text-sm font-medium">
+            Validation set
+            <select
+              className="mt-2 w-full rounded-md border bg-background px-3 py-2"
+              value={state.selectedSetId}
+              onChange={(event) => {
+                setSelectedResult(null)
+                void loadValidation(undefined, event.target.value)
+              }}
+            >
+              {state.sets.map((set) => (
+                <option key={set.validationSetId} value={set.validationSetId}>
+                  {set.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {activeSet ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {activeSet.description} Version {activeSet.version};{" "}
+              {activeSet.questionCount} questions.
+            </p>
+          ) : null}
+        </div>
+        <Button
+          type="button"
+          onClick={() => void runSelectedSet()}
+          disabled={state.isLaunching}
+        >
+          {state.isLaunching ? (
+            <Loader2 className="size-4 animate-spin motion-reduce:animate-none" />
+          ) : (
+            <Play className="size-4" aria-hidden="true" />
+          )}
+          Run validation
+        </Button>
+      </div>
+
+      {state.notice ? (
+        <section
+          className="rounded-lg border bg-card p-4 text-sm"
+          aria-live="polite"
+        >
+          {state.notice}
+        </section>
+      ) : null}
+
+      {state.alert ? <ValidationAlert alert={state.alert} /> : null}
+
+      {activeRun ? (
+        <>
+          <ValidationSummary run={activeRun} />
+          <ValidationResultsTable
+            run={activeRun}
+            onInspectResult={setSelectedResult}
           />
-        ) : detailState.state === "empty" ? (
-          <SectionState title="Source unavailable" body={detailState.message} />
-        ) : detailState.state === "outage" ? (
-          <RetryState
-            message={detailState.message}
-            onRetry={() =>
-              selectedSource
-                ? onRetrySourceDetail(selectedSource.sourceId)
-                : null
+        </>
+      ) : (
+        <SectionState
+          title="Validation history empty"
+          body="No immutable run history exists for this validation set yet."
+        />
+      )}
+
+      <ValidationRunHistory
+        runs={state.runs}
+        onOpenRun={(runId) => {
+          setSelectedResult(null)
+          void loadValidation(runId)
+        }}
+      />
+      <ValidationResultOverlay
+        result={selectedResult}
+        onClose={() => setSelectedResult(null)}
+      />
+    </section>
+  )
+}
+
+function ValidationSummary({ run }: { run: ValidationRunSummary }) {
+  const statusText = validationStatusLabel(run.status)
+  const cards = [
+    ["pass", run.passCount],
+    ["weakSupport", run.weakSupportCount],
+    ["refused", run.refusedCount],
+    ["failed", run.failedCount],
+    ["error", run.errorCount],
+  ] as const
+
+  return (
+    <section className="rounded-lg border bg-card p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="font-semibold">{run.validationSetName}</h3>
+          <p className="text-sm text-muted-foreground">
+            {statusText} · Version {run.validationSetVersion} · {run.createdAt}
+          </p>
+        </div>
+        <span className="inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium">
+          {run.status === "failed" ? (
+            <AlertTriangle className="size-4" aria-hidden="true" />
+          ) : (
+            <CheckCircle2 className="size-4" aria-hidden="true" />
+          )}
+          {statusText}
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {cards.map(([label, value]) => (
+          <article key={label} className="rounded-md border p-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase">
+              {label}
+            </p>
+            <p className="mt-2 text-2xl font-semibold">{value}</p>
+          </article>
+        ))}
+      </div>
+      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
+        <DetailTerm label="Created" value={run.createdAt} />
+        <DetailTerm label="Started" value={run.startedAt ?? "Not available"} />
+        <DetailTerm
+          label="Completed"
+          value={run.completedAt ?? "Not available"}
+        />
+      </dl>
+      <p className="mt-3 text-sm text-muted-foreground">{run.notes}</p>
+      {run.sourceSnapshotIds.length ? (
+        <p className="mt-2 text-xs break-words text-muted-foreground">
+          Source snapshots: {run.sourceSnapshotIds.join(", ")}
+        </p>
+      ) : null}
+    </section>
+  )
+}
+
+function ValidationResultsTable({
+  run,
+  onInspectResult,
+}: {
+  run: ValidationRunDetail
+  onInspectResult: (result: ValidationResult) => void
+}) {
+  if (!run.results.length) {
+    return (
+      <SectionState
+        title="Validation result data partial"
+        body="The run exists, but question-level results are not available yet."
+      />
+    )
+  }
+
+  return (
+    <section className="rounded-lg border bg-card p-4">
+      <h3 className="font-semibold">Question outcomes</h3>
+      <div className="mt-3 overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Outcome</TableHead>
+              <TableHead>Question</TableHead>
+              <TableHead>Expected</TableHead>
+              <TableHead>Actual</TableHead>
+              <TableHead>Support</TableHead>
+              <TableHead>Latency</TableHead>
+              <TableHead>Inspect</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {run.results.map((result) => (
+              <TableRow key={result.resultId}>
+                <TableCell>{result.outcome}</TableCell>
+                <TableCell className="max-w-80 min-w-56">
+                  {result.questionText}
+                </TableCell>
+                <TableCell>{result.expectedState}</TableCell>
+                <TableCell>{result.actualState}</TableCell>
+                <TableCell>
+                  {result.supportScore == null
+                    ? "Not available"
+                    : result.supportScore.toFixed(2)}
+                </TableCell>
+                <TableCell>
+                  {result.latencyMs == null
+                    ? "Not available"
+                    : `${result.latencyMs} ms`}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onInspectResult(result)}
+                    aria-label="Inspect result"
+                  >
+                    <Eye className="size-4" aria-hidden="true" />
+                    Inspect
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </section>
+  )
+}
+
+function ValidationRunHistory({
+  runs,
+  onOpenRun,
+}: {
+  runs: ValidationRunSummary[]
+  onOpenRun: (runId: string) => void
+}) {
+  return (
+    <section className="rounded-lg border bg-card p-4">
+      <h3 className="font-semibold">Immutable run history</h3>
+      {runs.length ? (
+        <ul className="mt-3 space-y-2 text-sm">
+          {runs.map((run) => (
+            <li
+              key={run.runId}
+              className="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <span>
+                <span className="font-medium">{run.validationSetName}</span>{" "}
+                {validationStatusLabel(run.status)} · {run.createdAt}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenRun(run.runId)}
+              >
+                Open run
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground">
+          No validation run history is available.
+        </p>
+      )}
+    </section>
+  )
+}
+
+function ValidationResultOverlay({
+  result,
+  onClose,
+}: {
+  result: ValidationResult | null
+  onClose: () => void
+}) {
+  const dialogRef = useModalFocus(Boolean(result), onClose)
+  if (!result) {
+    return null
+  }
+  return (
+    <div
+      ref={dialogRef}
+      className="fixed inset-0 z-50 flex items-end bg-background/80 p-0 md:items-center md:justify-center md:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Validation result detail"
+    >
+      <div className="max-h-[90svh] w-full overflow-y-auto rounded-t-lg border bg-card p-4 shadow-lg md:max-w-2xl md:rounded-lg">
+        <h3 className="text-lg font-semibold">{result.outcome}</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {result.questionText}
+        </p>
+        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+          <DetailTerm label="Expected" value={result.expectedState} />
+          <DetailTerm label="Actual" value={result.actualState} />
+          <DetailTerm
+            label="Support score"
+            value={
+              result.supportScore == null
+                ? "Not available"
+                : result.supportScore.toFixed(2)
             }
           />
-        ) : (
-          <SectionState
-            title="Select a source"
-            body="Choose an approved source to inspect its metadata and action trail."
+          <DetailTerm
+            label="Latency"
+            value={
+              result.latencyMs == null
+                ? "Not available"
+                : `${result.latencyMs} ms`
+            }
           />
-        )}
-      </aside>
+          <DetailTerm
+            label="Retrieved sources"
+            value={result.retrievedSourceIds.join(", ") || "None"}
+          />
+          <DetailTerm
+            label="Citations"
+            value={result.citationIds.join(", ") || "None"}
+          />
+          <DetailTerm label="Recorded" value={result.createdAt} />
+        </dl>
+        <pre className="mt-4 max-h-52 rounded-md border bg-muted/30 p-3 text-sm break-words whitespace-pre-wrap">
+          {result.answerPreview}
+        </pre>
+        <p className="mt-3 text-sm text-muted-foreground">{result.notes}</p>
+        <div className="mt-4 flex justify-end">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
     </div>
+  )
+}
+
+function validationStatusLabel(status: ValidationRunSummary["status"]) {
+  if (
+    status === "queued" ||
+    status === "processing" ||
+    status === "completed" ||
+    status === "failed"
+  ) {
+    return status
+  }
+  return `unknown: ${status}`
+}
+
+function validationAlertForRun(
+  run: ValidationRunDetail
+): ValidationWorkbenchAlert | null {
+  if (run.state === "stale") {
+    return {
+      title: "Validation data stale",
+      message:
+        run.notes ||
+        "This immutable run no longer reflects the latest validation-set or source snapshot.",
+      tone: "warning",
+    }
+  }
+  if (run.state === "partial" || !run.results.length) {
+    return {
+      title: "Validation data partial",
+      message:
+        run.notes ||
+        "The run exists, but some question-level detail is not available yet.",
+      tone: "warning",
+    }
+  }
+  return null
+}
+
+function validationDetailAlert(error: unknown): ValidationWorkbenchAlert {
+  if (error instanceof MaintainerApiError) {
+    if (error.status === 404) {
+      return {
+        title: "Validation run not found",
+        message:
+          "The requested validation run is no longer available. Choose another immutable history record.",
+        tone: "error",
+      }
+    }
+    if (error.status >= 500 || error.code === "admin_response_malformed") {
+      return {
+        title: "Validation detail unavailable",
+        message:
+          "The validation summary loaded, but detail is temporarily unavailable. Retry to inspect this run.",
+        tone: "warning",
+      }
+    }
+    return {
+      title: "Validation detail unavailable",
+      message: error.message,
+      tone: "error",
+    }
+  }
+
+  return {
+    title: "Validation detail unavailable",
+    message: "The validation detail could not be loaded right now.",
+    tone: "warning",
+  }
+}
+
+function ValidationAlert({ alert }: { alert: ValidationWorkbenchAlert }) {
+  const toneClass =
+    alert.tone === "error"
+      ? "border-destructive/40 bg-destructive/5"
+      : alert.tone === "warning"
+        ? "border-amber-600/40 bg-amber-600/10"
+        : "border-border bg-card"
+
+  return (
+    <section
+      className={`rounded-lg border p-4 ${toneClass}`}
+      aria-live="polite"
+    >
+      <h3 className="font-semibold">{alert.title}</h3>
+      <p className="mt-2 text-sm text-muted-foreground">{alert.message}</p>
+    </section>
   )
 }
 

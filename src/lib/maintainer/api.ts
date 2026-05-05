@@ -172,6 +172,90 @@ export type SourceMetadataPayload = {
   usageScope: string[]
 }
 
+export type ValidationRunStatus =
+  | "queued"
+  | "processing"
+  | "completed"
+  | "failed"
+
+export type ValidationOutcome =
+  | "pass"
+  | "weakSupport"
+  | "refused"
+  | "failed"
+  | "error"
+
+export type ValidationSet = {
+  validationSetId: string
+  name: string
+  description: string
+  version: number
+  isDefault: boolean
+  questionCount: number
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type ValidationSetList = {
+  sets: ValidationSet[]
+  defaultSetId: string | null
+}
+
+export type ValidationResult = {
+  resultId: string
+  validationQuestionId: string
+  questionText: string
+  expectedState: "grounded" | "weakSupport" | "refused"
+  actualState: string
+  outcome: ValidationOutcome
+  answerPreview: string
+  retrievedSourceIds: string[]
+  citationIds: string[]
+  supportScore: number | null
+  latencyMs: number | null
+  notes: string
+  createdAt: string
+}
+
+export type ValidationRunSummary = {
+  runId: string
+  validationSetId: string
+  validationSetName: string
+  validationSetVersion: number
+  status: ValidationRunStatus | (string & {})
+  totalCount: number
+  passCount: number
+  weakSupportCount: number
+  refusedCount: number
+  failedCount: number
+  errorCount: number
+  averageLatencyMs: number | null
+  createdBy: string
+  createdAt: string
+  startedAt: string | null
+  completedAt: string | null
+  sourceSnapshotIds: string[]
+  state: "empty" | "stale" | "partial" | "ready" | (string & {})
+  notes: string
+}
+
+export type ValidationRunList = {
+  runs: ValidationRunSummary[]
+}
+
+export type ValidationRunDetail = ValidationRunSummary & {
+  results: ValidationResult[]
+  auditEvents: {
+    eventId: string
+    runId: string
+    eventType: "launch" | "completion" | "failure"
+    origin: string
+    occurredAt: string
+    summary: string
+  }[]
+}
+
 type ApiEnvelope<T> =
   | { success: true; data: T; error: null; meta: Record<string, unknown> }
   | {
@@ -262,6 +346,45 @@ export async function fetchCitationDetail(
   return fetchMaintainerJson<CitationDetail>(
     `/api/admin/citations/${encodeURIComponent(citationId)}`,
     session
+  )
+}
+
+export async function fetchValidationSets(session: SupabaseSession) {
+  return fetchMaintainerJson<ValidationSetList>(
+    "/api/admin/validation-sets",
+    session
+  )
+}
+
+export async function fetchValidationRuns(session: SupabaseSession) {
+  return fetchMaintainerJson<ValidationRunList>(
+    "/api/admin/validation-runs",
+    session
+  )
+}
+
+export async function fetchValidationRunDetail(
+  runId: string,
+  session: SupabaseSession
+) {
+  return fetchMaintainerJson<ValidationRunDetail>(
+    `/api/admin/validation-runs/${encodeURIComponent(runId)}`,
+    session
+  )
+}
+
+export async function launchValidationRun(
+  validationSetId: string,
+  session: SupabaseSession
+) {
+  return fetchMaintainerJson<ValidationRunDetail>(
+    "/api/admin/validation-runs",
+    session,
+    {
+      method: "POST",
+      body: JSON.stringify({ validationSetId }),
+      headers: { "Content-Type": "application/json" },
+    }
   )
 }
 
