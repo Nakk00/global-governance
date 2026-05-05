@@ -6,6 +6,7 @@ from typing import Literal, TypedDict
 LifecycleState = Literal["draft", "approved", "active", "disabled", "archived"]
 ReadinessState = Literal["ready", "partial", "empty"]
 RunStatus = Literal["succeeded", "warning", "failed", "queued"]
+InspectionState = Literal["empty", "partial", "stale", "inactive", "ready", "unavailable"]
 
 
 class PartialDataMarker(TypedDict):
@@ -75,6 +76,68 @@ class StewardshipDashboardDto(TypedDict):
 class SourceMutationResult(TypedDict):
     source: SourceDetailDto
     dashboard: StewardshipDashboardDto
+
+
+class InspectionAnchorDto(TypedDict):
+    documentId: str | None
+    version: str | None
+    sourceId: str
+    state: InspectionState
+    message: str
+    nextStep: str
+
+
+class ChunkRowDto(TypedDict):
+    id: str
+    documentId: str
+    sourceId: str
+    chunkIndex: int
+    tokenCount: int
+    contentPreview: str
+    embeddingPresent: bool
+    activeState: InspectionState
+    pageNumber: int | None
+    heading: str | None
+    metadata: dict[str, object]
+
+
+class ChunkDetailDto(ChunkRowDto):
+    content: str
+    linkedCitationIds: list[str]
+    createdAt: str | None
+    updatedAt: str | None
+
+
+class CitationRowDto(TypedDict):
+    id: str
+    documentId: str
+    sourceId: str
+    citationLabel: str
+    displayLabel: str
+    linkedChunkIds: list[str]
+    activeState: InspectionState
+    pageNumber: int | None
+    sectionHeading: str | None
+    metadata: dict[str, object]
+
+
+class CitationDetailDto(CitationRowDto):
+    sourceTitle: str
+    sourcePath: str | None
+    copyableLabel: str
+    linkedChunks: list[ChunkRowDto]
+
+
+class SourceChunksInspectionDto(TypedDict):
+    anchor: InspectionAnchorDto
+    chunks: list[ChunkRowDto]
+    partialData: list[PartialDataMarker]
+
+
+class SourceCitationsInspectionDto(TypedDict):
+    anchor: InspectionAnchorDto
+    citations: list[CitationRowDto]
+    partialData: list[PartialDataMarker]
 
 
 @dataclass(frozen=True)

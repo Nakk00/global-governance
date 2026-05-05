@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   Archive,
   CheckCircle2,
+  Copy,
   FileUp,
+  Link2,
   Loader2,
   LogOut,
   Pencil,
@@ -14,9 +16,21 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { MaintainerLogin } from "@/components/modules/MaintainerDashboard/MaintainerLogin"
 import {
   fetchAdminMe,
+  fetchChunkDetail,
+  fetchCitationDetail,
+  fetchSourceChunks,
+  fetchSourceCitations,
   fetchSourceDetail,
   fetchStewardshipDashboard,
   ingestSource,
@@ -25,6 +39,12 @@ import {
   updateSourceMetadata,
   uploadSource,
   type AdminIdentity,
+  type ChunkDetail,
+  type ChunkRow,
+  type CitationDetail,
+  type CitationRow,
+  type InspectionAnchor,
+  type PartialDataMarker,
   type SourceDetail,
   type SourceInventoryItem,
   type SourceLifecycleState,
@@ -89,6 +109,34 @@ type ConfirmationState = {
   sourceId: string
   title: string
 } | null
+
+type InspectorTab = "overview" | "chunks" | "citations" | "history"
+
+type InspectionListState<T> =
+  | { state: "idle" }
+  | { state: "loading" }
+  | {
+      state: "ready"
+      anchor: InspectionAnchor
+      records: T[]
+      partialData: PartialDataMarker[]
+    }
+  | {
+      state: "empty"
+      anchor: InspectionAnchor
+      message: string
+      partialData: PartialDataMarker[]
+    }
+  | { state: "outage"; message: string }
+
+type InspectionDetailState =
+  | { state: "idle" }
+  | { state: "loading"; kind: "chunk" | "citation" }
+  | { state: "ready"; kind: "chunk"; detail: ChunkDetail }
+  | { state: "ready"; kind: "citation"; detail: CitationDetail }
+  | { state: "outage"; message: string }
+
+const INSPECTION_ROW_LIMIT = 50
 
 export function MaintainerDashboard() {
   const [gate, setGate] = useState<GateState>({ state: "loading" })
@@ -308,6 +356,7 @@ export function MaintainerDashboard() {
       ) : (
         <DashboardView
           dashboard={dashboardState.dashboard}
+          session={gate.session}
           selectedSourceId={selectedSourceId}
           detailState={detailState}
           mutationState={mutationState}
@@ -396,6 +445,7 @@ function AccessStateView({
 
 function DashboardView({
   dashboard,
+  session,
   selectedSourceId,
   detailState,
   mutationState,
@@ -407,6 +457,7 @@ function DashboardView({
   onRetrySourceDetail,
 }: {
   dashboard: StewardshipDashboard
+  session: SupabaseSession
   selectedSourceId: string | null
   detailState: DetailState
   mutationState: MutationState
@@ -454,6 +505,7 @@ function DashboardView({
         ) : detailState.state === "ready" ? (
           <SourceDetailPanel
             source={detailState.source}
+            session={session}
             mutationState={mutationState}
             onUpdateSource={onUpdateSource}
             onLifecycleAction={onLifecycleAction}
@@ -829,12 +881,14 @@ function SourceTable({
 
 function SourceDetailPanel({
   source,
+  session,
   mutationState,
   onUpdateSource,
   onLifecycleAction,
   onIngestSource,
 }: {
   source: SourceDetail
+  session: SupabaseSession
   mutationState: MutationState
   onUpdateSource: (sourceId: string, payload: SourceMetadataPayload) => void
   onLifecycleAction: (
@@ -845,7 +899,176 @@ function SourceDetailPanel({
 }) {
   const [editing, setEditing] = useState(false)
   const [confirmation, setConfirmation] = useState<ConfirmationState>(null)
+  const [activeTab, setActiveTab] = useState<InspectorTab>("overview")
+  const [chunkState, setChunkState] = useState<InspectionListState<ChunkRow>>({
+    state: "idle",
+  })
+  const [citationState, setCitationState] = useState<
+    InspectionListState<CitationRow>
+  >({ state: "idle" })
+  const [detailOverlay, setDetailOverlay] = useState<InspectionDetailState>({
+    state: "idle",
+  })
+  const requestKeyRef = useRef(0)
+  const detailRequestKeyRef = useRef(0)
   const isSubmitting = mutationState.state === "submitting"
+
+  const loadChunks = useCallback(async () => {
+    const requestKey = ++requestKeyRef.current
+    setChunkState({ state: "loading" })
+    try {
+      const payload = await fetchSourceChunks(source.sourceId, session)
+      if (requestKey !== requestKeyRef.current) {
+        return
+      }
+      setChunkState(
+        payload.chunks.length
+          ? {
+              state: "ready",
+              anchor: payload.anchor,
+              records: payload.chunks,
+              partialData: payload.partialData,
+            }
+          : {
+              state: "empty",
+              anchor: payload.anchor,
+              message: payload.anchor.nextStep,
+              partialData: payload.partialData,
+            }
+      )
+    } catch (error) {
+      if (requestKey !== requestKeyRef.current) {
+        return
+      }
+      setChunkState({
+        state: "outage",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Chunk inspection could not load.",
+      })
+    }
+  }, [session, source.sourceId])
+
+  const loadCitations = useCallback(async () => {
+    const requestKey = ++requestKeyRef.current
+    setCitationState({ state: "loading" })
+    try {
+      const payload = await fetchSourceCitations(source.sourceId, session)
+      if (requestKey !== requestKeyRef.current) {
+        return
+      }
+      setCitationState(
+        payload.citations.length
+          ? {
+              state: "ready",
+              anchor: payload.anchor,
+              records: payload.citations,
+              partialData: payload.partialData,
+            }
+          : {
+              state: "empty",
+              anchor: payload.anchor,
+              message: payload.anchor.nextStep,
+              partialData: payload.partialData,
+            }
+      )
+    } catch (error) {
+      if (requestKey !== requestKeyRef.current) {
+        return
+      }
+      setCitationState({
+        state: "outage",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Citation inspection could not load.",
+      })
+    }
+  }, [session, source.sourceId])
+
+  useEffect(() => {
+    // Selection changes intentionally reset the lazy inspection subviews.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setActiveTab("overview")
+    setChunkState({ state: "idle" })
+    setCitationState({ state: "idle" })
+    setDetailOverlay({ state: "idle" })
+    requestKeyRef.current += 1
+    detailRequestKeyRef.current += 1
+  }, [source.sourceId])
+
+  useEffect(() => {
+    if (activeTab === "chunks" && chunkState.state === "idle") {
+      // Lazy inspection data is fetched only after the maintainer opens the tab.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void loadChunks()
+    }
+    if (activeTab === "citations" && citationState.state === "idle") {
+      // Lazy inspection data is fetched only after the maintainer opens the tab.
+      void loadCitations()
+    }
+  }, [
+    activeTab,
+    chunkState.state,
+    citationState.state,
+    loadChunks,
+    loadCitations,
+  ])
+
+  async function openChunkDetail(chunkId: string) {
+    const requestKey = ++detailRequestKeyRef.current
+    setDetailOverlay({ state: "loading", kind: "chunk" })
+    try {
+      const detail = await fetchChunkDetail(chunkId, session)
+      if (requestKey !== detailRequestKeyRef.current) {
+        return
+      }
+      setDetailOverlay({
+        state: "ready",
+        kind: "chunk",
+        detail,
+      })
+    } catch (error) {
+      if (requestKey !== detailRequestKeyRef.current) {
+        return
+      }
+      setDetailOverlay({
+        state: "outage",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Chunk detail could not load.",
+      })
+    }
+  }
+
+  async function openCitationDetail(citationId: string) {
+    const requestKey = ++detailRequestKeyRef.current
+    setDetailOverlay({ state: "loading", kind: "citation" })
+    try {
+      const detail = await fetchCitationDetail(citationId, session)
+      if (requestKey !== detailRequestKeyRef.current) {
+        return
+      }
+      setDetailOverlay({
+        state: "ready",
+        kind: "citation",
+        detail,
+      })
+    } catch (error) {
+      if (requestKey !== detailRequestKeyRef.current) {
+        return
+      }
+      setDetailOverlay({
+        state: "outage",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Citation detail could not load.",
+      })
+    }
+  }
 
   return (
     <section className="rounded-lg border bg-card p-4">
@@ -951,6 +1174,81 @@ function SourceDetailPanel({
           }}
         />
       ) : null}
+      <SourceInspectorTabs activeTab={activeTab} onChange={setActiveTab} />
+      {activeTab === "overview" ? (
+        <SourceOverviewTab source={source} />
+      ) : activeTab === "chunks" ? (
+        <ChunkInspectionTab
+          state={chunkState}
+          onRetry={loadChunks}
+          onOpenChunk={openChunkDetail}
+        />
+      ) : activeTab === "citations" ? (
+        <CitationInspectionTab
+          state={citationState}
+          onRetry={loadCitations}
+          onOpenCitation={openCitationDetail}
+          onOpenChunk={openChunkDetail}
+        />
+      ) : (
+        <SourceHistoryTab source={source} />
+      )}
+      <InspectionDetailOverlay
+        state={detailOverlay}
+        onClose={() => {
+          detailRequestKeyRef.current += 1
+          setDetailOverlay({ state: "idle" })
+        }}
+        onOpenCitation={openCitationDetail}
+        onOpenChunk={openChunkDetail}
+      />
+    </section>
+  )
+}
+
+function SourceInspectorTabs({
+  activeTab,
+  onChange,
+}: {
+  activeTab: InspectorTab
+  onChange: (tab: InspectorTab) => void
+}) {
+  const tabs: { id: InspectorTab; label: string }[] = [
+    { id: "overview", label: "Overview" },
+    { id: "chunks", label: "Chunks" },
+    { id: "citations", label: "Citations" },
+    { id: "history", label: "History" },
+  ]
+
+  return (
+    <div
+      className="mt-5 grid grid-cols-2 gap-2 rounded-md border bg-muted/30 p-1 text-sm sm:grid-cols-4"
+      role="tablist"
+      aria-label="Source inspection views"
+    >
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.id}
+          className={`min-h-10 rounded px-3 font-medium ${
+            activeTab === tab.id
+              ? "bg-background shadow-sm"
+              : "text-muted-foreground"
+          }`}
+          onClick={() => onChange(tab.id)}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function SourceOverviewTab({ source }: { source: SourceDetail }) {
+  return (
+    <>
       <dl className="mt-4 grid gap-3 text-sm">
         <DetailTerm label="Approval status" value={source.lifecycleState} />
         <DetailTerm label="Provenance" value={source.provenance} />
@@ -964,6 +1262,16 @@ function SourceDetailPanel({
           value={source.aliases.length ? source.aliases.join(", ") : "None"}
         />
       </dl>
+      {source.partialData.length ? (
+        <PartialDataList markers={source.partialData} />
+      ) : null}
+    </>
+  )
+}
+
+function SourceHistoryTab({ source }: { source: SourceDetail }) {
+  return (
+    <>
       <HistoryGroup title="Approval lineage" events={source.approvalLineage} />
       <HistoryGroup
         title="Ingestion provenance"
@@ -974,19 +1282,551 @@ function SourceDetailPanel({
         events={source.validationHistory}
       />
       <HistoryGroup title="Maintainer audit trail" events={source.auditTrail} />
-      {source.partialData.length ? (
-        <div className="mt-5 rounded-md border border-dashed p-3 text-sm">
-          <p className="font-medium">Partial-data markers</p>
-          <ul className="mt-2 space-y-2">
-            {source.partialData.map((marker) => (
-              <li key={marker.field}>
-                {marker.field}: {marker.reason}
-              </li>
+    </>
+  )
+}
+
+function ChunkInspectionTab({
+  state,
+  onRetry,
+  onOpenChunk,
+}: {
+  state: InspectionListState<ChunkRow>
+  onRetry: () => void
+  onOpenChunk: (chunkId: string) => void
+}) {
+  const [query, setQuery] = useState("")
+
+  if (state.state === "loading") {
+    return <SectionSkeleton label="Loading retrieval chunks" />
+  }
+  if (state.state === "outage") {
+    return <RetryState message={state.message} onRetry={onRetry} />
+  }
+  if (state.state === "idle") {
+    return null
+  }
+  const filteredChunks =
+    state.state === "ready" ? filterChunks(state.records, query) : []
+
+  return (
+    <InspectionSurface
+      anchor={state.anchor}
+      partialData={state.partialData}
+      emptyMessage={state.state === "empty" ? state.message : null}
+    >
+      {state.state === "ready" ? (
+        <>
+          <InspectionFilter
+            label="Filter chunks"
+            placeholder="Search by chunk text, heading, id, or page"
+            query={query}
+            onQueryChange={setQuery}
+            visibleCount={Math.min(filteredChunks.length, INSPECTION_ROW_LIMIT)}
+            totalCount={filteredChunks.length}
+            totalAvailableCount={state.records.length}
+            itemLabel="chunks"
+          />
+          <ResponsiveChunkTable
+            chunks={filteredChunks}
+            onOpenChunk={onOpenChunk}
+          />
+        </>
+      ) : null}
+    </InspectionSurface>
+  )
+}
+
+function CitationInspectionTab({
+  state,
+  onRetry,
+  onOpenCitation,
+  onOpenChunk,
+}: {
+  state: InspectionListState<CitationRow>
+  onRetry: () => void
+  onOpenCitation: (citationId: string) => void
+  onOpenChunk: (chunkId: string) => void
+}) {
+  const [query, setQuery] = useState("")
+
+  if (state.state === "loading") {
+    return <SectionSkeleton label="Loading citation support" />
+  }
+  if (state.state === "outage") {
+    return <RetryState message={state.message} onRetry={onRetry} />
+  }
+  if (state.state === "idle") {
+    return null
+  }
+  const filteredCitations =
+    state.state === "ready" ? filterCitations(state.records, query) : []
+
+  return (
+    <InspectionSurface
+      anchor={state.anchor}
+      partialData={state.partialData}
+      emptyMessage={state.state === "empty" ? state.message : null}
+    >
+      {state.state === "ready" ? (
+        <>
+          <InspectionFilter
+            label="Filter citations"
+            placeholder="Search by display label, citation, chunk id, or page"
+            query={query}
+            onQueryChange={setQuery}
+            visibleCount={Math.min(
+              filteredCitations.length,
+              INSPECTION_ROW_LIMIT
+            )}
+            totalCount={filteredCitations.length}
+            totalAvailableCount={state.records.length}
+            itemLabel="citations"
+          />
+          <ResponsiveCitationTable
+            citations={filteredCitations}
+            onOpenCitation={onOpenCitation}
+            onOpenChunk={onOpenChunk}
+          />
+        </>
+      ) : null}
+    </InspectionSurface>
+  )
+}
+
+function InspectionSurface({
+  anchor,
+  partialData,
+  emptyMessage,
+  children,
+}: {
+  anchor: InspectionAnchor
+  partialData: PartialDataMarker[]
+  emptyMessage: string | null
+  children: React.ReactNode
+}) {
+  return (
+    <div className="mt-4 space-y-4">
+      <div className="rounded-md border border-dashed p-3 text-sm">
+        <p className="font-medium">Version anchor</p>
+        <p className="mt-2 text-muted-foreground">{anchor.message}</p>
+        <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+          <DetailTerm label="Document ID" value={anchor.documentId ?? "none"} />
+          <DetailTerm label="Version" value={anchor.version ?? "none"} />
+          <DetailTerm label="Inspection state" value={anchor.state} />
+          <DetailTerm label="Next step" value={anchor.nextStep} />
+        </dl>
+      </div>
+      {emptyMessage ? (
+        <SectionState
+          title="No retrieval evidence yet"
+          body={
+            emptyMessage === anchor.message
+              ? emptyMessage
+              : `${anchor.message} ${emptyMessage}`
+          }
+        />
+      ) : (
+        children
+      )}
+      {partialData.length ? <PartialDataList markers={partialData} /> : null}
+    </div>
+  )
+}
+
+function ResponsiveChunkTable({
+  chunks,
+  onOpenChunk,
+}: {
+  chunks: ChunkRow[]
+  onOpenChunk: (chunkId: string) => void
+}) {
+  return (
+    <>
+      {!chunks.length ? (
+        <SectionState
+          title="No matching chunks"
+          body="Try a different filter to inspect another slice of retrieval evidence."
+        />
+      ) : null}
+      <div className="grid gap-3 md:hidden">
+        {chunks.slice(0, INSPECTION_ROW_LIMIT).map((chunk) => (
+          <article key={chunk.id} className="rounded-md border p-3 text-sm">
+            <p className="font-medium">Chunk {chunk.chunkIndex}</p>
+            <p className="mt-1 break-words text-muted-foreground">
+              {chunk.contentPreview}
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {chunk.tokenCount} tokens · {chunk.activeState}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-3 w-full"
+              onClick={() => onOpenChunk(chunk.id)}
+            >
+              Inspect chunk
+            </Button>
+          </article>
+        ))}
+      </div>
+      <div className="hidden md:block">
+        <Table className="table-fixed">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-24">Order</TableHead>
+              <TableHead>Preview</TableHead>
+              <TableHead className="w-28">Tokens</TableHead>
+              <TableHead className="w-32">State</TableHead>
+              <TableHead className="w-28">Open</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {chunks.slice(0, INSPECTION_ROW_LIMIT).map((chunk) => (
+              <TableRow key={chunk.id}>
+                <TableCell>{chunk.chunkIndex}</TableCell>
+                <TableCell>
+                  <span className="block break-words">
+                    {chunk.contentPreview}
+                  </span>
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    {chunk.heading ?? "No heading"} · page{" "}
+                    {chunk.pageNumber ?? "n/a"}
+                  </span>
+                </TableCell>
+                <TableCell>{chunk.tokenCount}</TableCell>
+                <TableCell>{chunk.activeState}</TableCell>
+                <TableCell>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChunk(chunk.id)}
+                  >
+                    Inspect
+                  </Button>
+                </TableCell>
+              </TableRow>
             ))}
-          </ul>
+          </TableBody>
+        </Table>
+      </div>
+    </>
+  )
+}
+
+function ResponsiveCitationTable({
+  citations,
+  onOpenCitation,
+  onOpenChunk,
+}: {
+  citations: CitationRow[]
+  onOpenCitation: (citationId: string) => void
+  onOpenChunk: (chunkId: string) => void
+}) {
+  return (
+    <>
+      {!citations.length ? (
+        <SectionState
+          title="No matching citations"
+          body="Try a different filter to inspect another slice of citation support."
+        />
+      ) : null}
+      <div className="grid gap-3 md:hidden">
+        {citations.slice(0, INSPECTION_ROW_LIMIT).map((citation) => (
+          <article key={citation.id} className="rounded-md border p-3 text-sm">
+            <p className="font-medium">{citation.displayLabel}</p>
+            <p className="mt-1 break-words text-muted-foreground">
+              {citation.citationLabel}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-3 w-full"
+              onClick={() => onOpenCitation(citation.id)}
+            >
+              Inspect citation
+            </Button>
+          </article>
+        ))}
+      </div>
+      <div className="hidden md:block">
+        <Table className="table-fixed">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Display label</TableHead>
+              <TableHead>Canonical label</TableHead>
+              <TableHead className="w-32">Chunks</TableHead>
+              <TableHead className="w-32">State</TableHead>
+              <TableHead className="w-28">Open</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {citations.slice(0, INSPECTION_ROW_LIMIT).map((citation) => (
+              <TableRow key={citation.id}>
+                <TableCell>
+                  <span className="break-words">{citation.displayLabel}</span>
+                </TableCell>
+                <TableCell>
+                  <span className="break-words">{citation.citationLabel}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    {citation.sectionHeading ?? "No section"} · page{" "}
+                    {citation.pageNumber ?? "n/a"}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  {citation.linkedChunkIds.slice(0, 2).map((chunkId) => (
+                    <button
+                      key={chunkId}
+                      type="button"
+                      className="mr-2 inline-flex min-h-9 items-center rounded-md border px-2 text-xs"
+                      onClick={() => onOpenChunk(chunkId)}
+                    >
+                      <Link2 className="mr-1 size-3" aria-hidden="true" />
+                      {chunkId}
+                    </button>
+                  ))}
+                </TableCell>
+                <TableCell>{citation.activeState}</TableCell>
+                <TableCell>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenCitation(citation.id)}
+                  >
+                    Inspect
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
+  )
+}
+
+function PartialDataList({ markers }: { markers: PartialDataMarker[] }) {
+  return (
+    <div className="mt-5 rounded-md border border-dashed p-3 text-sm">
+      <p className="font-medium">Partial-data markers</p>
+      <ul className="mt-2 space-y-2">
+        {markers.map((marker) => (
+          <li key={`${marker.field}-${marker.reason}`}>
+            {marker.field}: {marker.reason}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function InspectionFilter({
+  label,
+  placeholder,
+  query,
+  onQueryChange,
+  visibleCount,
+  totalCount,
+  totalAvailableCount,
+  itemLabel,
+}: {
+  label: string
+  placeholder: string
+  query: string
+  onQueryChange: (value: string) => void
+  visibleCount: number
+  totalCount: number
+  totalAvailableCount: number
+  itemLabel: string
+}) {
+  const limitMessage =
+    totalCount > INSPECTION_ROW_LIMIT
+      ? `Showing first ${INSPECTION_ROW_LIMIT} of ${totalCount} matching ${itemLabel}. Refine the filter to narrow further.`
+      : `Showing ${visibleCount} of ${totalCount} matching ${itemLabel}.`
+
+  return (
+    <div className="space-y-2 rounded-md border p-3 text-sm">
+      <label className="block font-medium">
+        {label}
+        <input
+          type="search"
+          className="mt-2 w-full rounded-md border bg-background px-3 py-2"
+          placeholder={placeholder}
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
+      </label>
+      <p className="text-muted-foreground">
+        {limitMessage}
+        {totalAvailableCount !== totalCount
+          ? ` Filtered from ${totalAvailableCount} total records.`
+          : ""}
+      </p>
+    </div>
+  )
+}
+
+function InspectionDetailOverlay({
+  state,
+  onClose,
+  onOpenCitation,
+  onOpenChunk,
+}: {
+  state: InspectionDetailState
+  onClose: () => void
+  onOpenCitation: (citationId: string) => void
+  onOpenChunk: (chunkId: string) => void
+}) {
+  const dialogRef = useModalFocus(state.state !== "idle", onClose)
+  if (state.state === "idle") {
+    return null
+  }
+  return (
+    <div
+      ref={dialogRef}
+      className="fixed inset-0 z-50 flex items-end bg-background/80 p-0 md:items-center md:justify-center md:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Retrieval evidence detail"
+    >
+      <div className="max-h-[90svh] w-full overflow-y-auto rounded-t-lg border bg-card p-4 shadow-lg md:max-w-2xl md:rounded-lg">
+        {state.state === "loading" ? (
+          <p className="font-medium">Loading {state.kind} detail</p>
+        ) : state.state === "outage" ? (
+          <SectionState title="Evidence unavailable" body={state.message} />
+        ) : state.kind === "chunk" ? (
+          <ChunkDetailView
+            detail={state.detail}
+            onOpenCitation={onOpenCitation}
+          />
+        ) : (
+          <CitationDetailView detail={state.detail} onOpenChunk={onOpenChunk} />
+        )}
+        <div className="mt-4 flex justify-end">
+          <Button type="button" variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ChunkDetailView({
+  detail,
+  onOpenCitation,
+}: {
+  detail: ChunkDetail
+  onOpenCitation: (citationId: string) => void
+}) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold">Chunk {detail.chunkIndex}</h3>
+      <p className="mt-1 text-xs break-words text-muted-foreground">
+        {detail.id}
+      </p>
+      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <DetailTerm label="Document ID" value={detail.documentId} />
+        <DetailTerm label="Inspection state" value={detail.activeState} />
+        <DetailTerm label="Heading" value={detail.heading ?? "Not available"} />
+        <DetailTerm
+          label="Page"
+          value={detail.pageNumber?.toString() ?? "Not available"}
+        />
+        <DetailTerm label="Token count" value={detail.tokenCount.toString()} />
+        <DetailTerm
+          label="Embedding"
+          value={detail.embeddingPresent ? "Present" : "Missing"}
+        />
+        <DetailTerm
+          label="Updated"
+          value={detail.updatedAt ?? detail.createdAt ?? "Not available"}
+        />
+      </dl>
+      <pre className="mt-4 max-h-72 rounded-md border bg-muted/30 p-3 text-sm break-words whitespace-pre-wrap">
+        {detail.content}
+      </pre>
+      <CopyButton value={detail.content} label="Copy chunk text" />
+      {detail.linkedCitationIds.length ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {detail.linkedCitationIds.map((citationId) => (
+            <Button
+              key={citationId}
+              type="button"
+              variant="outline"
+              onClick={() => onOpenCitation(citationId)}
+            >
+              <Link2 className="size-4" aria-hidden="true" />
+              Open citation
+            </Button>
+          ))}
         </div>
       ) : null}
-    </section>
+    </div>
+  )
+}
+
+function CitationDetailView({
+  detail,
+  onOpenChunk,
+}: {
+  detail: CitationDetail
+  onOpenChunk: (chunkId: string) => void
+}) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold">{detail.displayLabel}</h3>
+      <p className="mt-1 text-xs break-words text-muted-foreground">
+        {detail.id}
+      </p>
+      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+        <DetailTerm label="Canonical label" value={detail.citationLabel} />
+        <DetailTerm label="Learner display" value={detail.copyableLabel} />
+        <DetailTerm label="Source title" value={detail.sourceTitle} />
+        <DetailTerm label="Document ID" value={detail.documentId} />
+        <DetailTerm label="Inspection state" value={detail.activeState} />
+        <DetailTerm
+          label="Section"
+          value={detail.sectionHeading ?? "Not available"}
+        />
+        <DetailTerm
+          label="Page"
+          value={detail.pageNumber?.toString() ?? "Not available"}
+        />
+        <DetailTerm
+          label="Source path"
+          value={detail.sourcePath ?? "Not available"}
+        />
+      </dl>
+      <CopyButton value={detail.copyableLabel} label="Copy citation label" />
+      <div className="mt-4 flex flex-wrap gap-2">
+        {detail.linkedChunks.map((chunk) => (
+          <Button
+            key={chunk.id}
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChunk(chunk.id)}
+          >
+            <Link2 className="size-4" aria-hidden="true" />
+            Open chunk {chunk.chunkIndex}
+          </Button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CopyButton({ value, label }: { value: string; label: string }) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      className="mt-3"
+      onClick={() => void navigator.clipboard?.writeText(value)}
+    >
+      <Copy className="size-4" aria-hidden="true" />
+      {label}
+    </Button>
   )
 }
 
@@ -996,6 +1836,43 @@ function DetailTerm({ label, value }: { label: string; value: string }) {
       <dt className="font-medium">{label}</dt>
       <dd className="text-muted-foreground">{value}</dd>
     </div>
+  )
+}
+
+function filterChunks(chunks: ChunkRow[], query: string) {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) {
+    return chunks
+  }
+
+  return chunks.filter((chunk) =>
+    [
+      chunk.id,
+      chunk.documentId,
+      chunk.heading ?? "",
+      chunk.contentPreview,
+      chunk.pageNumber?.toString() ?? "",
+      chunk.chunkIndex.toString(),
+    ].some((value) => value.toLowerCase().includes(normalizedQuery))
+  )
+}
+
+function filterCitations(citations: CitationRow[], query: string) {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) {
+    return citations
+  }
+
+  return citations.filter((citation) =>
+    [
+      citation.id,
+      citation.documentId,
+      citation.displayLabel,
+      citation.citationLabel,
+      citation.sectionHeading ?? "",
+      citation.pageNumber?.toString() ?? "",
+      citation.linkedChunkIds.join(" "),
+    ].some((value) => value.toLowerCase().includes(normalizedQuery))
   )
 }
 

@@ -4,6 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   fetchAdminMe,
+  fetchChunkDetail,
+  fetchCitationDetail,
+  fetchSourceChunks,
+  fetchSourceCitations,
   fetchSourceDetail,
   fetchStewardshipDashboard,
   ingestSource,
@@ -31,6 +35,10 @@ vi.mock("@/lib/maintainer/api", async () => {
   return {
     ...actual,
     fetchAdminMe: vi.fn(),
+    fetchChunkDetail: vi.fn(),
+    fetchCitationDetail: vi.fn(),
+    fetchSourceChunks: vi.fn(),
+    fetchSourceCitations: vi.fn(),
     fetchSourceDetail: vi.fn(),
     fetchStewardshipDashboard: vi.fn(),
     ingestSource: vi.fn(),
@@ -48,6 +56,10 @@ vi.mock("@/lib/supabase/browser-client", () => ({
 }))
 
 const mockedFetchAdminMe = vi.mocked(fetchAdminMe)
+const mockedFetchChunkDetail = vi.mocked(fetchChunkDetail)
+const mockedFetchCitationDetail = vi.mocked(fetchCitationDetail)
+const mockedFetchSourceChunks = vi.mocked(fetchSourceChunks)
+const mockedFetchSourceCitations = vi.mocked(fetchSourceCitations)
 const mockedFetchSourceDetail = vi.mocked(fetchSourceDetail)
 const mockedFetchStewardshipDashboard = vi.mocked(fetchStewardshipDashboard)
 const mockedIngestSource = vi.mocked(ingestSource)
@@ -136,6 +148,108 @@ beforeEach(() => {
   })
   mockedFetchStewardshipDashboard.mockResolvedValue(dashboard)
   mockedFetchSourceDetail.mockResolvedValue(detailFrom())
+  mockedFetchSourceChunks.mockResolvedValue({
+    anchor: {
+      documentId: "doc-un-charter-v2",
+      version: "v2",
+      sourceId: "gg-src-un-charter-institutions",
+      state: "ready",
+      message:
+        "Inspecting chunk records from the latest successful document revision.",
+      nextStep: "Re-ingest if the visible evidence is stale or incomplete.",
+    },
+    chunks: [
+      {
+        id: "chunk-un-charter-0",
+        documentId: "doc-un-charter-v2",
+        sourceId: "gg-src-un-charter-institutions",
+        chunkIndex: 0,
+        tokenCount: 42,
+        contentPreview:
+          "The UN Charter establishes the organs and obligations.",
+        embeddingPresent: true,
+        activeState: "ready",
+        pageNumber: 1,
+        heading: "Preamble",
+        metadata: {},
+      },
+    ],
+    partialData: [],
+  })
+  mockedFetchSourceCitations.mockResolvedValue({
+    anchor: {
+      documentId: "doc-un-charter-v2",
+      version: "v2",
+      sourceId: "gg-src-un-charter-institutions",
+      state: "ready",
+      message:
+        "Inspecting citation records from the latest successful document revision.",
+      nextStep: "Re-ingest if the visible evidence is stale or incomplete.",
+    },
+    citations: [
+      {
+        id: "ref-un-charter",
+        documentId: "doc-un-charter-v2",
+        sourceId: "gg-src-un-charter-institutions",
+        citationLabel: "Charter of the United Nations",
+        displayLabel: "UN Charter",
+        linkedChunkIds: ["chunk-un-charter-0"],
+        activeState: "ready",
+        pageNumber: 1,
+        sectionHeading: "Preamble",
+        metadata: {},
+      },
+    ],
+    partialData: [],
+  })
+  mockedFetchChunkDetail.mockResolvedValue({
+    id: "chunk-un-charter-0",
+    documentId: "doc-un-charter-v2",
+    sourceId: "gg-src-un-charter-institutions",
+    chunkIndex: 0,
+    tokenCount: 42,
+    contentPreview: "The UN Charter establishes the organs and obligations.",
+    content: "The UN Charter establishes the organs and obligations.",
+    embeddingPresent: true,
+    activeState: "ready",
+    pageNumber: 1,
+    heading: "Preamble",
+    metadata: {},
+    linkedCitationIds: ["ref-un-charter"],
+    createdAt: "2026-05-05T00:00:00Z",
+    updatedAt: "2026-05-05T00:00:00Z",
+  })
+  mockedFetchCitationDetail.mockResolvedValue({
+    id: "ref-un-charter",
+    documentId: "doc-un-charter-v2",
+    sourceId: "gg-src-un-charter-institutions",
+    citationLabel: "Charter of the United Nations",
+    displayLabel: "UN Charter",
+    linkedChunkIds: ["chunk-un-charter-0"],
+    activeState: "ready",
+    pageNumber: 1,
+    sectionHeading: "Preamble",
+    metadata: {},
+    sourceTitle: "Charter of the United Nations",
+    sourcePath: "bootstrap-approved-source-bundle",
+    copyableLabel: "UN Charter",
+    linkedChunks: [
+      {
+        id: "chunk-un-charter-0",
+        documentId: "doc-un-charter-v2",
+        sourceId: "gg-src-un-charter-institutions",
+        chunkIndex: 0,
+        tokenCount: 42,
+        contentPreview:
+          "The UN Charter establishes the organs and obligations.",
+        embeddingPresent: true,
+        activeState: "ready",
+        pageNumber: 1,
+        heading: "Preamble",
+        metadata: {},
+      },
+    ],
+  })
   mockedUploadSource.mockResolvedValue({
     source: {
       ...detailFrom(),
@@ -498,5 +612,216 @@ describe("MaintainerDashboard", () => {
         session
       )
     )
+  })
+
+  it("opens chunk inspection, detail, copy, and linked citation evidence", async () => {
+    const user = userEvent.setup()
+
+    render(<MaintainerDashboard />)
+
+    await screen.findByRole("heading", {
+      name: "Charter of the United Nations",
+    })
+    await user.click(screen.getByRole("tab", { name: "Chunks" }))
+
+    expect(await screen.findByText("doc-un-charter-v2")).toBeVisible()
+    expect(
+      screen.getAllByText(
+        "The UN Charter establishes the organs and obligations."
+      ).length
+    ).toBeGreaterThan(0)
+    await user.click(screen.getAllByRole("button", { name: "Inspect" }).at(-1)!)
+
+    expect(
+      await screen.findByRole("dialog", { name: "Retrieval evidence detail" })
+    ).toBeVisible()
+    expect(
+      screen.getByRole("button", { name: "Copy chunk text" })
+    ).toBeVisible()
+    await user.click(screen.getByRole("button", { name: "Open citation" }))
+
+    expect(mockedFetchCitationDetail).toHaveBeenCalledWith(
+      "ref-un-charter",
+      session
+    )
+  })
+
+  it("opens citation inspection with learner-visible labels and linked chunks", async () => {
+    const user = userEvent.setup()
+
+    render(<MaintainerDashboard />)
+
+    await screen.findByRole("heading", {
+      name: "Charter of the United Nations",
+    })
+    await user.click(screen.getByRole("tab", { name: "Citations" }))
+
+    expect((await screen.findAllByText("UN Charter")).length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText("Charter of the United Nations").length
+    ).toBeGreaterThan(0)
+    await user.click(screen.getAllByRole("button", { name: "Inspect" }).at(-1)!)
+
+    expect(
+      await screen.findByRole("button", { name: "Copy citation label" })
+    ).toBeVisible()
+    expect(screen.getByText("bootstrap-approved-source-bundle")).toBeVisible()
+    await user.click(screen.getByRole("button", { name: "Open chunk 0" }))
+    expect(mockedFetchChunkDetail).toHaveBeenCalledWith(
+      "chunk-un-charter-0",
+      session
+    )
+  })
+
+  it("keeps stale chunk responses from painting after source switching", async () => {
+    const user = userEvent.setup()
+    let resolveFirstChunks: (
+      value: Awaited<ReturnType<typeof fetchSourceChunks>>
+    ) => void = () => {}
+    mockedFetchSourceChunks.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFirstChunks = resolve
+        })
+    )
+
+    render(<MaintainerDashboard />)
+
+    await screen.findByRole("heading", {
+      name: "Charter of the United Nations",
+    })
+    await user.click(screen.getByRole("tab", { name: "Chunks" }))
+    await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
+    await user.click(screen.getByRole("tab", { name: "Chunks" }))
+
+    resolveFirstChunks({
+      anchor: {
+        documentId: "stale-doc",
+        version: "v0",
+        sourceId: "gg-src-un-charter-institutions",
+        state: "ready",
+        message: "stale",
+        nextStep: "stale",
+      },
+      chunks: [],
+      partialData: [],
+    })
+
+    await waitFor(() =>
+      expect(mockedFetchSourceChunks).toHaveBeenCalledTimes(2)
+    )
+    expect(screen.queryByText("stale-doc")).not.toBeInTheDocument()
+  })
+
+  it("keeps stale chunk detail responses from painting after source switching", async () => {
+    const user = userEvent.setup()
+    mockedFetchSourceDetail.mockImplementation(async (sourceId) =>
+      sourceId === "gg-src-south-china-sea-award"
+        ? detailFrom(dashboard.sources[1])
+        : detailFrom(dashboard.sources[0])
+    )
+    let resolveChunkDetail: (
+      value: Awaited<ReturnType<typeof fetchChunkDetail>>
+    ) => void = () => {}
+    mockedFetchChunkDetail.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveChunkDetail = resolve
+        })
+    )
+
+    render(<MaintainerDashboard />)
+
+    await screen.findByRole("heading", {
+      name: "Charter of the United Nations",
+    })
+    await user.click(screen.getByRole("tab", { name: "Chunks" }))
+    await user.click(screen.getAllByRole("button", { name: "Inspect" }).at(-1)!)
+    await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
+
+    resolveChunkDetail({
+      id: "chunk-un-charter-0",
+      documentId: "doc-un-charter-v2",
+      sourceId: "gg-src-un-charter-institutions",
+      chunkIndex: 0,
+      tokenCount: 42,
+      contentPreview: "The UN Charter establishes the organs and obligations.",
+      content: "The UN Charter establishes the organs and obligations.",
+      embeddingPresent: true,
+      activeState: "ready",
+      pageNumber: 1,
+      heading: "Preamble",
+      metadata: {},
+      linkedCitationIds: ["ref-un-charter"],
+      createdAt: "2026-05-05T00:00:00Z",
+      updatedAt: "2026-05-05T00:00:00Z",
+    })
+
+    await screen.findByRole("heading", {
+      name: "South China Sea Arbitration Award",
+    })
+    expect(
+      screen.queryByRole("dialog", { name: "Retrieval evidence detail" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("filters chunk inspection results and explains the row limit", async () => {
+    const user = userEvent.setup()
+    mockedFetchSourceChunks.mockResolvedValueOnce({
+      anchor: {
+        documentId: "doc-un-charter-v2",
+        version: "v2",
+        sourceId: "gg-src-un-charter-institutions",
+        state: "ready",
+        message:
+          "Inspecting chunk records from the latest successful document revision.",
+        nextStep: "Re-ingest if the visible evidence is stale or incomplete.",
+      },
+      chunks: Array.from({ length: 55 }, (_, index) => ({
+        id: `chunk-${index}`,
+        documentId: "doc-un-charter-v2",
+        sourceId: "gg-src-un-charter-institutions",
+        chunkIndex: index,
+        tokenCount: 40 + index,
+        contentPreview:
+          index === 54 ? "Tribunal award evidence" : `Chunk ${index}`,
+        embeddingPresent: true,
+        activeState: "ready" as const,
+        pageNumber: index + 1,
+        heading: index === 54 ? "Award" : "Preamble",
+        metadata: {},
+      })),
+      partialData: [],
+    })
+
+    render(<MaintainerDashboard />)
+
+    await screen.findByRole("heading", {
+      name: "Charter of the United Nations",
+    })
+    await user.click(screen.getByRole("tab", { name: "Chunks" }))
+
+    expect(
+      await screen.findByText(
+        "Showing first 50 of 55 matching chunks. Refine the filter to narrow further."
+      )
+    ).toBeVisible()
+    expect(
+      screen.queryByText("Tribunal award evidence")
+    ).not.toBeInTheDocument()
+
+    await user.type(
+      screen.getByRole("searchbox", { name: "Filter chunks" }),
+      "tribunal"
+    )
+
+    expect(
+      (await screen.findAllByText("Tribunal award evidence")).length
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getByText(
+        "Showing 1 of 1 matching chunks. Filtered from 55 total records."
+      )
+    ).toBeVisible()
   })
 })
