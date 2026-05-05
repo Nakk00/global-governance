@@ -23,21 +23,14 @@ const MaintainerDashboard = lazy(() =>
 )
 
 export function App() {
-  if (
-    window.location.pathname === "/maintainer" ||
-    window.location.pathname === "/maintainer/validation"
-  ) {
+  const pathname = window.location.pathname
+
+  if (pathname === "/maintainer" || pathname.startsWith("/maintainer/")) {
     return (
       <Suspense
         fallback={<main className="min-h-svh bg-background text-foreground" />}
       >
-        <MaintainerDashboard
-          initialView={
-            window.location.pathname === "/maintainer/validation"
-              ? "validation"
-              : "sources"
-          }
-        />
+        <MaintainerDashboard />
       </Suspense>
     )
   }

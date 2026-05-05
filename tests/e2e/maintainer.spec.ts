@@ -47,9 +47,33 @@ const dashboard = {
       partialData: [],
     },
   ],
-  ingestionRuns: [],
-  validationRuns: [],
-  auditEvents: [],
+  ingestionRuns: [
+    {
+      eventId: "ingest-1",
+      outcome: "succeeded",
+      origin: "admin@example.test",
+      occurredAt: "2026-05-05T00:00:00Z",
+      summary: "UN Charter source ingested into the retrieval index.",
+    },
+  ],
+  validationRuns: [
+    {
+      eventId: "validation-1",
+      outcome: "warning",
+      origin: "admin@example.test",
+      occurredAt: "2026-05-05T00:01:00Z",
+      summary: "Demo readiness validation completed with weak support.",
+    },
+  ],
+  auditEvents: [
+    {
+      eventId: "audit-1",
+      outcome: "recorded",
+      origin: "admin@example.test",
+      occurredAt: "2026-05-05T00:02:00Z",
+      summary: "Lifecycle action recorded for stewarded source.",
+    },
+  ],
 }
 
 const sourceDetail = {
@@ -424,18 +448,29 @@ test("@smoke maintainer mutation flow keeps upload and archive inside the privat
       return
     }
 
+    const detail = url.includes("gg-src-new-policy-note")
+      ? {
+          ...mutableDetail,
+          sourceId: "gg-src-new-policy-note",
+          title: "New Policy Note",
+          lifecycleState: "draft",
+          provenance: "Maintainer upload",
+          usageScope: ["ingestion"],
+        }
+      : mutableDetail
+
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
         success: true,
-        data: mutableDetail,
+        data: detail,
         error: null,
         meta: {},
       }),
     })
   })
 
-  await page.goto("/maintainer")
+  await page.goto("/maintainer/sources/new")
   await page.getByLabel("Source ID").fill("gg-src-new-policy-note")
   await page.getByLabel("Title").fill("New Policy Note")
   await page.getByLabel("Provenance").fill("Maintainer upload")
@@ -474,14 +509,51 @@ test("@smoke maintainer direct load resolves the private dashboard without publi
   await expect(
     page.getByRole("heading", { name: "Maintainer dashboard" })
   ).toBeVisible()
-  await expect(page.getByText("admin@example.test")).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "Maintainer overview" })
+  ).toBeVisible()
+  await expect(
+    page.getByText("admin@example.test", { exact: true })
+  ).toBeVisible()
   await expect(page.getByText("Stewarded sources")).toBeVisible()
   await expect(
     page.getByRole("heading", { name: "Protected source upload" })
-  ).toBeVisible()
+  ).toHaveCount(0)
   await expect(
     page.getByRole("heading", { name: "Charter of the United Nations" })
+  ).toHaveCount(0)
+  await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
+})
+
+test("@smoke maintainer-like public paths are not captured by the private route", async ({
+  page,
+}) => {
+  await page.goto("/maintainer-old")
+
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "Maintainer Sign In" })
+  ).toHaveCount(0)
+})
+
+test("@smoke maintainer sources route shows inventory and opens source detail", async ({
+  page,
+}) => {
+  await seedSession(page)
+  await mockMaintainerApi(page)
+
+  await page.goto("/maintainer/sources")
+  await expect(
+    page.getByRole("heading", { name: "Source stewardship inventory" })
   ).toBeVisible()
+  await expect(page.getByLabel("Source ID")).toHaveCount(0)
+  await page.getByRole("button", { name: "Inspect" }).first().click()
+  await expect(page).toHaveURL(
+    /\/maintainer\/sources\/gg-src-un-charter-institutions$/
+  )
+  await expect(page.locator("#source-detail-page-heading")).toHaveText(
+    "Charter of the United Nations"
+  )
   await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
 })
 
@@ -492,7 +564,7 @@ test("@smoke maintainer retrieval inspection opens chunks and citations without 
   await mockMaintainerApi(page)
   await page.setViewportSize({ width: 390, height: 844 })
 
-  await page.goto("/maintainer")
+  await page.goto("/maintainer/sources/gg-src-un-charter-institutions")
   await page.getByRole("tab", { name: "Chunks" }).click()
   await expect(page.getByText("doc-un-charter-v2")).toBeVisible()
   await expect(
@@ -520,6 +592,25 @@ test("@smoke maintainer retrieval inspection opens chunks and citations without 
     .locator("main")
     .evaluate((element) => element.scrollWidth)
   expect(mainScrollWidth).toBeLessThanOrEqual(390)
+})
+
+test("@smoke maintainer operations route separates records from source detail", async ({
+  page,
+}) => {
+  await seedSession(page)
+  await mockMaintainerApi(page)
+
+  await page.goto("/maintainer/operations")
+  await expect(
+    page.getByRole("heading", { name: "Ingestion and audit records" })
+  ).toBeVisible()
+  await expect(page.getByText("UN Charter source ingested")).toBeVisible()
+  await expect(page.getByText("Demo readiness validation")).toBeVisible()
+  await expect(page.getByText("Lifecycle action recorded")).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "Protected source upload" })
+  ).toHaveCount(0)
+  await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
 })
 
 test("@smoke maintainer validation workbench runs and inspects readiness checks", async ({

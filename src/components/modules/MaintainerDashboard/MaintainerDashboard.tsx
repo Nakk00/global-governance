@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   Archive,
   AlertTriangle,
@@ -87,7 +87,17 @@ type DashboardState =
   | { state: "outage"; message: string }
   | { state: "ready"; dashboard: StewardshipDashboard }
 
-type DashboardViewMode = "sources" | "validation"
+type MaintainerRoute =
+  | { section: "overview"; path: "/maintainer" | "/maintainer/overview" }
+  | { section: "sources"; path: "/maintainer/sources" }
+  | { section: "sourceNew"; path: "/maintainer/sources/new" }
+  | {
+      section: "sourceDetail"
+      path: `/maintainer/sources/${string}`
+      sourceId: string
+    }
+  | { section: "validation"; path: "/maintainer/validation" }
+  | { section: "operations"; path: "/maintainer/operations" }
 
 type DetailState =
   | { state: "idle" }
@@ -170,12 +180,30 @@ type ValidationWorkbenchAlert = {
 }
 
 const INSPECTION_ROW_LIMIT = 50
+const EMPTY_STEWARDSHIP_DASHBOARD: StewardshipDashboard = {
+  overview: {
+    sourceCount: 0,
+    activeSourceCount: 0,
+    draftSourceCount: 0,
+    partialSourceCount: 0,
+    latestIngestionStatus: null,
+    latestValidationStatus: null,
+    readinessState: "empty",
+  },
+  sources: [],
+  ingestionRuns: [],
+  validationRuns: [],
+  auditEvents: [],
+}
 
 export function MaintainerDashboard({
-  initialView = "sources",
+  initialPath,
 }: {
-  initialView?: DashboardViewMode
+  initialPath?: string
 } = {}) {
+  const [route, setRoute] = useState<MaintainerRoute>(() =>
+    parseMaintainerRoute(initialPath ?? window.location.pathname)
+  )
   const [gate, setGate] = useState<GateState>({ state: "loading" })
   const [dashboardState, setDashboardState] = useState<DashboardState>({
     state: "loading",
@@ -185,6 +213,7 @@ export function MaintainerDashboard({
   const [mutationState, setMutationState] = useState<MutationState>({
     state: "idle",
   })
+  const detailRequestKeyRef = useRef(0)
 
   const resolveGate = useCallback(async () => {
     setGate({ state: "loading" })
@@ -209,13 +238,21 @@ export function MaintainerDashboard({
 
   const loadSourceDetail = useCallback(
     async (sourceId: string, session: SupabaseSession) => {
+      const requestKey = ++detailRequestKeyRef.current
       setDetailState({ state: "loading" })
       try {
+        const source = await fetchSourceDetail(sourceId, session)
+        if (requestKey !== detailRequestKeyRef.current) {
+          return
+        }
         setDetailState({
           state: "ready",
-          source: await fetchSourceDetail(sourceId, session),
+          source,
         })
       } catch (error) {
+        if (requestKey !== detailRequestKeyRef.current) {
+          return
+        }
         if (handleMaintainerReadAuthFailure(error, setGate)) {
           setDetailState({ state: "idle" })
           return
@@ -251,10 +288,8 @@ export function MaintainerDashboard({
           ? currentSourceId
           : (dashboard.sources[0]?.sourceId ?? null)
       )
-      setDetailState({ state: "idle" })
     } catch (error) {
       if (handleMaintainerReadAuthFailure(error, setGate)) {
-        setDetailState({ state: "idle" })
         return
       }
       setDashboardState({
@@ -283,12 +318,28 @@ export function MaintainerDashboard({
   }, [gate, loadDashboard])
 
   useEffect(() => {
-    if (gate.state === "ready" && selectedSourceId) {
-      // Source detail is a follow-up backend read keyed by the current selection.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      void loadSourceDetail(selectedSourceId, gate.session)
+    function syncRouteFromHistory() {
+      setRoute(parseMaintainerRoute(window.location.pathname))
     }
-  }, [gate, selectedSourceId, loadSourceDetail])
+
+    window.addEventListener("popstate", syncRouteFromHistory)
+    return () => window.removeEventListener("popstate", syncRouteFromHistory)
+  }, [])
+
+  useEffect(() => {
+    if (gate.state !== "ready") {
+      return
+    }
+    if (route.section === "sourceDetail") {
+      setSelectedSourceId(route.sourceId)
+      // Source detail is a follow-up backend read keyed by the routed selection.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void loadSourceDetail(route.sourceId, gate.session)
+      return
+    }
+    detailRequestKeyRef.current += 1
+    setDetailState({ state: "idle" })
+  }, [gate, route, loadSourceDetail])
 
   function signOut() {
     clearSupabaseSession()
@@ -303,6 +354,15 @@ export function MaintainerDashboard({
     setSelectedSourceId(result.source.sourceId)
     setDetailState({ state: "ready", source: result.source })
     setMutationState({ state: "succeeded", message })
+    navigateTo(
+      `/maintainer/sources/${encodeURIComponent(result.source.sourceId)}`
+    )
+  }
+
+  function navigateTo(path: string) {
+    const nextRoute = parseMaintainerRoute(path)
+    window.history.pushState(null, "", nextRoute.path)
+    setRoute(nextRoute)
   }
 
   async function runMutation(
@@ -378,60 +438,48 @@ export function MaintainerDashboard({
         </div>
       </header>
 
-      {dashboardState.state === "loading" ? (
-        <SectionSkeleton label="Loading source stewardship records" />
-      ) : dashboardState.state === "empty" ? (
-        <SectionState
-          title="No approved sources yet"
-          body="The approved inventory returned an empty dataset."
-        />
-      ) : dashboardState.state === "outage" ? (
-        <RetryState
-          message={dashboardState.message}
-          onRetry={() => loadDashboard(gate.session)}
-        />
-      ) : (
-        <DashboardView
-          dashboard={dashboardState.dashboard}
-          session={gate.session}
-          initialView={initialView}
-          selectedSourceId={selectedSourceId}
-          detailState={detailState}
-          mutationState={mutationState}
-          onSelectSource={setSelectedSourceId}
-          onUploadSource={(payload) =>
-            runMutation(
-              "upload",
-              () => uploadSource(payload, gate.session),
-              "Source uploaded as draft and inactive."
-            )
-          }
-          onUpdateSource={(sourceId, payload) =>
-            runMutation(
-              "edit",
-              () => updateSourceMetadata(sourceId, payload, gate.session),
-              "Source metadata updated."
-            )
-          }
-          onLifecycleAction={(sourceId, action) =>
-            runMutation(
-              action,
-              () => mutateSourceLifecycle(sourceId, action, gate.session),
-              `Source ${action} request completed.`
-            )
-          }
-          onIngestSource={(sourceId) =>
-            runMutation(
-              "ingest",
-              () => ingestSource(sourceId, gate.session),
-              "Protected ingest request queued."
-            )
-          }
-          onRetrySourceDetail={(sourceId) =>
-            void loadSourceDetail(sourceId, gate.session)
-          }
-        />
-      )}
+      <DashboardView
+        route={route}
+        dashboardState={dashboardState}
+        session={gate.session}
+        selectedSourceId={selectedSourceId}
+        detailState={detailState}
+        mutationState={mutationState}
+        onNavigate={navigateTo}
+        onRetryDashboard={() => loadDashboard(gate.session)}
+        onSelectSource={setSelectedSourceId}
+        onUploadSource={(payload) =>
+          runMutation(
+            "upload",
+            () => uploadSource(payload, gate.session),
+            "Source uploaded as draft and inactive."
+          )
+        }
+        onUpdateSource={(sourceId, payload) =>
+          runMutation(
+            "edit",
+            () => updateSourceMetadata(sourceId, payload, gate.session),
+            "Source metadata updated."
+          )
+        }
+        onLifecycleAction={(sourceId, action) =>
+          runMutation(
+            action,
+            () => mutateSourceLifecycle(sourceId, action, gate.session),
+            `Source ${action} request completed.`
+          )
+        }
+        onIngestSource={(sourceId) =>
+          runMutation(
+            "ingest",
+            () => ingestSource(sourceId, gate.session),
+            "Protected ingest request queued."
+          )
+        }
+        onRetrySourceDetail={(sourceId) =>
+          void loadSourceDetail(sourceId, gate.session)
+        }
+      />
     </MaintainerFrame>
   )
 }
@@ -482,12 +530,14 @@ function AccessStateView({
 }
 
 function DashboardView({
-  dashboard,
+  route,
+  dashboardState,
   session,
-  initialView,
   selectedSourceId,
   detailState,
   mutationState,
+  onNavigate,
+  onRetryDashboard,
   onSelectSource,
   onUploadSource,
   onUpdateSource,
@@ -495,12 +545,14 @@ function DashboardView({
   onIngestSource,
   onRetrySourceDetail,
 }: {
-  dashboard: StewardshipDashboard
+  route: MaintainerRoute
+  dashboardState: DashboardState
   session: SupabaseSession
-  initialView: DashboardViewMode
   selectedSourceId: string | null
   detailState: DetailState
   mutationState: MutationState
+  onNavigate: (path: string) => void
+  onRetryDashboard: () => void
   onSelectSource: (sourceId: string) => void
   onUploadSource: (payload: SourceUploadPayload) => void
   onUpdateSource: (sourceId: string, payload: SourceMetadataPayload) => void
@@ -511,91 +563,456 @@ function DashboardView({
   onIngestSource: (sourceId: string) => void
   onRetrySourceDetail: (sourceId: string) => void
 }) {
-  const [viewMode, setViewMode] = useState<DashboardViewMode>(initialView)
-  const selectedSource = useMemo(
-    () =>
-      dashboard.sources.find(
-        (source) => source.sourceId === selectedSourceId
-      ) ?? dashboard.sources[0],
-    [dashboard.sources, selectedSourceId]
-  )
+  const dashboard =
+    dashboardState.state === "ready"
+      ? dashboardState.dashboard
+      : dashboardState.state === "empty"
+        ? EMPTY_STEWARDSHIP_DASHBOARD
+        : null
+  const selectedSource =
+    dashboard?.sources.find((source) => source.sourceId === selectedSourceId) ??
+    dashboard?.sources[0]
+  const routedSource =
+    route.section === "sourceDetail"
+      ? dashboard?.sources.find((source) => source.sourceId === route.sourceId)
+      : selectedSource
 
   return (
     <div className="space-y-5">
-      <nav className="flex flex-wrap gap-2" aria-label="Maintainer sections">
-        <Button
-          type="button"
-          variant={viewMode === "sources" ? "default" : "outline"}
-          onClick={() => setViewMode("sources")}
-        >
-          Source stewardship
-        </Button>
-        <Button
-          type="button"
-          variant={viewMode === "validation" ? "default" : "outline"}
-          onClick={() => setViewMode("validation")}
-        >
-          Validation workbench
-        </Button>
-      </nav>
-      {viewMode === "validation" ? (
+      <MaintainerSectionNav route={route} onNavigate={onNavigate} />
+      {route.section === "overview" ? (
+        dashboard ? (
+          <OverviewPage dashboard={dashboard} onNavigate={onNavigate} />
+        ) : (
+          <DashboardDataState
+            state={dashboardState}
+            onRetry={onRetryDashboard}
+          />
+        )
+      ) : route.section === "sources" ? (
+        dashboard ? (
+          <SourcesPage
+            dashboard={dashboard}
+            selectedSourceId={selectedSource?.sourceId ?? null}
+            onNavigate={onNavigate}
+            onSelectSource={onSelectSource}
+          />
+        ) : (
+          <DashboardDataState
+            state={dashboardState}
+            onRetry={onRetryDashboard}
+          />
+        )
+      ) : route.section === "sourceNew" ? (
+        <SourceUploadPage
+          mutationState={mutationState}
+          onSubmit={onUploadSource}
+        />
+      ) : route.section === "sourceDetail" ? (
+        <SourceDetailPage
+          sourceId={route.sourceId}
+          selectedSource={routedSource}
+          detailState={detailState}
+          session={session}
+          mutationState={mutationState}
+          onNavigate={onNavigate}
+          onUpdateSource={onUpdateSource}
+          onLifecycleAction={onLifecycleAction}
+          onIngestSource={onIngestSource}
+          onRetrySourceDetail={onRetrySourceDetail}
+        />
+      ) : route.section === "validation" ? (
         <ValidationWorkbench session={session} />
+      ) : dashboard ? (
+        <OperationsPage dashboard={dashboard} />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.9fr)]">
-          <section className="space-y-6">
-            <OverviewCards dashboard={dashboard} />
-            <MutationStatus state={mutationState} />
-            <SourceUploadPanel
-              mutationState={mutationState}
-              onSubmit={onUploadSource}
-            />
-            <SourceTable
-              sources={dashboard.sources}
-              selectedSourceId={selectedSource?.sourceId ?? null}
-              onSelectSource={onSelectSource}
-            />
-            <OperationalRecords
-              ingestionRuns={dashboard.ingestionRuns}
-              validationRuns={dashboard.validationRuns}
-              auditEvents={dashboard.auditEvents}
-            />
-          </section>
-          <aside aria-label="Source detail and history" className="space-y-4">
-            {detailState.state === "loading" ? (
-              <SectionSkeleton label="Loading source history" />
-            ) : detailState.state === "ready" ? (
-              <SourceDetailPanel
-                source={detailState.source}
-                session={session}
-                mutationState={mutationState}
-                onUpdateSource={onUpdateSource}
-                onLifecycleAction={onLifecycleAction}
-                onIngestSource={onIngestSource}
-              />
-            ) : detailState.state === "empty" ? (
-              <SectionState
-                title="Source unavailable"
-                body={detailState.message}
-              />
-            ) : detailState.state === "outage" ? (
-              <RetryState
-                message={detailState.message}
-                onRetry={() =>
-                  selectedSource
-                    ? onRetrySourceDetail(selectedSource.sourceId)
-                    : null
-                }
-              />
-            ) : (
-              <SectionState
-                title="Select a source"
-                body="Choose an approved source to inspect its metadata and action trail."
-              />
-            )}
-          </aside>
-        </div>
+        <DashboardDataState state={dashboardState} onRetry={onRetryDashboard} />
       )}
     </div>
+  )
+}
+
+function DashboardDataState({
+  state,
+  onRetry,
+}: {
+  state: DashboardState
+  onRetry: () => void
+}) {
+  if (state.state === "loading") {
+    return <SectionSkeleton label="Loading source stewardship records" />
+  }
+  if (state.state === "outage") {
+    return <RetryState message={state.message} onRetry={onRetry} />
+  }
+  return (
+    <SectionState
+      title="No approved sources yet"
+      body="The approved inventory returned an empty dataset."
+    />
+  )
+}
+
+function parseMaintainerRoute(pathname: string): MaintainerRoute {
+  const normalized = pathname.replace(/\/+$/, "") || "/maintainer"
+  if (normalized === "/maintainer" || normalized === "/maintainer/overview") {
+    return {
+      section: "overview",
+      path: normalized === "/maintainer/overview" ? normalized : "/maintainer",
+    }
+  }
+  if (normalized === "/maintainer/sources") {
+    return { section: "sources", path: "/maintainer/sources" }
+  }
+  if (normalized === "/maintainer/sources/new") {
+    return { section: "sourceNew", path: "/maintainer/sources/new" }
+  }
+  if (normalized.startsWith("/maintainer/sources/")) {
+    const sourceSegment = normalized.replace("/maintainer/sources/", "")
+    let sourceId = ""
+    try {
+      sourceId = decodeURIComponent(sourceSegment)
+    } catch {
+      return { section: "overview", path: "/maintainer" }
+    }
+    if (sourceId) {
+      return {
+        section: "sourceDetail",
+        path: `/maintainer/sources/${encodeURIComponent(sourceId)}`,
+        sourceId,
+      }
+    }
+  }
+  if (normalized === "/maintainer/validation") {
+    return { section: "validation", path: "/maintainer/validation" }
+  }
+  if (normalized === "/maintainer/operations") {
+    return { section: "operations", path: "/maintainer/operations" }
+  }
+  return { section: "overview", path: "/maintainer" }
+}
+
+function MaintainerSectionNav({
+  route,
+  onNavigate,
+}: {
+  route: MaintainerRoute
+  onNavigate: (path: string) => void
+}) {
+  const links = [
+    {
+      path: "/maintainer",
+      label: "Overview",
+      active: route.section === "overview",
+    },
+    {
+      path: "/maintainer/sources",
+      label: "Sources",
+      active:
+        route.section === "sources" ||
+        route.section === "sourceNew" ||
+        route.section === "sourceDetail",
+    },
+    {
+      path: "/maintainer/validation",
+      label: "Validation",
+      active: route.section === "validation",
+    },
+    {
+      path: "/maintainer/operations",
+      label: "Operations",
+      active: route.section === "operations",
+    },
+  ]
+
+  return (
+    <nav
+      className="flex flex-wrap gap-2 border-b border-border pb-4"
+      aria-label="Maintainer sections"
+    >
+      {links.map((link) => (
+        <button
+          key={link.path}
+          type="button"
+          className={`min-h-11 rounded-md border px-4 py-2 text-sm font-medium ${
+            link.active
+              ? "bg-primary text-primary-foreground"
+              : "bg-card text-foreground"
+          }`}
+          aria-current={link.active ? "page" : undefined}
+          onClick={() => onNavigate(link.path)}
+        >
+          {link.label}
+        </button>
+      ))}
+    </nav>
+  )
+}
+
+function OverviewPage({
+  dashboard,
+  onNavigate,
+}: {
+  dashboard: StewardshipDashboard
+  onNavigate: (path: string) => void
+}) {
+  return (
+    <section className="space-y-6" aria-labelledby="overview-page-heading">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase">
+            Readiness overview
+          </p>
+          <h2
+            id="overview-page-heading"
+            className="mt-2 text-2xl font-semibold"
+          >
+            Maintainer overview
+          </h2>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            onClick={() => onNavigate("/maintainer/sources")}
+          >
+            Review sources
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onNavigate("/maintainer/sources/new")}
+          >
+            <Upload className="size-4" aria-hidden="true" />
+            Upload source
+          </Button>
+        </div>
+      </div>
+      <OverviewCards dashboard={dashboard} />
+      <div className="grid gap-4 lg:grid-cols-3">
+        <ActivityPreview
+          title="Latest ingestion"
+          events={dashboard.ingestionRuns}
+          empty="No ingestion records are available."
+          onOpen={() => onNavigate("/maintainer/operations")}
+        />
+        <ActivityPreview
+          title="Latest validation"
+          events={dashboard.validationRuns}
+          empty="No validation records are available."
+          onOpen={() => onNavigate("/maintainer/validation")}
+        />
+        <ActivityPreview
+          title="Latest audit"
+          events={dashboard.auditEvents}
+          empty="No audit records are available."
+          onOpen={() => onNavigate("/maintainer/operations")}
+        />
+      </div>
+    </section>
+  )
+}
+
+function ActivityPreview({
+  title,
+  events,
+  empty,
+  onOpen,
+}: {
+  title: string
+  events: StewardshipEvent[]
+  empty: string
+  onOpen: () => void
+}) {
+  const latestEvent = events[0]
+
+  return (
+    <article className="rounded-lg border bg-card p-4">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-semibold">{title}</h3>
+        <Button type="button" variant="outline" onClick={onOpen}>
+          Open
+        </Button>
+      </div>
+      {latestEvent ? (
+        <div className="mt-4 text-sm">
+          <p className="font-medium">{latestEvent.outcome}</p>
+          <p className="mt-1 text-muted-foreground">{latestEvent.summary}</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {latestEvent.origin} · {latestEvent.occurredAt}
+          </p>
+        </div>
+      ) : (
+        <p className="mt-4 text-sm text-muted-foreground">{empty}</p>
+      )}
+    </article>
+  )
+}
+
+function SourcesPage({
+  dashboard,
+  selectedSourceId,
+  onNavigate,
+  onSelectSource,
+}: {
+  dashboard: StewardshipDashboard
+  selectedSourceId: string | null
+  onNavigate: (path: string) => void
+  onSelectSource: (sourceId: string) => void
+}) {
+  return (
+    <section className="space-y-5" aria-labelledby="sources-page-heading">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase">
+            Source lifecycle
+          </p>
+          <h2 id="sources-page-heading" className="mt-2 text-2xl font-semibold">
+            Source stewardship
+          </h2>
+        </div>
+        <Button
+          type="button"
+          onClick={() => onNavigate("/maintainer/sources/new")}
+        >
+          <Upload className="size-4" aria-hidden="true" />
+          Upload source
+        </Button>
+      </div>
+      <SourceTable
+        sources={dashboard.sources}
+        selectedSourceId={selectedSourceId}
+        onSelectSource={(sourceId) => {
+          onSelectSource(sourceId)
+          onNavigate(`/maintainer/sources/${encodeURIComponent(sourceId)}`)
+        }}
+      />
+    </section>
+  )
+}
+
+function SourceUploadPage({
+  mutationState,
+  onSubmit,
+}: {
+  mutationState: MutationState
+  onSubmit: (payload: SourceUploadPayload) => void
+}) {
+  return (
+    <section className="space-y-5" aria-labelledby="source-upload-page-heading">
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase">
+          Protected source intake
+        </p>
+        <h2
+          id="source-upload-page-heading"
+          className="mt-2 text-2xl font-semibold"
+        >
+          Upload a source draft
+        </h2>
+      </div>
+      <MutationStatus state={mutationState} />
+      <SourceUploadPanel mutationState={mutationState} onSubmit={onSubmit} />
+    </section>
+  )
+}
+
+function SourceDetailPage({
+  sourceId,
+  selectedSource,
+  detailState,
+  session,
+  mutationState,
+  onNavigate,
+  onUpdateSource,
+  onLifecycleAction,
+  onIngestSource,
+  onRetrySourceDetail,
+}: {
+  sourceId: string
+  selectedSource: SourceInventoryItem | undefined
+  detailState: DetailState
+  session: SupabaseSession
+  mutationState: MutationState
+  onNavigate: (path: string) => void
+  onUpdateSource: (sourceId: string, payload: SourceMetadataPayload) => void
+  onLifecycleAction: (
+    sourceId: string,
+    action: "approve" | "activate" | "disable" | "archive"
+  ) => void
+  onIngestSource: (sourceId: string) => void
+  onRetrySourceDetail: (sourceId: string) => void
+}) {
+  return (
+    <section className="space-y-5" aria-labelledby="source-detail-page-heading">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase">
+            Source detail
+          </p>
+          <h2
+            id="source-detail-page-heading"
+            className="mt-2 text-2xl font-semibold"
+          >
+            {selectedSource?.title ?? sourceId}
+          </h2>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onNavigate("/maintainer/sources")}
+        >
+          Back to sources
+        </Button>
+      </div>
+      <MutationStatus state={mutationState} />
+      {detailState.state === "loading" ? (
+        <SectionSkeleton label="Loading source history" />
+      ) : detailState.state === "ready" ? (
+        <SourceDetailPanel
+          source={detailState.source}
+          session={session}
+          mutationState={mutationState}
+          onUpdateSource={onUpdateSource}
+          onLifecycleAction={onLifecycleAction}
+          onIngestSource={onIngestSource}
+        />
+      ) : detailState.state === "empty" ? (
+        <SectionState title="Source unavailable" body={detailState.message} />
+      ) : detailState.state === "outage" ? (
+        <RetryState
+          message={detailState.message}
+          onRetry={() => onRetrySourceDetail(sourceId)}
+        />
+      ) : (
+        <SectionState
+          title="Source detail loading"
+          body="The selected source detail is being prepared."
+        />
+      )}
+    </section>
+  )
+}
+
+function OperationsPage({ dashboard }: { dashboard: StewardshipDashboard }) {
+  return (
+    <section className="space-y-5" aria-labelledby="operations-page-heading">
+      <div>
+        <p className="text-xs font-semibold text-muted-foreground uppercase">
+          Operational visibility
+        </p>
+        <h2
+          id="operations-page-heading"
+          className="mt-2 text-2xl font-semibold"
+        >
+          Ingestion and audit records
+        </h2>
+      </div>
+      <OperationalRecords
+        ingestionRuns={dashboard.ingestionRuns}
+        validationRuns={dashboard.validationRuns}
+        auditEvents={dashboard.auditEvents}
+      />
+    </section>
   )
 }
 
