@@ -199,6 +199,11 @@ const validationRuns = {
   runs: [validationRun],
 } satisfies ValidationRunList
 
+function renderMaintainer(path = "/maintainer") {
+  window.history.pushState(null, "", path)
+  return render(<MaintainerDashboard initialPath={path} />)
+}
+
 function detailFrom(source = dashboard.sources[0]): SourceDetail {
   return {
     ...source,
@@ -414,7 +419,7 @@ describe("MaintainerDashboard", () => {
   it("renders the sign-in gate when no session is present", async () => {
     mockedGetSupabaseSession.mockReturnValue(null)
 
-    render(<MaintainerDashboard />)
+    renderMaintainer()
 
     expect(
       await screen.findByRole("heading", { name: "Maintainer Sign In" })
@@ -429,7 +434,7 @@ describe("MaintainerDashboard", () => {
     const user = userEvent.setup()
     mockedGetSupabaseSession.mockReturnValue(null)
 
-    render(<MaintainerDashboard />)
+    renderMaintainer()
 
     const passwordInput = await screen.findByLabelText("Password")
     expect(passwordInput).toHaveAttribute("type", "password")
@@ -446,7 +451,7 @@ describe("MaintainerDashboard", () => {
     mockedGetSupabaseSession.mockReturnValue(null)
     mockedSignInWithPassword.mockImplementation(() => new Promise(() => {}))
 
-    render(<MaintainerDashboard />)
+    renderMaintainer()
 
     await user.type(await screen.findByLabelText("Email"), "admin@example.test")
     await user.type(screen.getByLabelText("Password"), "secret-password")
@@ -464,7 +469,7 @@ describe("MaintainerDashboard", () => {
     mockedGetSupabaseSession.mockReturnValue(null)
     mockedSignInWithPassword.mockRejectedValue(new Error("auth failed"))
 
-    render(<MaintainerDashboard />)
+    renderMaintainer()
 
     await user.type(await screen.findByLabelText("Email"), "admin@example.test")
     await user.type(screen.getByLabelText("Password"), "wrong-password")
@@ -485,7 +490,7 @@ describe("MaintainerDashboard", () => {
       return session
     })
 
-    render(<MaintainerDashboard />)
+    renderMaintainer()
 
     await user.type(await screen.findByLabelText("Email"), "admin@example.test")
     await user.type(screen.getByLabelText("Password"), "correct-password")
@@ -495,6 +500,103 @@ describe("MaintainerDashboard", () => {
       await screen.findByRole("heading", { name: "Maintainer dashboard" })
     ).toBeVisible()
     expect(mockedFetchAdminMe).toHaveBeenCalledWith(session)
+  })
+
+  it("keeps the overview focused on readiness instead of source operations", async () => {
+    renderMaintainer()
+
+    expect(
+      await screen.findByRole("heading", { name: "Maintainer overview" })
+    ).toBeVisible()
+    expect(screen.getByText("Stewarded sources")).toBeVisible()
+    expect(screen.getByText("Latest ingestion")).toBeVisible()
+    expect(
+      screen.queryByRole("heading", { name: "Protected source upload" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "Source stewardship inventory" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("opens inventory, upload, and operations as separate maintainer sections", async () => {
+    const user = userEvent.setup()
+
+    renderMaintainer("/maintainer/sources")
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Source stewardship inventory",
+      })
+    ).toBeVisible()
+    expect(screen.queryByLabelText("Source ID")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Upload source" }))
+    expect(
+      await screen.findByRole("heading", { name: "Upload a source draft" })
+    ).toBeVisible()
+    expect(screen.getByLabelText("Source ID")).toBeVisible()
+
+    await user.click(screen.getByRole("button", { name: "Operations" }))
+    expect(
+      await screen.findByRole("heading", {
+        name: "Ingestion and audit records",
+      })
+    ).toBeVisible()
+    expect(screen.getByText("Ingestion records")).toBeVisible()
+    expect(screen.getAllByText("No history is available.").length).toBe(3)
+  })
+
+  it("keeps upload available when the source inventory is empty", async () => {
+    mockedFetchStewardshipDashboard.mockResolvedValue({
+      ...dashboard,
+      overview: {
+        sourceCount: 0,
+        activeSourceCount: 0,
+        draftSourceCount: 0,
+        partialSourceCount: 0,
+        latestIngestionStatus: null,
+        latestValidationStatus: null,
+        readinessState: "empty",
+      },
+      sources: [],
+      ingestionRuns: [],
+      validationRuns: [],
+      auditEvents: [],
+    })
+
+    renderMaintainer("/maintainer/sources/new")
+
+    expect(
+      await screen.findByRole("heading", { name: "Upload a source draft" })
+    ).toBeVisible()
+    expect(screen.getByLabelText("Source file")).toBeVisible()
+  })
+
+  it("keeps validation available when source inventory loading fails", async () => {
+    mockedFetchStewardshipDashboard.mockRejectedValue(
+      new Error("source inventory unavailable")
+    )
+
+    renderMaintainer("/maintainer/validation")
+
+    expect(
+      await screen.findByRole("heading", { name: "Validation workbench" })
+    ).toBeVisible()
+    expect(screen.getByLabelText("Validation set")).toHaveValue(
+      "demo-readiness-v1"
+    )
+    expect(
+      screen.queryByText("source inventory unavailable")
+    ).not.toBeInTheDocument()
+  })
+
+  it("falls back safely when the source detail route is malformed", async () => {
+    renderMaintainer("/maintainer/sources/%E0%A4%A")
+
+    expect(
+      await screen.findByRole("heading", { name: "Maintainer overview" })
+    ).toBeVisible()
+    expect(mockedFetchSourceDetail).not.toHaveBeenCalled()
   })
 
   it.each([
@@ -543,7 +645,7 @@ describe("MaintainerDashboard", () => {
     async ({ arrange, heading }) => {
       arrange()
 
-      render(<MaintainerDashboard />)
+      renderMaintainer()
 
       expect(
         await screen.findByRole("heading", { name: heading })
@@ -560,11 +662,11 @@ describe("MaintainerDashboard", () => {
       )
     )
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
 
     expect(
       await screen.findByRole("heading", {
-        name: "Source stewardship inventory",
+        name: "Charter of the United Nations",
       })
     ).toBeVisible()
     await screen.findByRole("button", { name: "Retry dashboard load" })
@@ -579,10 +681,54 @@ describe("MaintainerDashboard", () => {
     ).toBeGreaterThan(0)
   })
 
+  it("keeps stale source detail responses from replacing the routed source", async () => {
+    const user = userEvent.setup()
+    let resolveFirstDetail: (value: SourceDetail) => void = () => {}
+    mockedFetchSourceDetail
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirstDetail = resolve
+          })
+      )
+      .mockResolvedValueOnce({
+        ...detailFrom(dashboard.sources[1]),
+        summary: "Second source detail.",
+      })
+
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
+
+    await screen.findByRole("heading", {
+      name: "Charter of the United Nations",
+    })
+    await user.click(screen.getByRole("button", { name: "Back to sources" }))
+    await screen.findByRole("heading", { name: "Source stewardship" })
+    await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
+
+    await screen.findAllByRole("heading", {
+      name: "South China Sea Arbitration Award",
+    })
+    expect(await screen.findByText("Second source detail.")).toBeVisible()
+
+    resolveFirstDetail({
+      ...detailFrom(dashboard.sources[0]),
+      summary: "Stale source detail.",
+    })
+
+    await waitFor(() =>
+      expect(
+        screen.getAllByRole("heading", {
+          name: "South China Sea Arbitration Award",
+        }).length
+      ).toBeGreaterThan(0)
+    )
+    expect(screen.queryByText("Stale source detail.")).not.toBeInTheDocument()
+  })
+
   it("signs out locally from the ready dashboard state", async () => {
     const user = userEvent.setup()
 
-    render(<MaintainerDashboard />)
+    renderMaintainer()
 
     const signOut = await screen.findByRole("button", { name: "Sign out" })
     await user.click(signOut)
@@ -597,7 +743,7 @@ describe("MaintainerDashboard", () => {
 
   it("uploads a protected source and refreshes the persisted projection", async () => {
     const user = userEvent.setup()
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/new")
 
     await screen.findByRole("heading", { name: "Protected source upload" })
     await user.type(
@@ -637,7 +783,7 @@ describe("MaintainerDashboard", () => {
       )
     )
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/new")
 
     await screen.findByRole("heading", { name: "Protected source upload" })
     await user.type(screen.getByLabelText("Source ID"), "gg-src-invalid")
@@ -655,7 +801,7 @@ describe("MaintainerDashboard", () => {
   it("shows a local file error before attempting upload", async () => {
     const user = userEvent.setup()
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/new")
 
     await screen.findByRole("heading", { name: "Protected source upload" })
     await user.type(screen.getByLabelText("Source ID"), "gg-src-no-file")
@@ -671,9 +817,9 @@ describe("MaintainerDashboard", () => {
   it("can queue ingest and archive through protected actions", async () => {
     const user = userEvent.setup()
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
 
-    await screen.findByRole("heading", {
+    await screen.findAllByRole("heading", {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("button", { name: "Ingest" }))
@@ -697,9 +843,9 @@ describe("MaintainerDashboard", () => {
   it("opens chunk inspection, detail, copy, and linked citation evidence", async () => {
     const user = userEvent.setup()
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
 
-    await screen.findByRole("heading", {
+    await screen.findAllByRole("heading", {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
@@ -729,9 +875,9 @@ describe("MaintainerDashboard", () => {
   it("opens citation inspection with learner-visible labels and linked chunks", async () => {
     const user = userEvent.setup()
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
 
-    await screen.findByRole("heading", {
+    await screen.findAllByRole("heading", {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("tab", { name: "Citations" }))
@@ -755,6 +901,11 @@ describe("MaintainerDashboard", () => {
 
   it("keeps stale chunk responses from painting after source switching", async () => {
     const user = userEvent.setup()
+    mockedFetchSourceDetail.mockImplementation(async (sourceId) =>
+      sourceId === "gg-src-south-china-sea-award"
+        ? detailFrom(dashboard.sources[1])
+        : detailFrom(dashboard.sources[0])
+    )
     let resolveFirstChunks: (
       value: Awaited<ReturnType<typeof fetchSourceChunks>>
     ) => void = () => {}
@@ -765,13 +916,18 @@ describe("MaintainerDashboard", () => {
         })
     )
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
 
-    await screen.findByRole("heading", {
+    await screen.findAllByRole("heading", {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
+    await user.click(screen.getByRole("button", { name: "Back to sources" }))
+    await screen.findByRole("heading", { name: "Source stewardship" })
     await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
+    await screen.findAllByRole("heading", {
+      name: "South China Sea Arbitration Award",
+    })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
 
     resolveFirstChunks({
@@ -810,13 +966,15 @@ describe("MaintainerDashboard", () => {
         })
     )
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
 
-    await screen.findByRole("heading", {
+    await screen.findAllByRole("heading", {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
     await user.click(screen.getAllByRole("button", { name: "Inspect" }).at(-1)!)
+    await user.click(screen.getByRole("button", { name: "Back to sources" }))
+    await screen.findByRole("heading", { name: "Source stewardship" })
     await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
 
     resolveChunkDetail({
@@ -837,7 +995,7 @@ describe("MaintainerDashboard", () => {
       updatedAt: "2026-05-05T00:00:00Z",
     })
 
-    await screen.findByRole("heading", {
+    await screen.findAllByRole("heading", {
       name: "South China Sea Arbitration Award",
     })
     expect(
@@ -874,9 +1032,9 @@ describe("MaintainerDashboard", () => {
       partialData: [],
     })
 
-    render(<MaintainerDashboard />)
+    renderMaintainer("/maintainer/sources/gg-src-un-charter-institutions")
 
-    await screen.findByRole("heading", {
+    await screen.findAllByRole("heading", {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
@@ -908,7 +1066,7 @@ describe("MaintainerDashboard", () => {
   it("loads the validation workbench, launches immutable runs, and opens result detail", async () => {
     const user = userEvent.setup()
 
-    render(<MaintainerDashboard initialView="validation" />)
+    renderMaintainer("/maintainer/validation")
 
     expect(
       await screen.findByRole("heading", { name: "Validation workbench" })
@@ -940,7 +1098,9 @@ describe("MaintainerDashboard", () => {
       await screen.findByRole("dialog", { name: "Validation result detail" })
     ).toBeVisible()
     expect(screen.getByText("Expected grounded answer matched.")).toBeVisible()
-    expect(screen.getAllByText("2026-05-05T00:00:05Z").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("2026-05-05T00:00:05Z").length).toBeGreaterThan(
+      0
+    )
   })
 
   it("keeps the selected set synchronized when opening a run from another validation set", async () => {
@@ -974,7 +1134,7 @@ describe("MaintainerDashboard", () => {
       runId === "val-run-2" ? alternateRun : validationRun
     )
 
-    render(<MaintainerDashboard initialView="validation" />)
+    renderMaintainer("/maintainer/validation")
 
     await screen.findByRole("heading", { name: "Validation workbench" })
     await user.click(screen.getAllByRole("button", { name: "Open run" })[1])
@@ -998,7 +1158,7 @@ describe("MaintainerDashboard", () => {
       )
     )
 
-    render(<MaintainerDashboard initialView="validation" />)
+    renderMaintainer("/maintainer/validation")
 
     await screen.findByRole("heading", { name: "Validation workbench" })
     expect(await screen.findByText("Validation run not found")).toBeVisible()
