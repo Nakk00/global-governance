@@ -397,10 +397,12 @@ class PublicLearnerBoundaryTests(SimpleTestCase):
             source_root / "lib" / "maintainer",
             source_root / "lib" / "supabase",
         }
+        text_suffixes = {".ts", ".tsx", ".js", ".jsx", ".css", ".html", ".json"}
         source_text = "\n".join(
             path.read_text(encoding="utf-8")
             for path in source_root.rglob("*")
             if path.is_file()
+            and path.suffix in text_suffixes
             and private_boundary not in path.parents
             and not any(private_lib in path.parents for private_lib in private_libs)
         )

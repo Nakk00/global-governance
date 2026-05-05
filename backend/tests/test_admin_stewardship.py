@@ -68,6 +68,110 @@ class AdminStewardshipApiTests(SimpleTestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"]["code"], "admin_source_not_found")
 
+    def test_source_chunk_inspection_defaults_to_latest_successful_document(self):
+        with self._authorized():
+            self.client.post(
+                "/api/admin/sources/gg-src-un-charter-institutions/ingest",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            self.client.post(
+                "/api/admin/sources/gg-src-un-charter-institutions/ingest",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            response = self.client.get(
+                "/api/admin/sources/gg-src-un-charter-institutions/chunks",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+
+        data = response.json()["data"]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["anchor"]["version"], "v2")
+        self.assertEqual(data["anchor"]["documentId"], data["chunks"][0]["documentId"])
+        self.assertEqual(data["chunks"][0]["chunkIndex"], 0)
+        self.assertTrue(data["chunks"][0]["embeddingPresent"])
+        self.assertEqual(data["chunks"][0]["activeState"], "ready")
+
+    def test_source_citation_inspection_exposes_display_label_and_linked_chunks(self):
+        with self._authorized():
+            self.client.post(
+                "/api/admin/sources/gg-src-un-charter-institutions/ingest",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            response = self.client.get(
+                "/api/admin/sources/gg-src-un-charter-institutions/citations",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+
+        data = response.json()["data"]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["anchor"]["version"], "v1")
+        self.assertEqual(
+            data["citations"][0]["citationLabel"], data["citations"][0]["displayLabel"]
+        )
+        self.assertEqual(len(data["citations"][0]["linkedChunkIds"]), 1)
+
+    def test_source_inspection_explains_missing_or_inactive_evidence(self):
+        with self._authorized():
+            draft_upload = self.client.post(
+                "/api/admin/sources/upload",
+                data={
+                    "sourceId": "gg-src-draft-evidence",
+                    "title": "Draft Evidence",
+                    "sourceType": "reference",
+                    "provenance": "Maintainer upload",
+                    "summary": "Draft source without ingestion evidence.",
+                    "usageScope": "ingestion",
+                    "file": SimpleUploadedFile("draft.md", b"# draft"),
+                },
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            response = self.client.get(
+                "/api/admin/sources/gg-src-draft-evidence/chunks",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+
+        self.assertEqual(draft_upload.status_code, 201)
+        data = response.json()["data"]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["anchor"]["state"], "inactive")
+        self.assertEqual(data["chunks"], [])
+        self.assertIn("Approve the source", data["anchor"]["nextStep"])
+
+    def test_chunk_and_citation_detail_return_safe_404_and_linked_evidence(self):
+        with self._authorized():
+            self.client.post(
+                "/api/admin/sources/gg-src-un-charter-institutions/ingest",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            chunks = self.client.get(
+                "/api/admin/sources/gg-src-un-charter-institutions/chunks",
+                HTTP_AUTHORIZATION="Bearer token",
+            ).json()["data"]["chunks"]
+            citations = self.client.get(
+                "/api/admin/sources/gg-src-un-charter-institutions/citations",
+                HTTP_AUTHORIZATION="Bearer token",
+            ).json()["data"]["citations"]
+            chunk_detail = self.client.get(
+                f"/api/admin/chunks/{chunks[0]['id']}",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            citation_detail = self.client.get(
+                f"/api/admin/citations/{citations[0]['id']}",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            missing_chunk = self.client.get(
+                "/api/admin/chunks/missing",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+
+        self.assertEqual(chunk_detail.status_code, 200)
+        self.assertIn("content", chunk_detail.json()["data"])
+        self.assertEqual(chunk_detail.json()["data"]["linkedCitationIds"], [citations[0]["id"]])
+        self.assertEqual(citation_detail.status_code, 200)
+        self.assertEqual(citation_detail.json()["data"]["linkedChunks"][0]["id"], chunks[0]["id"])
+        self.assertEqual(missing_chunk.status_code, 404)
+        self.assertEqual(missing_chunk.json()["error"]["code"], "admin_chunk_not_found")
+
     def test_operational_endpoints_return_read_only_events(self):
         for path in ("/api/admin/ingestion", "/api/admin/validation", "/api/admin/audit"):
             with self.subTest(path=path):

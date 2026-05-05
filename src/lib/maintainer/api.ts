@@ -84,6 +84,76 @@ export type SourceMutationResult = {
   dashboard: StewardshipDashboard
 }
 
+export type InspectionState =
+  | "empty"
+  | "partial"
+  | "stale"
+  | "inactive"
+  | "ready"
+  | "unavailable"
+
+export type InspectionAnchor = {
+  documentId: string | null
+  version: string | null
+  sourceId: string
+  state: InspectionState
+  message: string
+  nextStep: string
+}
+
+export type ChunkRow = {
+  id: string
+  documentId: string
+  sourceId: string
+  chunkIndex: number
+  tokenCount: number
+  contentPreview: string
+  embeddingPresent: boolean
+  activeState: InspectionState
+  pageNumber: number | null
+  heading: string | null
+  metadata: Record<string, unknown>
+}
+
+export type ChunkDetail = ChunkRow & {
+  content: string
+  linkedCitationIds: string[]
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+export type CitationRow = {
+  id: string
+  documentId: string
+  sourceId: string
+  citationLabel: string
+  displayLabel: string
+  linkedChunkIds: string[]
+  activeState: InspectionState
+  pageNumber: number | null
+  sectionHeading: string | null
+  metadata: Record<string, unknown>
+}
+
+export type CitationDetail = CitationRow & {
+  sourceTitle: string
+  sourcePath: string | null
+  copyableLabel: string
+  linkedChunks: ChunkRow[]
+}
+
+export type SourceChunksInspection = {
+  anchor: InspectionAnchor
+  chunks: ChunkRow[]
+  partialData: PartialDataMarker[]
+}
+
+export type SourceCitationsInspection = {
+  anchor: InspectionAnchor
+  citations: CitationRow[]
+  partialData: PartialDataMarker[]
+}
+
 export type SourceUploadPayload = {
   file: File
   sourceId: string
@@ -151,6 +221,46 @@ export async function fetchSourceDetail(
 ) {
   return fetchMaintainerJson<SourceDetail>(
     `/api/admin/sources/${encodeURIComponent(sourceId)}`,
+    session
+  )
+}
+
+export async function fetchSourceChunks(
+  sourceId: string,
+  session: SupabaseSession
+) {
+  return fetchMaintainerJson<SourceChunksInspection>(
+    `/api/admin/sources/${encodeURIComponent(sourceId)}/chunks`,
+    session
+  )
+}
+
+export async function fetchSourceCitations(
+  sourceId: string,
+  session: SupabaseSession
+) {
+  return fetchMaintainerJson<SourceCitationsInspection>(
+    `/api/admin/sources/${encodeURIComponent(sourceId)}/citations`,
+    session
+  )
+}
+
+export async function fetchChunkDetail(
+  chunkId: string,
+  session: SupabaseSession
+) {
+  return fetchMaintainerJson<ChunkDetail>(
+    `/api/admin/chunks/${encodeURIComponent(chunkId)}`,
+    session
+  )
+}
+
+export async function fetchCitationDetail(
+  citationId: string,
+  session: SupabaseSession
+) {
+  return fetchMaintainerJson<CitationDetail>(
+    `/api/admin/citations/${encodeURIComponent(citationId)}`,
     session
   )
 }

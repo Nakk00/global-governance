@@ -13,6 +13,10 @@ from sources.dtos import LifecycleState
 from sources.repository import (
     SourceMutationError,
     dispatch_ingest,
+    get_chunk_detail,
+    get_citation_detail,
+    get_source_chunks,
+    get_source_citations,
     get_source_detail,
     get_stewardship_dashboard,
     transition_source,
@@ -51,6 +55,78 @@ def source_detail(request: HttpRequest, source_id: str) -> JsonResponse:
             status=404,
         )
     return success_response(detail)
+
+
+def source_chunks(request: HttpRequest, source_id: str) -> JsonResponse:
+    auth_error = _guard_request(request, "GET")
+    if auth_error:
+        return auth_error
+
+    try:
+        payload = get_source_chunks(source_id)
+    except SourceMutationError as error:
+        return error_response(code=error.code, message=error.message, status=error.status)
+    if payload is None:
+        return error_response(
+            code="admin_source_not_found",
+            message="The requested approved source was not found.",
+            status=404,
+        )
+    return success_response(payload)
+
+
+def source_citations(request: HttpRequest, source_id: str) -> JsonResponse:
+    auth_error = _guard_request(request, "GET")
+    if auth_error:
+        return auth_error
+
+    try:
+        payload = get_source_citations(source_id)
+    except SourceMutationError as error:
+        return error_response(code=error.code, message=error.message, status=error.status)
+    if payload is None:
+        return error_response(
+            code="admin_source_not_found",
+            message="The requested approved source was not found.",
+            status=404,
+        )
+    return success_response(payload)
+
+
+def chunk_detail(request: HttpRequest, chunk_id: str) -> JsonResponse:
+    auth_error = _guard_request(request, "GET")
+    if auth_error:
+        return auth_error
+
+    try:
+        payload = get_chunk_detail(chunk_id)
+    except SourceMutationError as error:
+        return error_response(code=error.code, message=error.message, status=error.status)
+    if payload is None:
+        return error_response(
+            code="admin_chunk_not_found",
+            message="The requested retrieval chunk was not found.",
+            status=404,
+        )
+    return success_response(payload)
+
+
+def citation_detail(request: HttpRequest, citation_id: str) -> JsonResponse:
+    auth_error = _guard_request(request, "GET")
+    if auth_error:
+        return auth_error
+
+    try:
+        payload = get_citation_detail(citation_id)
+    except SourceMutationError as error:
+        return error_response(code=error.code, message=error.message, status=error.status)
+    if payload is None:
+        return error_response(
+            code="admin_citation_not_found",
+            message="The requested citation evidence was not found.",
+            status=404,
+        )
+    return success_response(payload)
 
 
 def ingestion_runs(request: HttpRequest) -> JsonResponse:

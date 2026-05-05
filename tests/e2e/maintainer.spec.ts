@@ -66,6 +66,69 @@ const sourceDetail = {
   auditTrail: [],
 }
 
+const chunkInspection = {
+  anchor: {
+    documentId: "doc-un-charter-v2",
+    version: "v2",
+    sourceId: "gg-src-un-charter-institutions",
+    state: "ready",
+    message:
+      "Inspecting chunk records from the latest successful document revision.",
+    nextStep: "Re-ingest if the visible evidence is stale or incomplete.",
+  },
+  chunks: [
+    {
+      id: "chunk-un-charter-0",
+      documentId: "doc-un-charter-v2",
+      sourceId: "gg-src-un-charter-institutions",
+      chunkIndex: 0,
+      tokenCount: 42,
+      contentPreview: "The UN Charter establishes the organs and obligations.",
+      embeddingPresent: true,
+      activeState: "ready",
+      pageNumber: 1,
+      heading: "Preamble",
+      metadata: {},
+    },
+  ],
+  partialData: [],
+}
+
+const citationInspection = {
+  anchor: chunkInspection.anchor,
+  citations: [
+    {
+      id: "ref-un-charter",
+      documentId: "doc-un-charter-v2",
+      sourceId: "gg-src-un-charter-institutions",
+      citationLabel: "Charter of the United Nations",
+      displayLabel: "UN Charter",
+      linkedChunkIds: ["chunk-un-charter-0"],
+      activeState: "ready",
+      pageNumber: 1,
+      sectionHeading: "Preamble",
+      metadata: {},
+    },
+  ],
+  partialData: [],
+}
+
+const chunkDetail = {
+  ...chunkInspection.chunks[0],
+  content: "The UN Charter establishes the organs and obligations.",
+  linkedCitationIds: ["ref-un-charter"],
+  createdAt: "2026-05-05T00:00:00Z",
+  updatedAt: "2026-05-05T00:00:00Z",
+}
+
+const citationDetail = {
+  ...citationInspection.citations[0],
+  sourceTitle: "Charter of the United Nations",
+  sourcePath: "bootstrap-approved-source-bundle",
+  copyableLabel: "UN Charter",
+  linkedChunks: chunkInspection.chunks,
+}
+
 async function seedSession(page: Page) {
   await page.addInitScript((storedSession) => {
     window.localStorage.setItem(
@@ -104,11 +167,58 @@ async function mockMaintainerApi(page: Page) {
     })
   })
   await page.route(/\/api\/admin\/sources\/.+$/, async (route) => {
+    const url = route.request().url()
+    if (url.endsWith("/chunks")) {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: chunkInspection,
+          error: null,
+          meta: {},
+        }),
+      })
+      return
+    }
+    if (url.endsWith("/citations")) {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: citationInspection,
+          error: null,
+          meta: {},
+        }),
+      })
+      return
+    }
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
         success: true,
         data: sourceDetail,
+        error: null,
+        meta: {},
+      }),
+    })
+  })
+  await page.route("**/api/admin/chunks/*", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: chunkDetail,
+        error: null,
+        meta: {},
+      }),
+    })
+  })
+  await page.route("**/api/admin/citations/*", async (route) => {
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        success: true,
+        data: citationDetail,
         error: null,
         meta: {},
       }),
@@ -279,6 +389,43 @@ test("@smoke maintainer direct load resolves the private dashboard without publi
     page.getByRole("heading", { name: "Charter of the United Nations" })
   ).toBeVisible()
   await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
+})
+
+test("@smoke maintainer retrieval inspection opens chunks and citations without public exposure", async ({
+  page,
+}) => {
+  await seedSession(page)
+  await mockMaintainerApi(page)
+  await page.setViewportSize({ width: 390, height: 844 })
+
+  await page.goto("/maintainer")
+  await page.getByRole("tab", { name: "Chunks" }).click()
+  await expect(page.getByText("doc-un-charter-v2")).toBeVisible()
+  await expect(
+    page
+      .getByText("The UN Charter establishes the organs and obligations.")
+      .first()
+  ).toBeVisible()
+  await page.getByRole("button", { name: "Inspect chunk" }).click()
+  await expect(
+    page.getByRole("dialog", { name: "Retrieval evidence detail" })
+  ).toBeVisible()
+  await page.keyboard.press("Escape")
+  await expect(
+    page.getByRole("dialog", { name: "Retrieval evidence detail" })
+  ).toHaveCount(0)
+
+  await page.getByRole("tab", { name: "Citations" }).click()
+  await expect(page.getByText("UN Charter").first()).toBeVisible()
+  await page.getByRole("button", { name: "Inspect citation" }).click()
+  await expect(
+    page.getByRole("button", { name: "Copy citation label" })
+  ).toBeVisible()
+  await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
+  const mainScrollWidth = await page
+    .locator("main")
+    .evaluate((element) => element.scrollWidth)
+  expect(mainScrollWidth).toBeLessThanOrEqual(390)
 })
 
 test("@smoke maintainer route keeps auth-gate fallbacks visible", async ({

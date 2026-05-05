@@ -16,10 +16,18 @@ from django.core.files.uploadedfile import UploadedFile
 
 from sources.dtos import (
     ApprovedSourceSeed,
+    ChunkDetailDto,
+    ChunkRowDto,
+    CitationDetailDto,
+    CitationRowDto,
     IngestJobDto,
+    InspectionAnchorDto,
+    InspectionState,
     LifecycleState,
     PartialDataMarker,
     ReadinessState,
+    SourceChunksInspectionDto,
+    SourceCitationsInspectionDto,
     SourceDetailDto,
     SourceInventoryItemDto,
     SourceMutationResult,
@@ -81,10 +89,56 @@ class SourceSnapshot:
     validation_events: list[StewardshipEventDto]
 
 
+@dataclass(frozen=True)
+class DocumentRecord:
+    document_id: str
+    source_id: str
+    title: str
+    source_path: str | None
+    version: str
+    created_at: str | None
+    updated_at: str | None
+
+
+@dataclass(frozen=True)
+class ChunkRecord:
+    chunk_id: str
+    document_id: str
+    source_id: str
+    chunk_index: int
+    content: str
+    token_count: int
+    embedding_present: bool
+    metadata: dict[str, Any]
+    created_at: str | None
+    updated_at: str | None
+
+
+@dataclass(frozen=True)
+class CitationRecord:
+    citation_id: str
+    document_id: str
+    source_id: str
+    citation_label: str
+    source_title: str
+    source_path: str | None
+    metadata: dict[str, Any]
+    created_at: str | None
+    updated_at: str | None
+
+
 class StewardshipRepository(Protocol):
     def get_dashboard(self) -> StewardshipDashboardDto: ...
 
     def get_source_detail(self, source_id: str) -> SourceDetailDto | None: ...
+
+    def get_source_chunks(self, source_id: str) -> SourceChunksInspectionDto | None: ...
+
+    def get_source_citations(self, source_id: str) -> SourceCitationsInspectionDto | None: ...
+
+    def get_chunk_detail(self, chunk_id: str) -> ChunkDetailDto | None: ...
+
+    def get_citation_detail(self, citation_id: str) -> CitationDetailDto | None: ...
 
     def upload_source(
         self,
@@ -187,8 +241,7 @@ APPROVED_SOURCE_SEEDS: tuple[ApprovedSourceSeed, ...] = (
         source_type="primary",
         provenance="Foundational UN treaty; institutional design; primary source",
         summary=(
-            "Defines the UN's purposes, organs, member obligations, and Security "
-            "Council structure."
+            "Defines the UN's purposes, organs, member obligations, and Security Council structure."
         ),
         usage_scope=("presentation", "chat", "ingestion"),
     ),
@@ -226,6 +279,10 @@ class InMemoryStewardshipRepository:
         self._jobs: dict[str, list[IngestJobDto]] = {}
         self._audit_events: dict[str, list[StewardshipEventDto]] = {}
         self._validation_events: dict[str, list[StewardshipEventDto]] = {}
+        self._documents: dict[str, list[DocumentRecord]] = {}
+        self._chunks: dict[str, list[ChunkRecord]] = {}
+        self._citations: dict[str, list[CitationRecord]] = {}
+        self._reference_chunks: dict[str, list[str]] = {}
 
     def get_dashboard(self) -> StewardshipDashboardDto:
         snapshots = self._snapshots()
@@ -234,6 +291,106 @@ class InMemoryStewardshipRepository:
     def get_source_detail(self, source_id: str) -> SourceDetailDto | None:
         snapshot = self._find_snapshot(source_id)
         return _source_detail(snapshot) if snapshot else None
+
+    def get_source_chunks(self, source_id: str) -> SourceChunksInspectionDto | None:
+        snapshot = self._find_snapshot(source_id)
+        if snapshot is None:
+            return None
+        document = self._latest_document(snapshot.source.source_id)
+        chunks = (
+            sorted(self._chunks.get(document.document_id, []), key=lambda chunk: chunk.chunk_index)
+            if document
+            else []
+        )
+        return {
+            "anchor": _inspection_anchor(snapshot, document, "chunk"),
+            "chunks": [
+                _chunk_row(chunk, _inspection_state(snapshot, document, chunk)) for chunk in chunks
+            ],
+            "partialData": _inspection_partial_data(snapshot, document, chunks),
+        }
+
+    def get_source_citations(self, source_id: str) -> SourceCitationsInspectionDto | None:
+        snapshot = self._find_snapshot(source_id)
+        if snapshot is None:
+            return None
+        document = self._latest_document(snapshot.source.source_id)
+        citations = self._citations.get(document.document_id, []) if document else []
+        return {
+            "anchor": _inspection_anchor(snapshot, document, "citation"),
+            "citations": [
+                _citation_row(
+                    citation,
+                    self._reference_chunks.get(citation.citation_id, []),
+                    _inspection_state(snapshot, document, citation),
+                )
+                for citation in citations
+            ],
+            "partialData": _inspection_partial_data(snapshot, document, citations),
+        }
+
+    def get_chunk_detail(self, chunk_id: str) -> ChunkDetailDto | None:
+        chunk = next(
+            (
+                item
+                for chunks in self._chunks.values()
+                for item in chunks
+                if item.chunk_id == chunk_id
+            ),
+            None,
+        )
+        if chunk is None:
+            return None
+        snapshot = self._require_snapshot(chunk.source_id)
+        document = self._latest_document(snapshot.source.source_id)
+        linked_citation_ids = [
+            citation_id
+            for citation_id, chunk_ids in self._reference_chunks.items()
+            if chunk.chunk_id in chunk_ids
+        ]
+        return {
+            **_chunk_row(chunk, _inspection_state(snapshot, document, chunk)),
+            "content": chunk.content,
+            "linkedCitationIds": linked_citation_ids,
+            "createdAt": chunk.created_at,
+            "updatedAt": chunk.updated_at,
+        }
+
+    def get_citation_detail(self, citation_id: str) -> CitationDetailDto | None:
+        citation = next(
+            (
+                item
+                for citations in self._citations.values()
+                for item in citations
+                if item.citation_id == citation_id
+            ),
+            None,
+        )
+        if citation is None:
+            return None
+        snapshot = self._require_snapshot(citation.source_id)
+        document = self._latest_document(snapshot.source.source_id)
+        linked_chunk_ids = self._reference_chunks.get(citation.citation_id, [])
+        linked_chunks = [
+            chunk
+            for chunk in self._chunks.get(citation.document_id, [])
+            if chunk.chunk_id in linked_chunk_ids
+        ]
+        row = _citation_row(
+            citation,
+            linked_chunk_ids,
+            _inspection_state(snapshot, document, citation),
+        )
+        return {
+            **row,
+            "sourceTitle": citation.source_title,
+            "sourcePath": citation.source_path,
+            "copyableLabel": row["displayLabel"],
+            "linkedChunks": [
+                _chunk_row(chunk, _inspection_state(snapshot, document, chunk))
+                for chunk in linked_chunks
+            ],
+        }
 
     def upload_source(
         self,
@@ -367,6 +524,7 @@ class InMemoryStewardshipRepository:
             "summary": "Protected ingest request completed and is ready for activation.",
         }
         self._jobs[snapshot.source.source_id][0] = completed_job
+        self._persist_demo_inspection_records(snapshot.source, len(snapshot.ingest_jobs) + 1)
         self._add_audit_event(
             source_id=snapshot.source.source_id,
             event_type=event_type,
@@ -375,6 +533,57 @@ class InMemoryStewardshipRepository:
             summary=completed_job["summary"],
         )
         return _mutation_result(self._snapshots(), snapshot.source.source_id)
+
+    def _latest_document(self, source_id: str) -> DocumentRecord | None:
+        documents = self._documents.get(source_id, [])
+        return (
+            sorted(
+                documents,
+                key=lambda document: document.updated_at or document.created_at or "",
+                reverse=True,
+            )[0]
+            if documents
+            else None
+        )
+
+    def _persist_demo_inspection_records(self, source: SourceRecord, revision: int) -> None:
+        now = _now()
+        document = DocumentRecord(
+            document_id=f"doc-{source.source_id}-v{revision}",
+            source_id=source.source_id,
+            title=source.title,
+            source_path=source.storage_path,
+            version=f"v{revision}",
+            created_at=now,
+            updated_at=now,
+        )
+        chunk = ChunkRecord(
+            chunk_id=f"chunk-{source.source_id}-v{revision}-0",
+            document_id=document.document_id,
+            source_id=source.source_id,
+            chunk_index=0,
+            content=f"{source.title}: {source.summary}",
+            token_count=max(8, len(source.summary.split()) + len(source.title.split())),
+            embedding_present=True,
+            metadata={"heading": "Source summary", "pageNumber": 1},
+            created_at=now,
+            updated_at=now,
+        )
+        citation = CitationRecord(
+            citation_id=f"ref-{source.source_id}-v{revision}",
+            document_id=document.document_id,
+            source_id=source.source_id,
+            citation_label=source.title,
+            source_title=source.title,
+            source_path=source.storage_path,
+            metadata={"sectionHeading": "Source summary"},
+            created_at=now,
+            updated_at=now,
+        )
+        self._documents.setdefault(source.source_id, []).append(document)
+        self._chunks[document.document_id] = [chunk]
+        self._citations[document.document_id] = [citation]
+        self._reference_chunks[citation.citation_id] = [chunk.chunk_id]
 
     def _snapshots(self) -> dict[str, SourceSnapshot]:
         snapshots: dict[str, SourceSnapshot] = {}
@@ -408,11 +617,7 @@ class InMemoryStewardshipRepository:
         if source_id in snapshots:
             return snapshots[source_id]
         return next(
-            (
-                snapshot
-                for snapshot in snapshots.values()
-                if source_id in snapshot.source.aliases
-            ),
+            (snapshot for snapshot in snapshots.values() if source_id in snapshot.source.aliases),
             None,
         )
 
@@ -458,6 +663,88 @@ class SupabaseStewardshipRepository:
     def get_source_detail(self, source_id: str) -> SourceDetailDto | None:
         snapshot = self._find_snapshot(source_id)
         return _source_detail(snapshot) if snapshot else None
+
+    def get_source_chunks(self, source_id: str) -> SourceChunksInspectionDto | None:
+        snapshot = self._find_snapshot(source_id)
+        if snapshot is None:
+            return None
+        document = self._latest_document(snapshot.source.source_id)
+        chunks = self._document_chunks(document.document_id) if document else []
+        return {
+            "anchor": _inspection_anchor(snapshot, document, "chunk"),
+            "chunks": [
+                _chunk_row(chunk, _inspection_state(snapshot, document, chunk)) for chunk in chunks
+            ],
+            "partialData": _inspection_partial_data(snapshot, document, chunks),
+        }
+
+    def get_source_citations(self, source_id: str) -> SourceCitationsInspectionDto | None:
+        snapshot = self._find_snapshot(source_id)
+        if snapshot is None:
+            return None
+        document = self._latest_document(snapshot.source.source_id)
+        citations = self._document_citations(document.document_id) if document else []
+        reference_chunks = self._reference_chunk_map(
+            [citation.citation_id for citation in citations],
+            by_reference=True,
+        )
+        return {
+            "anchor": _inspection_anchor(snapshot, document, "citation"),
+            "citations": [
+                _citation_row(
+                    citation,
+                    reference_chunks.get(citation.citation_id, []),
+                    _inspection_state(snapshot, document, citation),
+                )
+                for citation in citations
+            ],
+            "partialData": _inspection_partial_data(snapshot, document, citations),
+        }
+
+    def get_chunk_detail(self, chunk_id: str) -> ChunkDetailDto | None:
+        chunk = self._chunk_by_id(chunk_id)
+        if chunk is None:
+            return None
+        snapshot = self._find_snapshot(chunk.source_id)
+        if snapshot is None:
+            return None
+        document = self._latest_document(snapshot.source.source_id)
+        reference_chunks = self._reference_chunk_map([chunk.chunk_id], by_reference=False)
+        return {
+            **_chunk_row(chunk, _inspection_state(snapshot, document, chunk)),
+            "content": chunk.content,
+            "linkedCitationIds": reference_chunks.get(chunk.chunk_id, []),
+            "createdAt": chunk.created_at,
+            "updatedAt": chunk.updated_at,
+        }
+
+    def get_citation_detail(self, citation_id: str) -> CitationDetailDto | None:
+        citation = self._citation_by_id(citation_id)
+        if citation is None:
+            return None
+        snapshot = self._find_snapshot(citation.source_id)
+        if snapshot is None:
+            return None
+        document = self._latest_document(snapshot.source.source_id)
+        linked_chunk_ids = self._reference_chunk_map([citation.citation_id], by_reference=True).get(
+            citation.citation_id, []
+        )
+        linked_chunks = [chunk for chunk in self._chunks_by_ids(linked_chunk_ids)]
+        row = _citation_row(
+            citation,
+            linked_chunk_ids,
+            _inspection_state(snapshot, document, citation),
+        )
+        return {
+            **row,
+            "sourceTitle": citation.source_title,
+            "sourcePath": citation.source_path,
+            "copyableLabel": row["displayLabel"],
+            "linkedChunks": [
+                _chunk_row(chunk, _inspection_state(snapshot, document, chunk))
+                for chunk in linked_chunks
+            ],
+        }
 
     def upload_source(
         self,
@@ -705,11 +992,7 @@ class SupabaseStewardshipRepository:
         if source_id in snapshots:
             return snapshots[source_id]
         return next(
-            (
-                snapshot
-                for snapshot in snapshots.values()
-                if source_id in snapshot.source.aliases
-            ),
+            (snapshot for snapshot in snapshots.values() if source_id in snapshot.source.aliases),
             None,
         )
 
@@ -806,6 +1089,99 @@ class SupabaseStewardshipRepository:
             events.setdefault(row["source_id"], []).append(_event_from_row(row))
         return events
 
+    def _latest_document(self, source_id: str) -> DocumentRecord | None:
+        rows = self._request(
+            "GET",
+            "rest/v1/documents"
+            "?select=id,source_id,title,source_path,version,created_at,updated_at"
+            f"&source_id=eq.{quote(source_id, safe='')}"
+            "&order=updated_at.desc"
+            "&limit=1",
+        )
+        return _document_from_row(rows[0]) if rows else None
+
+    def _document_chunks(self, document_id: str) -> list[ChunkRecord]:
+        rows = self._request(
+            "GET",
+            "rest/v1/chunks"
+            "?select=id,document_id,source_id,chunk_index,content,token_count,embedding,metadata,created_at,updated_at"
+            f"&document_id=eq.{quote(document_id, safe='')}"
+            "&order=chunk_index.asc",
+        )
+        return [_chunk_from_row(row) for row in rows]
+
+    def _document_citations(self, document_id: str) -> list[CitationRecord]:
+        rows = self._request(
+            "GET",
+            "rest/v1/references"
+            "?select=id,document_id,source_id,citation_label,source_title,metadata,created_at,updated_at"
+            f"&document_id=eq.{quote(document_id, safe='')}"
+            "&order=citation_label.asc",
+        )
+        return [_citation_from_row(row, source_path=None) for row in rows]
+
+    def _document_by_id(self, document_id: str) -> DocumentRecord | None:
+        rows = self._request(
+            "GET",
+            "rest/v1/documents"
+            "?select=id,source_id,title,source_path,version,created_at,updated_at"
+            f"&id=eq.{quote(document_id, safe='')}"
+            "&limit=1",
+        )
+        return _document_from_row(rows[0]) if rows else None
+
+    def _chunk_by_id(self, chunk_id: str) -> ChunkRecord | None:
+        rows = self._request(
+            "GET",
+            "rest/v1/chunks"
+            "?select=id,document_id,source_id,chunk_index,content,token_count,embedding,metadata,created_at,updated_at"
+            f"&id=eq.{quote(chunk_id, safe='')}"
+            "&limit=1",
+        )
+        return _chunk_from_row(rows[0]) if rows else None
+
+    def _citation_by_id(self, citation_id: str) -> CitationRecord | None:
+        rows = self._request(
+            "GET",
+            "rest/v1/references"
+            "?select=id,document_id,source_id,citation_label,source_title,metadata,created_at,updated_at"
+            f"&id=eq.{quote(citation_id, safe='')}"
+            "&limit=1",
+        )
+        if not rows:
+            return None
+        document = self._document_by_id(str(rows[0]["document_id"]))
+        return _citation_from_row(rows[0], source_path=document.source_path if document else None)
+
+    def _chunks_by_ids(self, chunk_ids: list[str]) -> list[ChunkRecord]:
+        if not chunk_ids:
+            return []
+        rows = self._request(
+            "GET",
+            "rest/v1/chunks"
+            "?select=id,document_id,source_id,chunk_index,content,token_count,embedding,metadata,created_at,updated_at"
+            f"&id=in.({_quoted_csv(chunk_ids)})"
+            "&order=chunk_index.asc",
+        )
+        return [_chunk_from_row(row) for row in rows]
+
+    def _reference_chunk_map(self, ids: list[str], *, by_reference: bool) -> dict[str, list[str]]:
+        if not ids:
+            return {}
+        column = "reference_id" if by_reference else "chunk_id"
+        rows = self._request(
+            "GET",
+            "rest/v1/reference_chunks"
+            "?select=reference_id,chunk_id"
+            f"&{column}=in.({_quoted_csv(ids)})",
+        )
+        mapped: dict[str, list[str]] = {}
+        for row in rows:
+            key = row["reference_id"] if by_reference else row["chunk_id"]
+            value = row["chunk_id"] if by_reference else row["reference_id"]
+            mapped.setdefault(key, []).append(value)
+        return mapped
+
     def _create_audit_event(
         self,
         *,
@@ -893,8 +1269,7 @@ class SupabaseStewardshipRepository:
                 raise SourceMutationError(
                     code="admin_source_conflict",
                     message=(
-                        "The requested protected mutation conflicts with current "
-                        "stewardship state."
+                        "The requested protected mutation conflicts with current stewardship state."
                     ),
                     status=409,
                 ) from error
@@ -922,6 +1297,22 @@ def get_stewardship_dashboard() -> StewardshipDashboardDto:
 
 def get_source_detail(source_id: str) -> SourceDetailDto | None:
     return _repository().get_source_detail(source_id)
+
+
+def get_source_chunks(source_id: str) -> SourceChunksInspectionDto | None:
+    return _repository().get_source_chunks(source_id)
+
+
+def get_source_citations(source_id: str) -> SourceCitationsInspectionDto | None:
+    return _repository().get_source_citations(source_id)
+
+
+def get_chunk_detail(chunk_id: str) -> ChunkDetailDto | None:
+    return _repository().get_chunk_detail(chunk_id)
+
+
+def get_citation_detail(citation_id: str) -> CitationDetailDto | None:
+    return _repository().get_citation_detail(citation_id)
 
 
 def upload_source(
@@ -974,9 +1365,7 @@ def _source_from_seed(seed: ApprovedSourceSeed) -> SourceRecord:
     )
 
 
-def _mutation_result(
-    snapshots: dict[str, SourceSnapshot], source_id: str
-) -> SourceMutationResult:
+def _mutation_result(snapshots: dict[str, SourceSnapshot], source_id: str) -> SourceMutationResult:
     snapshot = snapshots.get(source_id)
     if snapshot is None:
         raise SourceMutationError(
@@ -1071,18 +1460,228 @@ def _source_detail(snapshot: SourceSnapshot) -> SourceDetailDto:
             "storagePath": snapshot.source.storage_path or "bootstrap-approved-source-bundle",
         },
         "approvalLineage": [
-            event
-            for event in audit_events
-            if event["eventType"] in {"approved", "activate"}
+            event for event in audit_events if event["eventType"] in {"approved", "activate"}
         ],
         "ingestionProvenance": [
-            event
-            for event in audit_events
-            if event["eventType"] in {"ingest", "re-ingest"}
+            event for event in audit_events if event["eventType"] in {"ingest", "re-ingest"}
         ],
         "validationHistory": list(snapshot.validation_events),
         "auditTrail": audit_events,
     }
+
+
+def _inspection_anchor(
+    snapshot: SourceSnapshot, document: DocumentRecord | None, record_type: str
+) -> InspectionAnchorDto:
+    state = _inspection_state(snapshot, document, None)
+    source = snapshot.source
+    if document is None:
+        return {
+            "documentId": None,
+            "version": None,
+            "sourceId": source.source_id,
+            "state": state,
+            "message": f"No ingestion-backed {record_type} records are available for this source.",
+            "nextStep": _inspection_next_step(snapshot),
+        }
+    return {
+        "documentId": document.document_id,
+        "version": document.version,
+        "sourceId": source.source_id,
+        "state": state,
+        "message": (
+            f"Inspecting {record_type} records from the latest successful document revision."
+        ),
+        "nextStep": _inspection_next_step(snapshot),
+    }
+
+
+def _inspection_state(
+    snapshot: SourceSnapshot,
+    document: DocumentRecord | None,
+    record: ChunkRecord | CitationRecord | None,
+) -> InspectionState:
+    if snapshot.source.lifecycle_state in {"draft", "disabled", "archived"}:
+        return "inactive"
+    if document is None:
+        return "empty"
+    if snapshot.source.lifecycle_state != "active":
+        return "stale"
+    if record is None:
+        return "ready"
+    metadata = record.metadata
+    if isinstance(record, ChunkRecord):
+        if (
+            not record.embedding_present
+            or not _metadata_value(metadata, "pageNumber", "page")
+            or not _metadata_value(metadata, "heading", "sectionHeading")
+        ):
+            return "partial"
+    if isinstance(record, CitationRecord):
+        if (
+            not _display_label(record)
+            or not _metadata_value(metadata, "pageNumber", "page")
+            or not _metadata_value(metadata, "sectionHeading", "heading")
+        ):
+            return "partial"
+    return "ready"
+
+
+def _inspection_partial_data(
+    snapshot: SourceSnapshot,
+    document: DocumentRecord | None,
+    records: list[ChunkRecord] | list[CitationRecord],
+) -> list[PartialDataMarker]:
+    markers: list[PartialDataMarker] = []
+    if document is None:
+        markers.append({"field": "documentId", "reason": _inspection_next_step(snapshot)})
+        return markers
+    if not records:
+        markers.append(
+            {
+                "field": "records",
+                "reason": "The latest successful document revision has no retrieval evidence rows.",
+            }
+        )
+    for record in records:
+        if isinstance(record, ChunkRecord) and not record.embedding_present:
+            markers.append({"field": record.chunk_id, "reason": "Chunk has no embedding vector."})
+        if not _metadata_value(record.metadata, "pageNumber", "page"):
+            field = record.chunk_id if isinstance(record, ChunkRecord) else record.citation_id
+            markers.append(
+                {
+                    "field": field,
+                    "reason": "Page context is unavailable.",
+                }
+            )
+    return markers
+
+
+def _inspection_next_step(snapshot: SourceSnapshot) -> str:
+    state = snapshot.source.lifecycle_state
+    if state == "draft":
+        return "Approve the source before ingesting retrieval evidence."
+    if state == "approved":
+        return "Run ingest or re-ingest to create retrieval chunks and citations."
+    if state == "disabled":
+        return "Activate the source after confirming the retrieval evidence is current."
+    if state == "archived":
+        return "Archived sources are not retrieval-eligible from this dashboard."
+    if snapshot.latest_ingest_job is None:
+        return "Run ingest to create the first retrieval evidence snapshot."
+    return "Re-ingest if the visible evidence is stale or incomplete."
+
+
+def _chunk_row(chunk: ChunkRecord, state: InspectionState) -> ChunkRowDto:
+    return {
+        "id": chunk.chunk_id,
+        "documentId": chunk.document_id,
+        "sourceId": chunk.source_id,
+        "chunkIndex": chunk.chunk_index,
+        "tokenCount": chunk.token_count,
+        "contentPreview": _preview(chunk.content),
+        "embeddingPresent": chunk.embedding_present,
+        "activeState": state,
+        "pageNumber": _optional_int(_metadata_value(chunk.metadata, "pageNumber", "page")),
+        "heading": _optional_str(_metadata_value(chunk.metadata, "heading", "sectionHeading")),
+        "metadata": dict(chunk.metadata),
+    }
+
+
+def _citation_row(
+    citation: CitationRecord, linked_chunk_ids: list[str], state: InspectionState
+) -> CitationRowDto:
+    return {
+        "id": citation.citation_id,
+        "documentId": citation.document_id,
+        "sourceId": citation.source_id,
+        "citationLabel": citation.citation_label,
+        "displayLabel": _display_label(citation),
+        "linkedChunkIds": list(linked_chunk_ids),
+        "activeState": state,
+        "pageNumber": _optional_int(_metadata_value(citation.metadata, "pageNumber", "page")),
+        "sectionHeading": _optional_str(
+            _metadata_value(citation.metadata, "sectionHeading", "heading")
+        ),
+        "metadata": dict(citation.metadata),
+    }
+
+
+def _document_from_row(row: dict[str, Any]) -> DocumentRecord:
+    return DocumentRecord(
+        document_id=str(row["id"]),
+        source_id=str(row["source_id"]),
+        title=str(row["title"]),
+        source_path=row.get("source_path"),
+        version=str(row["version"]),
+        created_at=row.get("created_at"),
+        updated_at=row.get("updated_at"),
+    )
+
+
+def _chunk_from_row(row: dict[str, Any]) -> ChunkRecord:
+    return ChunkRecord(
+        chunk_id=str(row["id"]),
+        document_id=str(row["document_id"]),
+        source_id=str(row["source_id"]),
+        chunk_index=int(row["chunk_index"]),
+        content=str(row["content"]),
+        token_count=int(row["token_count"]),
+        embedding_present=row.get("embedding") is not None,
+        metadata=_metadata_dict(row.get("metadata")),
+        created_at=row.get("created_at"),
+        updated_at=row.get("updated_at"),
+    )
+
+
+def _citation_from_row(row: dict[str, Any], *, source_path: str | None) -> CitationRecord:
+    return CitationRecord(
+        citation_id=str(row["id"]),
+        document_id=str(row["document_id"]),
+        source_id=str(row["source_id"]),
+        citation_label=str(row["citation_label"]),
+        source_title=str(row["source_title"]),
+        source_path=source_path,
+        metadata=_metadata_dict(row.get("metadata")),
+        created_at=row.get("created_at"),
+        updated_at=row.get("updated_at"),
+    )
+
+
+def _display_label(citation: CitationRecord) -> str:
+    value = _metadata_value(citation.metadata, "displayLabel", "shortTitle", "label")
+    return _optional_str(value) or citation.citation_label or citation.source_title
+
+
+def _metadata_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _metadata_value(metadata: dict[str, Any], *keys: str) -> Any:
+    for key in keys:
+        value = metadata.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _optional_str(value: Any) -> str | None:
+    return str(value) if value not in (None, "") else None
+
+
+def _optional_int(value: Any) -> int | None:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _preview(content: str) -> str:
+    return content if len(content) <= 220 else f"{content[:217]}..."
+
+
+def _quoted_csv(values: list[str]) -> str:
+    return ",".join(quote(value, safe="") for value in values)
 
 
 def _overview(
@@ -1123,8 +1722,7 @@ def _validate_transition(snapshot: SourceSnapshot, target_state: LifecycleState)
             status=409,
             fields={
                 "lifecycleState": (
-                    "Approve the source and wait for a successful ingest before "
-                    "activation."
+                    "Approve the source and wait for a successful ingest before activation."
                 )
             },
         )
@@ -1187,11 +1785,7 @@ def _validate_source_metadata(
 
 def _ensure_source_id_available(source_id: str, sources: dict[str, SourceRecord]) -> None:
     existing_ids = set(sources)
-    existing_aliases = {
-        alias
-        for source in sources.values()
-        for alias in source.aliases
-    }
+    existing_aliases = {alias for source in sources.values() for alias in source.aliases}
     if source_id in existing_ids or source_id in existing_aliases:
         raise SourceMutationError(
             code="admin_source_conflict",
