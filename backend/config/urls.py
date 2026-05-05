@@ -7,6 +7,7 @@ from config import api
 urlpatterns = [
     path("api/admin/", include("accounts.urls")),
     path("api/admin/", include("sources.urls")),
+    path("api/admin/", include("validation.urls")),
     path("_internal/bootstrap/health/", api.bootstrap_health, name="bootstrap-health"),
     path("_internal/chat/", api.reserved_chat, name="reserved-chat"),
     path("_internal/admin/", api.reserved_admin, name="reserved-admin"),

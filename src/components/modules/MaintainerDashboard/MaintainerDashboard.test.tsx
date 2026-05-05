@@ -6,17 +6,24 @@ import {
   fetchAdminMe,
   fetchChunkDetail,
   fetchCitationDetail,
+  fetchValidationRunDetail,
+  fetchValidationRuns,
+  fetchValidationSets,
   fetchSourceChunks,
   fetchSourceCitations,
   fetchSourceDetail,
   fetchStewardshipDashboard,
   ingestSource,
+  launchValidationRun,
   MaintainerApiError,
   mutateSourceLifecycle,
   updateSourceMetadata,
   uploadSource,
   type SourceDetail,
   type StewardshipDashboard,
+  type ValidationRunDetail,
+  type ValidationRunList,
+  type ValidationSetList,
 } from "@/lib/maintainer/api"
 import {
   clearSupabaseSession,
@@ -37,11 +44,15 @@ vi.mock("@/lib/maintainer/api", async () => {
     fetchAdminMe: vi.fn(),
     fetchChunkDetail: vi.fn(),
     fetchCitationDetail: vi.fn(),
+    fetchValidationRunDetail: vi.fn(),
+    fetchValidationRuns: vi.fn(),
+    fetchValidationSets: vi.fn(),
     fetchSourceChunks: vi.fn(),
     fetchSourceCitations: vi.fn(),
     fetchSourceDetail: vi.fn(),
     fetchStewardshipDashboard: vi.fn(),
     ingestSource: vi.fn(),
+    launchValidationRun: vi.fn(),
     mutateSourceLifecycle: vi.fn(),
     updateSourceMetadata: vi.fn(),
     uploadSource: vi.fn(),
@@ -58,11 +69,15 @@ vi.mock("@/lib/supabase/browser-client", () => ({
 const mockedFetchAdminMe = vi.mocked(fetchAdminMe)
 const mockedFetchChunkDetail = vi.mocked(fetchChunkDetail)
 const mockedFetchCitationDetail = vi.mocked(fetchCitationDetail)
+const mockedFetchValidationRunDetail = vi.mocked(fetchValidationRunDetail)
+const mockedFetchValidationRuns = vi.mocked(fetchValidationRuns)
+const mockedFetchValidationSets = vi.mocked(fetchValidationSets)
 const mockedFetchSourceChunks = vi.mocked(fetchSourceChunks)
 const mockedFetchSourceCitations = vi.mocked(fetchSourceCitations)
 const mockedFetchSourceDetail = vi.mocked(fetchSourceDetail)
 const mockedFetchStewardshipDashboard = vi.mocked(fetchStewardshipDashboard)
 const mockedIngestSource = vi.mocked(ingestSource)
+const mockedLaunchValidationRun = vi.mocked(launchValidationRun)
 const mockedMutateSourceLifecycle = vi.mocked(mutateSourceLifecycle)
 const mockedUpdateSourceMetadata = vi.mocked(updateSourceMetadata)
 const mockedUploadSource = vi.mocked(uploadSource)
@@ -123,6 +138,67 @@ const dashboard = {
   auditEvents: [],
 } satisfies StewardshipDashboard
 
+const validationSets = {
+  defaultSetId: "demo-readiness-v1",
+  sets: [
+    {
+      validationSetId: "demo-readiness-v1",
+      name: "Demo Readiness v1",
+      description: "Baseline demo checks.",
+      version: 1,
+      isDefault: true,
+      questionCount: 5,
+      createdBy: "system-seed",
+      createdAt: "2026-05-05T00:00:00Z",
+      updatedAt: "2026-05-05T00:00:00Z",
+    },
+  ],
+} satisfies ValidationSetList
+
+const validationRun = {
+  runId: "val-run-1",
+  validationSetId: "demo-readiness-v1",
+  validationSetName: "Demo Readiness v1",
+  validationSetVersion: 1,
+  status: "completed",
+  totalCount: 5,
+  passCount: 1,
+  weakSupportCount: 1,
+  refusedCount: 1,
+  failedCount: 1,
+  errorCount: 1,
+  averageLatencyMs: 685,
+  createdBy: "admin@example.test",
+  createdAt: "2026-05-05T00:00:00Z",
+  startedAt: "2026-05-05T00:00:01Z",
+  completedAt: "2026-05-05T00:00:05Z",
+  sourceSnapshotIds: ["gg-src-un-charter-institutions@active"],
+  state: "ready",
+  notes: "Immutable validation run completed.",
+  results: [
+    {
+      resultId: "result-pass",
+      validationQuestionId: "demo-q-grounded-un-charter",
+      questionText: "What is the UN Security Council's role?",
+      expectedState: "grounded",
+      actualState: "grounded",
+      outcome: "pass",
+      answerPreview: "The Security Council has primary responsibility...",
+      retrievedSourceIds: ["gg-src-un-charter-institutions"],
+      citationIds: ["ref-un-charter"],
+      supportScore: 0.93,
+      latencyMs: 840,
+      notes: "Expected grounded answer matched.",
+      createdAt: "2026-05-05T00:00:05Z",
+    },
+  ],
+  auditEvents: [],
+} satisfies ValidationRunDetail
+
+const validationRuns = {
+  runs: [validationRun],
+} satisfies ValidationRunList
+
 function detailFrom(source = dashboard.sources[0]): SourceDetail {
   return {
     ...source,
@@ -147,6 +223,10 @@ beforeEach(() => {
     isActive: true,
   })
   mockedFetchStewardshipDashboard.mockResolvedValue(dashboard)
+  mockedFetchValidationSets.mockResolvedValue(validationSets)
+  mockedFetchValidationRuns.mockResolvedValue(validationRuns)
+  mockedFetchValidationRunDetail.mockResolvedValue(validationRun)
+  mockedLaunchValidationRun.mockResolvedValue(validationRun)
   mockedFetchSourceDetail.mockResolvedValue(detailFrom())
   mockedFetchSourceChunks.mockResolvedValue({
     anchor: {
@@ -821,6 +901,110 @@ describe("MaintainerDashboard", () => {
     expect(
       screen.getByText(
         "Showing 1 of 1 matching chunks. Filtered from 55 total records."
+      )
+    ).toBeVisible()
+  })
+
+  it("loads the validation workbench, launches immutable runs, and opens result detail", async () => {
+    const user = userEvent.setup()
+
+    render(<MaintainerDashboard initialView="validation" />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Validation workbench" })
+    ).toBeVisible()
+    expect(screen.getByLabelText("Validation set")).toHaveValue(
+      "demo-readiness-v1"
+    )
+    expect(screen.getAllByText("Demo Readiness v1").length).toBeGreaterThan(0)
+    for (const outcome of [
+      "pass",
+      "weakSupport",
+      "refused",
+      "failed",
+      "error",
+    ]) {
+      expect(screen.getAllByText(outcome).length).toBeGreaterThan(0)
+    }
+
+    await user.click(screen.getByRole("button", { name: "Run validation" }))
+    await waitFor(() =>
+      expect(mockedLaunchValidationRun).toHaveBeenCalledWith(
+        "demo-readiness-v1",
+        session
+      )
+    )
+    await user.click(screen.getByRole("button", { name: "Inspect result" }))
+
+    expect(
+      await screen.findByRole("dialog", { name: "Validation result detail" })
+    ).toBeVisible()
+    expect(screen.getByText("Expected grounded answer matched.")).toBeVisible()
+    expect(screen.getAllByText("2026-05-05T00:00:05Z").length).toBeGreaterThan(0)
+  })
+
+  it("keeps the selected set synchronized when opening a run from another validation set", async () => {
+    const user = userEvent.setup()
+    const alternateSet = {
+      validationSetId: "policy-refusal-v1",
+      name: "Policy Refusal v1",
+      description: "Focused off-topic and refusal checks.",
+      version: 1,
+      isDefault: false,
+      questionCount: 3,
+      createdBy: "system-seed",
+      createdAt: "2026-05-05T00:00:00Z",
+      updatedAt: "2026-05-05T00:00:00Z",
+    }
+    const alternateRun = {
+      ...validationRun,
+      runId: "val-run-2",
+      validationSetId: alternateSet.validationSetId,
+      validationSetName: alternateSet.name,
+    }
+
+    mockedFetchValidationSets.mockResolvedValue({
+      defaultSetId: "demo-readiness-v1",
+      sets: [...validationSets.sets, alternateSet],
+    })
+    mockedFetchValidationRuns.mockResolvedValue({
+      runs: [validationRun, alternateRun],
+    })
+    mockedFetchValidationRunDetail.mockImplementation(async (runId) =>
+      runId === "val-run-2" ? alternateRun : validationRun
+    )
+
+    render(<MaintainerDashboard initialView="validation" />)
+
+    await screen.findByRole("heading", { name: "Validation workbench" })
+    await user.click(screen.getAllByRole("button", { name: "Open run" })[1])
+
+    await waitFor(() =>
+      expect(screen.getByLabelText("Validation set")).toHaveValue(
+        alternateSet.validationSetId
+      )
+    )
+    expect(
+      await screen.findByRole("heading", { name: "Policy Refusal v1" })
+    ).toBeVisible()
+  })
+
+  it("shows a distinct not-found state when validation run detail disappears", async () => {
+    mockedFetchValidationRunDetail.mockRejectedValue(
+      new MaintainerApiError(
+        "admin_validation_run_not_found",
+        404,
+        "The requested validation run was not found."
+      )
+    )
+
+    render(<MaintainerDashboard initialView="validation" />)
+
+    await screen.findByRole("heading", { name: "Validation workbench" })
+    expect(await screen.findByText("Validation run not found")).toBeVisible()
+    expect(
+      screen.getByText(
+        "The requested validation run is no longer available. Choose another immutable history record."
       )
     ).toBeVisible()
   })
