@@ -1,12 +1,12 @@
 # generated: 2026-04-24T00:50:58+08:00
-# last_updated: 2026-05-05T22:29:30.3409742+08:00
+# last_updated: 2026-05-05T12:00:00+08:00
 # project: Global-Governance
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts
 
 generated: 2026-04-24T00:50:58+08:00
-last_updated: 2026-05-05T22:29:30.3409742+08:00
+last_updated: 2026-05-05T13:34:00+08:00
 project: Global-Governance
 project_key: NOKEY
 tracking_system: file-system
@@ -58,14 +58,11 @@ development_status:
   5-6a-add-protected-source-mutation-workflows: done
   5-6b-inspect-retrieval-chunks-and-citations: done
   5-6c-run-admin-validation-checks: done
-  5-6d-reframe-the-dashboard-as-a-trust-and-readiness-console: backlog
-  5-6e-modularize-the-maintainer-dashboard-shell-and-routes: backlog
   5-7-orchestrate-retrieval-backed-grounded-answers-in-django: backlog
   5-8-add-topic-guard-safety-guard-and-guided-chat-suggestions-in-django: backlog
   5-9-redesign-the-source-aware-chat-experience: backlog
   5-10-rehearse-demo-readiness: backlog
   5-11-bootstrap-the-working-environment: backlog
-  5-12-harden-operational-guardrails-and-release-readiness: backlog
   epic-5-retrospective: optional
 
   # Epic 6: Adaptive Presentation and Future Expansion

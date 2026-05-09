@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Global-Governance UX Design Directions</title>
+    <style>
+      :root {
+        --bg: #091224;
+        --bg-elevated: #12203d;
+        --surface: #f4efe6;
+        --surface-muted: #e7dfd0;
+        --ink: #101827;
+        --ink-soft: #5f6774;
+        --line: rgba(255, 255, 255, 0.12);
+        --gold: #c9a86a;
+        --teal: #4f9c98;
+        --rust: #a94f44;
+        --paper-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+        --panel-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+        --radius-lg: 28px;
+        --radius-md: 18px;
+        --radius-sm: 12px;
+        --max: 1380px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(79, 156, 152, 0.12), transparent 26%),
+          radial-gradient(circle at 85% 15%, rgba(201, 168, 106, 0.12), transparent 20%),
+          linear-gradient(180deg, #07101f 0%, #0d1830 38%, #08111f 100%);
+        color: #f7f4ee;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(18px);
+        background: rgba(7, 16, 31, 0.8);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .topbar-inner {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 16px 24px;
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .brand-badge {
+        width: 14px;
+        height: 14px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--gold), #f1dfb6);
+        box-shadow: 0 0 20px rgba(201, 168, 106, 0.4);
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .nav a {
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        border-radius: 999px;
+        color: rgba(247, 244, 238, 0.84);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: 180ms ease;
+      }
+
+      .nav a:hover {
+        color: #fff;
+        border-color: rgba(201, 168, 106, 0.45);
+        background: rgba(201, 168, 106, 0.08);
+      }
+
+      .page {
+        max-width: var(--max);
+        margin: 0 auto;
+        padding: 40px 24px 96px;
+      }
+
+      .hero {
+        min-height: 72vh;
+        display: grid;
+        gap: 24px;
+        align-items: end;
+        padding: 48px 0 24px;
+      }
+
+      .eyebrow {
+        color: var(--gold);
+        font-size: 0.82rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-family: "Cormorant Garamond", Georgia, serif;
+        line-height: 1.02;
+        font-weight: 600;
+      }
+
+      h1 {
+        max-width: 12ch;
+        font-size: clamp(3.4rem, 8vw, 6.4rem);
+      }
+
+      .hero-copy {
+        max-width: 72ch;
+        color: rgba(247, 244, 238, 0.82);
+        font-size: 1.08rem;
+        line-height: 1.75;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 8px;
+      }
+
+      .summary-card {
+        padding: 18px 20px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--line);
+        box-shadow: var(--panel-shadow);
+      }
+
+      .summary-card strong {
+        display: block;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+      }
+
+      .summary-card span {
+        color: rgba(247, 244, 238, 0.74);
+        line-height: 1.6;
+        font-size: 0.94rem;
+      }
+
+      .section-title {
+        margin: 52px 0 20px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .section-title p {
+        max-width: 62ch;
+        margin: 0;
+        color: rgba(247, 244, 238, 0.72);
+        line-height: 1.7;
+      }
+
+      .direction {
+        min-height: 100vh;
+        margin-top: 28px;
+        padding: 28px;
+        border-radius: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: var(--panel-shadow);
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 24px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .direction::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: inherit;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .direction-main,
+      .direction-notes {
+        display: grid;
+        gap: 18px;
+        align-content: start;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .chip {
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .recommended {
+        background: rgba(201, 168, 106, 0.12);
+        border-color: rgba(201, 168, 106, 0.45);
+        color: #f9deb1;
+      }
+
+      .mockup {
+        min-height: 520px;
+        border-radius: 28px;
+        padding: 26px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 18px;
+      }
+
+      .mockup-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .mockup-nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .mockup-nav span,
+      .meta {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .hero-panel {
+        border-radius: 22px;
+        padding: 28px;
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .hero-panel h3 {
+        font-size: clamp(2.2rem, 5vw, 4rem);
+      }
+
+      .hero-panel p {
+        margin: 0;
+        line-height: 1.7;
+      }
+
+      .orb,
+      .diagram,
+      .map,
+      .column-stack,
+      .ledger,
+      .dossier {
+        border-radius: 20px;
+        min-height: 220px;
+      }
+
+      .content-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .mini-card {
+        min-height: 140px;
+        border-radius: 18px;
+        padding: 18px;
+        display: grid;
+        gap: 10px;
+        align-content: start;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+      }
+
+      .mini-card:hover {
+        transform: translateY(-3px);
+      }
+
+      .mini-card strong {
+        font-size: 1rem;
+      }
+
+      .mini-card p {
+        margin: 0;
+        line-height: 1.6;
+        font-size: 0.92rem;
+      }
+
+      .notes-card {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 22px;
+        padding: 22px;
+      }
+
+      .notes-card p,
+      .notes-card li {
+        line-height: 1.75;
+        color: rgba(247, 244, 238, 0.78);
+      }
+
+      .notes-card ul {
+        margin: 12px 0 0;
+        padding-left: 18px;
+      }
+
+      .direction h2 {
+        font-size: clamp(2rem, 4vw, 3.25rem);
+      }
+
+      .direction-copy {
+        font-size: 1rem;
+        color: rgba(247, 244, 238, 0.8);
+        line-height: 1.8;
+      }
+
+      .direction-score {
+        display: grid;
+        gap: 12px;
+      }
+
+      .score-row {
+        display: grid;
+        grid-template-columns: 140px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        font-size: 0.92rem;
+      }
+
+      .bar {
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .bar > span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+      }
+
+      .compare {
+        margin-top: 48px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 26px;
+        padding: 24px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 14px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        vertical-align: top;
+      }
+
+      th {
+        color: #fff;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      td {
+        color: rgba(247, 244, 238, 0.78);
+        line-height: 1.65;
+      }
+
+      .footer-note {
+        margin-top: 18px;
+        color: rgba(247, 244, 238, 0.68);
+        line-height: 1.7;
+      }
+
+      .direction[data-theme="editorial"] {
+        background: linear-gradient(135deg, #0b1631, #15284d 58%, #1d2d4b);
+      }
+
+      .direction[data-theme="editorial"] .mockup {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+      }
+
+      .direction[data-theme="editorial"] .hero-panel {
+        background:
+          radial-gradient(circle at 75% 20%, rgba(201, 168, 106, 0.22), transparent 22%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+      }
+
+      .direction[data-theme="editorial"] .orb {
+        background:
+          radial-gradient(circle at center, rgba(201, 168, 106, 0.55), rgba(79, 156, 152, 0.18) 38%, transparent 40%),
+          radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 68%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .direction[data-theme="atlas"] {
+        background: linear-gradient(135deg, #081421, #0a2530 48%, #0f3944);
+      }
+
+      .direction[data-theme="atlas"] .mockup {
+        background: rgba(6, 18, 24, 0.46);
+      }
+
+      .direction[data-theme="atlas"] .hero-panel {
+        background: linear-gradient(135deg, rgba(79, 156, 152, 0.12), rgba(255, 255, 255, 0.04));
+      }
+
+      .direction[data-theme="atlas"] .diagram {
+        background:
+          linear-gradient(rgba(79, 156, 152, 0.2), rgba(79, 156, 152, 0.2)),
+          repeating-linear-gradient(0deg, transparent 0 24px, rgba(255, 255, 255, 0.06) 24px 25px),
+          repeating-linear-gradient(90deg, transparent 0 24px, rgba(255, 255, 255, 0.06) 24px 25px);
+        border: 1px solid rgba(79, 156, 152, 0.24);
+      }
+
+      .direction[data-theme="cinema"] {
+        background: linear-gradient(135deg, #140d1e, #1a1830 52%, #1f1227);
+      }
+
+      .direction[data-theme="cinema"] .mockup {
+        background: rgba(18, 11, 28, 0.58);
+      }
+
+      .direction[data-theme="cinema"] .hero-panel {
+        background:
+          radial-gradient(circle at 20% 25%, rgba(169, 79, 68, 0.18), transparent 25%),
+          radial-gradient(circle at 80% 20%, rgba(201, 168, 106, 0.18), transparent 22%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.03));
+      }
+
+      .direction[data-theme="cinema"] .map {
+        background:
+          linear-gradient(135deg, rgba(169, 79, 68, 0.22), rgba(255, 255, 255, 0.02)),
+          repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.04) 0 10px, transparent 10px 20px);
+        border: 1px solid rgba(169, 79, 68, 0.24);
+      }
+
+      .direction[data-theme="ledger"] {
+        color: #111827;
+        background: linear-gradient(135deg, #f1ebde, #f7f1e8 52%, #ece2d1);
+      }
+
+      .direction[data-theme="ledger"] .notes-card,
+      .direction[data-theme="ledger"] .summary-card,
+      .direction[data-theme="ledger"] .chip,
+      .direction[data-theme="ledger"] .nav a,
+      .direction[data-theme="ledger"] .section-title p,
+      .direction[data-theme="ledger"] .direction-copy,
+      .direction[data-theme="ledger"] .notes-card p,
+      .direction[data-theme="ledger"] .notes-card li,
+      .direction[data-theme="ledger"] td {
+        color: var(--ink-soft);
+      }
+
+      .direction[data-theme="ledger"] .mockup,
+      .direction[data-theme="ledger"] .notes-card,
+      .direction[data-theme="ledger"] .mini-card {
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(16, 24, 39, 0.08);
+        box-shadow: var(--paper-shadow);
+      }
+
+      .direction[data-theme="ledger"] .hero-panel {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(243, 235, 222, 0.9));
+      }
+
+      .direction[data-theme="ledger"] .column-stack {
+        background:
+          linear-gradient(180deg, rgba(201, 168, 106, 0.22), rgba(201, 168, 106, 0.08)),
+          repeating-linear-gradient(180deg, transparent 0 31px, rgba(16, 24, 39, 0.06) 31px 32px);
+        border: 1px solid rgba(201, 168, 106, 0.22);
+      }
+
+      .direction[data-theme="dossier"] {
+        background: linear-gradient(135deg, #261916, #39201a 52%, #1c1622);
+      }
+
+      .direction[data-theme="dossier"] .mockup {
+        background: rgba(34, 21, 20, 0.62);
+      }
+
+      .direction[data-theme="dossier"] .hero-panel {
+        background: linear-gradient(135deg, rgba(169, 79, 68, 0.16), rgba(255, 255, 255, 0.03));
+      }
+
+      .direction[data-theme="dossier"] .dossier {
+        background:
+          radial-gradient(circle at 15% 15%, rgba(201, 168, 106, 0.22), transparent 22%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(201, 168, 106, 0.16);
+      }
+
+      .direction[data-theme="command"] {
+        background: linear-gradient(135deg, #06161e, #0c2131 48%, #0a2b37);
+      }
+
+      .direction[data-theme="command"] .mockup {
+        background: rgba(8, 22, 31, 0.56);
+      }
+
+      .direction[data-theme="command"] .hero-panel {
+        background:
+          radial-gradient(circle at 80% 25%, rgba(79, 156, 152, 0.18), transparent 22%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.03));
+      }
+
+      .direction[data-theme="command"] .ledger {
+        background:
+          linear-gradient(rgba(79, 156, 152, 0.14), rgba(79, 156, 152, 0.14)),
+          repeating-linear-gradient(180deg, transparent 0 31px, rgba(255, 255, 255, 0.08) 31px 32px);
+        border: 1px solid rgba(79, 156, 152, 0.2);
+      }
+
+      .tone-gold {
+        color: var(--gold);
+      }
+
+      .tone-teal {
+        color: #8fe1dd;
+      }
+
+      .tone-rust {
+        color: #e1a59d;
+      }
+
+      @media (max-width: 1100px) {
+        .direction,
+        .hero-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .summary-grid,
+        .content-row {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .score-row {
+          grid-template-columns: 110px 1fr auto;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .topbar-inner,
+        .page {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        .direction {
+          padding: 18px;
+        }
+
+        .summary-grid,
+        .content-row {
+          grid-template-columns: 1fr;
+        }
+
+        .section-title {
+          flex-direction: column;
+          align-items: start;
+        }
+
+        .score-row {
+          grid-template-columns: 1fr;
+        }
+
+        th,
+        td {
+          padding-left: 6px;
+          padding-right: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <span class="brand-badge"></span>
+          <span>Global-Governance Design Directions</span>
+        </div>
+        <nav class="nav">
+          <a href="#d1">D1 Editorial</a>
+          <a href="#d2">D2 Atlas</a>
+          <a href="#d3">D3 Cinema</a>
+          <a href="#d4">D4 Ledger</a>
+          <a href="#d5">D5 Dossier</a>
+          <a href="#d6">D6 Command</a>
+          <a href="#compare">Compare</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="eyebrow">Step 9 Visual Exploration</div>
+        <h1>Six design directions for a premium academic experience.</h1>
+        <p class="hero-copy">
+          These directions apply the approved UX foundation to the Global-Governance site. Each one explores a different balance of cinematic storytelling, academic clarity, interaction weight, and presentation confidence. Direction 1 is the recommended base, but the strongest final answer may be a hybrid.
+        </p>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <strong>Primary Goal</strong>
+            <span>Help student presenters understand, navigate, and explain the topic with confidence.</span>
+          </div>
+          <div class="summary-card">
+            <strong>Shared Foundation</strong>
+            <span>Deep navy, parchment reading surfaces, muted gold, restrained teal, editorial typography, and layered explanation.</span>
+          </div>
+          <div class="summary-card">
+            <strong>Flagship Moments</strong>
+            <span>Hero arrival, UN Command Center, West Philippine Sea dossier, and source-aware chatbot states.</span>
+          </div>
+          <div class="summary-card">
+            <strong>Recommendation</strong>
+            <span>Start from Diplomatic Editorial, then borrow structure from Atlas and evidence styling from Dossier.</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="section-title">
+        <div>
+          <div class="eyebrow">Direction Set</div>
+          <h2>Visual paths worth comparing</h2>
+        </div>
+        <p>
+          Use these sections to judge hierarchy, tone, motion weight, and how the content feels in a presentation context. The aim is not to pick a perfect mockup untouched, but to identify the strongest combination for the final site.
+        </p>
+      </div>
+
+      <section class="direction" data-theme="editorial" id="d1">
+        <div class="direction-main">
+          <div class="chips">
+            <span class="chip recommended">Recommended Base</span>
+            <span class="chip">Cinematic</span>
+            <span class="chip">Clear Hierarchy</span>
+            <span class="chip">Presentation-Ready</span>
+          </div>
+          <h2>Direction 1: Diplomatic Editorial</h2>
+          <p class="direction-copy">
+            A premium editorial documentary look with restrained spectacle. This direction balances atmosphere and readability best, making it the safest and strongest base for the final product.
+          </p>
+          <div class="mockup">
+            <div class="mockup-top">
+              <div class="meta">Global Governance / Overview / UN / Case Study / Chat</div>
+              <div class="mockup-nav">
+                <span class="chip">Student</span>
+                <span class="chip">Expert</span>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div>
+                <div class="eyebrow">If there is no world government</div>
+                <h3>How is the world governed?</h3>
+                <p>
+                  The story unfolds in chapters, with clear explanatory beats and one strong set-piece interaction per major section.
+                </p>
+              </div>
+              <div class="orb"></div>
+            </div>
+            <div class="content-row">
+              <div class="mini-card">
+                <strong>UN Command Center</strong>
+                <p>Tabs, organ cards, and side context keep institutions understandable without flattening nuance.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Case Study</strong>
+                <p>Timeline plus law-versus-reality framing makes the West Philippine Sea section feel serious and concrete.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Chat Support</strong>
+                <p>Source chips and prompt starters feel scholarly instead of generic.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div class="notes-card">
+            <h3>Why it works</h3>
+            <ul>
+              <li>Best balance of premium feel and academic credibility.</li>
+              <li>Strong hero and chapter pacing without exhausting the user.</li>
+              <li>Gives flagship modules room to stand out.</li>
+            </ul>
+          </div>
+          <div class="notes-card direction-score">
+            <div class="score-row"><span>Clarity</span><div class="bar"><span style="width:92%; background:var(--gold)"></span></div><strong>9.2</strong></div>
+            <div class="score-row"><span>Drama</span><div class="bar"><span style="width:78%; background:var(--gold)"></span></div><strong>7.8</strong></div>
+            <div class="score-row"><span>Trust</span><div class="bar"><span style="width:90%; background:var(--teal)"></span></div><strong>9.0</strong></div>
+            <div class="score-row"><span>Effort</span><div class="bar"><span style="width:70%; background:var(--gold)"></span></div><strong>7.0</strong></div>
+          </div>
+          <div class="notes-card">
+            <h3>Best used for</h3>
+            <p>Final production baseline. Especially strong if you want a site that feels polished in live presentation and still looks distinctive in screenshots.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction" data-theme="atlas" id="d2">
+        <div class="direction-main">
+          <div class="chips">
+            <span class="chip">Analytical</span>
+            <span class="chip">Structured</span>
+            <span class="chip">Map-Led</span>
+          </div>
+          <h2>Direction 2: Strategic Atlas</h2>
+          <p class="direction-copy">
+            A cleaner, map-informed direction that leans into global systems, networks, and institutional relationships. It feels slightly more analytical and less theatrical than Direction 1.
+          </p>
+          <div class="mockup">
+            <div class="mockup-top">
+              <div class="meta">Briefing view / system map / institutions / tensions</div>
+              <div class="mockup-nav">
+                <span class="chip">Actors</span>
+                <span class="chip">Networks</span>
+                <span class="chip">Dependencies</span>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div>
+                <div class="eyebrow tone-teal">Networked Governance</div>
+                <h3>Institutions, actors, and weak enforcement</h3>
+                <p>The hero and section transitions use geographic and systems cues rather than pure atmosphere.</p>
+              </div>
+              <div class="diagram"></div>
+            </div>
+            <div class="content-row">
+              <div class="mini-card">
+                <strong>System Map</strong>
+                <p>Relationship-based diagrams make actor interactions intuitive.</p>
+              </div>
+              <div class="mini-card">
+                <strong>High Scanability</strong>
+                <p>Excellent for quick review before presentation.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Stable Navigation</strong>
+                <p>Feels reliable and serious with minimal ornament.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div class="notes-card">
+            <h3>Why it works</h3>
+            <ul>
+              <li>Great for institutional clarity and information hierarchy.</li>
+              <li>Natural fit for the UN and key actors sections.</li>
+              <li>Keeps the site feeling intellectually credible.</li>
+            </ul>
+          </div>
+          <div class="notes-card direction-score">
+            <div class="score-row"><span>Clarity</span><div class="bar"><span style="width:90%; background:var(--teal)"></span></div><strong>9.0</strong></div>
+            <div class="score-row"><span>Drama</span><div class="bar"><span style="width:62%; background:var(--teal)"></span></div><strong>6.2</strong></div>
+            <div class="score-row"><span>Trust</span><div class="bar"><span style="width:88%; background:var(--teal)"></span></div><strong>8.8</strong></div>
+            <div class="score-row"><span>Effort</span><div class="bar"><span style="width:74%; background:var(--teal)"></span></div><strong>7.4</strong></div>
+          </div>
+          <div class="notes-card">
+            <h3>Best used for</h3>
+            <p>Borrow its structure for the UN Command Center and navigation model, even if the final aesthetic stays closer to Direction 1.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction" data-theme="cinema" id="d3">
+        <div class="direction-main">
+          <div class="chips">
+            <span class="chip">High Impact</span>
+            <span class="chip">Dramatic</span>
+            <span class="chip">Story-First</span>
+          </div>
+          <h2>Direction 3: Documentary Cinema</h2>
+          <p class="direction-copy">
+            A bolder, more immersive direction that leans into contrast, spotlighting, and chapter transitions. It creates stronger emotional peaks, but needs careful restraint to stay readable.
+          </p>
+          <div class="mockup">
+            <div class="mockup-top">
+              <div class="meta">Chapter 03 / The limits of power</div>
+              <div class="mockup-nav">
+                <span class="chip">Play flow</span>
+                <span class="chip">Scene beats</span>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div>
+                <div class="eyebrow tone-rust">Conflict and consequence</div>
+                <h3>Law speaks. Power decides.</h3>
+                <p>This direction turns sections into dramatic scenes, with strong contrast and high-emotion transitions.</p>
+              </div>
+              <div class="map"></div>
+            </div>
+            <div class="content-row">
+              <div class="mini-card">
+                <strong>High-Drama Hero</strong>
+                <p>Most likely to create a memorable first impression.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Powerful Case Study</strong>
+                <p>Best fit for the law-versus-reality framing.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Risk</strong>
+                <p>Can overpower explanatory content if applied everywhere.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div class="notes-card">
+            <h3>Why it works</h3>
+            <ul>
+              <li>Creates a stronger emotional arc than the other directions.</li>
+              <li>Excellent for hero arrival and case-study tension.</li>
+              <li>Would pair well with selective cinematic sections only.</li>
+            </ul>
+          </div>
+          <div class="notes-card direction-score">
+            <div class="score-row"><span>Clarity</span><div class="bar"><span style="width:73%; background:var(--rust)"></span></div><strong>7.3</strong></div>
+            <div class="score-row"><span>Drama</span><div class="bar"><span style="width:94%; background:var(--rust)"></span></div><strong>9.4</strong></div>
+            <div class="score-row"><span>Trust</span><div class="bar"><span style="width:74%; background:var(--rust)"></span></div><strong>7.4</strong></div>
+            <div class="score-row"><span>Effort</span><div class="bar"><span style="width:58%; background:var(--rust)"></span></div><strong>5.8</strong></div>
+          </div>
+          <div class="notes-card">
+            <h3>Best used for</h3>
+            <p>Borrow its hero tone and chapter transitions, but not its full-page intensity across the entire site.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction" data-theme="ledger" id="d4">
+        <div class="direction-main">
+          <div class="chips">
+            <span class="chip">Paper-Led</span>
+            <span class="chip">Academic</span>
+            <span class="chip">Reference-Heavy</span>
+          </div>
+          <h2>Direction 4: Institutional Ledger</h2>
+          <p class="direction-copy">
+            A light-surface direction centered on readable papers, archival rhythm, and scholarly trust. It feels most like a premium publication or briefing folio.
+          </p>
+          <div class="mockup">
+            <div class="mockup-top">
+              <div class="meta">Annotated report / organs / doctrine / evidence</div>
+              <div class="mockup-nav">
+                <span class="chip">Sources</span>
+                <span class="chip">Notes</span>
+                <span class="chip">Timeline</span>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div>
+                <div class="eyebrow">Global Governance Brief</div>
+                <h3>Readable, authoritative, and archival</h3>
+                <p>The experience feels like a curated academic document with premium spacing and stronger source visibility.</p>
+              </div>
+              <div class="column-stack"></div>
+            </div>
+            <div class="content-row">
+              <div class="mini-card">
+                <strong>Source Confidence</strong>
+                <p>Best direction for evaluators who prioritize rigor over spectacle.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Long-Form Comfort</strong>
+                <p>Ideal for dense explanations and references.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Risk</strong>
+                <p>Needs stronger contrast moments to avoid feeling too safe.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div class="notes-card">
+            <h3>Why it works</h3>
+            <ul>
+              <li>Most credible for source-heavy sections and references.</li>
+              <li>Excellent body-text readability and citation handling.</li>
+              <li>Gives the project academic weight fast.</li>
+            </ul>
+          </div>
+          <div class="notes-card direction-score">
+            <div class="score-row"><span>Clarity</span><div class="bar"><span style="width:95%; background:var(--gold)"></span></div><strong>9.5</strong></div>
+            <div class="score-row"><span>Drama</span><div class="bar"><span style="width:48%; background:var(--gold)"></span></div><strong>4.8</strong></div>
+            <div class="score-row"><span>Trust</span><div class="bar"><span style="width:94%; background:var(--gold)"></span></div><strong>9.4</strong></div>
+            <div class="score-row"><span>Effort</span><div class="bar"><span style="width:80%; background:var(--gold)"></span></div><strong>8.0</strong></div>
+          </div>
+          <div class="notes-card">
+            <h3>Best used for</h3>
+            <p>Borrow its paper surfaces, references treatment, and typography scale for content-heavy sections.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction" data-theme="dossier" id="d5">
+        <div class="direction-main">
+          <div class="chips">
+            <span class="chip">Investigative</span>
+            <span class="chip">Case-Led</span>
+            <span class="chip">Evidence First</span>
+          </div>
+          <h2>Direction 5: Casefile Immersion</h2>
+          <p class="direction-copy">
+            An investigative direction built for the West Philippine Sea dossier. It uses file, evidence, and timeline language to create tension and seriousness without becoming sensational.
+          </p>
+          <div class="mockup">
+            <div class="mockup-top">
+              <div class="meta">Casefile / 2012-2016 / ruling vs reality</div>
+              <div class="mockup-nav">
+                <span class="chip">Evidence</span>
+                <span class="chip">Timeline</span>
+                <span class="chip">Legal lens</span>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div>
+                <div class="eyebrow tone-rust">Interactive dossier</div>
+                <h3>Where international law met geopolitical reality</h3>
+                <p>Every panel feels like a curated evidence surface, which makes the case study unusually memorable.</p>
+              </div>
+              <div class="dossier"></div>
+            </div>
+            <div class="content-row">
+              <div class="mini-card">
+                <strong>Timeline Power</strong>
+                <p>Strongest framing for sequences of events and evidence.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Serious Tone</strong>
+                <p>Communicates consequence and complexity clearly.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Risk</strong>
+                <p>Too specific to become the whole site language.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div class="notes-card">
+            <h3>Why it works</h3>
+            <ul>
+              <li>Best dedicated style for the case study section.</li>
+              <li>Supports chronology, evidence, and friction extremely well.</li>
+              <li>Feels memorable without being gimmicky.</li>
+            </ul>
+          </div>
+          <div class="notes-card direction-score">
+            <div class="score-row"><span>Clarity</span><div class="bar"><span style="width:84%; background:var(--rust)"></span></div><strong>8.4</strong></div>
+            <div class="score-row"><span>Drama</span><div class="bar"><span style="width:86%; background:var(--rust)"></span></div><strong>8.6</strong></div>
+            <div class="score-row"><span>Trust</span><div class="bar"><span style="width:87%; background:var(--rust)"></span></div><strong>8.7</strong></div>
+            <div class="score-row"><span>Effort</span><div class="bar"><span style="width:72%; background:var(--rust)"></span></div><strong>7.2</strong></div>
+          </div>
+          <div class="notes-card">
+            <h3>Best used for</h3>
+            <p>Use this as the visual sub-language for the case-study module, even if the overall site follows Direction 1.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction" data-theme="command" id="d6">
+        <div class="direction-main">
+          <div class="chips">
+            <span class="chip">Interactive</span>
+            <span class="chip">Systems UI</span>
+            <span class="chip">Flagship Module</span>
+          </div>
+          <h2>Direction 6: Command Narrative</h2>
+          <p class="direction-copy">
+            A high-control direction that makes the UN section feel like an explorable command environment. It is the strongest candidate for a module-specific language, not a full-site default.
+          </p>
+          <div class="mockup">
+            <div class="mockup-top">
+              <div class="meta">Command view / Security Council / powers / limits</div>
+              <div class="mockup-nav">
+                <span class="chip">Organs</span>
+                <span class="chip">Authority</span>
+                <span class="chip">Constraints</span>
+              </div>
+            </div>
+            <div class="hero-panel">
+              <div>
+                <div class="eyebrow tone-teal">UN Command Center</div>
+                <h3>Explore authority, structure, and institutional limits</h3>
+                <p>Cards, gauges, tabs, and controlled data surfaces create a strong sense of interaction and structure.</p>
+              </div>
+              <div class="ledger"></div>
+            </div>
+            <div class="content-row">
+              <div class="mini-card">
+                <strong>Best Module Fit</strong>
+                <p>Feels purpose-built for the UN interaction.</p>
+              </div>
+              <div class="mini-card">
+                <strong>System Clarity</strong>
+                <p>Powerful for comparison and layered exploration.</p>
+              </div>
+              <div class="mini-card">
+                <strong>Risk</strong>
+                <p>Could drift toward dashboard language if overused.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div class="notes-card">
+            <h3>Why it works</h3>
+            <ul>
+              <li>Turns the UN module into a clear flagship interaction.</li>
+              <li>Strong for tabs, data chips, side panels, and comparison views.</li>
+              <li>Feels modern while still readable.</li>
+            </ul>
+          </div>
+          <div class="notes-card direction-score">
+            <div class="score-row"><span>Clarity</span><div class="bar"><span style="width:88%; background:var(--teal)"></span></div><strong>8.8</strong></div>
+            <div class="score-row"><span>Drama</span><div class="bar"><span style="width:69%; background:var(--teal)"></span></div><strong>6.9</strong></div>
+            <div class="score-row"><span>Trust</span><div class="bar"><span style="width:86%; background:var(--teal)"></span></div><strong>8.6</strong></div>
+            <div class="score-row"><span>Effort</span><div class="bar"><span style="width:76%; background:var(--teal)"></span></div><strong>7.6</strong></div>
+          </div>
+          <div class="notes-card">
+            <h3>Best used for</h3>
+            <p>Adopt it as a module-specific accent for the UN section and chatbot surfaces, not as the dominant full-page language.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="compare" id="compare">
+        <div class="section-title" style="margin-top:0">
+          <div>
+            <div class="eyebrow">Comparison Matrix</div>
+            <h2>Recommended hybrid</h2>
+          </div>
+          <p>
+            The best final system is not a single unmodified direction. It is a composed solution: Direction 1 for the whole-site baseline, Direction 2 for structure, Direction 5 for the case-study sub-language, and Direction 6 for the UN flagship module.
+          </p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Direction</th>
+              <th>Strongest Use</th>
+              <th>Primary Benefit</th>
+              <th>Main Risk</th>
+              <th>Keep / Borrow</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1. Diplomatic Editorial</td>
+              <td>Full-site baseline</td>
+              <td>Best balance of atmosphere, clarity, and academic trust</td>
+              <td>Can feel too safe if the hero and modules are not pushed enough</td>
+              <td>Keep as the overall base</td>
+            </tr>
+            <tr>
+              <td>2. Strategic Atlas</td>
+              <td>Navigation and systems sections</td>
+              <td>Excellent structure and mental-model support</td>
+              <td>Less emotional lift than the top directions</td>
+              <td>Borrow hierarchy and map logic</td>
+            </tr>
+            <tr>
+              <td>3. Documentary Cinema</td>
+              <td>Hero and chapter transitions</td>
+              <td>Highest impact and strongest emotional beat</td>
+              <td>Easy to overdo</td>
+              <td>Borrow selected transition language only</td>
+            </tr>
+            <tr>
+              <td>4. Institutional Ledger</td>
+              <td>References and dense reading surfaces</td>
+              <td>Highest scholarly trust and long-form readability</td>
+              <td>Not dramatic enough for the whole product</td>
+              <td>Borrow paper surfaces and citation treatment</td>
+            </tr>
+            <tr>
+              <td>5. Casefile Immersion</td>
+              <td>West Philippine Sea module</td>
+              <td>Best at timeline tension and evidence framing</td>
+              <td>Too specialized for the full site</td>
+              <td>Keep as the case-study sub-language</td>
+            </tr>
+            <tr>
+              <td>6. Command Narrative</td>
+              <td>UN Command Center</td>
+              <td>Best interactive system feel</td>
+              <td>Can drift into dashboard energy</td>
+              <td>Keep as the UN module accent language</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="footer-note">
+          Recommended lock-in: use Direction 1 as the product-wide foundation, then layer Direction 2 for information architecture, Direction 5 for the case-study experience, and Direction 6 for the UN interaction model. This gives the site a coherent main language with sharper, memorable sub-languages where they matter most.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -16,7 +16,7 @@ workflowType: 'architecture'
 project_name: 'Global-Governance'
 user_name: 'Nakko'
 date: '2026-04-23'
-lastEdited: '2026-05-05'
+lastEdited: '2026-05-02'
 lastStep: 8
 status: 'complete'
 completedAt: '2026-04-23'
@@ -25,8 +25,6 @@ editHistory:
     summary: 'Rebaselined the architecture for the approved Django chatbot-backend pivot, private maintainer authentication boundary, and source-stewardship admin operations.'
   - date: '2026-05-02'
     summary: 'Patched contradictions called out in adversarial review, including transition-state clarity, API contract depth, test ownership, and readiness caveats.'
-  - date: '2026-05-05'
-    summary: 'Corrected course for the private maintainer dashboard so the planning target now favors a readiness-first console, route-aligned private sections, and a modular frontend feature boundary instead of a long-term monolithic shell.'
 ---
 
 # Architecture Decision Document
@@ -302,8 +300,6 @@ These routes are served through Django, which acts as the single orchestration b
   - `/maintainer/validation`
   - `/maintainer/audit-logs`
 - Keep these routes undiscoverable from public learner navigation and treat hidden routing only as a UX choice, not as a security mechanism.
-- The private landing route should favor a blocker-driven dashboard view rather than defaulting to raw inventory management.
-- Frontend route separation should not be forced to mirror one aggregate backend endpoint one-for-one; dedicated private pages may compose aggregate dashboard DTOs as long as the route family stays operator-centered and the data contracts remain explicit.
 
 **Chat request lifecycle contract:**
 - The MVP chat path is non-streaming by default unless implementation proves streaming is required to meet the responsiveness target.
@@ -362,7 +358,6 @@ These routes are served through Django, which acts as the single orchestration b
   - West Philippine Sea Dossier
   - Source-Aware Chat Panel and chat transcript surfaces
 - If a private maintainer UI is added, keep it in an explicitly private feature boundary rather than mixing it into learner-facing story sections.
-- Within the private maintainer feature boundary, split the console into route-aligned slices such as shell, overview, source inventory, source detail, ingestion, validation, audit, and shared inspection overlays instead of concentrating the entire console in one implementation file.
 
 **Routing strategy:**
 - Use a single-page anchor-navigation architecture in the MVP.
@@ -816,10 +811,6 @@ global-governance/
 │   │   │   ├── api-client.ts
 │   │   │   ├── response-parser.ts
 │   │   │   └── citation-utils.ts
-│   │   ├── maintainer/
-│   │   │   ├── api.ts
-│   │   │   ├── route-state.ts
-│   │   │   └── view-models.ts
 │   │   └── validation/
 │   │       ├── api-schemas.ts
 │   │       └── content-schemas.ts
@@ -879,20 +870,9 @@ global-governance/
 │   │   │   │   ├── HeroScene.tsx
 │   │   │   │   ├── Globe.tsx
 │   │   │   │   └── SceneFallback.tsx
-│   │   │   ├── Recap/
-│   │   │   │   ├── InsightRecapCard.tsx
-│   │   │   │   └── SectionTakeaways.tsx
-│   │   │   └── MaintainerDashboard/
-│   │   │       ├── MaintainerShell.tsx
-│   │   │       ├── DashboardOverview.tsx
-│   │   │       ├── SourceInventoryView.tsx
-│   │   │       ├── SourceDetailView.tsx
-│   │   │       ├── IngestionView.tsx
-│   │   │       ├── ValidationView.tsx
-│   │   │       ├── AuditLogView.tsx
-│   │   │       └── inspection/
-│   │   │           ├── ChunkInspectionDialog.tsx
-│   │   │           └── CitationInspectionDialog.tsx
+│   │   │   └── Recap/
+│   │   │       ├── InsightRecapCard.tsx
+│   │   │       └── SectionTakeaways.tsx
 │   │   ├── chat/
 │   │   │   ├── ChatLauncher.tsx
 │   │   │   ├── ChatPanel.tsx
@@ -994,8 +974,6 @@ global-governance/
   - `src/data/references.ts`
   - `backend/common/responses.py`
 - Maintainer ingestion and validation:
-  - `src/components/modules/MaintainerDashboard/`
-  - `src/lib/maintainer/`
   - `scripts/chatbot/`
   - `backend/sources/`
   - `backend/ingestion/`

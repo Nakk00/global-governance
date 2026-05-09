@@ -62,7 +62,7 @@ Start here when exploring this area:
 
 | Area | Connections |
 |------|-------------|
-| Ui | 3 calls |
+| Layout | 3 calls |
 | Contexts | 1 calls |
 
 ## How to Explore
