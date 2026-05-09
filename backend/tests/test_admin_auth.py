@@ -403,6 +403,7 @@ class PublicLearnerBoundaryTests(SimpleTestCase):
             for path in source_root.rglob("*")
             if path.is_file()
             and path.suffix in text_suffixes
+            and "graphify-out" not in path.parts
             and private_boundary not in path.parents
             and not any(private_lib in path.parents for private_lib in private_libs)
         )

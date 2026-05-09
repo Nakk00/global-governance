@@ -16,6 +16,7 @@
 - Keep static assets under `public/` and isolate heavy media or 3D assets so they can be lazy-loaded.
 - Store checked-in Playwright E2E specs under `tests/e2e`.
 - Store shared Playwright fixtures, mocks, and support utilities under `tests/playwright`.
+- Store shared MSW handlers, fixtures, and server setup under `tests/support/msw`.
 - Create `tests/playwright` the first time shared Playwright support code is needed; do not scatter those helpers across feature folders.
 
 ## Verification
@@ -40,6 +41,7 @@
 - Keep Django backend tests under `backend/tests`.
 - Do not invent Next.js-specific verification steps for this repo.
 - Use `pnpm test:e2e` as the default fast Playwright suite; it excludes live chat backend checks and keeps chat requests mocked where the spec intends UI-only coverage.
+- Use `Vitest + React Testing Library + MSW` as the preferred frontend layer for mocked request/response behavior, safe-envelope parsing, and UI-state matrices that do not require a real browser.
 - Use `pnpm test:chat:live` when work touches the `/functions/v1/chat` endpoint, the `supabase/functions/chat` Edge Function, grounding rules, section scoping, chat request wiring, or local Supabase integration. This workflow expects a real local chat backend, typically started with `pnpm supabase:dev`.
 - Use `pnpm test:e2e:all` only when you intentionally want both the mocked Playwright suite and the tagged live chat coverage in one run.
 - Use `pnpm test:e2e:mocked` when you intentionally want the full mocked Playwright suite without live chat coverage.
@@ -47,11 +49,13 @@
 - Use `pnpm test:e2e:layout` for optional mocked browser coverage tagged `@layout`, including responsive, focus, and containment sweeps.
 - Keep Playwright intent tags explicit: use `@smoke` for the default fast lane, `@journey` for slower mocked multi-step flows, `@layout` for optional browser-only layout or accessibility sweeps, and `@chat-live` for real local chat backend coverage.
 - When a page-level Playwright file grows broad, split specs by intent instead of collecting everything in one mega-spec. Keep default-lane smoke checks in a dedicated `@smoke` file and move slower journey or layout coverage into separate tagged files.
+- Treat broad `page.route(...)` mocking in Playwright as a migration target unless the test is proving real browser layout, scrolling, viewport containment, navigation, or another browser-only behavior.
 
 ### Test Layer Strategy
 
 - Prefer the fastest test layer that can prove the behavior with confidence.
 - Use `pnpm test:unit` for frontend rendering logic, local state transitions, parser or adapter behavior, session-local UI behavior, and accessibility semantics that do not require a full browser workflow.
+- Use `Vitest + React Testing Library + MSW` for frontend request/response integration where components or frontend API helpers should exercise real `fetch(...)` behavior without a live backend.
 - Use `pnpm test:functions` for Supabase Edge Function request validation, response envelopes, grounding rules, refusal, weak-support, and cooldown contracts, retrieval parity, and public-chat protection logic.
 - Use `pnpm backend:test` for Django route guards, admin auth, permission checks, request validation, and backend response envelopes for maintainer workflows.
 - Use `pnpm test:e2e` for a small mocked browser journey layer. Do not use default Playwright coverage as the primary layer for business-rule matrices, contract validation, or repeated breakpoint sweeps when faster layers can cover the same behavior.
@@ -74,6 +78,7 @@
 - Plain `pnpm exec vitest run` should be safe for this repo and must not attempt to execute Playwright specs from `tests/e2e`.
 - When a story explicitly requires checked-in unit or component tests, use the repo-managed Vitest baseline and keep tests co-located as `*.test.ts` or `*.test.tsx`.
 - Use unit or component tests for isolated behavior, rendering logic, state handling, data shaping, and boundary conditions that do not require a full browser workflow.
+- Use MSW when a frontend test should keep the real network boundary and validate request shape, response parsing, or envelope handling; prefer `vi.mock(...)` when a dependency is already injected or the smaller seam keeps the test clearer.
 - Do not default every story to unit-test generation; add checked-in unit or component tests when the story scope, acceptance criteria, changed logic, or regression risk clearly justify them.
 - If shared unit-test helpers or setup utilities are needed, keep them in a dedicated top-level testing support area under `tests/`.
 
@@ -135,7 +140,7 @@
 
 ### Story E2E Automation
 
-- When a story explicitly requires checked-in E2E automation, use the `bmad-qa-generate-e2e-tests` skill so test generation follows the BMAD QA procedure.
+- When a story or phase explicitly requires checked-in E2E automation, use the GSD workflow that fits the scope: prefer `$gsd-add-tests <phase>` for phase-owned coverage and use `$gsd-quick --validate` when the work is smaller but still needs structured verification.
 - Use the repo-managed Playwright baseline for those generated E2E tests.
 - Save generated Playwright specs under `tests/e2e` and any shared Playwright support code under `tests/playwright`.
 - Align generated E2E tests with the project context coverage expectations for accessibility, reduced motion, responsive behavior, and chat fallback, refusal, weak-support, or cooldown states when applicable.
@@ -149,7 +154,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **global-governance-docuweb** (4854 symbols, 5808 relationships, 57 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **global-governance-docuweb** (4711 symbols, 7102 relationships, 183 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -187,5 +192,62 @@ This project is indexed by GitNexus as **global-governance-docuweb** (4854 symbo
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Work in the Sources area (136 symbols) | `.claude/skills/generated/sources/SKILL.md` |
+| Work in the _shared area (55 symbols) | `.claude/skills/generated/shared/SKILL.md` |
+| Work in the Validation area (45 symbols) | `.claude/skills/generated/validation/SKILL.md` |
+| Work in the Maintainer area (39 symbols) | `.claude/skills/generated/maintainer/SKILL.md` |
+| Work in the Tests area (39 symbols) | `.claude/skills/generated/tests/SKILL.md` |
+| Work in the Accounts area (23 symbols) | `.claude/skills/generated/accounts/SKILL.md` |
+| Work in the Chat area (21 symbols) | `.claude/skills/generated/chat/SKILL.md` |
+| Work in the Msw area (18 symbols) | `.claude/skills/generated/msw/SKILL.md` |
+| Work in the Contexts area (17 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
+| Work in the Scripts area (15 symbols) | `.claude/skills/generated/scripts/SKILL.md` |
+| Work in the Source-bundles area (10 symbols) | `.claude/skills/generated/source-bundles/SKILL.md` |
+| Work in the Sections area (10 symbols) | `.claude/skills/generated/sections/SKILL.md` |
+| Work in the Ui area (8 symbols) | `.claude/skills/generated/ui/SKILL.md` |
+| Work in the MaintainerDashboard area (8 symbols) | `.claude/skills/generated/maintainerdashboard/SKILL.md` |
+| Work in the Chatbot area (7 symbols) | `.claude/skills/generated/chatbot/SKILL.md` |
+| Work in the Cluster_57 area (7 symbols) | `.claude/skills/generated/cluster-57/SKILL.md` |
+| Work in the Hooks area (6 symbols) | `.claude/skills/generated/hooks/SKILL.md` |
+| Work in the Cluster_54 area (6 symbols) | `.claude/skills/generated/cluster-54/SKILL.md` |
+| Work in the Layout area (5 symbols) | `.claude/skills/generated/layout/SKILL.md` |
+| Work in the Cluster_131 area (5 symbols) | `.claude/skills/generated/cluster-131/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+## graphify
+
+This project has multiple graphify knowledge graphs:
+
+- `graphify-out/` = `src` slice
+- `graphify-out-backend/` = `backend` slice
+- `graphify-out-supabase/` = `supabase` slice
+- `graphify-out-merged/` = merged cross-layer map for `src + backend + supabase`
+- `.planning/` = GSD planning workspace for project setup, requirements, roadmap, state, codebase maps, research, phases, verification notes, sketches, spikes, and debug sessions
+
+Rules:
+- Before answering architecture or codebase questions, read `graphify-out-merged/GRAPH_REPORT.md` first when it exists.
+- If the question is clearly scoped to one layer, prefer the matching slice report before raw file search:
+  - `graphify-out/GRAPH_REPORT.md` for frontend `src`
+  - `graphify-out-backend/GRAPH_REPORT.md` for Django/backend
+  - `graphify-out-supabase/GRAPH_REPORT.md` for Supabase Edge Functions and shared server helpers
+- If any `graphify-out-*/wiki/index.md` exists, navigate it instead of reading raw files for broad orientation questions.
+- For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` against the most relevant graph before grep.
+- Treat graph outputs as architecture maps, not ground truth. Verify important `INFERRED` edges against source before making high-impact conclusions.
+- When creating stories, implementation plans, architecture notes, or refactor plans, consult the merged graph first, then the relevant slice graph, and use the graph's god nodes, bridges, and communities to scope work.
+- When running GSD workflows, use Graphify context whenever the task depends on codebase structure, ownership, dependencies, execution flow, architectural boundaries, implementation scope, or review coverage.
+- This especially applies to GSD workflows such as `$gsd-map-codebase`, `$gsd-discuss-phase`, `$gsd-plan-phase`, `$gsd-execute-phase`, `$gsd-code-review`, `$gsd-debug`, `$gsd-ui-phase`, `$gsd-ui-review`, `$gsd-ai-integration-phase`, and `$gsd-eval-review`.
+- It does not need to be forced for GSD workflows that are mostly prose-only or process-only and do not depend on repo structure.
+- For GSD graph-aware flows, prefer this sequence:
+  - read `graphify-out-merged/GRAPH_REPORT.md` first
+  - read the most relevant slice report second
+  - use graph findings to identify touched modules, cross-layer dependencies, likely bridge nodes, and verification risks
+- Do not produce a shallow GSD implementation plan, execution pass, or review that names only one folder or module when the merged graph shows cross-layer touchpoints.
+- If code changed in `src`, `backend`, or `supabase`, assume the corresponding graph and `graphify-out-merged/` may be stale until refreshed.
+- After meaningful code changes, refresh the affected graph slice and then refresh the merged graph before relying on graph-based planning again.
+
+GSD planning rules:
+- Use `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, and the relevant `.planning/phases/`, `.planning/research/`, or `.planning/codebase/` files when the task is about planning or delivery artifacts rather than runtime code.
+- Treat `.planning/` as the workflow source of truth for project intent, phase scope, and current execution state, but not as the source of truth for runtime behavior, API wiring, or code dependencies; use the code graphs and GitNexus for those.
+- Verify important assumptions from GSD planning artifacts against the underlying codebase before making high-impact implementation or architecture claims.
+- If `.planning/` files change substantially during planning or execution, reread the relevant planning artifacts before relying on older summaries.

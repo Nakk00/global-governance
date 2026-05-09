@@ -1,0 +1,266 @@
+{
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\App.tsx": {
+    "mtime": 1777961650.5729995,
+    "hash": "a8f044fdf0bec69e9707129d276791d2"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\main.tsx": {
+    "mtime": 1777209207.8206396,
+    "hash": "6a4d7f188a68ce96e17b86606ca77f04"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\chat\\SourceAwareChat.msw.test.tsx": {
+    "mtime": 1777972248.7183428,
+    "hash": "d6643643374c835ed96ebe576709b57b"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\chat\\SourceAwareChat.test.tsx": {
+    "mtime": 1777903942.8597505,
+    "hash": "0c958ce20b36bb07e24bbf451a1ee968"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\chat\\SourceAwareChat.tsx": {
+    "mtime": 1777562644.9040394,
+    "hash": "169945a198e46a416e4d96df42e57d38"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\layout\\AppShell.tsx": {
+    "mtime": 1777342005.6819613,
+    "hash": "881c89c240e395834b5ea2965e4f94f3"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\layout\\MobileMenu.tsx": {
+    "mtime": 1777209266.8483846,
+    "hash": "5c699f61f90d413f9329b345989a7503"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\layout\\Navbar.tsx": {
+    "mtime": 1777209266.89645,
+    "hash": "8941ac34f2f077f65b526b94e47454aa"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\layout\\SectionProgressRail.tsx": {
+    "mtime": 1777209267.0207143,
+    "hash": "ed1cd9966bef4c86f8a128d27dc13e5a"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\MaintainerDashboard.test.tsx": {
+    "mtime": 1778327818.1984062,
+    "hash": "3f2e866bb073cad157367f690e3401d9"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\MaintainerDashboard.tsx": {
+    "mtime": 1778326280.737057,
+    "hash": "79a04482878fa1136a3f656f7e3ed2dd"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\MaintainerLogin.tsx": {
+    "mtime": 1777915208.8715544,
+    "hash": "5a6e7f44afc6b997170a47decfaa095b"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\hooks\\useMaintainerDashboardData.ts": {
+    "mtime": 1778327792.0227213,
+    "hash": "2bc9117f8101e294711dbf220ee3b470"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\hooks\\useMaintainerGate.ts": {
+    "mtime": 1778326324.677879,
+    "hash": "b94422494e3d687843b384eea1117994"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\hooks\\useMaintainerNavigation.test.tsx": {
+    "mtime": 1778326220.2998555,
+    "hash": "e1451a32158d778869e1e69a2af4e481"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\hooks\\useMaintainerNavigation.ts": {
+    "mtime": 1778326164.5970864,
+    "hash": "eec09c95fc9184cce527b80b634f25ce"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\operations\\OperationsPage.tsx": {
+    "mtime": 1778326208.7807548,
+    "hash": "c64fdcd6e2611b9b34186fde4001c69a"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\overview\\OverviewPage.tsx": {
+    "mtime": 1778326208.7636049,
+    "hash": "acac58fa38531d51c8604ee06df5323a"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\shared\\maintainerDashboardShared.tsx": {
+    "mtime": 1778327805.2985997,
+    "hash": "409fb50857e602abfabe52cf701be3d8"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\shared\\MaintainerSectionNav.tsx": {
+    "mtime": 1778326208.7845626,
+    "hash": "c54c378c0baf2211248910c7ba60b9cd"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\sources\\SourceDetailPage.tsx": {
+    "mtime": 1778326208.77,
+    "hash": "aa3cb45c9252de6b31c63f54a33f4ef0"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\MaintainerDashboard\\validation\\ValidationWorkbench.tsx": {
+    "mtime": 1778326208.773674,
+    "hash": "4a91f94b6694787d21f6b8b9b692894a"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\UNCommandCenter\\UNCommandCenter.test.tsx": {
+    "mtime": 1777903943.7597976,
+    "hash": "ccdc40c09bce261ce4468c071b6ce3ba"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\UNCommandCenter\\UNCommandCenter.tsx": {
+    "mtime": 1777259275.0719078,
+    "hash": "28336f4935419ed89711f3fbf7244288"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\WpsDossier\\WpsDossier.test.tsx": {
+    "mtime": 1777865048.8396194,
+    "hash": "e48af4dfa58570fc1a1447884cbfe99d"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\WpsDossier\\WpsDossier.tsx": {
+    "mtime": 1777306649.6408014,
+    "hash": "4fe56c8642282257331dd6005270f2ba"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\modules\\WpsDossier\\WpsEvidenceSurface.tsx": {
+    "mtime": 1777304977.8726373,
+    "hash": "6c96def31ad5563b5a17a79d7cce8ee3"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\sections\\ChapterTransitionBlock.tsx": {
+    "mtime": 1777209189.2311788,
+    "hash": "838c7259a0715209ae16727a5c88aedc"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\sections\\HeroNarrativeFrame.tsx": {
+    "mtime": 1777209267.0865657,
+    "hash": "8e8a85ffc6ff1efb644e29f6b1b434ec"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\sections\\InsightRecapCard.tsx": {
+    "mtime": 1777209199.4706817,
+    "hash": "66602e0764c6a8413c2a6261a95c35c6"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\sections\\NarrativeSection.tsx": {
+    "mtime": 1777338997.8170538,
+    "hash": "6112dda489270fcb193d6e88a71cd653"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\ui\\button.tsx": {
+    "mtime": 1777209155.4039445,
+    "hash": "8e04296a8f670a25f95ffa06e9afab6b"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\ui\\collapsible.tsx": {
+    "mtime": 1777092741.8129258,
+    "hash": "e4bcbb11b112c6e0cb116b3a4768c3e8"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\components\\ui\\table.tsx": {
+    "mtime": 1777949419.5111828,
+    "hash": "fee91f6f21b638cdf3fe643f2667cacc"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\contexts\\navigation-context.ts": {
+    "mtime": 1777121186.339185,
+    "hash": "b9c91006deacd2c7628b1b7cdd799f34"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\contexts\\NavigationContext.tsx": {
+    "mtime": 1777905228.7065222,
+    "hash": "3d795d4605a94ec10bc5b48eb7ea4c44"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\contexts\\theme-provider.tsx": {
+    "mtime": 1777004497.871066,
+    "hash": "7acb1d3d5f4e7cc8d9b87e04f197c094"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\navigation.ts": {
+    "mtime": 1777090892.263098,
+    "hash": "1bd2814539d442ebeb006922b64adbd6"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\chat\\source-aware-chat.test.ts": {
+    "mtime": 1777395693.592651,
+    "hash": "6005fccc7be561fc48d36d33ead4c959"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\chat\\source-aware-chat.ts": {
+    "mtime": 1777395693.5916424,
+    "hash": "ccb1ed5f29b95e379191cecd157ee49e"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\conclusion-content.test.ts": {
+    "mtime": 1777602221.0503314,
+    "hash": "35f79672ed36491fe4e610dd774f1a19"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\conclusion-content.ts": {
+    "mtime": 1777602134.9897707,
+    "hash": "b70b6e0648c97b4756fffb8eaf28484a"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\core-narrative.test.ts": {
+    "mtime": 1777121186.6304154,
+    "hash": "5b151222b304edecf18eb0634a4f183b"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\core-narrative.ts": {
+    "mtime": 1777121186.6621826,
+    "hash": "2063b468ac4ceabdaf7842d53246a119"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\global-governance-overview.ts": {
+    "mtime": 1777121115.7425625,
+    "hash": "9ba0412a6607688c2b44da123295b7f6"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\governance-limits.ts": {
+    "mtime": 1777121115.7461095,
+    "hash": "ada6adcf30e79a1bd37d071f27588c9e"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\hero-content.ts": {
+    "mtime": 1777044464.946566,
+    "hash": "a91cce3c1fa77385d8bd00ce46630c45"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\narrative-types.ts": {
+    "mtime": 1777337210.8517604,
+    "hash": "68c06a0b7e5752141e8eef7a6ff7043a"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\un-command-center.ts": {
+    "mtime": 1777215748.923975,
+    "hash": "37edba7f986bd50c7c1a81f49fdfbf58"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\west-philippine-sea-dossier.test.ts": {
+    "mtime": 1777602234.4991856,
+    "hash": "b0b2673750d2179d46dd10cc6a4ca745"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\sections\\west-philippine-sea-dossier.ts": {
+    "mtime": 1777602157.2310145,
+    "hash": "db67bd3203d2b09bc7d4844599d1955f"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\source-bundles\\approved-source-bundle.test.ts": {
+    "mtime": 1777602296.9759352,
+    "hash": "f9a8c282448430e6dafab1b348f64406"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\data\\source-bundles\\approved-source-bundle.ts": {
+    "mtime": 1777602297.2378297,
+    "hash": "56d89f1be36a80c777c67b475d9488e5"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\hooks\\useNavigation.ts": {
+    "mtime": 1777089327.3841987,
+    "hash": "d8f3a987e56a760a74da4782178ad928"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\utils.ts": {
+    "mtime": 1777004262.47464,
+    "hash": "5a6fd53fdcf2be529e9cc0b718fde352"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\chat\\api-client.test.ts": {
+    "mtime": 1778324944.5821166,
+    "hash": "390b4b457af4adeffd18b5de64d56555"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\chat\\api-client.ts": {
+    "mtime": 1777564784.89406,
+    "hash": "1d74934e1377158bab469588303a2b69"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\chat\\grounded-answer.test.ts": {
+    "mtime": 1777602242.4881163,
+    "hash": "494e62264cce85d3ac1b719f3ea408b4"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\chat\\grounded-answer.ts": {
+    "mtime": 1777602194.883991,
+    "hash": "e495be0738945f1733f2ec46a32f1f18"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\maintainer\\api.test.ts": {
+    "mtime": 1777972457.9165187,
+    "hash": "b4b0c3720ae89681e4860acd9cb1c4bc"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\maintainer\\api.ts": {
+    "mtime": 1777954377.955876,
+    "hash": "15bec4d51c9bd792d2026d1b4cba9a5c"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\lib\\supabase\\browser-client.ts": {
+    "mtime": 1777804432.5744505,
+    "hash": "280e5ab9f6352df34eb53cf5a4b634bb"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\types\\chat.ts": {
+    "mtime": 1777562553.4755135,
+    "hash": "08229a094b8cfa97a080470eceedb512"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\assets\\maintainer-login\\Globe-Icon.png": {
+    "mtime": 1777910929.0,
+    "hash": "870e38815893a253eb312ae4f175c3a3"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\assets\\maintainer-login\\LoginUI_BG.png": {
+    "mtime": 1777908124.6491284,
+    "hash": "3c693cef45268741f466752933e14fdb"
+  },
+  "C:\\Users\\Nakko\\Desktop\\VSCode-ProjectFiles\\Global-Governance\\src\\assets\\maintainer-login\\Shield-Icon.png": {
+    "mtime": 1777910929.0,
+    "hash": "6427a2e09ffb08aa8c3d6d26dd52fa2c"
+  }
+}

@@ -9,19 +9,10 @@ from accounts.auth import AdminAuthError
 from accounts.permissions import authorize_admin_request
 from common.responses import error_response, success_response
 from common.validation import BoundaryValidationError, validate_json_object
+from sources import services as sources_service
 from sources.dtos import LifecycleState
 from sources.repository import (
     SourceMutationError,
-    dispatch_ingest,
-    get_chunk_detail,
-    get_citation_detail,
-    get_source_chunks,
-    get_source_citations,
-    get_source_detail,
-    get_stewardship_dashboard,
-    transition_source,
-    update_source_metadata,
-    upload_source,
 )
 
 
@@ -31,7 +22,7 @@ def dashboard(request: HttpRequest) -> JsonResponse:
         return auth_error
 
     try:
-        return success_response(get_stewardship_dashboard())
+        return success_response(sources_service.get_stewardship_dashboard())
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
 
@@ -45,7 +36,7 @@ def source_detail(request: HttpRequest, source_id: str) -> JsonResponse:
         return auth_error
 
     try:
-        detail = get_source_detail(source_id)
+        detail = sources_service.get_source_detail(source_id)
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
     if detail is None:
@@ -63,7 +54,7 @@ def source_chunks(request: HttpRequest, source_id: str) -> JsonResponse:
         return auth_error
 
     try:
-        payload = get_source_chunks(source_id)
+        payload = sources_service.get_source_chunks(source_id)
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
     if payload is None:
@@ -81,7 +72,7 @@ def source_citations(request: HttpRequest, source_id: str) -> JsonResponse:
         return auth_error
 
     try:
-        payload = get_source_citations(source_id)
+        payload = sources_service.get_source_citations(source_id)
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
     if payload is None:
@@ -99,7 +90,7 @@ def chunk_detail(request: HttpRequest, chunk_id: str) -> JsonResponse:
         return auth_error
 
     try:
-        payload = get_chunk_detail(chunk_id)
+        payload = sources_service.get_chunk_detail(chunk_id)
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
     if payload is None:
@@ -117,7 +108,7 @@ def citation_detail(request: HttpRequest, citation_id: str) -> JsonResponse:
         return auth_error
 
     try:
-        payload = get_citation_detail(citation_id)
+        payload = sources_service.get_citation_detail(citation_id)
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
     if payload is None:
@@ -135,7 +126,7 @@ def ingestion_runs(request: HttpRequest) -> JsonResponse:
         return auth_error
 
     try:
-        return success_response(get_stewardship_dashboard()["ingestionRuns"])
+        return success_response(sources_service.list_ingestion_runs())
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
 
@@ -146,7 +137,7 @@ def validation_runs(request: HttpRequest) -> JsonResponse:
         return auth_error
 
     try:
-        return success_response(get_stewardship_dashboard()["validationRuns"])
+        return success_response(sources_service.list_validation_runs())
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
 
@@ -157,7 +148,7 @@ def audit_events(request: HttpRequest) -> JsonResponse:
         return auth_error
 
     try:
-        return success_response(get_stewardship_dashboard()["auditEvents"])
+        return success_response(sources_service.list_audit_events())
     except SourceMutationError as error:
         return error_response(code=error.code, message=error.message, status=error.status)
 
@@ -177,7 +168,7 @@ def source_upload(request: HttpRequest) -> JsonResponse:
         "usageScope": request.POST.getlist("usageScope") or request.POST.get("usageScope", ""),
     }
     return _mutation_response(
-        lambda: upload_source(
+        lambda: sources_service.upload_source(
             uploaded_file=request.FILES.get("file"),
             metadata=metadata,
             actor=identity.email,
@@ -197,7 +188,7 @@ def source_update(request: HttpRequest, source_id: str) -> JsonResponse:
     except BoundaryValidationError as error:
         return error.to_response()
     return _mutation_response(
-        lambda: update_source_metadata(
+        lambda: sources_service.update_source_metadata(
             source_id=source_id,
             payload=payload,
             actor=identity.email,
@@ -230,7 +221,9 @@ def source_ingest(request: HttpRequest, source_id: str) -> JsonResponse:
     identity, auth_error = _authorize_mutation(request, "POST")
     if auth_error:
         return auth_error
-    return _mutation_response(lambda: dispatch_ingest(source_id=source_id, actor=identity.email))
+    return _mutation_response(
+        lambda: sources_service.dispatch_ingest(source_id=source_id, actor=identity.email)
+    )
 
 
 def _lifecycle_mutation(
@@ -240,7 +233,7 @@ def _lifecycle_mutation(
     if auth_error:
         return auth_error
     return _mutation_response(
-        lambda: transition_source(
+        lambda: sources_service.transition_source(
             source_id=source_id, target_state=target_state, actor=identity.email
         )
     )

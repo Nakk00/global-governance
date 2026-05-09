@@ -9,6 +9,7 @@ from urllib.error import HTTPError
 from django.test import Client, SimpleTestCase, override_settings
 
 from accounts.auth import AdminAuthError
+from validation import services as validation_service
 from validation.repository import _result_from_row, reset_validation_state
 
 
@@ -193,6 +194,21 @@ class AdminValidationApiTests(SimpleTestCase):
         self.assertEqual(launch.json()["data"]["status"], "completed")
         self.assertEqual(runs.status_code, 200)
         self.assertEqual(len(runs.json()["data"]["runs"]), 1)
+
+    def test_validation_list_view_delegates_to_service_layer(self):
+        with (
+            self._authorized(),
+            mock.patch(
+                "validation.views.validation_service.list_validation_runs",
+                wraps=validation_service.list_validation_runs,
+            ) as mocked_service,
+        ):
+            response = self.client.get(
+                "/api/admin/validation-runs", HTTP_AUTHORIZATION="Bearer token"
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mocked_service.called)
 
     def _authorized(self, *, side_effect: Exception | None = None):
         return mock.patch(
