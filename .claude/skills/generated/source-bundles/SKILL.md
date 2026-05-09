@@ -54,12 +54,9 @@ Start here when exploring this area:
 | `IngestIntoMemoryStore → ResolveApprovedSourceId` | cross_community | 5 |
 | `Main → ResolveApprovedSourceId` | cross_community | 5 |
 | `Main → ResolveApprovedSourceId` | cross_community | 5 |
-| `GetServerSectionSourceMap → ResolveApprovedSourceId` | intra_community | 5 |
 | `IngestIntoMemoryStore → NormalizeSourcePath` | cross_community | 4 |
 | `Main → NormalizeSourcePath` | cross_community | 4 |
 | `Main → NormalizeSourcePath` | cross_community | 4 |
-| `CreateWpsEvidenceRegistry → ResolveApprovedSourceId` | intra_community | 4 |
-| `GetConclusionReferenceSources → ResolveApprovedSourceId` | intra_community | 3 |
 
 ## How to Explore
 

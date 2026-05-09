@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { act, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -509,12 +509,43 @@ describe("MaintainerDashboard", () => {
       await screen.findByRole("heading", { name: "Maintainer overview" })
     ).toBeVisible()
     expect(screen.getByText("Stewarded sources")).toBeVisible()
-    expect(screen.getByText("Latest ingestion")).toBeVisible()
+    expect(screen.getByRole("heading", { name: "Sources" })).toBeVisible()
+    expect(screen.getByRole("heading", { name: "Validation" })).toBeVisible()
+    expect(
+      screen.getByRole("heading", { name: "Audit/Operations" })
+    ).toBeVisible()
     expect(
       screen.queryByRole("heading", { name: "Protected source upload" })
     ).not.toBeInTheDocument()
     expect(
       screen.queryByRole("heading", { name: "Source stewardship inventory" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("routes from readiness workflow cards into filtered drill-down queues", async () => {
+    const user = userEvent.setup()
+
+    renderMaintainer()
+
+    const validationCard = (
+      await screen.findByRole("heading", {
+        name: "Validation",
+      })
+    ).closest("article")
+    expect(validationCard).not.toBeNull()
+
+    await user.click(
+      within(validationCard as HTMLElement).getByRole("button", {
+        name: "Review follow-up queue",
+      })
+    )
+
+    expect(await screen.findByText("Validation follow-up queue")).toBeVisible()
+    expect(
+      screen.getAllByText("Charter of the United Nations").length
+    ).toBeGreaterThan(0)
+    expect(
+      screen.queryByText("South China Sea Arbitration Award")
     ).not.toBeInTheDocument()
   })
 
@@ -597,6 +628,38 @@ describe("MaintainerDashboard", () => {
       await screen.findByRole("heading", { name: "Maintainer overview" })
     ).toBeVisible()
     expect(mockedFetchSourceDetail).not.toHaveBeenCalled()
+  })
+
+  it("lets maintainers open a readiness finding in source detail first", async () => {
+    const user = userEvent.setup()
+
+    renderMaintainer()
+
+    const sourcesCard = (
+      await screen.findByRole("heading", {
+        name: "Sources",
+      })
+    ).closest("article")
+    expect(sourcesCard).not.toBeNull()
+
+    await user.click(
+      within(sourcesCard as HTMLElement).getByRole("button", {
+        name: "Open source detail",
+      })
+    )
+
+    await waitFor(() =>
+      expect(
+        screen.getAllByRole("heading", {
+          name: "Charter of the United Nations",
+        }).length
+      ).toBeGreaterThan(0)
+    )
+    expect(screen.getByText("Current readiness blocker")).toBeVisible()
+    expect(screen.getByText("Inline validation evidence")).toBeVisible()
+    expect(
+      screen.getByRole("button", { name: "Open validation workbench" })
+    ).toBeVisible()
   })
 
   it.each([
@@ -766,6 +829,54 @@ describe("MaintainerDashboard", () => {
     await waitFor(() => expect(mockedUploadSource).toHaveBeenCalled())
     expect(
       await screen.findByText("Source uploaded as draft and inactive.")
+    ).toBeVisible()
+    expect(screen.getAllByText("New Policy Note").length).toBeGreaterThan(0)
+  })
+
+  it("keeps the mutation-updated dashboard when an older dashboard load resolves later", async () => {
+    const user = userEvent.setup()
+    let resolveDashboardLoad: (value: StewardshipDashboard) => void = () => {}
+    mockedFetchStewardshipDashboard.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveDashboardLoad = resolve
+        })
+    )
+
+    renderMaintainer("/maintainer/sources/new")
+
+    await screen.findByRole("heading", { name: "Upload a source draft" })
+    await user.type(
+      screen.getByLabelText("Source ID"),
+      "gg-src-new-policy-note"
+    )
+    await user.type(screen.getByLabelText("Title"), "New Policy Note")
+    await user.clear(screen.getByLabelText("Provenance"))
+    await user.type(screen.getByLabelText("Provenance"), "Maintainer upload")
+    await user.type(
+      screen.getByLabelText("Summary"),
+      "A newly uploaded policy note."
+    )
+    await user.upload(
+      screen.getByLabelText("Source file"),
+      new File(["# policy"], "policy.md", { type: "text/markdown" })
+    )
+    await user.click(screen.getByRole("button", { name: "Upload draft" }))
+
+    expect(
+      await screen.findByText("Source uploaded as draft and inactive.")
+    ).toBeVisible()
+
+    await act(async () => {
+      resolveDashboardLoad(dashboard)
+    })
+
+    await user.click(screen.getByRole("button", { name: "Back to sources" }))
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Source stewardship",
+      })
     ).toBeVisible()
     expect(screen.getAllByText("New Policy Note").length).toBeGreaterThan(0)
   })

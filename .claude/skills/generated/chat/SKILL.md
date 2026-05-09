@@ -71,8 +71,9 @@ Start here when exploring this area:
 
 | Area | Connections |
 |------|-------------|
-| Layout | 2 calls |
 | Source-bundles | 1 calls |
+| Layout | 1 calls |
+| Ui | 1 calls |
 
 ## How to Explore
 

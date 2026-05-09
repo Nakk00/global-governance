@@ -1,0 +1,341 @@
+{
+  "communities": {
+    "0": [
+      "app_tsx",
+      "components_modules_uncommandcenter_uncommandcenter_test_tsx",
+      "components_modules_wpsdossier_wpsdossier_test_tsx",
+      "components_sections_chaptertransitionblock_tsx",
+      "components_sections_heronarrativeframe_tsx",
+      "components_ui_button_tsx",
+      "components_ui_table_tsx",
+      "contexts_theme_provider_disabletransitionstemporarily",
+      "contexts_theme_provider_getsystemtheme",
+      "contexts_theme_provider_iseditabletarget",
+      "contexts_theme_provider_istheme",
+      "contexts_theme_provider_tsx",
+      "contexts_theme_provider_usetheme",
+      "data_sections_un_command_center_ts",
+      "lib_utils_ts",
+      "main_tsx",
+      "ui_button_cn",
+      "ui_table_table",
+      "ui_table_tablehead",
+      "wpsdossier_wpsdossier_wpsdossier",
+      "wpsdossier_wpsevidencesurface_wpsevidencesurface"
+    ],
+    "1": [
+      "components_layout_appshell_tsx",
+      "components_layout_mobilemenu_tsx",
+      "components_layout_navbar_tsx",
+      "components_layout_sectionprogressrail_tsx",
+      "components_sections_insightrecapcard_tsx",
+      "contexts_navigation_context_ts",
+      "contexts_navigationcontext_focussection",
+      "contexts_navigationcontext_gethashsectionid",
+      "contexts_navigationcontext_getsectiondocumenttop",
+      "contexts_navigationcontext_navigationprovider",
+      "data_navigation_getchapterindex",
+      "data_navigation_ischapterid",
+      "data_navigation_isknownsectionid",
+      "data_navigation_ts",
+      "data_sections_core_narrative_test_ts",
+      "data_sections_core_narrative_ts",
+      "layout_appshell_appshell",
+      "layout_mobilemenu_closeatdesktop",
+      "sections_core_narrative_getcanonicalrecaptargetid",
+      "sections_core_narrative_resolvenarrativerecapcue"
+    ],
+    "2": [
+      "chat_api_client_createanonymoussessionid",
+      "chat_api_client_getanonymoussessionid",
+      "chat_api_client_requestgroundedanswer",
+      "chat_grounded_answer_asrecord",
+      "chat_grounded_answer_createchatrequest",
+      "chat_grounded_answer_optionalstring",
+      "chat_grounded_answer_parsecitation",
+      "chat_grounded_answer_parseerror",
+      "chat_grounded_answer_parsegroundedchatenvelope",
+      "chat_grounded_answer_parsegrounding",
+      "chat_grounded_answer_parsesuccessdata",
+      "chat_grounded_answer_requirepositiveinteger",
+      "chat_grounded_answer_requirestring",
+      "chat_grounded_answer_tousersafechaterror",
+      "lib_chat_api_client_test_ts",
+      "lib_chat_api_client_ts",
+      "lib_chat_grounded_answer_ts"
+    ],
+    "3": [
+      "maintainer_api_fetchchunkdetail",
+      "maintainer_api_fetchcitationdetail",
+      "maintainerdashboard_maintainerdashboard_accessstateview",
+      "maintainerdashboard_maintainerdashboard_handlekeydown",
+      "maintainerdashboard_maintainerdashboard_maintainerdashboard",
+      "maintainerdashboard_maintainerdashboard_openchunkdetail",
+      "maintainerdashboard_maintainerdashboard_opencitationdetail",
+      "maintainerdashboard_maintainerdashboard_test_detailfrom",
+      "maintainerdashboard_maintainerdashboard_test_rendermaintainer",
+      "maintainerdashboard_maintainerdashboard_test_resolvechunkdetail",
+      "maintainerdashboard_maintainerdashboard_test_resolvefirstchunks",
+      "maintainerdashboard_maintainerdashboard_test_resolvefirstdetail",
+      "maintainerdashboard_maintainerdashboard_validationalert",
+      "maintainerdashboard_maintainerdashboard_validationdetailalert"
+    ],
+    "4": [
+      "lib_maintainer_api_ts",
+      "maintainer_api_fetchmaintainerjson",
+      "maintainer_api_fetchsourcechunks",
+      "maintainer_api_fetchsourcecitations",
+      "maintainer_api_fetchsourcedetail",
+      "maintainer_api_fetchstewardshipdashboard",
+      "maintainer_api_fetchvalidationrundetail",
+      "maintainer_api_fetchvalidationsets",
+      "maintainer_api_ingestsource",
+      "maintainer_api_isapienvelope",
+      "maintainer_api_mutatesourcelifecycle",
+      "maintainer_api_parsemaintainerenvelope",
+      "maintainer_api_updatesourcemetadata",
+      "maintainer_api_uploadsource"
+    ],
+    "5": [
+      "chat_source_aware_chat_getsourceawarechatstarterprompts",
+      "chat_source_aware_chat_isstarterprompt",
+      "chat_source_aware_chat_resolvestarterpromptstate",
+      "chat_sourceawarechat_choosestarterprompt",
+      "chat_sourceawarechat_closechat",
+      "chat_sourceawarechat_handlequestionkeydown",
+      "chat_sourceawarechat_handleshellkeydown",
+      "chat_sourceawarechat_handlesubmit",
+      "components_chat_sourceawarechat_tsx",
+      "data_chat_source_aware_chat_test_ts",
+      "data_chat_source_aware_chat_ts"
+    ],
+    "6": [
+      "data_sections_conclusion_content_ts",
+      "data_sections_west_philippine_sea_dossier_ts",
+      "data_source_bundles_approved_source_bundle_ts",
+      "sections_conclusion_content_hascompleteconclusionreferences",
+      "sections_west_philippine_sea_dossier_createwpsevidenceregistry",
+      "source_bundles_approved_source_bundle_getapprovedsource",
+      "source_bundles_approved_source_bundle_getchatcitationsources",
+      "source_bundles_approved_source_bundle_getconclusionreferencesources",
+      "source_bundles_approved_source_bundle_getdossierevidencesources",
+      "source_bundles_approved_source_bundle_resolveapprovedsourceid"
+    ],
+    "7": [
+      "lib_maintainer_api_test_ts",
+      "maintainer_api_fetchadminme",
+      "maintainer_api_fetchvalidationruns",
+      "maintainer_api_launchvalidationrun",
+      "maintainer_api_maintainerapierror",
+      "maintainer_api_maintainerapierror_constructor",
+      "maintainerdashboard_maintainerdashboard_runselectedset"
+    ],
+    "8": [
+      "lib_supabase_browser_client_ts",
+      "maintainerdashboard_maintainerlogin_maintainerlogin",
+      "supabase_browser_client_clearsupabasesession",
+      "supabase_browser_client_getsupabasesession",
+      "supabase_browser_client_issupabasesessionexpired",
+      "supabase_browser_client_signinwithpassword"
+    ],
+    "9": [
+      "components_sections_narrativesection_tsx",
+      "sections_narrativesection_closeandreturnfocus",
+      "sections_narrativesection_handledisclosurekeydown",
+      "sections_narrativesection_hasinspectablereferences",
+      "sections_narrativesection_iscompletereference"
+    ],
+    "10": [
+      "chat_sourceawarechat_test_openchat",
+      "components_chat_sourceawarechat_test_tsx"
+    ],
+    "11": [
+      "components_ui_collapsible_tsx"
+    ],
+    "12": [
+      "data_sections_global_governance_overview_ts"
+    ],
+    "13": [
+      "data_sections_governance_limits_ts"
+    ],
+    "14": [
+      "data_sections_hero_content_ts"
+    ],
+    "15": [
+      "data_sections_narrative_types_ts"
+    ],
+    "16": [
+      "types_chat_ts"
+    ]
+  },
+  "cohesion": {
+    "0": 0.1,
+    "1": 0.13,
+    "2": 0.29,
+    "3": 0.16,
+    "4": 0.26,
+    "5": 0.24,
+    "6": 0.24,
+    "7": 0.33,
+    "8": 0.4,
+    "9": 0.5,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0
+  },
+  "gods": [
+    {
+      "id": "maintainerdashboard_maintainerdashboard_maintainerdashboard",
+      "label": "MaintainerDashboard()",
+      "degree": 35
+    },
+    {
+      "id": "maintainer_api_fetchmaintainerjson",
+      "label": "fetchMaintainerJson()",
+      "degree": 17
+    },
+    {
+      "id": "ui_button_cn",
+      "label": "cn()",
+      "degree": 10
+    },
+    {
+      "id": "sections_core_narrative_resolvenarrativerecapcue",
+      "label": "resolveNarrativeRecapCue()",
+      "degree": 7
+    },
+    {
+      "id": "chat_api_client_requestgroundedanswer",
+      "label": "requestGroundedAnswer()",
+      "degree": 7
+    },
+    {
+      "id": "chat_grounded_answer_parsesuccessdata",
+      "label": "parseSuccessData()",
+      "degree": 7
+    },
+    {
+      "id": "chat_grounded_answer_asrecord",
+      "label": "asRecord()",
+      "degree": 6
+    },
+    {
+      "id": "chat_grounded_answer_requirestring",
+      "label": "requireString()",
+      "degree": 6
+    },
+    {
+      "id": "chat_grounded_answer_parsecitation",
+      "label": "parseCitation()",
+      "degree": 6
+    },
+    {
+      "id": "chat_grounded_answer_parsegroundedchatenvelope",
+      "label": "parseGroundedChatEnvelope()",
+      "degree": 6
+    }
+  ],
+  "surprises": [
+    {
+      "source": "WpsDossier()",
+      "target": "resolveNarrativeRecapCue()",
+      "source_files": [
+        "components/modules/WpsDossier/WpsDossier.tsx",
+        "data/sections/core-narrative.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "parseCitation()",
+      "target": "resolveApprovedSourceId()",
+      "source_files": [
+        "lib/chat/grounded-answer.ts",
+        "data/source-bundles/approved-source-bundle.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "runSelectedSet()",
+      "target": "launchValidationRun()",
+      "source_files": [
+        "components/modules/MaintainerDashboard/MaintainerDashboard.tsx",
+        "lib/maintainer/api.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "runSelectedSet()",
+      "target": "fetchValidationRuns()",
+      "source_files": [
+        "components/modules/MaintainerDashboard/MaintainerDashboard.tsx",
+        "lib/maintainer/api.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
+      "source": "openChunkDetail()",
+      "target": "fetchChunkDetail()",
+      "source_files": [
+        "components/modules/MaintainerDashboard/MaintainerDashboard.tsx",
+        "lib/maintainer/api.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `cn()` connect `Community 0` to `Community 1`, `Community 5`, `Community 9`?",
+      "why": "High betweenness centrality (0.559) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `MaintainerDashboard()` connect `Community 3` to `Community 8`, `Community 0`, `Community 4`, `Community 7`?",
+      "why": "High betweenness centrality (0.452) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `requestGroundedAnswer()` connect `Community 2` to `Community 5`?",
+      "why": "High betweenness centrality (0.299) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 3 inferred relationships involving `resolveNarrativeRecapCue()` (e.g. with `un-command-center.ts` and `WpsDossier()`) actually correct?",
+      "why": "`resolveNarrativeRecapCue()` has 3 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 3 inferred relationships involving `requestGroundedAnswer()` (e.g. with `createChatRequest()` and `parseGroundedChatEnvelope()`) actually correct?",
+      "why": "`requestGroundedAnswer()` has 3 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.1 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 1` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.13 - nodes in this community are weakly interconnected."
+    }
+  ],
+  "mode": "code-only-src",
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

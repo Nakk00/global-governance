@@ -23,7 +23,7 @@ inputDocuments:
   - archive/docs/planning-artifacts/global_governance_coding_agent_guide.md
 lastStep: 14
 workflow: 'edit'
-lastEdited: 2026-04-23
+lastEdited: 2026-05-05
 editHistory:
   - date: 2026-04-23
     changes: Aligned motion guidance with the PRD so Motion remains the default interaction model, Lenis handles scroll feel, and GSAP stays limited to rare showcase scenes with reduced-motion priority.
@@ -31,6 +31,8 @@ editHistory:
     changes: Removed duplicate core-experience narrative, standardized Global Governance naming, added PRD traceability, and replaced the design-direction summary with an auditable comparison matrix.
   - date: 2026-05-02
     changes: Clarified that the public learner experience remains login-free while any private maintainer or source-stewardship tooling stays outside the public UX flow.
+  - date: 2026-05-05
+    changes: Corrected course for the private maintainer console to require a readiness-first information architecture, stronger source triage, dedicated ingestion and audit sections, and a more maintainable feature-sliced implementation target.
 ---
 
 # UX Design Specification: Global Governance
@@ -306,7 +308,7 @@ Module-specific accents should then be layered selectively. The West Philippine 
 
 The MVP should ship with a simplified hero narrative frame, guided scrollytelling, the UN Command Center, the West Philippine Sea Interactive Dossier, source-aware chatbot support as a flagship premium clarification surface, recap moments, references, and responsive accessibility. The opening hero should establish identity and momentum without requiring the full Living Globe implementation or any live Student / Expert mode switch. The public learner experience should remain login-free, and any maintainer-only stewardship tooling should stay outside this primary UX path.
 
-When a private maintainer surface is present in the MVP, it should behave like a restrained operational companion to the public experience rather than a second public-facing product. It should support `/maintainer/login`, `/maintainer/dashboard`, `/maintainer/sources`, `/maintainer/sources/:sourceId`, `/maintainer/ingestion`, `/maintainer/validation`, and `/maintainer/audit-logs`, while staying absent from learner navigation, chatbot framing, and public references flow.
+When a private maintainer surface is present in the MVP, it should behave like a restrained operational companion to the public experience rather than a second public-facing product. It should support `/maintainer/login`, `/maintainer/dashboard`, `/maintainer/sources`, `/maintainer/sources/:sourceId`, `/maintainer/ingestion`, `/maintainer/validation`, and `/maintainer/audit-logs`, while staying absent from learner navigation, chatbot framing, and public references flow. The default private landing view should answer whether the system is ready for demo, what is blocked, and which protected next actions the maintainer should take.
 
 ### Post-MVP
 
@@ -457,12 +459,12 @@ The gap is not in basic UI primitives. The gap is in the experience-defining com
 
 **Purpose:** Provide a private operational surface for approved-source stewardship, validation readiness, and audit traceability.  
 **Usage:** Available only to authenticated maintainers outside the public learner journey.  
-**Anatomy:** Protected login, readiness overview cards, source table, source detail, ingestion status list, chunk viewer, citation viewer, validation run list, audit history, protected action controls, and user-safe error states.  
+**Anatomy:** Protected login, readiness overview cards, blocker and next-action summary, source triage table, source detail, ingestion status list, chunk viewer, citation viewer, validation run list, audit history, source-linked operational records, protected action controls, and user-safe error states.  
 **States:** Signed out, loading, authorized, unauthorized, inactive, expired session, revoked session, empty data, partial data, processing, completed, failed, and retryable outage.  
 **Variants:** Desktop-first operational layout with tablet-safe collapse patterns and mobile containment for emergency or review use.  
 **Visual Direction:** Use a calmer operational expression of the existing Global Governance palette and typography, with Institutional Ledger structure and Strategic Atlas hierarchy cues. Avoid showcase motion, 3D framing, marketing-style hero treatment, or playful AI-control language.  
 **Accessibility:** Keyboard-first tables, filters, dialogs, forms, drawers, and status controls; visible focus states; readable badge semantics; reduced-motion containment; and explicit loading or error announcements.  
-**Interaction Behavior:** The console should help maintainers answer whether the chatbot is ready for demo by exposing source status, ingestion readiness, chunk and citation inspectability, validation results, audit history, and protected next actions without becoming a general CMS. Status badges should cover Draft, Approved, Active, Disabled, Archived, Pending, Processing, Completed, Failed, Pass, Weak Support, Refused, and Error.
+**Interaction Behavior:** The console should help maintainers answer whether the chatbot is ready for demo by exposing source status, ingestion readiness, chunk and citation inspectability, validation results, audit history, and protected next actions without becoming a general CMS. The overview should emphasize blockers and remediation order before raw inventory browsing. Ingestion and audit review should behave as first-class private sections rather than hidden secondary detail. Status badges should cover Draft, Approved, Active, Disabled, Archived, Pending, Processing, Completed, Failed, Pass, Weak Support, Refused, and Error.
 
 ### Hero Narrative Frame
 
@@ -552,9 +554,10 @@ The component strategy should follow a layered model. Standard interaction primi
 The practical rule should be:
 - Use design-system primitives for structure, controls, overlays, and accessibility scaffolding.
 - Build custom composites for story flow, institutional exploration, case-study storytelling, and source-aware learning.
-- For the private maintainer surface, use design-system primitives for tables, forms, badges, dialogs, sheets, alerts, skeletons, and filters, then layer only the minimum custom composition needed for readiness scanning and stewardship review.
+- For the private maintainer surface, use design-system primitives for tables, forms, badges, dialogs, sheets, alerts, skeletons, and filters, then layer only the minimum custom composition needed for readiness scanning, stewardship review, operational triage, and source-linked remediation.
 - Reuse tokens for spacing, typography, radius, surface treatment, and motion timing across both layers.
 - Treat mobile responsiveness and keyboard access as first-class requirements for every custom component.
+- Keep the private console split into route-aligned feature slices rather than one monolithic implementation surface so future stewardship growth does not collapse clarity or maintainability.
 
 This keeps the system efficient to build while still allowing the site's strongest sections to feel original and memorable.
 
@@ -579,6 +582,7 @@ Build the components that strengthen trust, clarity, and presentation readiness:
 - richer chatbot source states
 - refined comparison and recap variants
 - mobile-specific optimized versions of flagship modules
+- refined maintainer readiness board, ingestion queue, validation diagnostics, and audit-log navigation surfaces
 
 The order should follow user value, not visual excitement. The main story flow and learning clarity should work before the more ambitious presentation layers are fully refined.
 

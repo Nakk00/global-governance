@@ -7,6 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, SimpleTestCase, override_settings
 
 from accounts.auth import AdminAuthError
+from sources import services as sources_service
 from sources.repository import reset_stewardship_state
 
 
@@ -181,6 +182,19 @@ class AdminStewardshipApiTests(SimpleTestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertTrue(response.json()["success"])
                 self.assertEqual(response.json()["data"], [])
+
+    def test_dashboard_view_delegates_to_service_layer(self):
+        with (
+            self._authorized(),
+            mock.patch(
+                "sources.views.sources_service.get_stewardship_dashboard",
+                wraps=sources_service.get_stewardship_dashboard,
+            ) as mocked_service,
+        ):
+            response = self.client.get("/api/admin/sources", HTTP_AUTHORIZATION="Bearer token")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mocked_service.called)
 
     def test_upload_requires_admin_auth(self):
         response = self.client.post("/api/admin/sources/upload")

@@ -17,6 +17,8 @@ editHistory:
     summary: 'Rebaselined Epic 5 and supporting requirements for the approved Django chatbot-backend pivot and private maintainer admin operations.'
   - date: '2026-05-02'
     summary: 'Patched Epic 5 and Epic 6 story coverage to close operational, validation, and future-scope gaps found in review.'
+  - date: '2026-05-05'
+    summary: 'Corrected course for Epic 4 and Epic 5 by rebaselining maintainer FR traceability, narrowing Story 5.6, and preserving late Epic 5 readiness sequencing.'
 ---
 
 # Global-Governance - Epic Breakdown
@@ -45,12 +47,12 @@ This document provides the complete epic and story breakdown for Global-Governan
 - FR14: Learners can compare institutional roles and limitations within the United Nations without relying on long-form static text alone.
 - FR15: Learners can explore the West Philippine Sea case through an interactive dossier or timeline-based experience.
 - FR16: Learners can examine the relationship between legal rulings, geopolitical realities, and weak enforcement within the case study.
-- FR17: Learners can use interactive elements that reinforce understanding of the topic rather than merely decorate the experience.
+- FR17: Learners can use interactive elements that reveal or compare institutional roles, case-study facts, or source-backed explanations without interrupting the surrounding learning flow.
 - FR18: Learners can access layered content that separates summary explanation from supporting detail.
 - FR19: Learners can access section recaps, visible hierarchy, and next-step cues that help them re-enter the main learning flow after reviewing a section or module.
 - FR20: Learners can access simplified and expanded explanation depth through adaptive depth features when those features are enabled.
 - FR21: Learners can reinforce understanding through synthesis, recap, or clarification moments within the experience.
-- FR22: Learners can engage with a hero or opening experience that establishes context, identity, and tone for the topic.
+- FR22: Learners can engage with a hero or opening experience that introduces the central question of global governance, presents a clear call to continue into the learning flow, and preserves readable text and usable navigation on the reference demo device.
 - FR23: Learners can ask project-related questions through an integrated chatbot experience.
 - FR24: The chatbot can answer using approved project materials as its response basis.
 - FR25: The chatbot can refuse, redirect, or safely handle questions that fall outside the approved project scope.
@@ -63,18 +65,18 @@ This document provides the complete epic and story breakdown for Global-Governan
 - FR32: Evaluators can inspect evidence that the project's explanatory content is grounded in approved and disciplined source material.
 - FR33: Evaluators can distinguish the chatbot's bounded academic role from that of a general-purpose assistant.
 - FR34: The product can preserve alignment between its educational content, approved references, and chatbot-supported answers.
-- FR35: Maintainers can define and manage the set of approved materials used to support the chatbot experience.
-- FR36: Maintainers can prepare project content and source materials for use in the chatbot support flow.
-- FR37: Maintainers can validate that the chatbot behaves within topic boundaries and that public-chat protection rules behave correctly before demo or review use.
-- FR38: Maintainers can verify that major interactive sections, content flows, and educational modules are functioning before presentation.
-- FR39: Maintainers can validate demo readiness across the learning flow, interactive modules, and chatbot reliability before live use.
-- FR40: Maintainers can update or refine educational content without redesigning the full product structure.
-- FR41: Maintainers can support local development and validation workflows for the chatbot-related experience.
+- FR35: Authorized maintainers can sign in to private operational flows used for approved-source stewardship without requiring learner authentication.
+- FR36: Maintainers can define, inspect, and manage the set of approved materials used to support the chatbot experience.
+- FR37: Maintainers can prepare, upload, or update approved source materials for use in the chatbot support flow through protected workflows.
+- FR38: Maintainers can trigger or review ingestion, retrieval-readiness, validation status, source-support checks, and chunk or citation inspection for approved materials, while keeping uploaded or changed sources draft or inactive until review, ingestion, validation, and explicit activation are complete, and while routing directly from operational findings back to the affected source records.
+- FR39: Maintainers can validate that the chatbot behaves within topic boundaries and that public-chat protection rules behave correctly before demo or review use, including through a private validation workflow that records summary and per-question outcomes across grounded, weak-support, refusal, and failure states, highlights remediation priorities, and preserves readable immutable history.
+- FR40: Maintainers can verify that major interactive sections, content flows, and educational modules are functioning before presentation, validate demo readiness across the learning flow, interactive modules, and chatbot reliability before live use, inspect audit history for protected source and validation actions so stewardship changes remain reviewable and explainable, and use a readiness-first private console that surfaces blockers and next actions clearly.
+- FR41: Maintainers can support local development, authenticated admin operations, and validation workflows for the chatbot-related experience without redesigning the full product structure.
 - FR42: The product can support a classroom-demo walkthrough that presents the core learning flow, flagship modules, references, and chatbot interaction with no placeholder content in core sections and no broken UI states during the scripted demo.
-- FR43: The product can add enhanced presentation features beyond the MVP while preserving successful completion of the core learning flow in scripted walkthrough testing.
+- FR43: The product can add enhanced presentation features beyond the MVP while preserving successful completion of the core learning flow and continued compliance with NFR13, NFR14, and NFR15 in scripted walkthrough testing.
 - FR44: The product can support a Student / Expert mode that changes explanation depth when that feature is introduced.
 - FR45: The product can support richer chatbot guidance and educational assistance in post-MVP phases.
-- FR46: The product can support a future scenario-based simulator that allows learners to explore global governance through applied interactive decision or exploration flows.
+- FR46: The product can support a future scenario-based simulator that lets learners step through at least one governance scenario, inspect the participating actors and institutions, and review a summary of governance constraints, tradeoffs, and outcomes.
 
 ### NonFunctional Requirements
 
@@ -235,13 +237,13 @@ FR31: Epic 4 - Source support inspection for content and chatbot responses.
 FR32: Epic 4 - Evidence that explanatory content is grounded in approved sources.
 FR33: Epic 4 - Bounded academic chatbot role distinct from a general assistant.
 FR34: Epic 4 - Alignment between content, references, and chatbot answers.
-FR35: Epic 5 - Approved material management for the chatbot experience.
-FR36: Epic 5 - Preparing content and source materials for chatbot support.
-FR37: Epic 5 - Topic-bound chatbot validation and protection rule checks.
-FR38: Epic 5 - Verification that major interactive sections and modules function before presentation.
-FR39: Epic 5 - Demo-readiness validation across the learning flow and chatbot.
-FR40: Epic 5 - Updating educational content without redesigning the product structure.
-FR41: Epic 5 - Local development and validation workflows for the chatbot experience.
+FR35: Epic 5 - Maintainer sign-in for private operational flows without learner authentication.
+FR36: Epic 5 - Define, inspect, and manage approved materials for the chatbot experience.
+FR37: Epic 5 - Prepare, upload, and update approved sources through protected workflows.
+FR38: Epic 5 - Ingestion, retrieval-readiness, validation, chunk/citation inspection, draft gating, and source-linked operational routing.
+FR39: Epic 5 - Topic-bound and public-chat-protection validation with immutable run history.
+FR40: Epic 5 - Demo-readiness verification, audit review, and readiness-first private console behavior.
+FR41: Epic 5 - Local development, authenticated admin operations, and validation workflows.
 FR42: Epic 5 - Classroom-demo walkthrough support with no placeholder or broken core states.
 FR43: Epic 6 - Enhanced presentation features that preserve the core flow.
 FR44: Epic 6 - Student / Expert mode that changes explanation depth.
@@ -294,6 +296,9 @@ UX-DR26-35: Epic 1, Epic 2, Epic 3, Epic 4, Epic 5, Epic 6 - source credibility,
 
 - Story 1.1 is the initial project-foundation bootstrap story. It exists to establish the approved starter template and shared frontend scaffold.
 - Story 5.4 is the backend-foundation pivot story. It establishes the Django service boundary before deeper chatbot implementation continues.
+- Story 5.6 is the baseline private stewardship shell story. It establishes the protected overview and source-detail foundation, but it does not by itself own the final readiness-first information architecture, deep inspection flows, validation workbench, or route-aligned modularization added by Stories 5.6A through 5.6E.
+- Stories 5.6D and 5.6E are trust-and-readiness follow-up stories. They keep the completed dashboard foundation intact while upgrading the private console's information architecture, route structure, and maintainability before demo-readiness closure.
+- Epic 5 story-to-requirement emphasis should stay explicit during handoff: FR35 -> 5.5; FR36 -> 5.1, 5.6, 5.6D; FR37 -> 5.2, 5.6A; FR38 -> 5.6A, 5.6B, 5.6C, 5.6D; FR39 -> 5.3, 5.6C; FR40 -> 5.6, 5.6D, 5.10, 5.12; FR41 -> 5.4, 5.5, 5.11.
 - Story 5.11 is the maintainer-workflow bootstrap story. It exists to establish the clean-clone setup path and local operational workflow after the Django-backed chatbot path and demo rehearsal plan are in place.
 - Story 5.12 is the operational-hardening story. It closes the release, audit, security, and observability gaps that must exist before the Django-backed stack is considered demo-ready.
 - These setup and pivot stories are intentionally separated between product foundation, backend rebaseline, and maintainer operations so implementation ownership stays easy to scan.
@@ -311,11 +316,11 @@ Learners can investigate the West Philippine Sea as an evidence-led case study, 
 **FRs covered:** FR5, FR15, FR16
 
 ### Epic 4: Grounded Guidance and Trust
-Learners can ask bounded questions, inspect approved sources, and use references and chatbot support to reinforce the thesis while preserving academic credibility. This epic closes the experience after the main narrative journey in Epic 1 by providing the final trust, references, and bounded guidance surfaces.
+Learners can ask bounded questions, inspect approved sources, and use references and chatbot support to reinforce the thesis while preserving academic credibility. This epic closes the experience after the main narrative journey in Epic 1 by providing the learner-facing trust, references, and bounded guidance surfaces, while deeper Django-backed chat orchestration and protected maintainer workflows continue in Epic 5.
 **FRs covered:** FR6, FR23, FR24, FR25, FR26, FR27, FR28, FR29, FR30, FR31, FR32, FR33, FR34
 
 ### Epic 5: Content Stewardship and Demo Reliability
-Maintainers can manage approved source material, operate the Django-backed chatbot stack safely, and rehearse a stable classroom demo that keeps the core experience reliable.
+Maintainers can sign in to protected operational flows, manage approved source material, operate the Django-backed chatbot stack safely, and rehearse a stable classroom demo that keeps the core experience reliable. This epic owns the private stewardship surface, authenticated admin operations, validation history, readiness-first console behavior, and demo-reliability workflows that support the learner-facing experience from outside the public flow.
 **FRs covered:** FR35, FR36, FR37, FR38, FR39, FR40, FR41, FR42
 
 ### Epic 6: Adaptive Presentation and Future Expansion
@@ -1084,19 +1089,19 @@ So that approved-source operations remain restricted without adding learner acco
 ### Story 5.6: Build the Private Source Stewardship Dashboard
 
 As a maintainer,
-I want a private source stewardship surface,
-So that I can review approved materials, ingestion state, and validation readiness without exposing admin tooling publicly.
+I want a baseline private source stewardship surface,
+So that I can review approved materials and high-level operational state without exposing admin tooling publicly.
 
 **Acceptance Criteria:**
 
 **Given** I access the maintainer dashboard as an authenticated maintainer
 **When** the dashboard loads
-**Then** I can review approved sources, source metadata, and current readiness state in one private surface
+**Then** I can review approved sources, source metadata, and high-level operational state in one private surface
 **And** the dashboard is not linked from the public learner flow
 
 **Given** I need to review source changes
 **When** I inspect a source entry
-**Then** I can see approval status, relevant metadata, and change visibility sufficient for stewardship review
+**Then** I can see approval status, provenance, lifecycle state, and relevant metadata sufficient for stewardship review
 **And** the experience supports source governance without requiring direct database access
 
 **Given** I need to understand how a source reached its current state
@@ -1106,23 +1111,13 @@ So that I can review approved materials, ingestion state, and validation readine
 
 **Given** I need operational visibility
 **When** I inspect ingestion or validation records
-**Then** I can see job status, recent runs, and actionable outcomes
-**And** the dashboard remains scoped to source stewardship rather than becoming a general public CMS
-
-**Given** I access the private maintainer route family
-**When** I move between dashboard, sources, ingestion, validation, and audit views
-**Then** each route remains protected by maintainer authentication and authorization
-**And** no route is exposed through public learner navigation
-
-**Given** the dashboard loads
-**When** I review readiness cards and source detail sections
-**Then** I can see source readiness, latest ingestion state, validation summary, recent audit activity, and demo-readiness blockers
-**And** the dashboard helps answer whether the chatbot is ready for demo
+**Then** I can see latest job state, recent validation summary, and recent audit-facing signals at a high level
+**And** the dashboard remains scoped to baseline source stewardship rather than becoming the final readiness console or a general public CMS
 
 **Given** I inspect a source detail view
-**When** metadata, version, ingestion, chunk, citation, validation, and audit summaries are available
-**Then** I can understand source state without direct database access
-**And** the view remains source-stewardship scoped rather than becoming a general CMS
+**When** metadata, lifecycle, ingestion summary, validation summary, and recent action history are available
+**Then** I can understand the source's current stewardship state without direct database access
+**And** deeper chunk inspection, citation inspection, validation-run execution, and readiness-first triage remain follow-up story scope
 
 ### Story 5.6A: Add Protected Source Mutation Workflows
 
@@ -1220,6 +1215,67 @@ So that I can verify grounded, weak-support, refusal, and citation behavior befo
 **When** I open the validation area
 **Then** the UI presents explicit empty, partial-data, retryable, and outage states
 **And** the maintainer can still distinguish readiness uncertainty from total system breakage
+
+### Story 5.6D: Reframe the Dashboard as a Trust-and-Readiness Console
+
+As a maintainer,
+I want the private dashboard to prioritize readiness, blockers, and next actions,
+So that I can decide quickly whether the system is demo-ready and what to fix next.
+
+**Acceptance Criteria:**
+
+**Given** I open the private dashboard landing view
+**When** the readiness overview loads
+**Then** it emphasizes current readiness state, active blockers, latest ingestion and validation signals, and recommended next actions before raw inventory browsing
+**And** the landing experience answers whether the chatbot is ready for demo without requiring deep inspection first
+
+**Given** I review the source inventory
+**When** I triage approved materials
+**Then** I can sort, filter, or scan by lifecycle state, ingestion state, validation outcome, partial-data condition, and readiness priority
+**And** the source list behaves as an operational work queue rather than a passive catalog
+
+**Given** I need to review operational events
+**When** I open ingestion, validation, or audit-focused areas
+**Then** those concerns appear as first-class private sections instead of being buried inside a generic operations view
+**And** records can route me back to the affected source detail, inspection surface, or remediation path
+
+**Given** I inspect validation outcomes or audit history
+**When** failures, weak-support results, refusals, or source changes are present
+**Then** the console highlights remediation priorities and preserves source-linked traceability
+**And** the maintainer can distinguish what is blocked, what is degraded, and what is safe for demo use
+
+**Given** the private console is used on desktop, tablet, or narrow review widths
+**When** the layout adapts
+**Then** the visual hierarchy remains calm, readable, keyboard accessible, and operationally focused
+**And** loading, empty, partial-data, and outage states stay explicit and understandable
+
+### Story 5.6E: Stabilize the Maintainer Console Structure
+
+As a maintainer,
+I want the private console to stay consistent and reliable as it grows across dashboard, sources, ingestion, validation, and audit views,
+So that I can move between stewardship tasks without confusion or regressions.
+
+**Acceptance Criteria:**
+
+**Given** the private maintainer surface spans dashboard, sources, ingestion, validation, and audit views
+**When** I move between those areas
+**Then** the shell, navigation framing, and auth-guard behavior remain consistent across the private console
+**And** each area feels like part of one operator experience rather than a disconnected set of screens
+
+**Given** the console continues to grow after the readiness-first reframe
+**When** engineers inspect or extend the implementation
+**Then** the frontend is organized into explicit route-aligned slices such as shell, overview, source inventory, source detail, ingestion, validation, audit, and shared inspection overlays
+**And** the implementation does not depend on one giant feature file to own all private-console behavior
+
+**Given** the dashboard relies on aggregate and source-specific maintainer data
+**When** client-side data access is structured
+**Then** thin shared maintainer API helpers and focused view logic support the route family
+**And** privileged ingestion, validation, and mutation logic remain on the protected Django side
+
+**Given** the console already supports stewardship workflows
+**When** the structural refactor lands
+**Then** private-route semantics, stale-response handling, outage states, and accessibility-critical behaviors remain covered by tests
+**And** the refactor preserves current stewardship capabilities while reducing long-term change risk for maintainers
 
 ### Story 5.7: Orchestrate Retrieval-Backed Grounded Answers in Django
 
@@ -1358,6 +1414,11 @@ So that I can present the site without broken core states.
 **Then** no core section shows placeholder content during the scripted demo
 **And** the site feels complete enough for classroom review
 
+**Given** I use the private maintainer console during demo preparation
+**When** I review readiness, validation, ingestion, and audit signals
+**Then** the console surfaces blockers, next actions, and source-linked follow-up clearly enough to support rehearsal decisions
+**And** demo-readiness review does not depend on tribal knowledge or manual cross-checking across unrelated screens
+
 ### Story 5.11: Bootstrap the Working Environment
 
 As a maintainer,
@@ -1391,11 +1452,11 @@ So that I can start from scratch and reach a working local environment quickly.
 **Then** the workflow remains reproducible and consistent
 **And** the setup path is practical for future maintainers
 
-### Story 5.12: Harden Operational Guardrails and Release Readiness
+### Story 5.12: Establish Release Guardrails and Operational Review Paths
 
 As a maintainer,
-I want the Django-backed stack to include explicit security, audit, observability, and release guardrails,
-So that the project remains reviewable, supportable, and safe to ship beyond a one-off local demo.
+I want the project to expose clear release guardrails and operational review paths,
+So that I can prepare demo or release workflows confidently without relying on hidden infrastructure knowledge.
 
 **Acceptance Criteria:**
 
@@ -1409,20 +1470,15 @@ So that the project remains reviewable, supportable, and safe to ship beyond a o
 **Then** the system exposes a documented audit-review path with enough history to understand what happened
 **And** reviewer access does not require direct database spelunking
 
-**Given** the repository and deployment environments are prepared for release
-**When** I validate environment handling
-**Then** browser-safe values, server-only secrets, and local-development secrets remain separated
-**And** secret-scan checks find no high-confidence service credentials in source-controlled code
+**Given** I prepare a reviewed release or demo-ready deployment
+**When** frontend deployments, Django service deployments, and Supabase migrations move toward use
+**Then** the release follows the documented reviewed workflow instead of ad hoc dashboard edits
+**And** the corresponding verification commands and smoke checks are part of the release path
 
 **Given** the stack is running in local or hosted form
 **When** a frontend delivery issue, Django failure, ingestion problem, or chat incident occurs
 **Then** Vercel, Django, and Supabase logs provide enough observability to diagnose the issue
 **And** the operational workflow documents where maintainers should look first
-
-**Given** I prepare a reviewed release
-**When** frontend deployments, Django service deployments, and Supabase migrations move toward demo or production use
-**Then** the release follows the documented reviewed workflow instead of ad hoc dashboard edits
-**And** the corresponding verification commands and smoke checks are part of the release path
 
 **Given** the protection layer is enabled for public chat and protected routes
 **When** Redis-backed rate limits, abuse counters, cooldown flags, or local fallback adapters are exercised
@@ -1470,14 +1526,19 @@ So that the site can become richer over time while staying reliable.
 **Acceptance Criteria:**
 
 **Given** enhanced presentation features are enabled
-**When** I move through the site
+**When** I move through the site in scripted walkthrough testing
 **Then** the added presentation layers improve the experience without blocking access to core content
-**And** the main learning flow still completes successfully
+**And** the main learning flow still completes successfully without restart or manual repair
 
 **Given** I use the site without the optional enhancements
 **When** I complete the learning journey
 **Then** the core experience still works on its own
-**And** missing enhancements do not create broken states
+**And** missing enhancements do not create broken states or block access to core sections
+
+**Given** a non-core premium enhancement is disabled, delayed, or fails during use
+**When** I continue through the learning flow or use the chatbot
+**Then** the site preserves graceful degradation for the main narrative and interactive modules
+**And** visible fallback, weak-support, or cooldown states remain understandable where chat support is affected
 
 **Given** deeper chatbot guidance or continuity features are introduced beyond the MVP premium history surface
 **When** I ask questions
@@ -1486,8 +1547,8 @@ So that the site can become richer over time while staying reliable.
 
 **Given** I compare the enhanced and non-enhanced experiences
 **When** the optional features are present
-**Then** they feel like polish, not dependency
-**And** they preserve the site's academic tone
+**Then** they preserve the site's academic tone and remain optional to the core experience
+**And** they do not become a dependency for demo-readiness or successful completion of the learning flow
 
 ### Story 6.3: Prepare a Simulator-Ready Scenario Shell
 
@@ -1499,7 +1560,7 @@ So that applied global governance exploration can be added without rebuilding th
 
 **Given** the simulator expansion is introduced as a future layer
 **When** I view the scenario shell
-**Then** it shows the structure for a guided applied-learning scenario
+**Then** it shows the structure for a guided applied-learning governance scenario
 **And** it remains clearly separate from the core MVP learning flow
 
 **Given** the simulator shell is not yet ready for public use
@@ -1509,8 +1570,8 @@ So that applied global governance exploration can be added without rebuilding th
 
 **Given** a scenario is selected
 **When** the shell renders
-**Then** it can present the involved actors, the situation summary, and the decision or exploration path at a high level
-**And** the structure is understandable even before the full simulator exists
+**Then** it can present the participating actors and institutions, the situation summary, and the decision or exploration path at a high level
+**And** it includes a clear summary of governance constraints, tradeoffs, and possible outcomes even before the full simulator exists
 
 **Given** the scenario shell is not yet fully developed
 **When** I use the current site
@@ -1520,4 +1581,4 @@ So that applied global governance exploration can be added without rebuilding th
 **Given** the scenario structure is extended later
 **When** new content is added
 **Then** it can support applied exploration without forcing redesigns of the hero, UN module, or case dossier
-**And** the expansion fits the existing product narrative
+**And** the expansion fits the existing product narrative while preserving the scenario-summary structure

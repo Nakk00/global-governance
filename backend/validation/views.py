@@ -7,12 +7,9 @@ from accounts.auth import AdminAuthError
 from accounts.permissions import authorize_admin_request
 from common.responses import error_response, success_response
 from common.validation import BoundaryValidationError, validate_json_object
+from validation import services as validation_service
 from validation.repository import (
     ValidationWorkflowError,
-    get_validation_run,
-    launch_validation_run,
-    list_validation_runs,
-    list_validation_sets,
 )
 
 
@@ -20,7 +17,7 @@ def validation_sets(request: HttpRequest) -> JsonResponse:
     auth_error = _guard_request(request, "GET")
     if auth_error:
         return auth_error
-    return success_response(list_validation_sets())
+    return success_response(validation_service.list_validation_sets())
 
 
 @csrf_exempt
@@ -31,14 +28,14 @@ def validation_runs(request: HttpRequest) -> JsonResponse:
     auth_error = _guard_request(request, "GET")
     if auth_error:
         return auth_error
-    return success_response(list_validation_runs())
+    return success_response(validation_service.list_validation_runs())
 
 
 def validation_run_detail(request: HttpRequest, run_id: str) -> JsonResponse:
     auth_error = _guard_request(request, "GET")
     if auth_error:
         return auth_error
-    run = get_validation_run(run_id)
+    run = validation_service.get_validation_run(run_id)
     if run is None:
         return error_response(
             code="admin_validation_run_not_found",
@@ -70,7 +67,9 @@ def launch_run(request: HttpRequest) -> JsonResponse:
 
     try:
         return success_response(
-            launch_validation_run(validation_set_id=validation_set_id, actor=identity.email),
+            validation_service.launch_validation_run(
+                validation_set_id=validation_set_id, actor=identity.email
+            ),
             status=201,
         )
     except ValidationWorkflowError as error:
