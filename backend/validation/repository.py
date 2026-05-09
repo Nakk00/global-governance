@@ -401,7 +401,8 @@ class SupabaseValidationRepository:
                     event_type="completion",
                     actor=actor,
                     summary=(
-                        f"Validation run completed with {completed['failedCount']} failed checks."
+                        "Validation run completed with "
+                        f"{completed['failedCount']} failed checks."
                     ),
                 )
             except ValidationWorkflowError:

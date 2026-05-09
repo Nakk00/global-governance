@@ -76,7 +76,6 @@ The MVP should include:
 - the UN Command Center
 - the West Philippine Sea Interactive Dossier
 - the grounded chatbot
-- a private maintainer trust-and-readiness console for source stewardship, validation review, and demo blocker triage
 - public-chat protection with rate limiting, abuse counters, and short cooldowns
 - clear references and source visibility
 - responsive and accessibility-conscious presentation across desktop and mobile, without learner account setup
