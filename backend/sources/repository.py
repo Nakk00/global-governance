@@ -1723,9 +1723,7 @@ def _monitoring(
     partial_count = sum(1 for source in sources if source["partialData"])
     draft_count = sum(1 for source in sources if source["lifecycleState"] == "draft")
     active_count = sum(1 for source in sources if source["lifecycleState"] == "active")
-    warning_validation_count = sum(
-        1 for event in validation_runs if event["outcome"] == "warning"
-    )
+    warning_validation_count = sum(1 for event in validation_runs if event["outcome"] == "warning")
     failed_validation_count = sum(1 for event in validation_runs if event["outcome"] == "failed")
     blocker_count = partial_count + draft_count + failed_validation_count
     return {
@@ -1835,7 +1833,9 @@ def _next_actions(
         actions.append(
             {
                 "label": "Close partial evidence",
-                "detail": f"{partial_count} source record(s) need ingestion or validation follow-up.",
+                "detail": (
+                    f"{partial_count} source record(s) need ingestion or validation follow-up."
+                ),
                 "href": "/maintainer/sources",
                 "priority": "high",
             }

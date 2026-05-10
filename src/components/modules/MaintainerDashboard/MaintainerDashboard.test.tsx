@@ -113,7 +113,8 @@ const dashboard = {
       label: "Blockers",
       value: "1",
       tone: "critical",
-      detail: "Draft, partial, or failed validation items needing maintainer attention.",
+      detail:
+        "Draft, partial, or failed validation items needing maintainer attention.",
     },
     validationHealth: {
       label: "Validation health",
@@ -134,7 +135,17 @@ const dashboard = {
     totalEvents: 1,
     latestOutcome: "succeeded",
     latestEventAt: "2026-05-05T00:00:00Z",
-    recentEvents: [],
+    recentEvents: [
+      {
+        eventId: "audit-1",
+        sourceId: "gg-src-un-charter-institutions",
+        eventType: "ingest",
+        origin: "admin@example.test",
+        occurredAt: "2026-05-05T00:00:00Z",
+        outcome: "succeeded",
+        summary: "Protected ingest completed.",
+      },
+    ],
   },
   chatbotTrust: {
     state: "partial",
@@ -148,7 +159,8 @@ const dashboard = {
         label: "Grounded sources",
         value: "1",
         tone: "good",
-        detail: "Active chat-scoped sources with successful ingestion evidence.",
+        detail:
+          "Active chat-scoped sources with successful ingestion evidence.",
       },
     ],
   },
@@ -547,7 +559,7 @@ describe("MaintainerDashboard", () => {
     await user.click(screen.getByRole("button", { name: "Sign In" }))
 
     expect(
-      await screen.findByRole("heading", { name: "Maintainer dashboard" })
+      await screen.findByRole("heading", { name: "Maintainer control center" })
     ).toBeVisible()
     expect(mockedFetchAdminMe).toHaveBeenCalledWith(session)
   })
@@ -558,7 +570,10 @@ describe("MaintainerDashboard", () => {
     expect(
       await screen.findByRole("heading", { name: "Maintainer overview" })
     ).toBeVisible()
-    expect(screen.getByText("Stewarded sources")).toBeVisible()
+    expect(screen.getByText("Control center overview")).toBeVisible()
+    expect(screen.getByText("Blockers")).toBeVisible()
+    expect(screen.getByText("Validation health")).toBeVisible()
+    expect(screen.getByText("Next actions")).toBeVisible()
     expect(screen.getByRole("heading", { name: "Sources" })).toBeVisible()
     expect(screen.getByRole("heading", { name: "Validation" })).toBeVisible()
     expect(
@@ -570,6 +585,26 @@ describe("MaintainerDashboard", () => {
     expect(
       screen.queryByRole("heading", { name: "Source stewardship inventory" })
     ).not.toBeInTheDocument()
+  })
+
+  it("opens audit trail and chatbot trust as first-class private sections", async () => {
+    const user = userEvent.setup()
+
+    renderMaintainer()
+
+    await user.click(await screen.findByRole("button", { name: "Audit Trail" }))
+    expect(
+      await screen.findByRole("heading", { name: "Audit Trail" })
+    ).toBeVisible()
+    expect(screen.getByText("Recent audit events")).toBeVisible()
+    expect(screen.getByText("Protected ingest completed.")).toBeVisible()
+
+    await user.click(screen.getByRole("button", { name: "Chatbot Trust" }))
+    expect(
+      await screen.findByRole("heading", { name: "Chatbot Trust" })
+    ).toBeVisible()
+    expect(screen.getAllByText("Grounded sources").length).toBeGreaterThan(0)
+    expect(screen.getByText("Validation runs")).toBeVisible()
   })
 
   it("routes from readiness workflow cards into filtered drill-down queues", async () => {

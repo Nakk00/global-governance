@@ -21,6 +21,75 @@ export const stewardshipDashboard = {
     latestValidationStatus: "warning",
     readinessState: "partial",
   },
+  monitoring: {
+    readiness: {
+      label: "Readiness",
+      value: "2/2 active",
+      tone: "warning",
+      detail: "Active approved sources ready for learner-facing grounding.",
+    },
+    blockers: {
+      label: "Blockers",
+      value: "1",
+      tone: "critical",
+      detail:
+        "Draft, partial, or failed validation items needing maintainer attention.",
+    },
+    validationHealth: {
+      label: "Validation health",
+      value: "Warning",
+      tone: "warning",
+      detail: "1 warning and 0 failed source validation signals.",
+    },
+    nextActions: [
+      {
+        label: "Close partial evidence",
+        detail: "1 source record needs ingestion follow-up.",
+        href: "/maintainer/sources",
+        priority: "high",
+      },
+    ],
+  },
+  auditTrail: {
+    totalEvents: 1,
+    latestOutcome: "succeeded",
+    latestEventAt: "2026-05-05T00:02:00Z",
+    recentEvents: [
+      {
+        eventId: "audit-1",
+        sourceId: "gg-src-un-charter-institutions",
+        eventType: "audit",
+        outcome: "succeeded",
+        origin: "admin@example.test",
+        occurredAt: "2026-05-05T00:02:00Z",
+        summary: "Lifecycle action recorded for stewarded source.",
+      },
+    ],
+  },
+  chatbotTrust: {
+    state: "partial",
+    groundedSourceCount: 1,
+    validationRunCount: 1,
+    latestValidationStatus: "warning",
+    warningCount: 1,
+    failedCount: 0,
+    evidence: [
+      {
+        label: "Grounded sources",
+        value: "1",
+        tone: "good",
+        detail:
+          "Active chat-scoped sources with successful ingestion evidence.",
+      },
+      {
+        label: "Validation coverage",
+        value: "1",
+        tone: "warning",
+        detail:
+          "Canonical validation signals available to the private console.",
+      },
+    ],
+  },
   sources: [
     {
       sourceId: "gg-src-un-charter-institutions",

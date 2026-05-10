@@ -16,6 +16,66 @@ const dashboard = {
     latestValidationStatus: "warning",
     readinessState: "partial",
   },
+  monitoring: {
+    readiness: {
+      label: "Readiness",
+      value: "2/2 active",
+      tone: "warning",
+      detail: "Active approved sources ready for learner-facing grounding.",
+    },
+    blockers: {
+      label: "Blockers",
+      value: "1",
+      tone: "critical",
+      detail: "Draft, partial, or failed validation items needing maintainer attention.",
+    },
+    validationHealth: {
+      label: "Validation health",
+      value: "Warning",
+      tone: "warning",
+      detail: "1 warning and 0 failed source validation signals.",
+    },
+    nextActions: [
+      {
+        label: "Close partial evidence",
+        detail: "1 source record needs ingestion follow-up.",
+        href: "/maintainer/sources",
+        priority: "high",
+      },
+    ],
+  },
+  auditTrail: {
+    totalEvents: 1,
+    latestOutcome: "succeeded",
+    latestEventAt: "2026-05-05T00:02:00Z",
+    recentEvents: [
+      {
+        eventId: "audit-1",
+        sourceId: "gg-src-un-charter-institutions",
+        eventType: "audit",
+        outcome: "succeeded",
+        origin: "admin@example.test",
+        occurredAt: "2026-05-05T00:02:00Z",
+        summary: "Lifecycle action recorded for stewarded source.",
+      },
+    ],
+  },
+  chatbotTrust: {
+    state: "partial",
+    groundedSourceCount: 1,
+    validationRunCount: 1,
+    latestValidationStatus: "warning",
+    warningCount: 1,
+    failedCount: 0,
+    evidence: [
+      {
+        label: "Grounded sources",
+        value: "1",
+        tone: "good",
+        detail: "Active chat-scoped sources with successful ingestion evidence.",
+      },
+    ],
+  },
   sources: [
     {
       sourceId: "gg-src-un-charter-institutions",
@@ -50,6 +110,8 @@ const dashboard = {
   ingestionRuns: [
     {
       eventId: "ingest-1",
+      sourceId: "gg-src-un-charter-institutions",
+      eventType: "ingest",
       outcome: "succeeded",
       origin: "admin@example.test",
       occurredAt: "2026-05-05T00:00:00Z",
@@ -59,6 +121,8 @@ const dashboard = {
   validationRuns: [
     {
       eventId: "validation-1",
+      sourceId: "gg-src-un-charter-institutions",
+      eventType: "validation",
       outcome: "warning",
       origin: "admin@example.test",
       occurredAt: "2026-05-05T00:01:00Z",
@@ -68,7 +132,9 @@ const dashboard = {
   auditEvents: [
     {
       eventId: "audit-1",
-      outcome: "recorded",
+      sourceId: "gg-src-un-charter-institutions",
+      eventType: "audit",
+      outcome: "succeeded",
       origin: "admin@example.test",
       occurredAt: "2026-05-05T00:02:00Z",
       summary: "Lifecycle action recorded for stewarded source.",
@@ -507,7 +573,7 @@ test("@smoke maintainer direct load resolves the private dashboard without publi
 
   await page.goto("/maintainer")
   await expect(
-    page.getByRole("heading", { name: "Maintainer dashboard" })
+    page.getByRole("heading", { name: "Maintainer control center" })
   ).toBeVisible()
   await expect(
     page.getByRole("heading", { name: "Maintainer overview" })
@@ -515,7 +581,7 @@ test("@smoke maintainer direct load resolves the private dashboard without publi
   await expect(
     page.getByText("admin@example.test", { exact: true })
   ).toBeVisible()
-  await expect(page.getByText("Stewarded sources")).toBeVisible()
+  await expect(page.getByText("Control center overview")).toBeVisible()
   await expect(
     page.getByRole("heading", { name: "Protected source upload" })
   ).toHaveCount(0)

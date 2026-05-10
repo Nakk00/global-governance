@@ -4,6 +4,7 @@ import { MaintainerLogin } from "@/components/modules/MaintainerDashboard/Mainta
 import { useMaintainerDashboardData } from "@/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData"
 import { useMaintainerGate } from "@/components/modules/MaintainerDashboard/hooks/useMaintainerGate"
 import { useMaintainerNavigation } from "@/components/modules/MaintainerDashboard/hooks/useMaintainerNavigation"
+import { AuditTrailPage } from "@/components/modules/MaintainerDashboard/audit-trail/AuditTrailPage"
 import { OperationsPage } from "@/components/modules/MaintainerDashboard/operations/OperationsPage"
 import { OverviewPage } from "@/components/modules/MaintainerDashboard/overview/OverviewPage"
 import { SourceDetailPage } from "@/components/modules/MaintainerDashboard/sources/SourceDetailPage"
@@ -17,6 +18,7 @@ import {
   SourceUploadPage,
   SourcesPage,
 } from "@/components/modules/MaintainerDashboard/shared/maintainerDashboardShared"
+import { ChatbotTrustPage } from "@/components/modules/MaintainerDashboard/trust/ChatbotTrustPage"
 import { ValidationWorkbench } from "@/components/modules/MaintainerDashboard/validation/ValidationWorkbench"
 
 export function MaintainerDashboard({
@@ -87,27 +89,32 @@ export function MaintainerDashboard({
 
   return (
     <MaintainerFrame>
-      <header className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-4 border-b border-white/15 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase">
+          <p className="text-xs font-semibold text-cyan-200 uppercase">
             Private source stewardship
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-normal">
-            Maintainer dashboard
+            Maintainer control center
           </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Approved source review, protected uploads, lifecycle actions,
-            ingestion readiness, and audit trail.
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+            Readiness, blockers, validation health, audit history, and chatbot
+            trust for the private maintainer workflow.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="inline-flex items-center gap-2 rounded-md border px-3 py-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm sm:justify-end">
+          <img
+            src="/admin-logo.png"
+            alt="Global Governance admin"
+            className="h-12 w-auto rounded-md bg-white/90 p-1"
+          />
+          <span className="inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/10 px-3 py-2">
             <ShieldCheck className="size-4" aria-hidden="true" />
             {gate.identity.email}
           </span>
           <button
             type="button"
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border px-3 py-2 font-medium"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 bg-white/10 px-3 py-2 font-medium"
             onClick={handleSignOut}
           >
             <LogOut className="size-4" aria-hidden="true" />
@@ -163,6 +170,24 @@ export function MaintainerDashboard({
           />
         ) : route.section === "validation" ? (
           <ValidationWorkbench session={gate.session} />
+        ) : route.section === "auditTrail" ? (
+          dashboard ? (
+            <AuditTrailPage dashboard={dashboard} onNavigate={navigateTo} />
+          ) : (
+            <DashboardDataState
+              state={dashboardState}
+              onRetry={retryDashboard}
+            />
+          )
+        ) : route.section === "chatbotTrust" ? (
+          dashboard ? (
+            <ChatbotTrustPage dashboard={dashboard} />
+          ) : (
+            <DashboardDataState
+              state={dashboardState}
+              onRetry={retryDashboard}
+            />
+          )
         ) : dashboard ? (
           <OperationsPage dashboard={dashboard} />
         ) : (

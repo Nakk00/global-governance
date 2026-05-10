@@ -3,13 +3,16 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import {
   Archive,
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
+  ClipboardList,
   Copy,
   Eye,
   FileUp,
   Link2,
   Loader2,
   LogOut,
+  MessageSquareText,
   Pencil,
   Play,
   RefreshCcw,
@@ -104,6 +107,8 @@ export type MaintainerRoute =
       sourceId: string
     }
   | { section: "validation"; path: string; preset: MaintainerPreset | null }
+  | { section: "auditTrail"; path: string; preset: MaintainerPreset | null }
+  | { section: "chatbotTrust"; path: string; preset: MaintainerPreset | null }
   | { section: "operations"; path: string; preset: MaintainerPreset | null }
 
 export type DetailState =
@@ -196,6 +201,42 @@ export const EMPTY_STEWARDSHIP_DASHBOARD: StewardshipDashboard = {
     latestIngestionStatus: null,
     latestValidationStatus: null,
     readinessState: "empty",
+  },
+  monitoring: {
+    readiness: {
+      label: "Readiness",
+      value: "0/0 active",
+      tone: "neutral",
+      detail: "No approved source inventory is available yet.",
+    },
+    blockers: {
+      label: "Blockers",
+      value: "0",
+      tone: "neutral",
+      detail: "No maintainer blockers are available yet.",
+    },
+    validationHealth: {
+      label: "Validation health",
+      value: "No runs",
+      tone: "neutral",
+      detail: "No validation signals are available yet.",
+    },
+    nextActions: [],
+  },
+  auditTrail: {
+    totalEvents: 0,
+    latestOutcome: null,
+    latestEventAt: null,
+    recentEvents: [],
+  },
+  chatbotTrust: {
+    state: "empty",
+    groundedSourceCount: 0,
+    validationRunCount: 0,
+    latestValidationStatus: null,
+    warningCount: 0,
+    failedCount: 0,
+    evidence: [],
   },
   sources: [],
   ingestionRuns: [],
@@ -498,9 +539,14 @@ export function MaintainerDashboard({
 
 export function MaintainerFrame({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-svh bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-8 lg:px-10">
-        {children}
+    <main
+      className="min-h-svh bg-slate-950 bg-cover bg-fixed bg-center text-slate-50"
+      style={{ backgroundImage: "url('/admin-background.png')" }}
+    >
+      <div className="min-h-svh bg-slate-950/86">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-8 lg:px-10">
+          {children}
+        </div>
       </div>
     </main>
   )
@@ -705,6 +751,12 @@ export function parseMaintainerRoute(pathname: string): MaintainerRoute {
   if (normalized === "/maintainer/validation") {
     return { section: "validation", path, preset }
   }
+  if (normalized === "/maintainer/audit-trail") {
+    return { section: "auditTrail", path, preset }
+  }
+  if (normalized === "/maintainer/chatbot-trust") {
+    return { section: "chatbotTrust", path, preset }
+  }
   if (normalized === "/maintainer/operations") {
     return { section: "operations", path, preset }
   }
@@ -749,6 +801,16 @@ export function MaintainerSectionNav({
       active: route.section === "validation",
     },
     {
+      path: "/maintainer/audit-trail",
+      label: "Audit Trail",
+      active: route.section === "auditTrail",
+    },
+    {
+      path: "/maintainer/chatbot-trust",
+      label: "Chatbot Trust",
+      active: route.section === "chatbotTrust",
+    },
+    {
       path: "/maintainer/operations",
       label: "Operations",
       active: route.section === "operations",
@@ -757,17 +819,17 @@ export function MaintainerSectionNav({
 
   return (
     <nav
-      className="flex flex-wrap gap-2 border-b border-border pb-4"
+      className="flex gap-2 overflow-x-auto border-b border-white/15 pb-4 sm:flex-wrap"
       aria-label="Maintainer sections"
     >
       {links.map((link) => (
         <button
           key={link.path}
           type="button"
-          className={`min-h-11 rounded-md border px-4 py-2 text-sm font-medium ${
+          className={`min-h-11 shrink-0 rounded-md border px-4 py-2 text-sm font-medium ${
             link.active
-              ? "bg-primary text-primary-foreground"
-              : "bg-card text-foreground"
+              ? "border-cyan-300 bg-cyan-300 text-slate-950"
+              : "border-white/15 bg-white/10 text-slate-100 hover:bg-white/12"
           }`}
           aria-current={link.active ? "page" : undefined}
           onClick={() => onNavigate(link.path)}
@@ -819,7 +881,7 @@ export function OverviewPage({
           </Button>
         </div>
       </div>
-      <OverviewCards dashboard={dashboard} />
+      <OverviewCards dashboard={dashboard} onNavigate={onNavigate} />
       <div className="grid gap-4 lg:grid-cols-3">
         {workflowCards.map((card) => (
           <WorkflowHealthCard
@@ -1670,31 +1732,223 @@ export function handleMaintainerReadAuthFailure(
   return false
 }
 
-function OverviewCards({ dashboard }: { dashboard: StewardshipDashboard }) {
+function OverviewCards({
+  dashboard,
+  onNavigate,
+}: {
+  dashboard: StewardshipDashboard
+  onNavigate: (path: string) => void
+}) {
   const cards = [
-    ["Stewarded sources", dashboard.overview.sourceCount],
-    ["Active sources", dashboard.overview.activeSourceCount],
-    ["Draft sources", dashboard.overview.draftSourceCount],
-    ["Partial records", dashboard.overview.partialSourceCount],
-    ["Readiness", dashboard.overview.readinessState],
+    dashboard.monitoring.readiness,
+    dashboard.monitoring.blockers,
+    dashboard.monitoring.validationHealth,
+    {
+      label: "Next actions",
+      value: String(dashboard.monitoring.nextActions.length),
+      tone: dashboard.monitoring.nextActions.length ? "warning" : "good",
+      detail: dashboard.monitoring.nextActions.length
+        ? dashboard.monitoring.nextActions[0].detail
+        : "No immediate maintainer actions are queued.",
+    },
   ] as const
 
   return (
     <section aria-labelledby="maintainer-overview-heading">
       <h2 id="maintainer-overview-heading" className="text-xl font-semibold">
-        Overview
+        Control center overview
       </h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(([label, value]) => (
-          <article key={label} className="rounded-lg border bg-card p-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase">
-              {label}
+        {cards.map((card) => (
+          <article
+            key={card.label}
+            className="rounded-lg border border-white/12 bg-white/10 p-4 shadow-lg shadow-black/20"
+          >
+            <p className="text-xs font-semibold text-slate-300 uppercase">
+              {card.label}
             </p>
-            <p className="mt-2 text-2xl font-semibold">{value}</p>
+            <p className="mt-2 text-2xl font-semibold">{card.value}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              {card.detail}
+            </p>
+          </article>
+        ))}
+      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        {dashboard.monitoring.nextActions.map((action) => (
+          <button
+            key={`${action.href}-${action.label}`}
+            type="button"
+            className="flex min-h-16 items-center justify-between rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-4 py-3 text-left text-sm"
+            onClick={() => onNavigate(action.href)}
+          >
+            <span>
+              <span className="block font-semibold text-cyan-100">
+                {action.label}
+              </span>
+              <span className="mt-1 block text-slate-300">{action.detail}</span>
+            </span>
+            <ArrowRight className="size-4 shrink-0 text-cyan-100" />
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function AuditTrailPage({
+  dashboard,
+  onNavigate,
+}: {
+  dashboard: StewardshipDashboard
+  onNavigate: (path: string) => void
+}) {
+  return (
+    <section className="space-y-5" aria-labelledby="audit-trail-heading">
+      <SectionHeading
+        eyebrow="Private operations"
+        title="Audit Trail"
+        body={`${dashboard.auditTrail.totalEvents} protected event(s) recorded across source stewardship.`}
+      />
+      <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+        <MetricPanel
+          icon={<ClipboardList className="size-5" aria-hidden="true" />}
+          title="Latest event"
+          value={dashboard.auditTrail.latestOutcome ?? "No events"}
+          detail={
+            dashboard.auditTrail.latestEventAt ??
+            "No protected audit event has been recorded yet."
+          }
+        />
+        <div className="rounded-lg border border-white/12 bg-white/10 p-4">
+          <h3 className="font-semibold">Recent audit events</h3>
+          <div className="mt-4 space-y-3">
+            {dashboard.auditTrail.recentEvents.length ? (
+              dashboard.auditTrail.recentEvents.map((event) => (
+                <button
+                  key={event.eventId}
+                  type="button"
+                  className="block w-full rounded-md border border-white/10 bg-slate-950/40 p-3 text-left text-sm"
+                  onClick={() =>
+                    onNavigate(
+                      `/maintainer/sources/${encodeURIComponent(event.sourceId)}`
+                    )
+                  }
+                >
+                  <span className="font-semibold">{event.eventType}</span>
+                  <span className="ml-2 text-slate-300">{event.outcome}</span>
+                  <span className="mt-1 block text-slate-300">
+                    {event.summary}
+                  </span>
+                </button>
+              ))
+            ) : (
+              <p className="text-sm text-slate-300">
+                No audit history is available.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export function ChatbotTrustPage({
+  dashboard,
+}: {
+  dashboard: StewardshipDashboard
+}) {
+  return (
+    <section className="space-y-5" aria-labelledby="chatbot-trust-heading">
+      <SectionHeading
+        eyebrow="Grounded answer safety"
+        title="Chatbot Trust"
+        body="Canonical source and validation signals for the private maintainer trust view."
+      />
+      <div className="grid gap-4 md:grid-cols-3">
+        <MetricPanel
+          icon={<MessageSquareText className="size-5" aria-hidden="true" />}
+          title="Trust state"
+          value={dashboard.chatbotTrust.state}
+          detail="Readiness of the current grounded-answer evidence set."
+        />
+        <MetricPanel
+          icon={<ShieldCheck className="size-5" aria-hidden="true" />}
+          title="Grounded sources"
+          value={String(dashboard.chatbotTrust.groundedSourceCount)}
+          detail="Active chat-scoped sources with successful ingestion evidence."
+        />
+        <MetricPanel
+          icon={<CheckCircle2 className="size-5" aria-hidden="true" />}
+          title="Validation runs"
+          value={String(dashboard.chatbotTrust.validationRunCount)}
+          detail={`Latest status: ${dashboard.chatbotTrust.latestValidationStatus ?? "none"}.`}
+        />
+      </div>
+      <div className="grid gap-3 lg:grid-cols-2">
+        {dashboard.chatbotTrust.evidence.map((item) => (
+          <article
+            key={item.label}
+            className="rounded-lg border border-white/12 bg-white/10 p-4"
+          >
+            <p className="text-xs font-semibold text-slate-300 uppercase">
+              {item.label}
+            </p>
+            <p className="mt-2 text-2xl font-semibold">{item.value}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              {item.detail}
+            </p>
           </article>
         ))}
       </div>
     </section>
+  )
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  body,
+}: {
+  eyebrow: string
+  title: string
+  body: string
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold text-cyan-200 uppercase">{eyebrow}</p>
+      <h2
+        id={`${title.toLowerCase().replaceAll(" ", "-")}-heading`}
+        className="mt-2 text-2xl font-semibold"
+      >
+        {title}
+      </h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{body}</p>
+    </div>
+  )
+}
+
+function MetricPanel({
+  icon,
+  title,
+  value,
+  detail,
+}: {
+  icon: React.ReactNode
+  title: string
+  value: string
+  detail: string
+}) {
+  return (
+    <article className="rounded-lg border border-white/12 bg-white/10 p-4">
+      <div className="flex items-center gap-2 text-cyan-100">
+        {icon}
+        <h3 className="font-semibold">{title}</h3>
+      </div>
+      <p className="mt-3 text-3xl font-semibold">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-300">{detail}</p>
+    </article>
   )
 }
 
