@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
-from typing import Any, Protocol, cast
+from typing import Any, Literal, Protocol, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urljoin
 from urllib.request import Request, urlopen
@@ -16,6 +16,8 @@ from django.core.files.uploadedfile import UploadedFile
 
 from sources.dtos import (
     ApprovedSourceSeed,
+    AuditTrailSummaryDto,
+    ChatbotTrustDto,
     ChunkDetailDto,
     ChunkRowDto,
     CitationDetailDto,
@@ -24,8 +26,10 @@ from sources.dtos import (
     InspectionAnchorDto,
     InspectionState,
     LifecycleState,
+    NextActionDto,
     PartialDataMarker,
     ReadinessState,
+    RunStatus,
     SourceChunksInspectionDto,
     SourceCitationsInspectionDto,
     SourceDetailDto,
@@ -33,12 +37,14 @@ from sources.dtos import (
     SourceMutationResult,
     StewardshipDashboardDto,
     StewardshipEventDto,
+    StewardshipMonitoringDto,
     StewardshipOverviewDto,
 )
 
 MAX_SOURCE_UPLOAD_BYTES = 10 * 1024 * 1024
 SUPPORTED_UPLOAD_EXTENSIONS = {".md", ".txt", ".pdf", ".csv"}
 PRIVATE_SOURCE_BUCKET = "project-source-pdfs"
+MetricTone = Literal["good", "warning", "critical", "neutral"]
 ALLOWED_TRANSITIONS: dict[LifecycleState, set[LifecycleState]] = {
     "draft": {"approved", "archived"},
     "approved": {"active", "disabled", "archived"},
@@ -1406,6 +1412,9 @@ def _dashboard_from_snapshots(
     )
     return {
         "overview": _overview(sources, ingestion_runs, validation_runs),
+        "monitoring": _monitoring(sources, ingestion_runs, validation_runs),
+        "auditTrail": _audit_trail_summary(audit_events),
+        "chatbotTrust": _chatbot_trust(sources, validation_runs),
         "sources": sources,
         "ingestionRuns": ingestion_runs,
         "validationRuns": validation_runs,
@@ -1704,6 +1713,168 @@ def _overview(
         "latestValidationStatus": validation_runs[0]["outcome"] if validation_runs else None,
         "readinessState": readiness_state,
     }
+
+
+def _monitoring(
+    sources: list[SourceInventoryItemDto],
+    ingestion_runs: list[StewardshipEventDto],
+    validation_runs: list[StewardshipEventDto],
+) -> StewardshipMonitoringDto:
+    partial_count = sum(1 for source in sources if source["partialData"])
+    draft_count = sum(1 for source in sources if source["lifecycleState"] == "draft")
+    active_count = sum(1 for source in sources if source["lifecycleState"] == "active")
+    warning_validation_count = sum(
+        1 for event in validation_runs if event["outcome"] == "warning"
+    )
+    failed_validation_count = sum(1 for event in validation_runs if event["outcome"] == "failed")
+    blocker_count = partial_count + draft_count + failed_validation_count
+    return {
+        "readiness": {
+            "label": "Readiness",
+            "value": f"{active_count}/{len(sources)} active",
+            "tone": "good" if sources and blocker_count == 0 else "warning",
+            "detail": "Active approved sources ready for learner-facing grounding.",
+        },
+        "blockers": {
+            "label": "Blockers",
+            "value": str(blocker_count),
+            "tone": "good" if blocker_count == 0 else "critical",
+            "detail": "Draft, partial, or failed validation items needing maintainer attention.",
+        },
+        "validationHealth": {
+            "label": "Validation health",
+            "value": _latest_status_label(validation_runs),
+            "tone": _status_tone(validation_runs[0]["outcome"] if validation_runs else None),
+            "detail": (
+                f"{warning_validation_count} warning and {failed_validation_count} failed "
+                "source validation signals."
+            ),
+        },
+        "nextActions": _next_actions(
+            partial_count=partial_count,
+            draft_count=draft_count,
+            ingestion_runs=ingestion_runs,
+            validation_runs=validation_runs,
+        ),
+    }
+
+
+def _audit_trail_summary(
+    audit_events: list[StewardshipEventDto],
+) -> AuditTrailSummaryDto:
+    latest = audit_events[0] if audit_events else None
+    return {
+        "totalEvents": len(audit_events),
+        "latestOutcome": latest["outcome"] if latest else None,
+        "latestEventAt": latest["occurredAt"] if latest else None,
+        "recentEvents": audit_events[:6],
+    }
+
+
+def _chatbot_trust(
+    sources: list[SourceInventoryItemDto],
+    validation_runs: list[StewardshipEventDto],
+) -> ChatbotTrustDto:
+    grounded_sources = [
+        source
+        for source in sources
+        if "chat" in source["usageScope"]
+        and source["lifecycleState"] == "active"
+        and source["ingestionReadiness"] == "ready"
+    ]
+    warning_count = sum(1 for event in validation_runs if event["outcome"] == "warning")
+    failed_count = sum(1 for event in validation_runs if event["outcome"] == "failed")
+    state: ReadinessState = "ready"
+    if failed_count or warning_count or not grounded_sources:
+        state = "partial"
+    if not sources:
+        state = "empty"
+    latest_status = validation_runs[0]["outcome"] if validation_runs else None
+    return {
+        "state": state,
+        "groundedSourceCount": len(grounded_sources),
+        "validationRunCount": len(validation_runs),
+        "latestValidationStatus": latest_status,
+        "warningCount": warning_count,
+        "failedCount": failed_count,
+        "evidence": [
+            {
+                "label": "Grounded sources",
+                "value": str(len(grounded_sources)),
+                "tone": "good" if grounded_sources else "warning",
+                "detail": "Active chat-scoped sources with successful ingestion evidence.",
+            },
+            {
+                "label": "Validation coverage",
+                "value": str(len(validation_runs)),
+                "tone": _status_tone(latest_status),
+                "detail": "Canonical validation signals available to the private console.",
+            },
+        ],
+    }
+
+
+def _next_actions(
+    *,
+    partial_count: int,
+    draft_count: int,
+    ingestion_runs: list[StewardshipEventDto],
+    validation_runs: list[StewardshipEventDto],
+) -> list[NextActionDto]:
+    actions: list[NextActionDto] = []
+    if draft_count:
+        actions.append(
+            {
+                "label": "Review draft sources",
+                "detail": f"{draft_count} draft source(s) need approval or archive decisions.",
+                "href": "/maintainer/sources",
+                "priority": "high",
+            }
+        )
+    if partial_count:
+        actions.append(
+            {
+                "label": "Close partial evidence",
+                "detail": f"{partial_count} source record(s) need ingestion or validation follow-up.",
+                "href": "/maintainer/sources",
+                "priority": "high",
+            }
+        )
+    if not validation_runs:
+        actions.append(
+            {
+                "label": "Run validation",
+                "detail": "Launch the demo readiness set before presenting chatbot trust.",
+                "href": "/maintainer/validation",
+                "priority": "medium",
+            }
+        )
+    if ingestion_runs and ingestion_runs[0]["outcome"] in {"failed", "warning"}:
+        actions.append(
+            {
+                "label": "Inspect latest ingest",
+                "detail": "The latest ingest signal needs maintainer review.",
+                "href": "/maintainer/operations",
+                "priority": "medium",
+            }
+        )
+    return actions[:4]
+
+
+def _latest_status_label(validation_runs: list[StewardshipEventDto]) -> str:
+    if not validation_runs:
+        return "No runs"
+    return validation_runs[0]["outcome"].replace("-", " ").title()
+
+
+def _status_tone(status: RunStatus | None) -> MetricTone:
+    if status == "succeeded":
+        return "good"
+    if status == "failed":
+        return "critical"
+    if status in {"warning", "queued"}:
+        return "warning"
+    return "neutral"
 
 
 def _validate_transition(snapshot: SourceSnapshot, target_state: LifecycleState) -> None:

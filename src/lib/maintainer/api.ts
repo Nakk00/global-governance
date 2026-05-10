@@ -25,6 +25,20 @@ export type StewardshipEvent = {
   summary: string
 }
 
+export type MonitoringMetric = {
+  label: string
+  value: string
+  tone: "good" | "warning" | "critical" | "neutral"
+  detail: string
+}
+
+export type NextAction = {
+  label: string
+  detail: string
+  href: string
+  priority: "high" | "medium" | "low"
+}
+
 export type SourceLifecycleState =
   | "draft"
   | "approved"
@@ -72,6 +86,27 @@ export type StewardshipDashboard = {
     latestIngestionStatus: StewardshipEvent["outcome"] | null
     latestValidationStatus: StewardshipEvent["outcome"] | null
     readinessState: "ready" | "partial" | "empty"
+  }
+  monitoring: {
+    readiness: MonitoringMetric
+    blockers: MonitoringMetric
+    validationHealth: MonitoringMetric
+    nextActions: NextAction[]
+  }
+  auditTrail: {
+    totalEvents: number
+    latestOutcome: StewardshipEvent["outcome"] | null
+    latestEventAt: string | null
+    recentEvents: StewardshipEvent[]
+  }
+  chatbotTrust: {
+    state: "ready" | "partial" | "empty"
+    groundedSourceCount: number
+    validationRunCount: number
+    latestValidationStatus: StewardshipEvent["outcome"] | null
+    warningCount: number
+    failedCount: number
+    evidence: MonitoringMetric[]
   }
   sources: SourceInventoryItem[]
   ingestionRuns: StewardshipEvent[]

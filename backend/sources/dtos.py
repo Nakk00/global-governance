@@ -65,8 +65,49 @@ class StewardshipOverviewDto(TypedDict):
     readinessState: ReadinessState
 
 
+class MonitoringMetricDto(TypedDict):
+    label: str
+    value: str
+    tone: Literal["good", "warning", "critical", "neutral"]
+    detail: str
+
+
+class NextActionDto(TypedDict):
+    label: str
+    detail: str
+    href: str
+    priority: Literal["high", "medium", "low"]
+
+
+class StewardshipMonitoringDto(TypedDict):
+    readiness: MonitoringMetricDto
+    blockers: MonitoringMetricDto
+    validationHealth: MonitoringMetricDto
+    nextActions: list[NextActionDto]
+
+
+class AuditTrailSummaryDto(TypedDict):
+    totalEvents: int
+    latestOutcome: RunStatus | None
+    latestEventAt: str | None
+    recentEvents: list[StewardshipEventDto]
+
+
+class ChatbotTrustDto(TypedDict):
+    state: ReadinessState
+    groundedSourceCount: int
+    validationRunCount: int
+    latestValidationStatus: RunStatus | None
+    warningCount: int
+    failedCount: int
+    evidence: list[MonitoringMetricDto]
+
+
 class StewardshipDashboardDto(TypedDict):
     overview: StewardshipOverviewDto
+    monitoring: StewardshipMonitoringDto
+    auditTrail: AuditTrailSummaryDto
+    chatbotTrust: ChatbotTrustDto
     sources: list[SourceInventoryItemDto]
     ingestionRuns: list[StewardshipEventDto]
     validationRuns: list[StewardshipEventDto]

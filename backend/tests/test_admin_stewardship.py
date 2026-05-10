@@ -31,6 +31,16 @@ class AdminStewardshipApiTests(SimpleTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(payload["success"])
         self.assertGreater(payload["data"]["overview"]["sourceCount"], 0)
+        self.assertIn("monitoring", payload["data"])
+        self.assertIn("auditTrail", payload["data"])
+        self.assertIn("chatbotTrust", payload["data"])
+        self.assertEqual(payload["data"]["monitoring"]["blockers"]["label"], "Blockers")
+        self.assertGreaterEqual(
+            len(payload["data"]["monitoring"]["nextActions"]),
+            1,
+        )
+        self.assertEqual(payload["data"]["auditTrail"]["totalEvents"], 0)
+        self.assertEqual(payload["data"]["chatbotTrust"]["state"], "partial")
         first_source = payload["data"]["sources"][0]
         self.assertIn("sourceId", first_source)
         self.assertIn(
@@ -195,6 +205,21 @@ class AdminStewardshipApiTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mocked_service.called)
+
+    def test_dashboard_monitoring_updates_after_ingest_and_audit_events(self):
+        with self._authorized():
+            self.client.post(
+                "/api/admin/sources/gg-src-un-charter-institutions/ingest",
+                HTTP_AUTHORIZATION="Bearer token",
+            )
+            response = self.client.get("/api/admin/sources", HTTP_AUTHORIZATION="Bearer token")
+
+        data = response.json()["data"]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["auditTrail"]["totalEvents"], 2)
+        self.assertEqual(data["auditTrail"]["latestOutcome"], "succeeded")
+        self.assertGreaterEqual(data["chatbotTrust"]["groundedSourceCount"], 1)
+        self.assertEqual(data["chatbotTrust"]["evidence"][0]["label"], "Grounded sources")
 
     def test_upload_requires_admin_auth(self):
         response = self.client.post("/api/admin/sources/upload")

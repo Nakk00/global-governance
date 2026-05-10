@@ -102,6 +102,56 @@ const dashboard = {
     latestValidationStatus: "warning",
     readinessState: "partial",
   },
+  monitoring: {
+    readiness: {
+      label: "Readiness",
+      value: "2/2 active",
+      tone: "warning",
+      detail: "Active approved sources ready for learner-facing grounding.",
+    },
+    blockers: {
+      label: "Blockers",
+      value: "1",
+      tone: "critical",
+      detail: "Draft, partial, or failed validation items needing maintainer attention.",
+    },
+    validationHealth: {
+      label: "Validation health",
+      value: "Warning",
+      tone: "warning",
+      detail: "1 warning and 0 failed source validation signals.",
+    },
+    nextActions: [
+      {
+        label: "Close partial evidence",
+        detail: "1 source record needs ingestion follow-up.",
+        href: "/maintainer/sources",
+        priority: "high",
+      },
+    ],
+  },
+  auditTrail: {
+    totalEvents: 1,
+    latestOutcome: "succeeded",
+    latestEventAt: "2026-05-05T00:00:00Z",
+    recentEvents: [],
+  },
+  chatbotTrust: {
+    state: "partial",
+    groundedSourceCount: 1,
+    validationRunCount: 1,
+    latestValidationStatus: "warning",
+    warningCount: 1,
+    failedCount: 0,
+    evidence: [
+      {
+        label: "Grounded sources",
+        value: "1",
+        tone: "good",
+        detail: "Active chat-scoped sources with successful ingestion evidence.",
+      },
+    ],
+  },
   sources: [
     {
       sourceId: "gg-src-un-charter-institutions",
