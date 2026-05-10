@@ -56,6 +56,12 @@ if ($LASTEXITCODE -ne 0) {
   throw "Django backend preflight failed."
 }
 
+Write-Host "Applying Django migrations for development database..."
+& powershell -NoProfile -ExecutionPolicy Bypass -File $backendPythonScript backend/manage.py migrate --settings=config.settings.development
+if ($LASTEXITCODE -ne 0) {
+  throw "Django migrations failed."
+}
+
 pnpm supabase:start
 if ($LASTEXITCODE -ne 0) {
   throw "Supabase failed to start."

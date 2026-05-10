@@ -15,6 +15,7 @@
     "supabase:functions:chat": "supabase functions serve chat --env-file .env.local --no-verify-jwt",
     "supabase:dev": "pnpm supabase:start && pnpm supabase:functions",
     "backend:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 backend/manage.py check --settings=config.settings.development",
+    "backend:migrate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 backend/manage.py migrate --settings=config.settings.development",
     "backend:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 backend/manage.py runserver 127.0.0.1:8000 --settings=config.settings.development",
     "backend:lint": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 -m ruff check backend",
     "backend:format": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 -m ruff format backend",
