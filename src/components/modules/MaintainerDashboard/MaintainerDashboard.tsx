@@ -89,32 +89,32 @@ export function MaintainerDashboard({
 
   return (
     <MaintainerFrame>
-      <header className="flex flex-col gap-4 border-b border-white/15 pb-5 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-6 border-b border-white/10 pb-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs font-semibold text-cyan-200 uppercase">
+          <p className="text-xs font-bold tracking-normal text-cyan-300 uppercase">
             Private source stewardship
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal">
+          <h1 className="mt-3 text-3xl font-bold tracking-normal text-white">
             Maintainer control center
           </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-100">
             Readiness, blockers, validation health, audit history, and chatbot
             trust for the private maintainer workflow.
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm sm:justify-end">
+        <div className="flex flex-wrap items-center gap-3 text-sm lg:justify-end">
           <img
             src="/admin-logo.png"
             alt="Global Governance admin"
-            className="h-12 w-auto rounded-md bg-white/90 p-1"
+            className="h-12 w-12 rounded-lg bg-white p-1 shadow-lg shadow-sky-950/30"
           />
-          <span className="inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/10 px-3 py-2">
+          <span className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-2 font-semibold text-white shadow-sm shadow-black/20 backdrop-blur-md">
             <ShieldCheck className="size-4" aria-hidden="true" />
             {gate.identity.email}
           </span>
           <button
             type="button"
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-white/15 bg-white/10 px-3 py-2 font-medium"
+            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-2 font-semibold text-white shadow-sm shadow-black/20 backdrop-blur-md transition hover:border-sky-300/45 hover:bg-white/15 focus-visible:ring-3 focus-visible:ring-sky-300/40 focus-visible:outline-none"
             onClick={handleSignOut}
           >
             <LogOut className="size-4" aria-hidden="true" />

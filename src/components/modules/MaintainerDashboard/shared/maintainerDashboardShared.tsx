@@ -543,8 +543,8 @@ export function MaintainerFrame({ children }: { children: React.ReactNode }) {
       className="min-h-svh bg-slate-950 bg-cover bg-fixed bg-center text-slate-50"
       style={{ backgroundImage: "url('/admin-background.png')" }}
     >
-      <div className="min-h-svh bg-slate-950/86">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-8 lg:px-10">
+      <div className="min-h-svh bg-[#020713]/90">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-4 py-6 sm:px-8 lg:px-0">
           {children}
         </div>
       </div>
@@ -819,17 +819,17 @@ export function MaintainerSectionNav({
 
   return (
     <nav
-      className="flex gap-2 overflow-x-auto border-b border-white/15 pb-4 sm:flex-wrap"
+      className="flex gap-2 overflow-x-auto border-b border-white/10 pt-0 pb-4 sm:flex-wrap"
       aria-label="Maintainer sections"
     >
       {links.map((link) => (
         <button
           key={link.path}
           type="button"
-          className={`min-h-11 shrink-0 rounded-md border px-4 py-2 text-sm font-medium ${
+          className={`min-h-11 shrink-0 rounded-lg border px-4 py-2 text-sm font-semibold shadow-sm shadow-black/20 backdrop-blur-md transition focus-visible:ring-3 focus-visible:ring-cyan-300/35 focus-visible:outline-none ${
             link.active
               ? "border-cyan-300 bg-cyan-300 text-slate-950"
-              : "border-white/15 bg-white/10 text-slate-100 hover:bg-white/12"
+              : "border-white/15 bg-white/10 text-white hover:border-sky-300/40 hover:bg-white/15"
           }`}
           aria-current={link.active ? "page" : undefined}
           onClick={() => onNavigate(link.path)}
@@ -852,14 +852,14 @@ export function OverviewPage({
 
   return (
     <section className="space-y-6" aria-labelledby="overview-page-heading">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase">
+          <p className="text-xs font-bold text-slate-300 uppercase">
             Readiness overview
           </p>
           <h2
             id="overview-page-heading"
-            className="mt-2 text-2xl font-semibold"
+            className="mt-3 text-2xl font-bold text-white"
           >
             Maintainer overview
           </h2>
@@ -867,6 +867,7 @@ export function OverviewPage({
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
+            className="rounded-lg bg-sky-300 px-4 font-semibold text-slate-950 shadow-sm shadow-black/20 hover:bg-sky-200"
             onClick={() => onNavigate("/maintainer/sources")}
           >
             Review sources
@@ -874,6 +875,7 @@ export function OverviewPage({
           <Button
             type="button"
             variant="outline"
+            className="rounded-lg border-white/15 bg-white/5 px-4 font-semibold text-white shadow-sm shadow-black/20 backdrop-blur-md hover:border-sky-300/40 hover:bg-white/10 hover:text-white"
             onClick={() => onNavigate("/maintainer/sources/new")}
           >
             <Upload className="size-4" aria-hidden="true" />
@@ -1755,20 +1757,23 @@ function OverviewCards({
 
   return (
     <section aria-labelledby="maintainer-overview-heading">
-      <h2 id="maintainer-overview-heading" className="text-xl font-semibold">
+      <h2
+        id="maintainer-overview-heading"
+        className="text-[1.35rem] font-bold text-white"
+      >
         Control center overview
       </h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => (
           <article
             key={card.label}
-            className="rounded-lg border border-white/12 bg-white/10 p-4 shadow-lg shadow-black/20"
+            className="min-h-36 rounded-lg border border-white/15 bg-white/[0.115] p-4 shadow-lg shadow-black/25 backdrop-blur-md"
           >
-            <p className="text-xs font-semibold text-slate-300 uppercase">
+            <p className="text-xs font-bold text-slate-200 uppercase">
               {card.label}
             </p>
-            <p className="mt-2 text-2xl font-semibold">{card.value}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">
+            <p className="mt-3 text-2xl font-bold text-white">{card.value}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-100">
               {card.detail}
             </p>
           </article>
@@ -1779,16 +1784,16 @@ function OverviewCards({
           <button
             key={`${action.href}-${action.label}`}
             type="button"
-            className="flex min-h-16 items-center justify-between rounded-lg border border-cyan-300/25 bg-cyan-300/10 px-4 py-3 text-left text-sm"
+            className="flex min-h-[70px] items-center justify-between rounded-lg border border-cyan-300/35 bg-cyan-950/55 px-4 py-3 text-left text-sm shadow-sm shadow-black/25 backdrop-blur-md transition hover:border-cyan-200/60 hover:bg-cyan-900/65 focus-visible:ring-3 focus-visible:ring-cyan-300/35 focus-visible:outline-none"
             onClick={() => onNavigate(action.href)}
           >
             <span>
-              <span className="block font-semibold text-cyan-100">
+              <span className="block font-bold text-cyan-50">
                 {action.label}
               </span>
-              <span className="mt-1 block text-slate-300">{action.detail}</span>
+              <span className="mt-1 block text-slate-100">{action.detail}</span>
             </span>
-            <ArrowRight className="size-4 shrink-0 text-cyan-100" />
+            <ArrowRight className="size-4 shrink-0 text-cyan-50" />
           </button>
         ))}
       </div>
@@ -2738,35 +2743,39 @@ function WorkflowHealthCard({
   onNavigate: (path: string) => void
 }) {
   return (
-    <article className="rounded-lg border bg-card p-4">
+    <article className="rounded-lg border border-white/15 bg-slate-950/72 p-4 shadow-lg shadow-black/25 backdrop-blur-md">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-semibold">{card.title}</h3>
-          <p className="mt-1 text-sm text-muted-foreground">{card.status}</p>
+          <h3 className="font-bold text-white">{card.title}</h3>
+          <p className="mt-1 text-sm leading-5 text-slate-100">{card.status}</p>
         </div>
         <Button
           type="button"
           variant="outline"
+          className="rounded-lg border-white/15 bg-white/5 px-3 font-semibold text-white hover:border-sky-300/40 hover:bg-white/10 hover:text-white"
           onClick={() => onNavigate(card.actionPath)}
         >
           {card.actionLabel}
         </Button>
       </div>
-      <div className="mt-4 rounded-md border border-dashed p-3">
-        <p className="text-xs font-semibold text-muted-foreground uppercase">
+      <div className="mt-4 rounded-lg border border-dashed border-white/15 bg-slate-950/35 p-3">
+        <p className="text-xs font-bold text-slate-300 uppercase">
           {card.metricLabel}
         </p>
-        <p className="mt-2 text-2xl font-semibold">{card.metricValue}</p>
+        <p className="mt-2 text-2xl font-bold text-white">{card.metricValue}</p>
       </div>
       <ul className="mt-4 space-y-2 text-sm">
         {card.highlights.length ? (
           card.highlights.map((item) => (
-            <li key={item.id} className="rounded-md border p-3">
-              <p className="font-medium">{item.label}</p>
-              <p className="mt-1 text-muted-foreground">{item.summary}</p>
+            <li
+              key={item.id}
+              className="rounded-lg border border-white/15 bg-white/[0.035] p-3"
+            >
+              <p className="font-bold text-white">{item.label}</p>
+              <p className="mt-1 leading-5 text-slate-200">{item.summary}</p>
               <button
                 type="button"
-                className="mt-3 min-h-10 rounded-md border px-3 py-2 font-medium"
+                className="mt-3 min-h-10 rounded-lg border border-white/15 px-3 py-2 font-semibold text-white transition hover:border-sky-300/40 hover:bg-white/10 focus-visible:ring-3 focus-visible:ring-sky-300/30 focus-visible:outline-none"
                 onClick={() => onNavigate(item.path)}
               >
                 Open source detail
@@ -2774,7 +2783,7 @@ function WorkflowHealthCard({
             </li>
           ))
         ) : (
-          <li className="rounded-md border p-3 text-muted-foreground">
+          <li className="rounded-lg border border-white/15 bg-white/[0.035] p-3 text-slate-200">
             No urgent findings are recorded right now.
           </li>
         )}
