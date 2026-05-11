@@ -1,11 +1,13 @@
 # Ingested Context
 
-The archived proposal is a planning refinement for the existing Global Governance brownfield MVP.
+Source: `archive/docs/planning-artifacts/codebase-modularization-v2-proposal.md`
 
-It focuses on four connected themes:
-- Student / Expert depth and lesson-aware chat guidance
-- Visible trust cues and source grounding
-- Readability and navigability for private maintainer work
-- Repeatable demo and release verification
+The modularization proposal is a conservative structural follow-up to the existing private maintainer and source stewardship work. It does not propose new user-facing behavior. Instead, it aims to reduce file size, mixed responsibilities, and future review risk in areas already identified as large or fragile:
 
-The proposal aligns with the current v1 roadmap instead of introducing a new runtime boundary.
+- `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx`
+- `src/components/modules/MaintainerDashboard/sources/SourcesPage.tsx`
+- `backend/sources/repository.py`
+- `src/components/modules/MaintainerDashboard/overview/OverviewPage.tsx`
+- `src/lib/maintainer/api.ts`
+
+The proposal overlaps with Phase 3's completed maintainer readiness hardening and Phase 5's active admin UX polish. The safest routing is to treat this as a later structural phase that follows the Phase 5 control-center work, or as a backlog/future milestone item if Phase 4 and Phase 5 remain the current delivery priorities.

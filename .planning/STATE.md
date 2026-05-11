@@ -68,6 +68,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 5 added: Admin UX Polish for Maintainers
+- Phase 6 queued from the codebase modularization v2 proposal as a post-Phase-5 structural cleanup phase. It should not widen active Phase 4 or Phase 5 scope unless explicitly re-promoted.
 
 ### Pending Todos
 
@@ -77,6 +78,7 @@ None yet.
 
 - Some older planning artifacts still assume a future Django-owned public chat path; phase planning should treat that as future scope unless deliberately changed
 - The maintainer dashboard and repository layers are large enough that refactors need disciplined scope and verification
+- The modularization proposal overlaps files touched by active Phase 5 admin work, so execute it after Phase 5 stabilizes or deliberately split it into a separate workstream.
 
 ## Deferred Items
 

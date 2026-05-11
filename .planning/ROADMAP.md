@@ -129,3 +129,34 @@ Cross-cutting constraints:
 - `Settings` stays out of first-class navigation in Phase 5.
 - The provided `Admin-Background.png` and `Admin-Logo.png` assets should be used to reinforce the admin brand.
 - The control center must remain readable on mobile screens.
+
+### Phase 6: Maintainer Codebase Modularization
+
+**Goal:** Reduce maintainer console and source stewardship file size, mixed responsibilities, and review risk through behavior-preserving module splits after the Phase 5 control-center work stabilizes.
+**Requirements**: [MOD-01, MOD-02, MOD-03, MOD-04, MOD-05]
+**Depends on:** Phase 5
+**UI hint:** no
+**Success Criteria** (what must be TRUE):
+1. `maintainerDashboardShared.tsx` no longer owns full feature pages.
+2. Source detail, validation, audit trail, and chatbot trust implementations live in feature-owned folders.
+3. `SourcesPage.tsx` is reduced to page state and page composition.
+4. `backend/sources/repository.py` becomes a compatibility export layer instead of a monolithic repository implementation.
+5. `OverviewPage.tsx` and maintainer API wrappers are split without changing routes, DTO fields, response envelopes, or session-expiry behavior.
+**Plans:** 5 plans
+
+Plans:
+
+**Wave 1**
+- [ ] 06-01: Split maintainer shared types, routing, states, mutation helpers, and generic formatters
+- [ ] 06-02: Move source detail, validation, audit trail, and chatbot trust implementation into feature-owned modules
+- [ ] 06-03: Split source inventory page components and metrics helpers
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 06-04: Split backend source repository into base, mapper, seed, storage, mutation, memory, and Supabase modules
+- [ ] 06-05: Split overview builders and maintainer API wrappers by feature
+
+Cross-cutting constraints:
+- The modularization must be behavior-preserving from a user and API-consumer perspective.
+- Frontend routes, backend response contracts, DTO field names, session-expiry behavior, and private maintainer boundaries must stay stable.
+- Compatibility exports are allowed during transition to reduce import churn.
+- Backend repository work must run GitNexus impact analysis before implementation and keep backend verification focused on stewardship behavior.
