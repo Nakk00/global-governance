@@ -17,6 +17,7 @@ Users should leave the experience able to explain global governance clearly and 
 - ✓ Maintainers can sign in to a private console and inspect readiness, sources, validation, and audit workflows through protected Django APIs — existing brownfield baseline
 - ✓ The repo already supports split verification lanes across frontend unit tests, Supabase function tests, Django tests, and Playwright browser checks — existing brownfield baseline
 - ✓ Maintainers can use a readiness-first private console with source-first drill-downs, inline validation evidence, and thinner frontend/backend stewardship seams — validated in Phase 3: Maintainer Readiness Hardening
+- ✓ Maintainers can use a dark private control center with richer monitoring, first-class Audit Trail and Chatbot Trust sections, and server-shaped admin readiness signals — validated in Phase 5: Admin UX Polish for Maintainers
 
 ### Active
 
@@ -43,6 +44,8 @@ Phase 3 is now complete. The maintainer surface has a readiness-first overview, 
 
 An archived chatbot/admin improvement proposal has now been folded into the same roadmap. Its chat-side ideas reinforce the existing depth, trust, and reliability phases, while its admin-side ideas sharpen the private readiness direction already validated in Phase 3. The proposal does not introduce a new runtime boundary; it tightens the current brownfield priorities.
 
+Phase 5 is complete. The private maintainer surface now has a dark control-center presentation, richer monitoring contract, and first-class Audit Trail and Chatbot Trust sections. Phase 5 UAT passed with 6/6 checks and no issues; the security review was deliberately skipped via `$gsd-progress --next --force` and remains explicit verification debt if needed before release.
+
 ## Constraints
 
 - **Tech stack**: Keep the frontend as a React + TypeScript SPA built with Vite and `pnpm` — this preserves the current public architecture and avoids an unnecessary framework pivot
@@ -62,6 +65,7 @@ An archived chatbot/admin improvement proposal has now been folded into the same
 | Keep the active learner chat boundary on Supabase Edge Functions | Codebase mapping, route guards, and current client wiring all confirm the Django public chat cutover is intentionally deferred today | ✓ Good |
 | Use interactive workflow gates with research, plan check, and verifier enabled | The product still has meaningful scope and architecture decisions ahead, so guarded planning is worth the extra friction | — Pending |
 | Absorb the archived chatbot/admin improvement proposal into the current v1 roadmap | It aligns with existing phase intent and should sharpen, not replace, the brownfield plan | ✓ Good |
+| Complete Phase 5 while skipping the security gate by force | UAT and verification passed, but the user explicitly chose to skip `$gsd-secure-phase 5` to keep momentum toward Phase 6 | ✓ Accepted debt |
 
 ## Evolution
 
@@ -81,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-10 after chatbot/admin proposal merge*
+*Last updated: 2026-05-11 after Phase 5 forced completion*

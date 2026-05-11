@@ -14,6 +14,8 @@ This roadmap starts from the real brownfield baseline instead of replaying alrea
 - [ ] **Phase 2: Trust And Grounding Clarity** - Make source support, chat state semantics, and evaluator trust cues coherent across narrative and chat
 - [x] **Phase 3: Maintainer Readiness Hardening** - Turn the private stewardship surface into a clearer, less fragile readiness console (completed 2026-05-09)
 - [ ] **Phase 4: Demo Reliability And Verification** - Finish the brownfield MVP with performance hardening and repeatable pre-demo quality gates
+- [x] **Phase 5: Admin UX Polish for Maintainers** - Turn the private maintainer surface into a dark analytics-heavy control center with richer monitoring metrics and first-class Audit Trail and Chatbot Trust sections (completed 2026-05-11; security review skipped by --force)
+- [ ] **Phase 6: Maintainer Codebase Modularization** - Reduce maintainer console and source stewardship file size, mixed responsibilities, and review risk through behavior-preserving module splits
 
 ## Phase Details
 
@@ -94,7 +96,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order unless explicitly re-promoted or forced: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -102,6 +104,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 2. Trust And Grounding Clarity | 0/2 | Not started | - |
 | 3. Maintainer Readiness Hardening | 3/3 | Complete    | 2026-05-09 |
 | 4. Demo Reliability And Verification | 0/3 | Not started | - |
+| 5. Admin UX Polish for Maintainers | 2/2 | Complete | 2026-05-11 |
+| 6. Maintainer Codebase Modularization | 0/5 | Not started | - |
 
 ### Phase 5: Admin UX Polish for Maintainers
 
@@ -109,6 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 **Requirements**: [ADMIN-01]
 **Depends on:** Phase 4
 **UI hint:** yes
+**Status:** Complete — 2026-05-11
 **Success Criteria** (what must be TRUE):
 1. Maintainer opens a multi-card control center that emphasizes readiness, blockers, validation health, and next actions.
 2. `Audit Trail` and `Chatbot Trust` are first-class private sections, while `Settings` remains secondary.
@@ -118,10 +123,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 Plans:
 
 **Wave 1**
-- [ ] 05-01: Extend the maintainer monitoring contract and backend aggregates for rich overview, audit, and trust signals
+- [x] 05-01: Extend the maintainer monitoring contract and backend aggregates for rich overview, audit, and trust signals
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 05-02: Rebuild the maintainer shell into a dark control center with first-class Audit Trail and Chatbot Trust sections
+- [x] 05-02: Rebuild the maintainer shell into a dark control center with first-class Audit Trail and Chatbot Trust sections
 
 Cross-cutting constraints:
 - The maintainer console must remain private, SPA-first, and anchor-navigation oriented.
@@ -129,6 +134,7 @@ Cross-cutting constraints:
 - `Settings` stays out of first-class navigation in Phase 5.
 - The provided `Admin-Background.png` and `Admin-Logo.png` assets should be used to reinforce the admin brand.
 - The control center must remain readable on mobile screens.
+- `$gsd-secure-phase 5` was skipped via `$gsd-progress --next --force`; carry this as explicit verification debt if security review is needed later.
 
 ### Phase 6: Maintainer Codebase Modularization
 

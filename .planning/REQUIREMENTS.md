@@ -49,7 +49,7 @@
 
 ### Maintainer UX
 
-- **ADMIN-01**: Private maintainer views keep source status, validation outcomes, audit entries, and error states readable, actionable, and easy to navigate
+- [x] **ADMIN-01**: Private maintainer views keep source status, validation outcomes, audit entries, and error states readable, actionable, and easy to navigate
 
 ### Maintainer Modularization
 
@@ -89,7 +89,7 @@
 | CUTOVER-01 | Future milestone | Deferred |
 | DEPTH-05 | Future milestone | Deferred |
 | CHAT-01 | Future milestone | Deferred |
-| ADMIN-01 | Future milestone | Deferred |
+| ADMIN-01 | Phase 5 | Complete |
 | MOD-01 | Phase 6 | Deferred |
 | MOD-02 | Phase 6 | Deferred |
 | MOD-03 | Phase 6 | Deferred |
@@ -105,4 +105,4 @@
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-11 after codebase modularization v2 proposal ingest*
+*Last updated: 2026-05-11 after Phase 5 forced completion*
