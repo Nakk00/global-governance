@@ -105,7 +105,7 @@ Phases execute in numeric order unless explicitly re-promoted or forced: 1 → 2
 | 3. Maintainer Readiness Hardening | 3/3 | Complete    | 2026-05-09 |
 | 4. Demo Reliability And Verification | 0/3 | Not started | - |
 | 5. Admin UX Polish for Maintainers | 2/2 | Complete | 2026-05-11 |
-| 6. Maintainer Codebase Modularization | 0/5 | Not started | - |
+| 6. Maintainer Codebase Modularization | 4/5 | In progress | - |
 
 ### Phase 5: Admin UX Polish for Maintainers
 
@@ -153,12 +153,18 @@ Cross-cutting constraints:
 Plans:
 
 **Wave 1**
-- [ ] 06-01: Split maintainer shared types, routing, states, mutation helpers, and generic formatters
-- [ ] 06-02: Move source detail, validation, audit trail, and chatbot trust implementation into feature-owned modules
-- [ ] 06-03: Split source inventory page components and metrics helpers
+- [x] 06-01: Split maintainer shared types, routing, states, mutation helpers, and generic formatters
 
-**Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 06-04: Split backend source repository into base, mapper, seed, storage, mutation, memory, and Supabase modules
+**Wave 2**
+- [x] 06-02: Move source detail, validation, audit trail, and chatbot trust implementation into feature-owned modules
+
+**Wave 3**
+- [x] 06-03: Split source inventory page components and metrics helpers
+
+**Wave 4**
+- [x] 06-04: Split backend source repository into base, mapper, seed, storage, mutation, memory, and Supabase modules
+
+**Wave 5**
 - [ ] 06-05: Split overview builders and maintainer API wrappers by feature
 
 Cross-cutting constraints:
