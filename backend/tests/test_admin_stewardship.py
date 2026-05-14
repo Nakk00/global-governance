@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from unittest import mock
+from urllib.error import URLError
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, SimpleTestCase, override_settings
@@ -43,6 +44,8 @@ class AdminStewardshipApiTests(SimpleTestCase):
         self.assertEqual(payload["data"]["chatbotTrust"]["state"], "partial")
         first_source = payload["data"]["sources"][0]
         self.assertIn("sourceId", first_source)
+        self.assertIn("createdAt", first_source)
+        self.assertIn("updatedAt", first_source)
         self.assertIn(
             first_source["lifecycleState"], {"draft", "approved", "active", "disabled", "archived"}
         )
@@ -60,6 +63,8 @@ class AdminStewardshipApiTests(SimpleTestCase):
         data = response.json()["data"]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["sourceId"], "gg-src-un-charter-institutions")
+        self.assertIn("createdAt", data)
+        self.assertIn("updatedAt", data)
         self.assertIn("approvalLineage", data)
         self.assertIn("ingestionProvenance", data)
         self.assertIn("validationHistory", data)
@@ -205,6 +210,27 @@ class AdminStewardshipApiTests(SimpleTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mocked_service.called)
+
+    @override_settings(
+        SUPABASE_URL="https://example.supabase.co",
+        SUPABASE_SERVICE_ROLE_KEY="service-role-key",
+    )
+    def test_sources_dashboard_falls_back_when_store_is_unavailable(self):
+        with (
+            self._authorized(),
+            mock.patch("sources.repositories.get_test_repository", return_value=None),
+            mock.patch(
+                "sources.repositories.supabase.urlopen",
+                side_effect=URLError("timed out"),
+            ),
+        ):
+            response = self.client.get("/api/admin/sources", HTTP_AUTHORIZATION="Bearer token")
+
+        payload = response.json()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(payload["success"])
+        self.assertGreater(payload["data"]["overview"]["sourceCount"], 0)
+        self.assertIn("sources", payload["data"])
 
     def test_dashboard_monitoring_updates_after_ingest_and_audit_events(self):
         with self._authorized():
