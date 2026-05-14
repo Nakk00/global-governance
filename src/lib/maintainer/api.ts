@@ -1,8 +1,3 @@
-import {
-  clearSupabaseSession,
-  type SupabaseSession,
-} from "@/lib/supabase/browser-client"
-
 export type AdminIdentity = {
   userId: string
   email: string
@@ -59,6 +54,8 @@ export type SourceInventoryItem = {
   title: string
   sourceType: string
   lifecycleState: SourceLifecycleState
+  createdAt?: string | null
+  updatedAt?: string | null
   aliases: string[]
   usageScope: string[]
   provenance: string
@@ -291,278 +288,25 @@ export type ValidationRunDetail = ValidationRunSummary & {
   }[]
 }
 
-type ApiEnvelope<T> =
-  | { success: true; data: T; error: null; meta: Record<string, unknown> }
-  | {
-      success: false
-      data: null
-      error: {
-        code: string
-        message: string
-        status: number
-        details?: { fields?: Record<string, string> }
-      }
-      meta: Record<string, unknown>
-    }
-
-export class MaintainerApiError extends Error {
-  readonly code: string
-  readonly status: number
-  readonly fields: Record<string, string>
-
-  constructor(
-    code: string,
-    status: number,
-    message: string,
-    fields: Record<string, string> = {}
-  ) {
-    super(message)
-    this.code = code
-    this.status = status
-    this.fields = fields
-  }
-}
-
-export async function fetchAdminMe(session: SupabaseSession) {
-  return fetchMaintainerJson<AdminIdentity>("/api/admin/me", session)
-}
-
-export async function fetchStewardshipDashboard(session: SupabaseSession) {
-  return fetchMaintainerJson<StewardshipDashboard>(
-    "/api/admin/sources",
-    session
-  )
-}
-
-export async function fetchSourceDetail(
-  sourceId: string,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<SourceDetail>(
-    `/api/admin/sources/${encodeURIComponent(sourceId)}`,
-    session
-  )
-}
-
-export async function fetchSourceChunks(
-  sourceId: string,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<SourceChunksInspection>(
-    `/api/admin/sources/${encodeURIComponent(sourceId)}/chunks`,
-    session
-  )
-}
-
-export async function fetchSourceCitations(
-  sourceId: string,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<SourceCitationsInspection>(
-    `/api/admin/sources/${encodeURIComponent(sourceId)}/citations`,
-    session
-  )
-}
-
-export async function fetchChunkDetail(
-  chunkId: string,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<ChunkDetail>(
-    `/api/admin/chunks/${encodeURIComponent(chunkId)}`,
-    session
-  )
-}
-
-export async function fetchCitationDetail(
-  citationId: string,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<CitationDetail>(
-    `/api/admin/citations/${encodeURIComponent(citationId)}`,
-    session
-  )
-}
-
-export async function fetchValidationSets(session: SupabaseSession) {
-  return fetchMaintainerJson<ValidationSetList>(
-    "/api/admin/validation-sets",
-    session
-  )
-}
-
-export async function fetchValidationRuns(session: SupabaseSession) {
-  return fetchMaintainerJson<ValidationRunList>(
-    "/api/admin/validation-runs",
-    session
-  )
-}
-
-export async function fetchValidationRunDetail(
-  runId: string,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<ValidationRunDetail>(
-    `/api/admin/validation-runs/${encodeURIComponent(runId)}`,
-    session
-  )
-}
-
-export async function launchValidationRun(
-  validationSetId: string,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<ValidationRunDetail>(
-    "/api/admin/validation-runs",
-    session,
-    {
-      method: "POST",
-      body: JSON.stringify({ validationSetId }),
-      headers: { "Content-Type": "application/json" },
-    }
-  )
-}
-
-export async function uploadSource(
-  payload: SourceUploadPayload,
-  session: SupabaseSession
-) {
-  const formData = new FormData()
-  formData.set("file", payload.file)
-  formData.set("sourceId", payload.sourceId)
-  formData.set("title", payload.title)
-  formData.set("sourceType", payload.sourceType)
-  formData.set("provenance", payload.provenance)
-  formData.set("summary", payload.summary)
-  payload.usageScope.forEach((scope) => formData.append("usageScope", scope))
-
-  return fetchMaintainerJson<SourceMutationResult>(
-    "/api/admin/sources/upload",
-    session,
-    {
-      method: "POST",
-      body: formData,
-    }
-  )
-}
-
-export async function updateSourceMetadata(
-  sourceId: string,
-  payload: SourceMetadataPayload,
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<SourceMutationResult>(
-    `/api/admin/sources/${encodeURIComponent(sourceId)}`,
-    session,
-    {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" },
-    }
-  )
-}
-
-export async function mutateSourceLifecycle(
-  sourceId: string,
-  action: "approve" | "activate" | "disable" | "archive",
-  session: SupabaseSession
-) {
-  return fetchMaintainerJson<SourceMutationResult>(
-    `/api/admin/sources/${encodeURIComponent(sourceId)}/${action}`,
-    session,
-    { method: "POST" }
-  )
-}
-
-export async function ingestSource(sourceId: string, session: SupabaseSession) {
-  return fetchMaintainerJson<SourceMutationResult>(
-    `/api/admin/sources/${encodeURIComponent(sourceId)}/ingest`,
-    session,
-    { method: "POST" }
-  )
-}
-
-async function fetchMaintainerJson<T>(
-  path: string,
-  session: SupabaseSession,
-  init: RequestInit = {}
-): Promise<T> {
-  const response = await fetch(path, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${session.accessToken}`,
-      Accept: "application/json",
-      ...init.headers,
-    },
-  })
-  const payload = await parseMaintainerEnvelope<T>(response)
-
-  if (!payload.success) {
-    if (response.status === 401 || response.status === 403) {
-      clearSupabaseSession()
-    }
-    throw new MaintainerApiError(
-      payload.error.code,
-      payload.error.status,
-      payload.error.message,
-      payload.error.details?.fields
-    )
-  }
-
-  return payload.data
-}
-
-async function parseMaintainerEnvelope<T>(
-  response: Response
-): Promise<ApiEnvelope<T>> {
-  try {
-    const payload = (await response.json()) as unknown
-    if (!isApiEnvelope(payload)) {
-      throw new Error("malformed_envelope")
-    }
-    return payload as ApiEnvelope<T>
-  } catch {
-    return {
-      success: false,
-      data: null,
-      error: {
-        code: "admin_response_malformed",
-        message: "The maintainer request returned an unreadable response.",
-        status: response.status || 502,
-      },
-      meta: {},
-    }
-  }
-}
-
-function isApiEnvelope<T>(value: unknown): value is ApiEnvelope<T> {
-  if (!value || typeof value !== "object") {
-    return false
-  }
-
-  const record = value as Record<string, unknown>
-
-  if (!("success" in record) || typeof record.success !== "boolean") {
-    return false
-  }
-
-  if (!("meta" in record) || !record.meta || typeof record.meta !== "object") {
-    return false
-  }
-
-  if (record.success) {
-    return "data" in record && "error" in record
-  }
-
-  const error = record.error
-
-  return (
-    "data" in record &&
-    "error" in record &&
-    error !== null &&
-    typeof error === "object" &&
-    "code" in error &&
-    "message" in error &&
-    "status" in error
-  )
-}
+export { MaintainerApiError } from "./envelope"
+export { fetchAdminMe } from "./auth-api"
+export {
+  fetchChunkDetail,
+  fetchCitationDetail,
+  fetchSourceCitations,
+  fetchSourceChunks,
+  fetchSourceDetail,
+  fetchStewardshipDashboard,
+} from "./source-api"
+export {
+  fetchValidationRunDetail,
+  fetchValidationRuns,
+  fetchValidationSets,
+  launchValidationRun,
+} from "./validation-api"
+export {
+  ingestSource,
+  mutateSourceLifecycle,
+  updateSourceMetadata,
+  uploadSource,
+} from "./mutation-api"

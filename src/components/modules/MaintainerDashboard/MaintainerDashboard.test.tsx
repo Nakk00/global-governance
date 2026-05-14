@@ -3,7 +3,25 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
-  fetchAdminMe,
+  MaintainerApiError,
+  type SourceDetail,
+  type StewardshipDashboard,
+  type ValidationRunDetail,
+  type ValidationRunList,
+  type ValidationSetList,
+} from "@/lib/maintainer/api"
+import { fetchAdminMe } from "@/lib/maintainer/auth-api"
+import {
+  fetchSourceDetail,
+  fetchStewardshipDashboard,
+} from "@/lib/maintainer/source-api"
+import {
+  ingestSource,
+  mutateSourceLifecycle,
+  updateSourceMetadata,
+  uploadSource,
+} from "@/lib/maintainer/mutation-api"
+import {
   fetchChunkDetail,
   fetchCitationDetail,
   fetchValidationRunDetail,
@@ -11,19 +29,7 @@ import {
   fetchValidationSets,
   fetchSourceChunks,
   fetchSourceCitations,
-  fetchSourceDetail,
-  fetchStewardshipDashboard,
-  ingestSource,
   launchValidationRun,
-  MaintainerApiError,
-  mutateSourceLifecycle,
-  updateSourceMetadata,
-  uploadSource,
-  type SourceDetail,
-  type StewardshipDashboard,
-  type ValidationRunDetail,
-  type ValidationRunList,
-  type ValidationSetList,
 } from "@/lib/maintainer/api"
 import {
   clearSupabaseSession,
@@ -34,6 +40,43 @@ import {
 
 import { MaintainerDashboard } from "./MaintainerDashboard"
 
+vi.mock("@/lib/maintainer/auth-api", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/lib/maintainer/auth-api")
+  >("@/lib/maintainer/auth-api")
+
+  return {
+    ...actual,
+    fetchAdminMe: vi.fn(),
+  }
+})
+
+vi.mock("@/lib/maintainer/source-api", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/lib/maintainer/source-api")
+  >("@/lib/maintainer/source-api")
+
+  return {
+    ...actual,
+    fetchSourceDetail: vi.fn(),
+    fetchStewardshipDashboard: vi.fn(),
+  }
+})
+
+vi.mock("@/lib/maintainer/mutation-api", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/lib/maintainer/mutation-api")
+  >("@/lib/maintainer/mutation-api")
+
+  return {
+    ...actual,
+    ingestSource: vi.fn(),
+    mutateSourceLifecycle: vi.fn(),
+    updateSourceMetadata: vi.fn(),
+    uploadSource: vi.fn(),
+  }
+})
+
 vi.mock("@/lib/maintainer/api", async () => {
   const actual = await vi.importActual<typeof import("@/lib/maintainer/api")>(
     "@/lib/maintainer/api"
@@ -41,7 +84,6 @@ vi.mock("@/lib/maintainer/api", async () => {
 
   return {
     ...actual,
-    fetchAdminMe: vi.fn(),
     fetchChunkDetail: vi.fn(),
     fetchCitationDetail: vi.fn(),
     fetchValidationRunDetail: vi.fn(),
@@ -49,13 +91,7 @@ vi.mock("@/lib/maintainer/api", async () => {
     fetchValidationSets: vi.fn(),
     fetchSourceChunks: vi.fn(),
     fetchSourceCitations: vi.fn(),
-    fetchSourceDetail: vi.fn(),
-    fetchStewardshipDashboard: vi.fn(),
-    ingestSource: vi.fn(),
     launchValidationRun: vi.fn(),
-    mutateSourceLifecycle: vi.fn(),
-    updateSourceMetadata: vi.fn(),
-    uploadSource: vi.fn(),
   }
 })
 
@@ -67,6 +103,12 @@ vi.mock("@/lib/supabase/browser-client", () => ({
 }))
 
 const mockedFetchAdminMe = vi.mocked(fetchAdminMe)
+const mockedFetchSourceDetail = vi.mocked(fetchSourceDetail)
+const mockedFetchStewardshipDashboard = vi.mocked(fetchStewardshipDashboard)
+const mockedIngestSource = vi.mocked(ingestSource)
+const mockedMutateSourceLifecycle = vi.mocked(mutateSourceLifecycle)
+const mockedUpdateSourceMetadata = vi.mocked(updateSourceMetadata)
+const mockedUploadSource = vi.mocked(uploadSource)
 const mockedFetchChunkDetail = vi.mocked(fetchChunkDetail)
 const mockedFetchCitationDetail = vi.mocked(fetchCitationDetail)
 const mockedFetchValidationRunDetail = vi.mocked(fetchValidationRunDetail)
@@ -74,13 +116,7 @@ const mockedFetchValidationRuns = vi.mocked(fetchValidationRuns)
 const mockedFetchValidationSets = vi.mocked(fetchValidationSets)
 const mockedFetchSourceChunks = vi.mocked(fetchSourceChunks)
 const mockedFetchSourceCitations = vi.mocked(fetchSourceCitations)
-const mockedFetchSourceDetail = vi.mocked(fetchSourceDetail)
-const mockedFetchStewardshipDashboard = vi.mocked(fetchStewardshipDashboard)
-const mockedIngestSource = vi.mocked(ingestSource)
 const mockedLaunchValidationRun = vi.mocked(launchValidationRun)
-const mockedMutateSourceLifecycle = vi.mocked(mutateSourceLifecycle)
-const mockedUpdateSourceMetadata = vi.mocked(updateSourceMetadata)
-const mockedUploadSource = vi.mocked(uploadSource)
 const mockedClearSupabaseSession = vi.mocked(clearSupabaseSession)
 const mockedGetSupabaseSession = vi.mocked(getSupabaseSession)
 const mockedIsSupabaseSessionExpired = vi.mocked(isSupabaseSessionExpired)
@@ -559,31 +595,33 @@ describe("MaintainerDashboard", () => {
     await user.click(screen.getByRole("button", { name: "Sign In" }))
 
     expect(
-      await screen.findByRole("heading", { name: "Maintainer control center" })
+      await screen.findByRole("heading", { name: "Readiness Overview" })
     ).toBeVisible()
     expect(mockedFetchAdminMe).toHaveBeenCalledWith(session)
   })
 
-  it("keeps the overview focused on readiness instead of source operations", async () => {
+  it("renders the target admin portal readiness dashboard", async () => {
     renderMaintainer()
 
     expect(
-      await screen.findByRole("heading", { name: "Maintainer overview" })
+      await screen.findByRole("heading", { name: "Readiness Overview" })
     ).toBeVisible()
-    expect(screen.getByText("Control center overview")).toBeVisible()
-    expect(screen.getByText("Blockers")).toBeVisible()
-    expect(screen.getByText("Validation health")).toBeVisible()
-    expect(screen.getByText("Next actions")).toBeVisible()
-    expect(screen.getByRole("heading", { name: "Sources" })).toBeVisible()
-    expect(screen.getByRole("heading", { name: "Validation" })).toBeVisible()
-    expect(
-      screen.getByRole("heading", { name: "Audit/Operations" })
-    ).toBeVisible()
+    expect(screen.getByText("System Readiness")).toBeVisible()
+    expect(screen.getByText("Open Blockers")).toBeVisible()
+    expect(screen.getAllByText("Validation Health").length).toBeGreaterThan(0)
+    expect(screen.getByText("Chat Reliability")).toBeVisible()
+    expect(screen.getByText("Current Blockers / Warnings")).toBeVisible()
+    expect(screen.getByText("Recommended Next Actions")).toBeVisible()
+    expect(screen.getByText("Demo / Release Checklist")).toBeVisible()
+    expect(screen.getByText("Source Management")).toBeVisible()
+    expect(screen.getByText("Validation Center")).toBeVisible()
+    expect(screen.getAllByText("Audit Trail").length).toBeGreaterThan(0)
+    expect(screen.getByText("Chatbot Trust Monitoring")).toBeVisible()
     expect(
       screen.queryByRole("heading", { name: "Protected source upload" })
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole("heading", { name: "Source stewardship inventory" })
+      screen.queryByRole("heading", { name: "Source Stewardship" })
     ).not.toBeInTheDocument()
   })
 
@@ -607,52 +645,57 @@ describe("MaintainerDashboard", () => {
     expect(screen.getByText("Validation runs")).toBeVisible()
   })
 
-  it("routes from readiness workflow cards into filtered drill-down queues", async () => {
+  it("routes from readiness action panels into drill-down queues", async () => {
     const user = userEvent.setup()
 
     renderMaintainer()
 
-    const validationCard = (
-      await screen.findByRole("heading", {
-        name: "Validation",
-      })
-    ).closest("article")
-    expect(validationCard).not.toBeNull()
+    const nextActionsPanel = (
+      await screen.findByText("Recommended Next Actions")
+    ).closest("section")
+    expect(nextActionsPanel).not.toBeNull()
 
     await user.click(
-      within(validationCard as HTMLElement).getByRole("button", {
-        name: "Review follow-up queue",
+      within(nextActionsPanel as HTMLElement).getByRole("button", {
+        name: /Close partial evidence/,
       })
     )
 
-    expect(await screen.findByText("Validation follow-up queue")).toBeVisible()
+    expect(
+      await screen.findByRole("heading", {
+        name: "Source Stewardship",
+      })
+    ).toBeVisible()
     expect(
       screen.getAllByText("Charter of the United Nations").length
     ).toBeGreaterThan(0)
-    expect(
-      screen.queryByText("South China Sea Arbitration Award")
-    ).not.toBeInTheDocument()
   })
 
-  it("opens inventory, upload, and operations as separate maintainer sections", async () => {
+  it("opens source stewardship, upload revision, and operations as separate maintainer sections", async () => {
     const user = userEvent.setup()
 
     renderMaintainer("/maintainer/sources")
 
     expect(
       await screen.findByRole("heading", {
-        name: "Source stewardship inventory",
+        name: "Source Stewardship",
       })
     ).toBeVisible()
     expect(screen.queryByLabelText("Source ID")).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole("button", { name: "Upload source" }))
+    await screen.findByRole("button", { name: "Upload Revision" })
+    await user.click(screen.getByRole("button", { name: "Upload Revision" }))
     expect(
       await screen.findByRole("heading", { name: "Upload a source draft" })
     ).toBeVisible()
-    expect(screen.getByLabelText("Source ID")).toBeVisible()
+    expect(screen.getByLabelText("Source ID")).toHaveValue(
+      "gg-src-un-charter-institutions-revision"
+    )
+    expect(screen.getByLabelText("Title")).toHaveValue(
+      "Charter of the United Nations revision"
+    )
 
-    await user.click(screen.getByRole("button", { name: "Operations" }))
+    await user.click(screen.getByRole("button", { name: "Settings" }))
     expect(
       await screen.findByRole("heading", {
         name: "Ingestion and audit records",
@@ -660,6 +703,22 @@ describe("MaintainerDashboard", () => {
     ).toBeVisible()
     expect(screen.getByText("Ingestion records")).toBeVisible()
     expect(screen.getAllByText("No history is available.").length).toBe(3)
+  })
+
+  it("shows the sources-only Upload Source CTA in the shell", async () => {
+    const user = userEvent.setup()
+
+    renderMaintainer("/maintainer/sources")
+
+    expect(
+      await screen.findByRole("button", { name: "Upload Source" })
+    ).toBeVisible()
+
+    await user.click(screen.getByRole("button", { name: "Upload Source" }))
+
+    expect(
+      await screen.findByRole("heading", { name: "Upload a source draft" })
+    ).toBeVisible()
   })
 
   it("keeps upload available when the source inventory is empty", async () => {
@@ -710,7 +769,7 @@ describe("MaintainerDashboard", () => {
     renderMaintainer("/maintainer/sources/%E0%A4%A")
 
     expect(
-      await screen.findByRole("heading", { name: "Maintainer overview" })
+      await screen.findByRole("heading", { name: "Readiness Overview" })
     ).toBeVisible()
     expect(mockedFetchSourceDetail).not.toHaveBeenCalled()
   })
@@ -720,18 +779,12 @@ describe("MaintainerDashboard", () => {
 
     renderMaintainer()
 
-    const sourcesCard = (
-      await screen.findByRole("heading", {
-        name: "Sources",
-      })
-    ).closest("article")
-    expect(sourcesCard).not.toBeNull()
+    const sourceFinding = (
+      await screen.findByText("Weak-support answers detected")
+    ).closest("button")
+    expect(sourceFinding).not.toBeNull()
 
-    await user.click(
-      within(sourcesCard as HTMLElement).getByRole("button", {
-        name: "Open source detail",
-      })
-    )
+    await user.click(sourceFinding as HTMLElement)
 
     await waitFor(() =>
       expect(
@@ -850,13 +903,12 @@ describe("MaintainerDashboard", () => {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("button", { name: "Back to sources" }))
-    await screen.findByRole("heading", { name: "Source stewardship" })
+    await screen.findByRole("heading", { name: "Source Stewardship" })
     await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
 
     await screen.findAllByRole("heading", {
       name: "South China Sea Arbitration Award",
     })
-    expect(await screen.findByText("Second source detail.")).toBeVisible()
 
     resolveFirstDetail({
       ...detailFrom(dashboard.sources[0]),
@@ -878,7 +930,11 @@ describe("MaintainerDashboard", () => {
 
     renderMaintainer()
 
-    const signOut = await screen.findByRole("button", { name: "Sign out" })
+    const signOut = (
+      await screen.findAllByRole("button", {
+        name: "Sign out",
+      })
+    )[0]
     await user.click(signOut)
 
     expect(mockedClearSupabaseSession).toHaveBeenCalled()
@@ -894,6 +950,9 @@ describe("MaintainerDashboard", () => {
     renderMaintainer("/maintainer/sources/new")
 
     await screen.findByRole("heading", { name: "Protected source upload" })
+    await user.clear(screen.getByLabelText("Source ID"))
+    await user.clear(screen.getByLabelText("Title"))
+    await user.clear(screen.getByLabelText("Summary"))
     await user.type(
       screen.getByLabelText("Source ID"),
       "gg-src-new-policy-note"
@@ -915,7 +974,6 @@ describe("MaintainerDashboard", () => {
     expect(
       await screen.findByText("Source uploaded as draft and inactive.")
     ).toBeVisible()
-    expect(screen.getAllByText("New Policy Note").length).toBeGreaterThan(0)
   })
 
   it("keeps the mutation-updated dashboard when an older dashboard load resolves later", async () => {
@@ -931,6 +989,9 @@ describe("MaintainerDashboard", () => {
     renderMaintainer("/maintainer/sources/new")
 
     await screen.findByRole("heading", { name: "Upload a source draft" })
+    await user.clear(screen.getByLabelText("Source ID"))
+    await user.clear(screen.getByLabelText("Title"))
+    await user.clear(screen.getByLabelText("Summary"))
     await user.type(
       screen.getByLabelText("Source ID"),
       "gg-src-new-policy-note"
@@ -960,10 +1021,12 @@ describe("MaintainerDashboard", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "Source stewardship",
+        name: "Source Stewardship",
       })
     ).toBeVisible()
-    expect(screen.getAllByText("New Policy Note").length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText("gg-src-new-policy-note").length
+    ).toBeGreaterThan(0)
   })
 
   it("surfaces field recovery details for failed mutations", async () => {
@@ -1046,13 +1109,17 @@ describe("MaintainerDashboard", () => {
     })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
 
-    expect(await screen.findByText("doc-un-charter-v2")).toBeVisible()
+    expect(
+      (await screen.findAllByText("doc-un-charter-v2")).length
+    ).toBeGreaterThan(0)
     expect(
       screen.getAllByText(
         "The UN Charter establishes the organs and obligations."
       ).length
     ).toBeGreaterThan(0)
-    await user.click(screen.getAllByRole("button", { name: "Inspect" }).at(-1)!)
+    await user.click(
+      screen.getAllByRole("button", { name: "Inspect chunk" }).at(-1)!
+    )
 
     expect(
       await screen.findByRole("dialog", { name: "Retrieval evidence detail" })
@@ -1082,7 +1149,9 @@ describe("MaintainerDashboard", () => {
     expect(
       screen.getAllByText("Charter of the United Nations").length
     ).toBeGreaterThan(0)
-    await user.click(screen.getAllByRole("button", { name: "Inspect" }).at(-1)!)
+    await user.click(
+      screen.getAllByRole("button", { name: "Inspect citation" }).at(-1)!
+    )
 
     expect(
       await screen.findByRole("button", { name: "Copy citation label" })
@@ -1119,7 +1188,7 @@ describe("MaintainerDashboard", () => {
     })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
     await user.click(screen.getByRole("button", { name: "Back to sources" }))
-    await screen.findByRole("heading", { name: "Source stewardship" })
+    await screen.findByRole("heading", { name: "Source Stewardship" })
     await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
     await screen.findAllByRole("heading", {
       name: "South China Sea Arbitration Award",
@@ -1168,9 +1237,11 @@ describe("MaintainerDashboard", () => {
       name: "Charter of the United Nations",
     })
     await user.click(screen.getByRole("tab", { name: "Chunks" }))
-    await user.click(screen.getAllByRole("button", { name: "Inspect" }).at(-1)!)
+    await user.click(
+      screen.getAllByRole("button", { name: "Inspect chunk" }).at(-1)!
+    )
     await user.click(screen.getByRole("button", { name: "Back to sources" }))
-    await screen.findByRole("heading", { name: "Source stewardship" })
+    await screen.findByRole("heading", { name: "Source Stewardship" })
     await user.click(screen.getAllByRole("button", { name: "Inspect" })[1])
 
     resolveChunkDetail({

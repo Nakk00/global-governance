@@ -2,10 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import {
   fetchStewardshipDashboard,
-  MaintainerApiError,
   type StewardshipDashboard,
-} from "./api"
-import { clearSupabaseSession, type SupabaseSession } from "@/lib/supabase/browser-client"
+} from "./source-api"
+import { fetchStewardshipDashboard as fetchStewardshipDashboardCompat } from "./api"
+import { MaintainerApiError } from "./envelope"
+import {
+  clearSupabaseSession,
+  type SupabaseSession,
+} from "@/lib/supabase/browser-client"
 
 vi.mock("@/lib/supabase/browser-client", () => ({
   clearSupabaseSession: vi.fn(),
@@ -36,7 +40,8 @@ const dashboard = {
       label: "Blockers",
       value: "0",
       tone: "good",
-      detail: "Draft, partial, or failed validation items needing maintainer attention.",
+      detail:
+        "Draft, partial, or failed validation items needing maintainer attention.",
     },
     validationHealth: {
       label: "Validation health",
@@ -74,11 +79,28 @@ const dashboard = {
         label: "Grounded sources",
         value: "1",
         tone: "good",
-        detail: "Active chat-scoped sources with successful ingestion evidence.",
+        detail:
+          "Active chat-scoped sources with successful ingestion evidence.",
       },
     ],
   },
-  sources: [],
+  sources: [
+    {
+      sourceId: "gg-src-un-charter-institutions",
+      title: "Charter of the United Nations",
+      sourceType: "primary",
+      lifecycleState: "active",
+      createdAt: "2026-05-10T00:00:00Z",
+      updatedAt: "2026-05-11T00:00:00Z",
+      aliases: ["un-charter"],
+      usageScope: ["chat", "ingestion"],
+      provenance: "Foundational UN treaty",
+      ingestionReadiness: "ready",
+      latestValidationOutcome: "succeeded",
+      latestIngestJob: null,
+      partialData: [],
+    },
+  ],
   ingestionRuns: [],
   validationRuns: [],
   auditEvents: [],
@@ -106,6 +128,12 @@ describe("maintainer API", () => {
       monitoring: { blockers: { label: "Blockers" } },
       auditTrail: { totalEvents: 1 },
       chatbotTrust: { groundedSourceCount: 1 },
+      sources: [
+        {
+          createdAt: "2026-05-10T00:00:00Z",
+          updatedAt: "2026-05-11T00:00:00Z",
+        },
+      ],
     })
   })
 
@@ -130,5 +158,27 @@ describe("maintainer API", () => {
       MaintainerApiError
     )
     expect(clearSupabaseSession).toHaveBeenCalled()
+  })
+
+  it("keeps the compatibility barrel wired to the source API module", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: dashboard,
+          error: null,
+          meta: {},
+        }),
+        { status: 200 }
+      )
+    )
+
+    await expect(
+      fetchStewardshipDashboardCompat(session)
+    ).resolves.toMatchObject({
+      monitoring: { blockers: { label: "Blockers" } },
+      auditTrail: { totalEvents: 1 },
+      chatbotTrust: { groundedSourceCount: 1 },
+    })
   })
 })

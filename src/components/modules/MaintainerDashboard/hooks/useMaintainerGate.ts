@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { fetchAdminMe } from "@/lib/maintainer/api"
+import { fetchAdminMe } from "@/lib/maintainer/auth-api"
 import {
   clearSupabaseSession,
   getSupabaseSession,
   isSupabaseSessionExpired,
 } from "@/lib/supabase/browser-client"
 
-import {
-  mapGateError,
-  type GateState,
-} from "../shared/maintainerDashboardShared"
+import { mapGateError } from "../shared/mutation-state"
+import type { GateState } from "../shared/types"
 
 export function useMaintainerGate() {
   const [gate, setGate] = useState<GateState>({ state: "loading" })

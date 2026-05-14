@@ -3,26 +3,30 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import {
   fetchSourceDetail,
   fetchStewardshipDashboard,
+} from "@/lib/maintainer/source-api"
+import {
   ingestSource,
-  MaintainerApiError,
   mutateSourceLifecycle,
   updateSourceMetadata,
   uploadSource,
   type SourceMetadataPayload,
   type SourceMutationResult,
   type SourceUploadPayload,
-} from "@/lib/maintainer/api"
+} from "@/lib/maintainer/mutation-api"
+import { MaintainerApiError } from "@/lib/maintainer/envelope"
 
 import {
   handleMaintainerReadAuthFailure,
   mutationErrorState,
-  type DashboardState,
-  type DetailState,
-  type GateState,
-  type MaintainerRoute,
-  type MutationMode,
-  type MutationState,
-} from "../shared/maintainerDashboardShared"
+} from "../shared/mutation-state"
+import type {
+  DashboardState,
+  DetailState,
+  GateState,
+  MaintainerRoute,
+  MutationMode,
+  MutationState,
+} from "../shared/types"
 
 type UseMaintainerDashboardDataArgs = {
   gate: GateState
@@ -42,11 +46,20 @@ export function useMaintainerDashboardData({
   })
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null)
   const [detailState, setDetailState] = useState<DetailState>({ state: "idle" })
+  const [selectedSourcePreviewData, setSelectedSourcePreviewData] =
+    useState<DetailState>({ state: "idle" })
   const [mutationState, setMutationState] = useState<MutationState>({
     state: "idle",
   })
   const dashboardRequestKeyRef = useRef(0)
   const detailRequestKeyRef = useRef(0)
+  const previewRequestKeyRef = useRef(0)
+  const selectedSourceIdRef = useRef<string | null>(null)
+  const routeSectionRef = useRef(route.section)
+
+  useEffect(() => {
+    routeSectionRef.current = route.section
+  }, [route.section])
 
   const loadSourceDetail = useCallback(
     async (sourceId: string) => {
@@ -86,6 +99,53 @@ export function useMaintainerDashboardData({
     [gate, setGate]
   )
 
+  const loadSourcePreview = useCallback(
+    async (sourceId: string) => {
+      if (gate.state !== "ready") {
+        return
+      }
+
+      const requestKey = ++previewRequestKeyRef.current
+      setSelectedSourcePreviewData({ state: "loading" })
+      try {
+        const source = await fetchSourceDetail(sourceId, gate.session)
+        if (requestKey !== previewRequestKeyRef.current) {
+          return
+        }
+        setSelectedSourcePreviewData({ state: "ready", source })
+      } catch (error) {
+        if (requestKey !== previewRequestKeyRef.current) {
+          return
+        }
+        if (handleMaintainerReadAuthFailure(error, setGate)) {
+          return
+        }
+        if (error instanceof MaintainerApiError && error.status === 404) {
+          setSelectedSourcePreviewData({
+            state: "empty",
+            message: error.message,
+          })
+          return
+        }
+        setSelectedSourcePreviewData({
+          state: "outage",
+          message:
+            error instanceof Error
+              ? error.message
+              : "The source preview could not load.",
+        })
+      }
+    },
+    [gate, setGate]
+  )
+
+  const retrySelectedSourcePreview = useCallback(() => {
+    if (gate.state !== "ready" || !selectedSourceId) {
+      return
+    }
+    void loadSourcePreview(selectedSourceId)
+  }, [gate, loadSourcePreview, selectedSourceId])
+
   const loadDashboard = useCallback(async () => {
     if (gate.state !== "ready") {
       return
@@ -103,12 +163,19 @@ export function useMaintainerDashboardData({
           ? { state: "ready", dashboard }
           : { state: "empty" }
       )
-      setSelectedSourceId((currentSourceId) =>
+      const currentSourceId = selectedSourceIdRef.current
+      const nextSourceId =
         currentSourceId &&
         dashboard.sources.some((source) => source.sourceId === currentSourceId)
           ? currentSourceId
           : (dashboard.sources[0]?.sourceId ?? null)
-      )
+      setSelectedSourceId(nextSourceId)
+      selectedSourceIdRef.current = nextSourceId
+      if (routeSectionRef.current === "sources" && nextSourceId) {
+        void loadSourcePreview(nextSourceId)
+      } else {
+        previewRequestKeyRef.current += 1
+      }
     } catch (error) {
       if (requestKey !== dashboardRequestKeyRef.current) {
         return
@@ -124,7 +191,7 @@ export function useMaintainerDashboardData({
             : "The stewardship dashboard could not load.",
       })
     }
-  }, [gate, setGate])
+  }, [gate, loadSourcePreview, setGate])
 
   useEffect(() => {
     // Dashboard data is pulled only after the authoritative admin gate resolves.
@@ -145,6 +212,23 @@ export function useMaintainerDashboardData({
     detailRequestKeyRef.current += 1
     setDetailState({ state: "idle" })
   }, [gate, loadSourceDetail, route])
+
+  const selectSource = useCallback(
+    (sourceId: string | null) => {
+      selectedSourceIdRef.current = sourceId
+      setSelectedSourceId(sourceId)
+      if (
+        gate.state !== "ready" ||
+        routeSectionRef.current !== "sources" ||
+        !sourceId
+      ) {
+        previewRequestKeyRef.current += 1
+        return
+      }
+      void loadSourcePreview(sourceId)
+    },
+    [gate.state, loadSourcePreview]
+  )
 
   const applyMutationResult = useCallback(
     (result: SourceMutationResult, message: string) => {
@@ -248,18 +332,27 @@ export function useMaintainerDashboardData({
   const resetData = useCallback(() => {
     dashboardRequestKeyRef.current += 1
     detailRequestKeyRef.current += 1
+    previewRequestKeyRef.current += 1
     setDashboardState({ state: "loading" })
     setSelectedSourceId(null)
+    selectedSourceIdRef.current = null
     setDetailState({ state: "idle" })
+    setSelectedSourcePreviewData({ state: "idle" })
     setMutationState({ state: "idle" })
   }, [])
+
+  const selectedSourcePreviewState =
+    route.section === "sources" && selectedSourceId
+      ? selectedSourcePreviewData
+      : ({ state: "idle" } as const)
 
   return {
     dashboardState,
     detailState,
+    selectedSourcePreviewState,
     mutationState,
     selectedSourceId,
-    setSelectedSourceId,
+    selectSource,
     retryDashboard: loadDashboard,
     retrySourceDetail: loadSourceDetail,
     uploadDraft,
@@ -267,5 +360,6 @@ export function useMaintainerDashboardData({
     runLifecycleAction,
     queueIngest,
     resetData,
+    retrySelectedSourcePreview,
   }
 }
