@@ -63,15 +63,17 @@ test("@smoke maintainer readiness overview drills into source detail first", asy
 
   await page.goto("/maintainer")
   await expect(
-    page.getByRole("heading", { name: "Maintainer overview" })
+    page.getByRole("region", { name: "Readiness Overview" })
   ).toBeVisible()
-  await expect(page.getByRole("heading", { name: "Sources" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Source Management" })).toBeVisible()
 
-  await page.getByRole("button", { name: "Open source detail" }).first().click()
+  await page.getByRole("button", { name: "View full details" }).click()
 
   await expect(page.locator("#source-detail-page-heading")).toHaveText(
     "Charter of the United Nations"
   )
   await expect(page.getByText("Current readiness blocker")).toBeVisible()
-  await expect(page.getByText("Inline validation evidence")).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: "Open validation workbench" })
+  ).toBeVisible()
 })

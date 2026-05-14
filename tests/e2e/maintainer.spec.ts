@@ -27,7 +27,8 @@ const dashboard = {
       label: "Blockers",
       value: "1",
       tone: "critical",
-      detail: "Draft, partial, or failed validation items needing maintainer attention.",
+      detail:
+        "Draft, partial, or failed validation items needing maintainer attention.",
     },
     validationHealth: {
       label: "Validation health",
@@ -72,7 +73,8 @@ const dashboard = {
         label: "Grounded sources",
         value: "1",
         tone: "good",
-        detail: "Active chat-scoped sources with successful ingestion evidence.",
+        detail:
+          "Active chat-scoped sources with successful ingestion evidence.",
       },
     ],
   },
@@ -573,20 +575,21 @@ test("@smoke maintainer direct load resolves the private dashboard without publi
 
   await page.goto("/maintainer")
   await expect(
-    page.getByRole("heading", { name: "Maintainer control center" })
+    page.getByRole("region", { name: "Readiness Overview" })
   ).toBeVisible()
   await expect(
-    page.getByRole("heading", { name: "Maintainer overview" })
+    page.getByRole("heading", { name: "Source Management" })
   ).toBeVisible()
   await expect(
-    page.getByText("admin@example.test", { exact: true })
+    page.getByText(
+      "Private maintainer console for project readiness and trust monitoring."
+    )
   ).toBeVisible()
-  await expect(page.getByText("Control center overview")).toBeVisible()
   await expect(
     page.getByRole("heading", { name: "Protected source upload" })
   ).toHaveCount(0)
   await expect(
-    page.getByRole("heading", { name: "Charter of the United Nations" })
+    page.locator("#source-detail-page-heading")
   ).toHaveCount(0)
   await expect(page.getByRole("navigation", { name: "Primary" })).toHaveCount(0)
 })
@@ -632,7 +635,7 @@ test("@smoke maintainer retrieval inspection opens chunks and citations without 
 
   await page.goto("/maintainer/sources/gg-src-un-charter-institutions")
   await page.getByRole("tab", { name: "Chunks" }).click()
-  await expect(page.getByText("doc-un-charter-v2")).toBeVisible()
+  await expect(page.getByText("doc-un-charter-v2").first()).toBeVisible()
   await expect(
     page
       .getByText("The UN Charter establishes the organs and obligations.")

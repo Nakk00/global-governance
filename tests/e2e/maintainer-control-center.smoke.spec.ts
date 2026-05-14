@@ -49,21 +49,25 @@ test("@smoke maintainer control center opens audit and trust sections", async ({
   await page.goto("/maintainer")
 
   await expect(
-    page.getByRole("heading", { name: "Maintainer overview" })
+    page.getByRole("region", { name: "Readiness Overview" })
   ).toBeVisible()
-  await expect(page.getByText("Control center overview")).toBeVisible()
   await expect(
-    page.getByRole("img", { name: "Global Governance admin" })
+    page.getByText(
+      "Private maintainer console for project readiness and trust monitoring."
+    )
+  ).toBeVisible()
+  await expect(
+    page.getByRole("img", { name: "Global Governance" })
   ).toBeVisible()
 
-  await page.getByRole("button", { name: "Audit Trail" }).click()
+  await page.getByRole("button", { name: "Audit Trail", exact: true }).click()
   await expect(page).toHaveURL(/\/maintainer\/audit-trail$/)
   await expect(page.getByRole("heading", { name: "Audit Trail" })).toBeVisible()
   await expect(
     page.getByText("Lifecycle action recorded for stewarded source.")
   ).toBeVisible()
 
-  await page.getByRole("button", { name: "Chatbot Trust" }).click()
+  await page.getByRole("button", { name: "Chatbot Trust", exact: true }).click()
   await expect(page).toHaveURL(/\/maintainer\/chatbot-trust$/)
   await expect(
     page.getByRole("heading", { name: "Chatbot Trust" })
