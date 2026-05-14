@@ -56,8 +56,8 @@
 - **MOD-01**: Maintainer dashboard shared infrastructure is separated from feature-owned page implementations so `maintainerDashboardShared.tsx` no longer owns full feature pages
 - **MOD-02**: Source inventory UI is split so `SourcesPage.tsx` owns page state and composition while filters, tables, cards, metrics, preview rail, and formatters live in focused modules
 - **MOD-03**: Backend source repository code is split into focused contract, mapper, seed, storage, mutation, memory, and Supabase implementation modules while preserving current service, view, DTO, and response behavior
-- **MOD-04**: Maintainer overview data builders and visual primitives are separated from top-level `OverviewPage.tsx` composition
-- **MOD-05**: Maintainer API wrappers are grouped by feature while preserving shared fetch, envelope parsing, request shape, response parsing, and session-expiry behavior
+- [x] **MOD-04**: Maintainer overview data builders and visual primitives are separated from top-level `OverviewPage.tsx` composition
+- [x] **MOD-05**: Maintainer API wrappers are grouped by feature while preserving shared fetch, envelope parsing, request shape, response parsing, and session-expiry behavior
 
 ## Out of Scope
 
@@ -93,8 +93,8 @@
 | MOD-01 | Phase 6 | Deferred |
 | MOD-02 | Phase 6 | Deferred |
 | MOD-03 | Phase 6 | Deferred |
-| MOD-04 | Phase 6 | Deferred |
-| MOD-05 | Phase 6 | Deferred |
+| MOD-04 | Phase 6 | Complete |
+| MOD-05 | Phase 6 | Complete |
 | SIM-01 | Future milestone | Deferred |
 | VIS-01 | Future milestone | Deferred |
 
@@ -105,4 +105,4 @@
 
 ---
 *Requirements defined: 2026-05-06*
-*Last updated: 2026-05-11 after Phase 5 forced completion*
+*Last updated: 2026-05-14 after Phase 6 completion*

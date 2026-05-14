@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 6 wave 4 completed
-last_updated: "2026-05-14T12:50:01.5078377Z"
-last_activity: 2026-05-14 -- Phase 6 wave 4 completed
+stopped_at: Completed 06-05-PLAN.md
+last_updated: "2026-05-14T13:13:59.280Z"
+last_activity: 2026-05-14
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
-  completed_plans: 9
-  percent: 90
+  completed_plans: 10
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-05-11)
 ## Current Position
 
 Phase: 6 of 6 (Maintainer Codebase Modularization)
-Plan: 4 of 5 complete
-Status: Executing
-Last activity: 2026-05-14 -- Phase 6 wave 4 completed
+Plan: 5 of 5 complete
+Status: Ready to execute
+Last activity: 2026-05-14
 
-Progress: [█████████░] 90%
+Progress: [██████████] 100%
 
 Current focus: Wave 5 - Split overview builders and maintainer API wrappers by feature
 
@@ -58,6 +58,8 @@ Current focus: Wave 5 - Split overview builders and maintainer API wrappers by f
 - Last 5 plans: none yet
 - Trend: Stable
 
+| Phase 6 P5 | 6 min | 2 tasks | 18 files |
+
 ## Accumulated Context
 
 ### Decisions
@@ -74,6 +76,9 @@ Recent decisions affecting current work:
 - Phase 6 wave 2 moved source detail, validation, audit trail, and chatbot trust into feature-owned modules while preserving the private maintainer entry points
 - Phase 6 wave 3 split the source inventory page into feature-owned inventory modules while keeping `SourcesPage.tsx` focused on state and composition
 - Phase 6 wave 4 split the backend stewardship repository into a focused repositories package with a compatibility shim
+- [Phase 6]: Kept OverviewPage.tsx as the composition root and moved overview row, summary, table, and metric logic into feature-owned helper modules. — This preserves the readiness cards and navigation targets while reducing mixed responsibilities in the overview surface.
+- [Phase 6]: Split the maintainer API wrappers into feature-grouped modules around shared transport and envelope helpers, then left api.ts as a compatibility barrel. — This centralizes request parsing and error shape handling while letting downstream imports migrate incrementally.
+- [Phase 6]: Retargeted downstream maintainer hooks, pages, and tests to the new API modules without changing routes, envelopes, or session-expiry behavior. — This validates the split against real consumers and keeps the protected session-expiry and envelope contracts stable.
 
 ### Roadmap Evolution
 
@@ -101,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-14T12:50:01.5078377Z
-Stopped at: Phase 6 wave 4 completed
-Resume file: .planning/phases/06-maintainer-codebase-modularization/06-CONTEXT.md
+Last session: 2026-05-14T13:13:59.248Z
+Stopped at: Completed 06-05-PLAN.md
+Resume file: None

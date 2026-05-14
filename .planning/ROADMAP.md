@@ -15,7 +15,7 @@ This roadmap starts from the real brownfield baseline instead of replaying alrea
 - [x] **Phase 3: Maintainer Readiness Hardening** - Turn the private stewardship surface into a clearer, less fragile readiness console (completed 2026-05-09)
 - [ ] **Phase 4: Demo Reliability And Verification** - Finish the brownfield MVP with performance hardening and repeatable pre-demo quality gates
 - [x] **Phase 5: Admin UX Polish for Maintainers** - Turn the private maintainer surface into a dark analytics-heavy control center with richer monitoring metrics and first-class Audit Trail and Chatbot Trust sections (completed 2026-05-11; security review skipped by --force)
-- [ ] **Phase 6: Maintainer Codebase Modularization** - Reduce maintainer console and source stewardship file size, mixed responsibilities, and review risk through behavior-preserving module splits
+- [x] **Phase 6: Maintainer Codebase Modularization** - Reduce maintainer console and source stewardship file size, mixed responsibilities, and review risk through behavior-preserving module splits (completed 2026-05-14)
 
 ## Phase Details
 
@@ -105,7 +105,7 @@ Phases execute in numeric order unless explicitly re-promoted or forced: 1 → 2
 | 3. Maintainer Readiness Hardening | 3/3 | Complete    | 2026-05-09 |
 | 4. Demo Reliability And Verification | 0/3 | Not started | - |
 | 5. Admin UX Polish for Maintainers | 2/2 | Complete | 2026-05-11 |
-| 6. Maintainer Codebase Modularization | 4/5 | In progress | - |
+| 6. Maintainer Codebase Modularization | 5/5 | Complete   | 2026-05-14 |
 
 ### Phase 5: Admin UX Polish for Maintainers
 
@@ -148,7 +148,7 @@ Cross-cutting constraints:
 3. `SourcesPage.tsx` is reduced to page state and page composition.
 4. `backend/sources/repository.py` becomes a compatibility export layer instead of a monolithic repository implementation.
 5. `OverviewPage.tsx` and maintainer API wrappers are split without changing routes, DTO fields, response envelopes, or session-expiry behavior.
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 
 Plans:
 
@@ -165,7 +165,7 @@ Plans:
 - [x] 06-04: Split backend source repository into base, mapper, seed, storage, mutation, memory, and Supabase modules
 
 **Wave 5**
-- [ ] 06-05: Split overview builders and maintainer API wrappers by feature
+- [x] 06-05: Split overview builders and maintainer API wrappers by feature
 
 Cross-cutting constraints:
 - The modularization must be behavior-preserving from a user and API-consumer perspective.
