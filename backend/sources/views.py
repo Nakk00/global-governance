@@ -11,9 +11,7 @@ from common.responses import error_response, success_response
 from common.validation import BoundaryValidationError, validate_json_object
 from sources import services as sources_service
 from sources.dtos import LifecycleState
-from sources.repository import (
-    SourceMutationError,
-)
+from sources.repositories import SourceMutationError
 
 
 def dashboard(request: HttpRequest) -> JsonResponse:

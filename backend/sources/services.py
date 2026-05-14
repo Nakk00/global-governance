@@ -4,7 +4,7 @@ from typing import Any
 
 from django.core.files.uploadedfile import UploadedFile
 
-from sources import repository
+from sources import repositories as repository
 from sources.dtos import (
     ChunkDetailDto,
     CitationDetailDto,
