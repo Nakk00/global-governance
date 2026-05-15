@@ -63,7 +63,7 @@ Impact/safety checks:
 
 ---
 
-# Ingest Synthesis: Admin Side Documentation Proposal v2
+# Ingest Synthesis: Admin Side Documentation Proposal v4
 
 ## Source
 
@@ -71,7 +71,7 @@ Impact/safety checks:
 
 ## Summary
 
-The ingested proposal is a documentation-first guide for the private maintainer/admin surface. It asks for a beginner-friendly walkthrough, a Mermaid diagram of the end-to-end access path, a short verification summary, and a gap list.
+The ingested proposal is a documentation-first maintainer playbook for the private admin surface. It asks for a beginner-friendly walkthrough that explains the top-level tabs, blocker states, source-detail tabs, validation follow-up, a Mermaid diagram of the end-to-end access path, a short verification summary, and a gap list.
 
 ## Planning Interpretation
 

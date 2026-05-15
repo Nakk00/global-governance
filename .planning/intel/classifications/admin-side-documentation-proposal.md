@@ -3,24 +3,25 @@
 path: archive/docs/planning-artifacts/admin-side-documentation-proposal.md
 type: DOC
 precedence: DOC
-title: Admin Side Documentation Proposal v2
-scope_summary: Documentation-first proposal for a beginner-friendly private maintainer/admin guide that verifies current behavior against code and tests.
+title: Admin Side Documentation Proposal v4
+scope_summary: Action-first maintainer playbook proposal for the private admin surface, centered on dashboard blockers, tab-by-tab remediation, nested source inspection tabs, and success-state guidance.
 
 ## Extracted Intent
 
-The document proposes a beginner-friendly admin-side walkthrough that explains the private maintainer shell, verifies current sign-in and access-gate behavior against code and tests, and presents the flow with a Mermaid diagram.
+The document proposes a beginner-friendly maintainer guide that explains the private `/maintainer` surface as a repair workflow: dashboard triage, source inventory review, source-detail inspection, validation follow-up, audit trail confirmation, and chatbot trust diagnosis.
 
 ## Key Scope
 
-- Explain how maintainer sign-in, session storage, and access gating currently work.
-- Document the backend admin boundary, section routing, data loading, mutations, and fallback states.
-- Separate verified facts from inferred gaps or future improvements.
-- Include a Mermaid graph and a short verification summary for the guide.
-- Keep improvement ideas separate from documentation delivery.
+- Explain each top-level maintainer tab in action-first language.
+- Explain dashboard blockers and status labels as actionable remediation paths.
+- Explain the nested `Overview`, `Chunks`, `Citations`, and `History` tabs on source detail pages.
+- Distinguish diagnosis surfaces from repair surfaces.
+- Include success states, failure states, and gap handling so the guide can tell a maintainer what to do next.
 
 ## Cross References
 
-- Related planning: `.planning/PROJECT.md`
-- Related planning: `.planning/ROADMAP.md`
-- Related current phases: Phase 3, Phase 5, and Phase 6 in `.planning/ROADMAP.md`
-- Related code areas: `src/App.tsx`, `src/components/modules/MaintainerDashboard/`, `src/lib/maintainer/`, `backend/accounts/`, `backend/sources/`, `backend/validation/`, `tests/e2e/`
+- Related current planning: `.planning/intel/decisions.md`
+- Related current planning: `.planning/intel/requirements.md`
+- Related current planning: `.planning/intel/constraints.md`
+- Related current planning: `.planning/intel/context.md`
+- Related current planning: `.planning/intel/SYNTHESIS.md`

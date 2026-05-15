@@ -20,9 +20,10 @@ Source: `archive/docs/planning-artifacts/codebase-modularization-v2-proposal.md`
 4. Split `src/components/modules/MaintainerDashboard/overview/OverviewPage.tsx`.
 5. Split `src/lib/maintainer/api.ts`.
 
-## Admin Side Documentation Proposal
+## Admin Side Documentation Proposal v4
 
-- Treat the proposal as documentation-first work, not a runtime or roadmap change.
+- Treat the v4 proposal as documentation-first work, not a runtime or roadmap change.
 - Route the guide-writing work to `gsd-docs-update` rather than widening the active maintainer implementation phases.
-- Use the proposal’s verified facts as the source of truth and treat anything outside that list as a gap until re-verified.
+- Use the proposal’s verified facts as the source of truth, especially the action-first tab model, blocker playbook, and source-subtab walkthroughs, and treat anything outside that list as a gap until re-verified.
 - Keep the improvement ideas separate so they can become a future story or phase only if explicitly promoted.
+- Preserve exact UI labels in the guide, including `Operations` and the nested source tabs, and explain blockers as repair steps rather than architecture.
