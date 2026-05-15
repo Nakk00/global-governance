@@ -60,3 +60,33 @@ Backend repository plan:
 Impact/safety checks:
 - Run GitNexus impact analysis before editing high-fan-out functions, classes, or methods.
 - Run `gitnexus_detect_changes()` before any commit.
+
+---
+
+# Ingest Synthesis: Admin Side Documentation Proposal v2
+
+## Source
+
+- `archive/docs/planning-artifacts/admin-side-documentation-proposal.md` classified as `DOC`
+
+## Summary
+
+The ingested proposal is a documentation-first guide for the private maintainer/admin surface. It asks for a beginner-friendly walkthrough, a Mermaid diagram of the end-to-end access path, a short verification summary, and a gap list.
+
+## Planning Interpretation
+
+This is best treated as docs-update work rather than a roadmap phase change. The proposal does not introduce new runtime behavior and explicitly separates future improvement ideas from the documentation task.
+
+No roadmap phase addition is required from this ingest because the proposal is documentation-only.
+
+Recommended planning route:
+
+- Hand the guide-writing work to `gsd-docs-update`
+- Use the proposal’s verified facts as the source of truth and mark everything else as a gap or assumption
+- Keep the admin-side improvement ideas separate until they are explicitly promoted into their own story or phase
+
+## Verification
+
+- Cite the current admin-related code and test areas named in the proposal
+- Include the Mermaid graph and gap list requested by the proposal
+- Re-verify if auth, route, or maintainer behavior changes later

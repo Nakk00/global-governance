@@ -19,3 +19,10 @@ Source: `archive/docs/planning-artifacts/codebase-modularization-v2-proposal.md`
 3. Split `backend/sources/repository.py`.
 4. Split `src/components/modules/MaintainerDashboard/overview/OverviewPage.tsx`.
 5. Split `src/lib/maintainer/api.ts`.
+
+## Admin Side Documentation Proposal
+
+- Treat the proposal as documentation-first work, not a runtime or roadmap change.
+- Route the guide-writing work to `gsd-docs-update` rather than widening the active maintainer implementation phases.
+- Use the proposal’s verified facts as the source of truth and treat anything outside that list as a gap until re-verified.
+- Keep the improvement ideas separate so they can become a future story or phase only if explicitly promoted.

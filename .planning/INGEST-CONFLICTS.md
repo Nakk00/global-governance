@@ -2,32 +2,18 @@
 
 ### BLOCKERS (0)
 
-### WARNINGS (2)
+### WARNINGS (0)
 
-[WARNING] Proposed modularization overlaps active Phase 5 work
-  Found: The proposal targets maintainer dashboard files and source stewardship files that Phase 5 already plans to modify for admin UX polish and richer monitoring.
-  Impact: Merging the proposal directly into active Phase 5 could widen the execution scope and make behavior-preserving modularization compete with UI/control-center delivery.
-  -> Route the proposal as a later structural phase or backlog item unless the user explicitly approves widening Phase 5.
+### INFO (3)
 
-[WARNING] Backend repository split has wider blast radius than frontend helper extraction
-  Found: The proposal identifies `backend/sources/repository.py` as a high-payoff target but notes that it touches source stewardship behavior, source mutations, ingestion dispatch, inspection, and dashboard data.
-  Impact: Planning the backend split without explicit impact analysis and backend verification could destabilize private maintainer workflows.
-  -> Keep backend repository modularization in its own plan with GitNexus impact analysis and backend checks before implementation.
+[INFO] Documentation-only proposal
+  Found: The proposal splits the guide-writing task from future improvement work and points the implementation task to docs-update.
+  Note: This ingest does not require a new runtime phase or roadmap change.
 
-### INFO (4)
+[INFO] Verified source map is explicit
+  Found: The proposal names the current code and test areas to cite in the walkthrough.
+  Note: The guide can be grounded in current repo behavior instead of hypothetical architecture.
 
-[INFO] Existing planning already recognizes maintainer modularization risk
-  Found: `.planning/STATE.md` notes that maintainer dashboard and repository layers are large enough to need disciplined scope and verification.
-  Note: The proposal reinforces an existing planning concern rather than introducing an unrelated direction.
-
-[INFO] Proposal is behavior-preserving
-  Found: The proposal explicitly excludes route changes, backend response contract changes, DTO renames, React Router, global stores, and new public maintainer dashboard behavior.
-  Note: This aligns with current project guardrails and makes the work suitable for a refactor/maintainability phase.
-
-[INFO] Recommended first PR is narrow
-  Found: The first proposed PR moves only shared non-feature helpers from `maintainerDashboardShared.tsx`.
-  Note: This can become the first plan in a later modularization phase.
-
-[INFO] Verification strategy aligns with repo defaults
-  Found: The proposal uses frontend unit/lint/typecheck/build checks for frontend work and backend test/lint/typecheck/check commands for repository work.
-  Note: This matches the verification guidance in `AGENTS.md`.
+[INFO] Gap handling is part of the deliverable
+  Found: The proposal asks for a gap list and cautions that anything outside the verified-facts list must be treated as a gap or assumption.
+  Note: This makes it suitable for documentation planning without changing product scope.

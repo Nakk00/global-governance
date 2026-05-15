@@ -48,3 +48,22 @@ Acceptance signals:
 - Auth, source, validation, mutation, and ingestion wrappers are grouped in feature-specific modules.
 - Function names remain stable where practical.
 - Request shape, response parsing, and session-expiry behavior remain stable.
+
+## DOC-01: Beginner-Friendly Admin Side Guide
+
+The private maintainer/admin behavior should be documented in a beginner-friendly guide that explains sign-in, the private gate, section routing, data loading, protected mutations, the browser/backend boundary, and the current verification proof.
+
+Acceptance signals:
+- The guide covers the maintainer entry point, sign-in/session behavior, and `GET /api/admin/me` gate.
+- The guide explains the dashboard section model, data-loading paths, mutation flow, and fallback states.
+- The guide includes a Mermaid graph for the end-to-end request path and a short verification summary.
+- The guide clearly separates verified behavior from inferred notes or future improvements.
+
+## DOC-02: Verification Summary And Gap List
+
+The guide should include a short summary of what is confirmed by code and tests and a gap list for anything still unclear or untested.
+
+Acceptance signals:
+- Verified code and test areas are named explicitly.
+- Remaining gaps or risks are called out instead of hidden.
+- The guide avoids presenting assumptions as confirmed facts.
