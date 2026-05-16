@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 7 context gathered
-last_updated: "2026-05-16T02:07:32.997Z"
-last_activity: 2026-05-14
+status: completed
+stopped_at: Phase 07.4 context gathered
+last_updated: "2026-05-16T11:30:22.779Z"
+last_activity: 2026-05-16
 progress:
-  total_phases: 7
+  total_phases: 13
   completed_phases: 3
   total_plans: 10
   completed_plans: 10
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-11)
 
 **Core value:** Users should leave the experience able to explain global governance clearly and trust that the site's claims and chatbot answers are grounded in approved material.
-**Current focus:** Phase 6 - Maintainer Codebase Modularization (wave 5 next)
+**Current focus:** Planning cleanup and remediation phases for the next milestone
 
 ## Current Position
 
-Phase: 6 of 6 (Maintainer Codebase Modularization)
-Plan: 5 of 5 complete
-Status: Ready to execute
-Last activity: 2026-05-14
+Phase: 07.1 of 10 (address tech debt: trust and grounding)
+Plan: Not started
+Status: Milestone complete
+Last activity: 2026-05-16
 
 Progress: [██████████] 100%
 
-Current focus: Wave 5 - Split overview builders and maintainer API wrappers by feature
+Current focus: Planning cleanup and remediation phases for the next milestone
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9
+- Total plans completed: 11
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -52,6 +52,7 @@ Current focus: Wave 5 - Split overview builders and maintainer API wrappers by f
 | 4 | 0 | 3 | - |
 | 5 | 2 | 2 | - |
 | 6 | 4 | 5 | - |
+| 7 | 1 | 1 | - |
 
 **Recent Trend:**
 
@@ -85,7 +86,10 @@ Recent decisions affecting current work:
 - Phase 5 added: Admin UX Polish for Maintainers
 - Phase 6 queued from the codebase modularization v2 proposal as a post-Phase-5 structural cleanup phase. It should not widen active Phase 4 or Phase 5 scope unless explicitly re-promoted.
 - Phase 7 added: Validation Evidence Bridge
-- Phase 5 marked complete after passed verification and UAT; Phase 6 is the current execution target.
+- Cleanup phases 07.1-07.3 inserted to close the remaining v1 depth, trust, and reliability gaps
+- Phase 7 marked complete after the validation bridge closeout; cleanup phases 07.1-07.3 and remediation phases 07.4-07.6 are the next planning tracks.
+- Validation remediation proposal promoted to future roadmap phases 07.4-07.6
+- Phase 7 edited: updated goal, requirements, success criteria, and plan list for the validation evidence bridge
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-16T02:07:32.946Z
-Stopped at: Phase 7 context gathered
-Resume file: .planning/phases/GGOV-07-validation-evidence-bridge/07-CONTEXT.md
+Last session: 2026-05-16T11:30:22.748Z
+Stopped at: Phase 07.4 context gathered
+Resume file: .planning/phases/GGOV-07.4-guided-remediation-workflow/07.4-CONTEXT.md
