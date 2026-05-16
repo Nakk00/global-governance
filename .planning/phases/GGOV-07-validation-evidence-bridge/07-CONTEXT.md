@@ -14,6 +14,17 @@ introduce new public routes or a new maintainer workflow surface.
 
 </domain>
 
+<spec_lock>
+## Requirements (locked via SPEC.md)
+
+**5 requirements are locked.** See `07-SPEC.md` for the full requirements,
+boundaries, constraints, acceptance criteria, and ambiguity report.
+
+Downstream agents MUST read `07-SPEC.md` before planning or implementing.
+Requirements are not duplicated here.
+
+</spec_lock>
+
 <decisions>
 ## Implementation Decisions
 
@@ -80,6 +91,8 @@ introduce new public routes or a new maintainer workflow surface.
 ### Planning Core
 - `.planning/ROADMAP.md` - Phase 7 goal placeholder, dependency on Phase 6,
   and roadmap status.
+- `.planning/phases/GGOV-07-validation-evidence-bridge/07-SPEC.md` -
+  locked WHAT/WHY requirements, boundaries, and acceptance criteria.
 - `.planning/REQUIREMENTS.md` - `ADMIN-02` plus its acceptance signals for
   terminal source-facing validation history.
 - `.planning/STATE.md` - milestone history and the note that Phase 7 was
