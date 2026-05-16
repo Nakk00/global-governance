@@ -289,6 +289,69 @@ const validationRun = {
       notes: "Expected grounded answer matched.",
       createdAt: "2026-05-05T00:00:05Z",
     },
+    {
+      resultId: "result-weak-support",
+      validationQuestionId: "demo-q-weak-support",
+      questionText: "Which body coordinates implementation under the Charter?",
+      expectedState: "weakSupport",
+      actualState: "weakSupport",
+      outcome: "weakSupport",
+      answerPreview:
+        "The response pointed to the UN system but only lightly tied it to the Charter.",
+      retrievedSourceIds: ["gg-src-un-charter-institutions"],
+      citationIds: ["ref-un-charter"],
+      supportScore: 0.41,
+      latencyMs: 910,
+      notes: "Support exists, but the source detail should be revisited.",
+      createdAt: "2026-05-05T00:00:06Z",
+    },
+    {
+      resultId: "result-refused",
+      validationQuestionId: "demo-q-refused",
+      questionText: "Can the answer invent a new member state commitment?",
+      expectedState: "refused",
+      actualState: "refused",
+      outcome: "refused",
+      answerPreview:
+        "I cannot confirm that request from the available evidence.",
+      retrievedSourceIds: [],
+      citationIds: [],
+      supportScore: null,
+      latencyMs: 460,
+      notes:
+        "Correct refusal, but the follow-up should stay in validation detail.",
+      createdAt: "2026-05-05T00:00:07Z",
+    },
+    {
+      resultId: "result-failed",
+      validationQuestionId: "demo-q-failed",
+      questionText: "Does the evaluator still resolve a grounded answer?",
+      expectedState: "grounded",
+      actualState: "timeout",
+      outcome: "failed",
+      answerPreview: "The evaluator did not complete this question.",
+      retrievedSourceIds: [],
+      citationIds: [],
+      supportScore: null,
+      latencyMs: null,
+      notes: "Validation failed before a stable answer could be recorded.",
+      createdAt: "2026-05-05T00:00:08Z",
+    },
+    {
+      resultId: "result-error",
+      validationQuestionId: "demo-q-error",
+      questionText: "Can the backend return a parsed result envelope?",
+      expectedState: "grounded",
+      actualState: "error",
+      outcome: "error",
+      answerPreview: "The validation pipeline encountered an unexpected error.",
+      retrievedSourceIds: [],
+      citationIds: [],
+      supportScore: null,
+      latencyMs: null,
+      notes: "Unexpected error while loading validation detail.",
+      createdAt: "2026-05-05T00:00:09Z",
+    },
   ],
   auditEvents: [],
 } satisfies ValidationRunDetail
@@ -1351,6 +1414,18 @@ describe("MaintainerDashboard", () => {
     ]) {
       expect(screen.getAllByText(outcome).length).toBeGreaterThan(0)
     }
+    expect(
+      screen.getByRole("heading", { name: "Remediation queue" })
+    ).toBeVisible()
+    expect(
+      screen.getByRole("link", { name: "Open source detail" })
+    ).toHaveAttribute(
+      "href",
+      "/maintainer/sources/gg-src-un-charter-institutions?preset=validation-follow-up"
+    )
+    expect(
+      screen.getAllByRole("button", { name: "Open result overlay" })
+    ).toHaveLength(3)
 
     await user.click(screen.getByRole("button", { name: "Run validation" }))
     await waitFor(() =>
@@ -1359,7 +1434,9 @@ describe("MaintainerDashboard", () => {
         session
       )
     )
-    await user.click(screen.getByRole("button", { name: "Inspect result" }))
+    await user.click(
+      screen.getAllByRole("button", { name: "Inspect result" })[0]
+    )
 
     expect(
       await screen.findByRole("dialog", { name: "Validation result detail" })

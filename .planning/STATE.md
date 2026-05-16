@@ -89,6 +89,7 @@ Recent decisions affecting current work:
 - Cleanup phases 07.1-07.3 inserted to close the remaining v1 depth, trust, and reliability gaps
 - Phase 7 marked complete after the validation bridge closeout; cleanup phases 07.1-07.3 and remediation phases 07.4-07.6 are the next planning tracks.
 - Validation remediation proposal promoted to future roadmap phases 07.4-07.6
+- Phase 07.4 completed the read-only guided remediation queue in the private validation workbench, with deterministic source-detail and result-overlay follow-up surfaces for completed non-pass results.
 - Phase 7 edited: updated goal, requirements, success criteria, and plan list for the validation evidence bridge
 
 ### Pending Todos
