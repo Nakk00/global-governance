@@ -48,6 +48,9 @@ Global-Governance.code-workspace
 # Playwright artifacts
 .playwright/
 .playwright-cli/*.log
+.playwright-cli/*.png
+.playwright-cli/*.yml
+.playwright-cli/*.yaml
 playwright-report/
 test-results/
 blob-report/
@@ -55,3 +58,13 @@ blob-report/
 # Local tool and service state
 .devserver.log
 .tmp-*.log
+.tmp/
+tmp/
+
+# Generated code intelligence artifacts
+graphify-out/
+graphify-out-backend/
+graphify-out-supabase/
+graphify-out-merged/
+backend/graphify-out/
+supabase/graphify-out/
