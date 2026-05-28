@@ -22,6 +22,12 @@ const MaintainerDashboard = lazy(() =>
   )
 )
 
+const PublicHomepageOverviewMockup = lazy(() =>
+  import("@/mockups/public-homepage-redesign/OverviewMockupPage").then(
+    (module) => ({ default: module.OverviewMockupPage })
+  )
+)
+
 export function App() {
   const pathname = window.location.pathname
 
@@ -31,6 +37,16 @@ export function App() {
         fallback={<main className="min-h-svh bg-background text-foreground" />}
       >
         <MaintainerDashboard />
+      </Suspense>
+    )
+  }
+
+  if (pathname === "/mockups/public-homepage-redesign/overview") {
+    return (
+      <Suspense
+        fallback={<main className="min-h-svh bg-background text-foreground" />}
+      >
+        <PublicHomepageOverviewMockup />
       </Suspense>
     )
   }
