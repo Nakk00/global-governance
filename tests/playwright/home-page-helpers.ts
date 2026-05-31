@@ -18,7 +18,6 @@ export const narrativeSections = [
 ]
 
 export const summaryFirstSections = [
-  "Global governance overview",
   "Governance limits and enforcement",
   "West Philippine Sea dossier",
   "Conclusion and references",

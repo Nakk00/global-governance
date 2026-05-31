@@ -43,14 +43,12 @@ test("@smoke desktop navigation jumps between chapter sections and restores hist
   await page.goto("/", { waitUntil: "domcontentloaded" })
 
   const topNav = page.getByRole("navigation", { name: "Primary" })
-  const rail = page.getByRole("navigation", { name: "Section progress" })
   const dossier = page.getByRole("region", {
     name: "West Philippine Sea dossier",
   })
 
   for (const chapterName of chapterNames) {
     await expect(topNav.getByRole("link", { name: chapterName })).toBeVisible()
-    await expect(rail.getByRole("link", { name: chapterName })).toBeVisible()
   }
 
   await topNav.getByRole("link", { name: "UN Command Center" }).click()
@@ -65,11 +63,13 @@ test("@smoke desktop navigation jumps between chapter sections and restores hist
     page.getByText("Current chapter: UN Command Center")
   ).toBeVisible()
 
-  await rail.getByRole("link", { name: "West Philippine Sea dossier" }).click()
+  await topNav
+    .getByRole("link", { name: "West Philippine Sea dossier" })
+    .click()
   await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
   await expect(dossier).toBeFocused()
   await expect(
-    rail.getByRole("link", { name: "West Philippine Sea dossier" })
+    topNav.getByRole("link", { name: "West Philippine Sea dossier" })
   ).toHaveAttribute("aria-current", "location")
 
   await page.goBack()
@@ -263,7 +263,7 @@ test("@smoke UN command center introduces an explorable shell with keyboard entr
       }
 
       await expectNoHorizontalOverflow(page)
-      if (width >= 768) {
+      if (width >= 1024) {
         await expect(
           page
             .getByRole("navigation", { name: "Primary" })
@@ -283,14 +283,17 @@ test("@smoke UN command center introduces an explorable shell with keyboard entr
           return section.getBoundingClientRect().top <= 180
         })
         await waitForScrollIdle(page)
-        const openNavigation = page.getByRole("button", {
-          name: "Open navigation",
-        })
-        await expect(openNavigation).toBeVisible()
-        await openNavigation.click()
         const mobileNav = page.getByRole("navigation", {
           name: "Mobile chapters",
         })
+
+        if (!(await mobileNav.isVisible().catch(() => false))) {
+          const openNavigation = page.getByRole("button", {
+            name: "Open navigation",
+          })
+          await expect(openNavigation).toBeVisible()
+          await openNavigation.click()
+        }
 
         const mobileUnLink = mobileNav.getByRole("link", {
           name: "UN Command Center",

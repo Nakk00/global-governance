@@ -606,7 +606,11 @@ test("@journey recap cues explain re-entry and use canonical next anchors", asyn
 
   for (const cue of recapCues) {
     const section = page.getByRole("region", { name: cue.sectionName })
-    await expect(section.getByText("Key takeaway")).toBeVisible()
+    if (cue.sectionName === "Global governance overview") {
+      await expect(section.getByText("Selected relationship")).toBeVisible()
+    } else {
+      await expect(section.getByText("Key takeaway")).toBeVisible()
+    }
     await expect(section.getByRole("link", { name: cue.cueName })).toBeVisible()
   }
 

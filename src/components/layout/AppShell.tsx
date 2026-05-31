@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 
 import { SourceAwareChat } from "@/components/chat/SourceAwareChat"
+import { IdleScrollCue } from "@/components/layout/IdleScrollCue"
 import { Navbar } from "@/components/layout/Navbar"
 import { SectionProgressRail } from "@/components/layout/SectionProgressRail"
 import { NavigationProvider } from "@/contexts/NavigationContext"
@@ -16,6 +17,7 @@ export function AppShell({ children }: AppShellProps) {
         <Navbar />
         <SectionProgressRail />
         {children}
+        <IdleScrollCue />
         <SourceAwareChat />
       </div>
     </NavigationProvider>

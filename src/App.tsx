@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/AppShell"
 import { UNCommandCenter } from "@/components/modules/UNCommandCenter/UNCommandCenter"
 import { WpsDossier } from "@/components/modules/WpsDossier/WpsDossier"
 import { ChapterTransitionBlock } from "@/components/sections/ChapterTransitionBlock"
+import { GlobalGovernanceOverviewChapter } from "@/components/sections/GlobalGovernanceOverviewChapter"
 import { HeroNarrativeFrame } from "@/components/sections/HeroNarrativeFrame"
 import { NarrativeSection } from "@/components/sections/NarrativeSection"
 import { defaultChapterId } from "@/data/navigation"
@@ -22,6 +23,12 @@ const MaintainerDashboard = lazy(() =>
   )
 )
 
+const PublicHomepageHeroMockup = lazy(() =>
+  import("@/mockups/public-homepage-redesign/HeroMockupPage").then(
+    (module) => ({ default: module.HeroMockupPage })
+  )
+)
+
 const PublicHomepageOverviewMockup = lazy(() =>
   import("@/mockups/public-homepage-redesign/OverviewMockupPage").then(
     (module) => ({ default: module.OverviewMockupPage })
@@ -37,6 +44,16 @@ export function App() {
         fallback={<main className="min-h-svh bg-background text-foreground" />}
       >
         <MaintainerDashboard />
+      </Suspense>
+    )
+  }
+
+  if (pathname === "/mockups/public-homepage-redesign/hero") {
+    return (
+      <Suspense
+        fallback={<main className="min-h-svh bg-background text-foreground" />}
+      >
+        <PublicHomepageHeroMockup />
       </Suspense>
     )
   }
@@ -86,6 +103,8 @@ export function App() {
                 />
               ) : section.id === "west-philippine-sea-dossier" ? (
                 <WpsDossier content={section} shell={wpsDossierShell} />
+              ) : section.id === "global-governance-overview" ? (
+                <GlobalGovernanceOverviewChapter content={section} />
               ) : (
                 <NarrativeSection content={section} />
               )}

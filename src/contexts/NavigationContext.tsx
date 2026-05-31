@@ -11,6 +11,7 @@ import { NavigationContext } from "@/contexts/navigation-context"
 import {
   chapterNavigation,
   defaultChapterId,
+  getAdjacentChapterId,
   getChapterIndex,
   isChapterId,
   isKnownSectionId,
@@ -45,6 +46,9 @@ const getSectionDocumentTop = (sectionId: string) => {
 
 export function NavigationProvider({ children }: NavigationProviderProps) {
   const [activeSectionId, setActiveSectionId] = useState(defaultChapterId)
+  const [activePanelByChapter, setActivePanelByChapter] = useState<
+    Partial<Record<string, string>>
+  >({})
   const activeSectionIdRef = useRef(activeSectionId)
   const programmaticNavigationUntilRef = useRef(0)
   const programmaticNavigationTargetRef = useRef<string | null>(null)
@@ -85,6 +89,60 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
   const resetToTop = useCallback(() => {
     navigateToSection(defaultChapterId)
   }, [navigateToSection])
+
+  const navigateToChapter = useCallback(
+    (chapterId: string) => {
+      if (!isChapterId(chapterId)) {
+        return
+      }
+
+      navigateToSection(chapterId)
+    },
+    [navigateToSection]
+  )
+
+  const navigateToAdjacentChapter = useCallback(
+    (direction: "previous" | "next") => {
+      const currentChapterId = isChapterId(activeSectionIdRef.current)
+        ? activeSectionIdRef.current
+        : defaultChapterId
+      const adjacentChapterId = getAdjacentChapterId(
+        currentChapterId,
+        direction
+      )
+
+      if (!adjacentChapterId) {
+        return
+      }
+
+      navigateToChapter(adjacentChapterId)
+    },
+    [navigateToChapter]
+  )
+
+  const setActiveChapterPanel = useCallback(
+    (chapterId: string, panelId: string) => {
+      if (!isChapterId(chapterId) || panelId.trim().length === 0) {
+        return
+      }
+
+      setActivePanelByChapter((current) => {
+        if (current[chapterId] === panelId) {
+          return current
+        }
+
+        return {
+          ...current,
+          [chapterId]: panelId,
+        }
+      })
+    },
+    []
+  )
+
+  const resetToStart = useCallback(() => {
+    navigateToChapter(defaultChapterId)
+  }, [navigateToChapter])
 
   useEffect(() => {
     const reconcileHash = () => {
@@ -231,23 +289,51 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
     }
   }, [])
 
-  const completedSectionIds = useMemo(() => {
-    const activeIndex = getChapterIndex(activeSectionId)
+  const activeChapterId = isChapterId(activeSectionId)
+    ? activeSectionId
+    : defaultChapterId
+  const activeChapterIndex = getChapterIndex(activeChapterId)
+
+  const completedChapterIds = useMemo(() => {
+    const activeIndex = getChapterIndex(activeChapterId)
     return new Set(
       chapterNavigation
         .slice(0, Math.max(activeIndex, 0))
         .map((item) => item.id)
     )
-  }, [activeSectionId])
+  }, [activeChapterId])
+
+  const completedSectionIds = completedChapterIds
 
   const value = useMemo(
     () => ({
+      activeChapterId,
+      activeChapterIndex,
       activeSectionId,
+      activePanelByChapter,
+      completedChapterIds,
       completedSectionIds,
+      navigateToChapter,
       navigateToSection,
+      navigateToAdjacentChapter,
+      setActiveChapterPanel,
+      resetToStart,
       resetToTop,
     }),
-    [activeSectionId, completedSectionIds, navigateToSection, resetToTop]
+    [
+      activeChapterId,
+      activeChapterIndex,
+      activePanelByChapter,
+      activeSectionId,
+      completedChapterIds,
+      completedSectionIds,
+      navigateToAdjacentChapter,
+      navigateToChapter,
+      navigateToSection,
+      resetToStart,
+      resetToTop,
+      setActiveChapterPanel,
+    ]
   )
 
   return (

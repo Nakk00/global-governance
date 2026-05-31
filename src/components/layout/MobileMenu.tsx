@@ -15,7 +15,7 @@ export function MobileMenu() {
     (activeSectionId === journeyStartSection.id ? journeyStartSection : null)
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 768px)")
+    const mediaQuery = window.matchMedia("(min-width: 1024px)")
 
     const closeAtDesktop = () => {
       if (mediaQuery.matches) {
@@ -33,7 +33,7 @@ export function MobileMenu() {
 
   return (
     <>
-      <div className="ml-auto md:hidden">
+      <div className="ml-auto lg:hidden">
         <Button
           type="button"
           variant="outline"
@@ -53,7 +53,7 @@ export function MobileMenu() {
         <nav
           id="mobile-chapter-navigation"
           aria-label="Mobile chapters"
-          className="orbital-nav-shell mt-2 max-h-[calc(100svh-5.5rem)] basis-full overflow-y-auto overscroll-contain rounded-3xl border px-4 py-4 md:hidden"
+          className="orbital-nav-shell mt-2 max-h-[calc(100svh-5.5rem)] basis-full overflow-y-auto overscroll-contain rounded-3xl border px-4 py-4 lg:hidden"
         >
           <p className="mb-2 text-xs font-medium text-muted-foreground">
             Current chapter:{" "}

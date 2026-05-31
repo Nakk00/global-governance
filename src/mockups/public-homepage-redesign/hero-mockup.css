@@ -1,0 +1,811 @@
+.public-homepage-hero-mockup {
+  --hero-bg: #06111f;
+  --hero-panel: rgba(8, 21, 38, 0.78);
+  --hero-panel-strong: rgba(5, 14, 27, 0.9);
+  --hero-border: rgba(124, 201, 255, 0.24);
+  --hero-border-gold: rgba(217, 155, 55, 0.48);
+  --hero-gold: #d99b37;
+  --hero-gold-soft: #f4dda2;
+  --hero-blue: #7cc9ff;
+  --hero-text: #f8fafc;
+  --hero-muted: #b8c4d6;
+  min-height: 100svh;
+  background: var(--hero-bg);
+  color: var(--hero-text);
+}
+
+.hero-mockup-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  padding: clamp(0.75rem, 1.1vw, 1rem);
+}
+
+.hero-mockup-bg,
+.hero-mockup-route-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+}
+
+.hero-mockup-bg {
+  background:
+    radial-gradient(circle at 52% 21%, rgba(124, 201, 255, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.26) 84%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.26), transparent 28%, transparent 72%, rgba(0, 0, 0, 0.24)),
+    url("/images/public-homepage/resource-pack/hero/hero-global-stage-bg-01.png");
+  background-position: center;
+  background-size: cover;
+}
+
+.hero-mockup-route-overlay {
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.82;
+  mix-blend-mode: screen;
+}
+
+.hero-mockup-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(5, 14, 27, 0.14), rgba(5, 14, 27, 0.34) 32%, transparent 58%),
+    linear-gradient(180deg, rgba(3, 9, 18, 0.08), rgba(3, 9, 18, 0.08) 48%, rgba(3, 9, 18, 0.24));
+  pointer-events: none;
+}
+
+.hero-mockup-navbar {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: minmax(16rem, 18rem) minmax(0, 1fr) auto;
+  gap: 1.1rem;
+  align-items: center;
+  min-height: 5.4rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(124, 201, 255, 0.16);
+  border-radius: 1.55rem;
+  background:
+    radial-gradient(circle at 24% 0%, rgba(124, 201, 255, 0.1), transparent 30%),
+    rgba(3, 11, 22, 0.78);
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(22px);
+}
+
+.hero-mockup-brand {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--hero-text);
+  text-decoration: none;
+}
+
+.hero-mockup-brand-mark {
+  position: relative;
+  display: inline-block;
+  width: 3.1rem;
+  height: 3.1rem;
+  flex: 0 0 auto;
+  background-image: url("/images/public-homepage/resource-pack/hero/governance-compass-mark-01.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  filter: drop-shadow(0 0 8px rgba(217, 155, 55, 0.42));
+}
+
+.hero-mockup-brand-mark::before,
+.hero-mockup-brand-mark::after {
+  display: none;
+}
+
+.hero-mockup-brand-title,
+.hero-mockup-brand-subtitle {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-mockup-brand-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.hero-mockup-brand-subtitle {
+  margin-top: 0.25rem;
+  color: rgba(248, 250, 252, 0.82);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.hero-mockup-chapters {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.hero-mockup-chapter-link {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: center;
+  min-width: 0;
+  max-width: 10.8rem;
+  min-height: 3.8rem;
+  padding: 0.45rem 0.72rem;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  color: rgba(248, 250, 252, 0.72);
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.hero-mockup-chapter-link:not(:last-child) {
+  border-right-color: rgba(184, 196, 214, 0.12);
+  border-top-right-radius: 0.1rem;
+  border-bottom-right-radius: 0.1rem;
+}
+
+.hero-mockup-chapter-link[data-active="true"] {
+  max-width: 11.2rem;
+  border-color: rgba(124, 201, 255, 0.62);
+  border-radius: 1.3rem;
+  background:
+    radial-gradient(circle at 28% 16%, rgba(124, 201, 255, 0.3), transparent 35%),
+    linear-gradient(135deg, rgba(39, 89, 133, 0.9), rgba(11, 31, 57, 0.92));
+  color: white;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 32px rgba(124, 201, 255, 0.2);
+}
+
+.hero-mockup-chapter-number {
+  color: rgba(248, 250, 252, 0.45);
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.hero-mockup-chapter-link[data-active="true"] .hero-mockup-chapter-number {
+  color: white;
+}
+
+.hero-mockup-chapter-label {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.hero-mockup-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero-mockup-progress {
+  display: grid;
+  min-width: 5.2rem;
+  gap: 0.2rem;
+  padding-inline: 0.5rem 0.8rem;
+  border-left: 1px solid rgba(184, 196, 214, 0.14);
+}
+
+.hero-mockup-progress span {
+  color: rgba(184, 196, 214, 0.72);
+  font-size: 0.66rem;
+  line-height: 1;
+}
+
+.hero-mockup-progress strong {
+  color: white;
+  font-size: 0.92rem;
+  line-height: 1;
+}
+
+.hero-mockup-progress i {
+  display: block;
+  width: 3.9rem;
+  height: 0.16rem;
+  margin-top: 0.25rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--hero-blue) 18%, rgba(184, 196, 214, 0.22) 18%);
+  box-shadow: 0 0 12px rgba(124, 201, 255, 0.64);
+}
+
+.hero-mockup-utility,
+.hero-mockup-chat-button {
+  display: inline-grid;
+  min-width: 2.6rem;
+  min-height: 2.9rem;
+  place-items: center;
+  gap: 0.18rem;
+  border: 0;
+  background: transparent;
+  color: rgba(248, 250, 252, 0.82);
+  cursor: pointer;
+  font: inherit;
+}
+
+.hero-mockup-utility svg,
+.hero-mockup-chat-button svg {
+  width: 1.24rem;
+  height: 1.24rem;
+}
+
+.hero-mockup-utility span,
+.hero-mockup-chat-button span {
+  font-size: 0.64rem;
+}
+
+.hero-mockup-chat-button {
+  min-width: 3.25rem;
+  border: 1px solid rgba(124, 201, 255, 0.22);
+  border-radius: 1.2rem;
+  background: rgba(124, 201, 255, 0.06);
+}
+
+.hero-mockup-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(15rem, 17rem) minmax(34rem, 1fr) minmax(15rem, 17rem);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "system copy pillars"
+    "focus scroll chat";
+  min-height: calc(100svh - 6.7rem);
+  gap: clamp(1.2rem, 2vw, 2rem);
+  align-items: center;
+  padding: clamp(2.5rem, 5vw, 4.8rem) clamp(2rem, 3vw, 3rem) 1.6rem;
+}
+
+.hero-mockup-panel {
+  border: 1px solid var(--hero-border);
+  border-radius: 1.45rem;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(124, 201, 255, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(8, 21, 38, 0.84), rgba(4, 13, 25, 0.82));
+  box-shadow:
+    0 22px 46px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+}
+
+.hero-mockup-system-panel {
+  grid-area: system;
+  align-self: start;
+  margin-top: 1.8rem;
+  padding: 1.4rem 1.55rem;
+  border-color: rgba(217, 155, 55, 0.38);
+}
+
+.hero-mockup-kicker,
+.hero-mockup-eyebrow,
+.hero-mockup-mini-kicker {
+  color: var(--hero-gold-soft);
+  font-size: 0.73rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero-mockup-kicker-centered {
+  text-align: center;
+}
+
+.hero-mockup-system-intro {
+  margin-top: 0.9rem;
+  color: rgba(248, 250, 252, 0.8);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.hero-mockup-system-list {
+  display: grid;
+  gap: 0;
+  margin: 1.35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-mockup-system-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 3.1rem;
+  border-top: 1px solid rgba(184, 196, 214, 0.13);
+  color: rgba(248, 250, 252, 0.78);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.hero-mockup-system-list svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--hero-gold);
+}
+
+.hero-mockup-copy {
+  grid-area: copy;
+  align-self: start;
+  justify-self: center;
+  max-width: 47rem;
+  padding-top: clamp(1rem, 3.3vw, 3.4rem);
+  text-align: center;
+  text-shadow: 0 18px 48px rgba(0, 0, 0, 0.72);
+}
+
+.hero-mockup-eyebrow {
+  color: var(--hero-gold);
+  font-size: 0.82rem;
+}
+
+.hero-mockup-divider {
+  display: block;
+  width: 13.6rem;
+  height: 1px;
+  margin: 1.05rem auto 1.25rem;
+  background: linear-gradient(90deg, transparent, var(--hero-gold), transparent);
+}
+
+.hero-mockup-divider::after {
+  content: "";
+  display: block;
+  width: 0.3rem;
+  height: 0.3rem;
+  margin: -0.15rem auto 0;
+  rotate: 45deg;
+  background: var(--hero-gold);
+}
+
+.hero-mockup-title {
+  max-width: 47rem;
+  margin: 0 auto;
+  color: white;
+  font-family: var(--font-heading);
+  font-size: clamp(4.2rem, 6.25vw, 6.45rem);
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+.hero-mockup-title span {
+  color: var(--hero-gold-soft);
+}
+
+.hero-mockup-support {
+  max-width: 40rem;
+  margin: 1.5rem auto 0;
+  color: rgba(248, 250, 252, 0.78);
+  font-size: clamp(1rem, 1.25vw, 1.18rem);
+  line-height: 1.6;
+}
+
+.hero-mockup-ctas {
+  display: flex;
+  justify-content: center;
+  gap: 1.3rem;
+  margin-top: 2rem;
+}
+
+.hero-mockup-primary-cta,
+.hero-mockup-secondary-cta {
+  min-width: 14rem;
+  min-height: 3.6rem;
+  border-radius: 1rem;
+  font-size: 0.95rem;
+  font-weight: 850;
+}
+
+.hero-mockup-primary-cta {
+  border: 1px solid rgba(244, 221, 162, 0.74);
+  background: linear-gradient(135deg, #f5c85d, #d99b37);
+  color: #130f08;
+  box-shadow:
+    0 14px 34px rgba(217, 155, 55, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.hero-mockup-primary-cta svg,
+.hero-mockup-secondary-cta svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.hero-mockup-secondary-cta {
+  border-color: rgba(184, 196, 214, 0.46);
+  background: rgba(5, 14, 27, 0.66);
+  color: white;
+  backdrop-filter: blur(14px);
+}
+
+.hero-mockup-pillars-panel {
+  grid-area: pillars;
+  align-self: start;
+  margin-top: 1.8rem;
+  padding: 1.35rem 1.2rem 1.25rem;
+  border-color: rgba(217, 155, 55, 0.36);
+}
+
+.hero-mockup-orbit {
+  position: relative;
+  width: 13.3rem;
+  height: 13.3rem;
+  margin: 1.2rem auto 0.9rem;
+}
+
+.hero-mockup-orbit-ring,
+.hero-mockup-orbit-ring-inner,
+.hero-mockup-orbit-line,
+.hero-mockup-orbit-center,
+.hero-mockup-pillar-node {
+  position: absolute;
+  pointer-events: none;
+}
+
+.hero-mockup-orbit-ring {
+  inset: 2.05rem;
+  border: 1px dashed rgba(217, 155, 55, 0.72);
+  border-radius: 999px;
+}
+
+.hero-mockup-orbit-ring-inner {
+  inset: 3.95rem;
+  border-style: solid;
+  border-color: rgba(124, 201, 255, 0.18);
+}
+
+.hero-mockup-orbit-line {
+  top: 50%;
+  left: 50%;
+  background: linear-gradient(90deg, transparent, rgba(217, 155, 55, 0.48), transparent);
+  transform: translate(-50%, -50%);
+}
+
+.hero-mockup-orbit-line-horizontal {
+  width: 8.9rem;
+  height: 1px;
+}
+
+.hero-mockup-orbit-line-vertical {
+  width: 1px;
+  height: 8.9rem;
+}
+
+.hero-mockup-orbit-center {
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 4.4rem;
+  height: 4.4rem;
+  place-items: center;
+  border: 1px solid rgba(217, 155, 55, 0.78);
+  border-radius: 999px;
+  background: rgba(5, 14, 27, 0.72);
+  color: var(--hero-gold);
+  transform: translate(-50%, -50%);
+}
+
+.hero-mockup-orbit-center svg {
+  width: 2.15rem;
+  height: 2.15rem;
+}
+
+.hero-mockup-pillar-node {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  width: 4.6rem;
+  color: rgba(248, 250, 252, 0.82);
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.hero-mockup-pillar-node svg {
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0.38rem;
+  border: 1px solid rgba(217, 155, 55, 0.74);
+  border-radius: 999px;
+  color: var(--hero-gold);
+  background: rgba(5, 14, 27, 0.78);
+}
+
+.hero-mockup-pillar-node[data-position="top"] {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hero-mockup-pillar-node[data-position="rightTop"] {
+  top: 3.45rem;
+  right: -0.4rem;
+}
+
+.hero-mockup-pillar-node[data-position="rightBottom"] {
+  right: -0.4rem;
+  bottom: 2.8rem;
+}
+
+.hero-mockup-pillar-node[data-position="bottom"] {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hero-mockup-pillar-node[data-position="leftBottom"] {
+  bottom: 2.8rem;
+  left: -0.4rem;
+}
+
+.hero-mockup-pillar-node[data-position="leftTop"] {
+  top: 3.45rem;
+  left: -0.8rem;
+}
+
+.hero-mockup-pillar-quote {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(217, 155, 55, 0.28);
+  color: rgba(248, 250, 252, 0.74);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.hero-mockup-pillar-quote > span {
+  color: var(--hero-gold);
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  line-height: 0.9;
+}
+
+.hero-mockup-pillar-quote p {
+  margin: 0;
+}
+
+.hero-mockup-pillar-quote strong {
+  grid-column: 2;
+  color: var(--hero-gold-soft);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero-mockup-focus-card {
+  grid-area: focus;
+  width: min(100%, 15.6rem);
+  align-self: end;
+  padding: 1rem 1.1rem;
+}
+
+.hero-mockup-focus-card h2 {
+  margin: 0.5rem 0 0;
+  color: white;
+  font-size: 0.94rem;
+  font-weight: 800;
+}
+
+.hero-mockup-focus-card p {
+  margin: 0.45rem 0 0;
+  color: rgba(248, 250, 252, 0.72);
+  font-size: 0.78rem;
+  line-height: 1.48;
+}
+
+.hero-mockup-focus-progress {
+  display: block;
+  height: 0.22rem;
+  margin-top: 0.9rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, var(--hero-gold) 0 18%, rgba(184, 196, 214, 0.22) 18% 100%);
+}
+
+.hero-mockup-scroll-cue {
+  grid-area: scroll;
+  display: grid;
+  justify-items: center;
+  align-self: end;
+  color: rgba(248, 250, 252, 0.7);
+  font-size: 0.72rem;
+}
+
+.hero-mockup-scroll-cue span {
+  display: grid;
+  width: 2.1rem;
+  height: 3.2rem;
+  place-items: center;
+  border: 1px solid rgba(248, 250, 252, 0.76);
+  border-radius: 999px;
+}
+
+.hero-mockup-scroll-cue svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.hero-mockup-scroll-cue p {
+  margin: 0.45rem 0 0.1rem;
+}
+
+.hero-mockup-chat-dock {
+  grid-area: chat;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  align-self: end;
+  justify-self: end;
+  width: min(22rem, 100%);
+  min-height: 4rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgba(124, 201, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(8, 21, 38, 0.82);
+  color: white;
+  cursor: pointer;
+  text-align: left;
+  backdrop-filter: blur(18px);
+}
+
+.hero-mockup-chat-icon,
+.hero-mockup-chat-arrow {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  place-items: center;
+  border: 1px solid rgba(124, 201, 255, 0.2);
+  border-radius: 999px;
+  color: rgba(248, 250, 252, 0.86);
+}
+
+.hero-mockup-chat-dock strong,
+.hero-mockup-chat-dock small {
+  display: block;
+}
+
+.hero-mockup-chat-dock strong {
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hero-mockup-chat-dock small {
+  margin-top: 0.18rem;
+  color: rgba(248, 250, 252, 0.62);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 86rem) {
+  .hero-mockup-navbar {
+    grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr) auto;
+  }
+
+  .hero-mockup-utility span {
+    display: none;
+  }
+
+  .hero-mockup-layout {
+    grid-template-columns: minmax(13.5rem, 15rem) minmax(30rem, 1fr) minmax(13.5rem, 15rem);
+    padding-inline: 1.3rem;
+  }
+
+  .hero-mockup-title {
+    font-size: clamp(3.8rem, 6vw, 5.4rem);
+  }
+}
+
+@media (max-width: 64rem) {
+  .hero-mockup-stage {
+    overflow-y: auto;
+  }
+
+  .hero-mockup-navbar {
+    grid-template-columns: 1fr auto;
+    border-radius: 1.25rem;
+  }
+
+  .hero-mockup-chapters,
+  .hero-mockup-progress,
+  .hero-mockup-utility {
+    display: none;
+  }
+
+  .hero-mockup-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "system"
+      "pillars"
+      "focus"
+      "chat";
+    min-height: auto;
+    padding: 3rem 0.4rem 1rem;
+  }
+
+  .hero-mockup-copy,
+  .hero-mockup-system-panel,
+  .hero-mockup-pillars-panel,
+  .hero-mockup-focus-card,
+  .hero-mockup-chat-dock {
+    width: min(100%, 42rem);
+    margin-inline: auto;
+  }
+
+  .hero-mockup-copy {
+    padding-top: 0;
+  }
+
+  .hero-mockup-system-panel,
+  .hero-mockup-pillars-panel {
+    margin-top: 0;
+  }
+
+  .hero-mockup-scroll-cue {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .hero-mockup-brand-title {
+    font-size: 0.86rem;
+  }
+
+  .hero-mockup-brand-subtitle,
+  .hero-mockup-chat-button span {
+    display: none;
+  }
+
+  .hero-mockup-title {
+    font-size: clamp(3rem, 15vw, 4.25rem);
+  }
+
+  .hero-mockup-ctas {
+    flex-direction: column;
+  }
+
+  .hero-mockup-primary-cta,
+  .hero-mockup-secondary-cta {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-homepage-hero-mockup *,
+  .public-homepage-hero-mockup *::before,
+  .public-homepage-hero-mockup *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

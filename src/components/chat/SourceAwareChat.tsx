@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   ChevronDown,
   FileText,
   LoaderCircle,
@@ -328,13 +329,22 @@ export function SourceAwareChat({
           type="button"
           aria-controls={panelId}
           aria-expanded={isOpen}
+          aria-label="Open source-aware chat"
           tabIndex={isOpen ? -1 : undefined}
           data-source-aware-chat-trigger=""
-          className="rounded-full px-4 shadow-lg"
+          className="source-chat-dock"
           onClick={() => setIsOpen((current) => !current)}
         >
-          <MessageCircle aria-hidden="true" data-icon="inline-start" />
-          Open source-aware chat
+          <span className="source-chat-dock-icon" aria-hidden="true">
+            <MessageCircle />
+          </span>
+          <span className="source-chat-dock-copy">
+            <strong>Ask a question about this chapter</strong>
+            <small>Source-aware • Cite-verified</small>
+          </span>
+          <span className="source-chat-dock-arrow" aria-hidden="true">
+            <ArrowRight />
+          </span>
         </Button>
       </div>
     </div>

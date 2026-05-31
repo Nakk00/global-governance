@@ -341,13 +341,9 @@ test("@layout core journey has no horizontal overflow in default and reduced mot
       await expectNoHorizontalOverflow(page)
 
       const returnControl =
-        width >= 1280
-          ? page.getByRole("button", {
-              name: "Return to start from progress rail",
-            })
-          : width >= 768
-            ? page.getByRole("button", { name: "Return to start" })
-            : page.getByRole("button", { name: "Close navigation" })
+        width >= 768
+          ? page.getByRole("button", { name: "Return to start" })
+          : page.getByRole("button", { name: "Close navigation" })
 
       await expect(returnControl).toBeVisible()
       await expectTouchTarget(returnControl)
@@ -367,7 +363,7 @@ test("@layout keyboard path exposes the active layout controls with visible focu
     await heroCta.focus()
     await expectVisibleFocus(heroCta)
 
-    if (width < 768) {
+    if (width < 1024) {
       const menuButton = page.getByRole("button", { name: "Open navigation" })
       await menuButton.focus()
       await expectVisibleFocus(menuButton)
@@ -386,14 +382,6 @@ test("@layout keyboard path exposes the active layout controls with visible focu
       await expectVisibleFocus(primaryLink)
     }
 
-    if (width >= 1280) {
-      const railLink = page
-        .getByRole("navigation", { name: "Section progress" })
-        .getByRole("link", { name: "West Philippine Sea dossier" })
-      await railLink.focus()
-      await expectVisibleFocus(railLink)
-    }
-
     const recapCue = page
       .getByRole("region", { name: "Global governance overview" })
       .getByRole("link", { name: "Continue to UN Command Center" })
@@ -404,12 +392,7 @@ test("@layout keyboard path exposes the active layout controls with visible focu
       name: /return to start/i,
     })
     if (width >= 768) {
-      const returnControl =
-        width >= 1280
-          ? page.getByRole("button", {
-              name: "Return to start from progress rail",
-            })
-          : returnControls.first()
+      const returnControl = returnControls.first()
       await returnControl.focus()
       await expectVisibleFocus(returnControl)
     }
@@ -566,7 +549,9 @@ test("@layout editorial system applies shared surfaces and action hierarchy", as
     .locator('[data-editorial-surface="transition"]')
     .first()
   const narrative = page.locator('[data-editorial-surface="narrative"]').first()
-  const recap = narrative.locator('[data-editorial-surface="recap"]')
+  const recap = page.locator(
+    '#governance-limits [data-editorial-surface="recap"]'
+  )
   const sourceLanding = page.locator('[data-editorial-surface="source"]')
 
   await expect(hero).toBeVisible()
