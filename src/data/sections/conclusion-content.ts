@@ -53,7 +53,7 @@ export const conclusionContent: NarrativeSectionContent = {
   recap: {
     takeaway:
       "This chapter closed the journey with the thesis intact: global governance is imperfect, contested, and still worth understanding.",
-    nextStepLabel: "Return to Journey start",
-    nextStepTargetId: "journey-start",
+    nextStepLabel: "Return to opening chapter",
+    nextStepTargetId: "hero-narrative-frame",
   },
 }

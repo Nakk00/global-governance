@@ -7,7 +7,6 @@ import {
   chapterCount,
   chapterNavigation,
   defaultChapterId,
-  journeyStartSection,
 } from "@/data/navigation"
 import { useNavigation } from "@/hooks/useNavigation"
 import { cn } from "@/lib/utils"
@@ -17,7 +16,7 @@ export function Navbar() {
     useNavigation()
   const activeChapter =
     chapterNavigation.find((item) => item.id === activeChapterId) ??
-    journeyStartSection
+    chapterNavigation[0]!
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-40 px-2 pt-3 sm:px-4">

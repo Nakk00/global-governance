@@ -18,8 +18,8 @@ test("@smoke home page opens the journey and continues in-page", async ({
   await page.goto("/", { waitUntil: "domcontentloaded" })
 
   const continueLink = page.getByRole("link", { name: "Begin the journey" })
-  const journeyStart = page.getByRole("region", {
-    name: "Journey start",
+  const overview = page.getByRole("region", {
+    name: "Global governance overview",
   })
 
   await expect(
@@ -32,9 +32,22 @@ test("@smoke home page opens the journey and continues in-page", async ({
   await expect(continueLink).toBeFocused()
   await page.keyboard.press("Enter")
 
-  await expect(page).toHaveURL(/#journey-start$/)
-  await expect(journeyStart).toBeVisible()
-  await expect(journeyStart).toBeFocused()
+  await expect(page).toHaveURL(/#global-governance-overview$/)
+  await expect(overview).toBeVisible()
+  await expect(overview).toBeFocused()
+})
+
+test("@smoke legacy journey-start hash redirects to Chapter 2", async ({
+  page,
+}) => {
+  await page.goto("/#journey-start", { waitUntil: "domcontentloaded" })
+
+  const overview = page.getByRole("region", {
+    name: "Global governance overview",
+  })
+
+  await expect(page).toHaveURL(/#global-governance-overview$/)
+  await expect(overview).toBeFocused()
 })
 
 test("@smoke desktop navigation jumps between chapter sections and restores history", async ({
@@ -407,7 +420,7 @@ test("@smoke conclusion references are inspectable, keyboard-safe, and contained
         name: "Inspect the sources",
       })
       const recapCue = conclusion.getByRole("link", {
-        name: "Return to Journey start",
+        name: "Return to opening chapter",
       })
 
       await expect(conclusion).toBeFocused()
@@ -476,9 +489,9 @@ test("@smoke conclusion references are inspectable, keyboard-safe, and contained
       await recapCue.focus()
       await expectVisibleFocus(recapCue)
       await page.keyboard.press("Enter")
-      await expect(page).toHaveURL(/#journey-start$/)
+      await expect(page).toHaveURL(/#hero-narrative-frame$/)
       await expect(
-        page.getByRole("region", { name: "Journey start" })
+        page.getByRole("region", { name: "Global Governance" })
       ).toBeFocused()
     }
   }

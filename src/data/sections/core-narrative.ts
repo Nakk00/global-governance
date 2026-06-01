@@ -2,7 +2,6 @@ import { conclusionContent } from "@/data/sections/conclusion-content"
 import {
   globalGovernanceOverview,
   institutionsTransition,
-  journeyStartContent,
 } from "@/data/sections/global-governance-overview"
 import {
   caseFileTransition,
@@ -13,10 +12,8 @@ import {
   unCommandCenter,
 } from "@/data/sections/un-command-center"
 import { westPhilippineSeaDossier } from "@/data/sections/west-philippine-sea-dossier"
-import { isKnownSectionId, journeyStartSection } from "@/data/navigation"
+import { defaultChapterId, isKnownSectionId } from "@/data/navigation"
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
-
-export { journeyStartContent }
 
 export const coreNarrativeSections = [
   globalGovernanceOverview,
@@ -51,7 +48,7 @@ const getCanonicalRecapTargetId = (sectionId: string) => {
 
   const nextSection = coreNarrativeSections[sectionIndex + 1]
 
-  return nextSection?.id ?? journeyStartSection.id
+  return nextSection?.id ?? defaultChapterId
 }
 
 export function resolveNarrativeRecapCue(

@@ -18,7 +18,9 @@ describe("conclusionContent", () => {
       /landing point for later source work|placeholder/i
     )
     expect(referenceDisclosure.title).toBe("Inspect the sources")
-    expect(conclusionContent.recap?.nextStepTargetId).toBe("journey-start")
+    expect(conclusionContent.recap?.nextStepTargetId).toBe(
+      "hero-narrative-frame"
+    )
   })
 
   it("models at least three approved references with stable source metadata", () => {

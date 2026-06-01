@@ -318,7 +318,6 @@ export const activeApprovedSourceBundle: ApprovedSourceBundle = {
       {
         sourceId: "gg-src-global-governance-course-frame",
         sectionIds: [
-          "journey-start",
           "hero-narrative-frame",
           "global-governance-overview",
           "governance-limits",

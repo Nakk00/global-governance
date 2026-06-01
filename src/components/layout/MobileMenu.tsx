@@ -2,7 +2,7 @@ import { Menu, X } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { chapterNavigation, journeyStartSection } from "@/data/navigation"
+import { chapterNavigation } from "@/data/navigation"
 import { useNavigation } from "@/hooks/useNavigation"
 import { cn } from "@/lib/utils"
 
@@ -11,8 +11,7 @@ export function MobileMenu() {
   const { activeSectionId, completedSectionIds, navigateToSection } =
     useNavigation()
   const activeChapter =
-    chapterNavigation.find((item) => item.id === activeSectionId) ??
-    (activeSectionId === journeyStartSection.id ? journeyStartSection : null)
+    chapterNavigation.find((item) => item.id === activeSectionId) ?? null
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(min-width: 1024px)")

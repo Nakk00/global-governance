@@ -5,7 +5,6 @@ export type SourceAwareChatStarterPrompt = {
 }
 
 type SourceAwareChatSectionId =
-  | "journey-start"
   | "hero-narrative-frame"
   | "global-governance-overview"
   | "un-command-center"
@@ -53,22 +52,6 @@ export const sourceAwareChatStarterPrompts = [
 const starterPromptsBySection: Partial<
   Record<SourceAwareChatSectionId, SourceAwareChatStarterPrompt[]>
 > = {
-  "journey-start": [
-    sourceAwareChatStarterPrompts[0],
-    {
-      id: "institutions-without-world-government",
-      label: "Institutions",
-      prompt:
-        "How do institutions coordinate global governance without becoming a world government?",
-    },
-    {
-      id: "un-coordination-role",
-      label: "UN role",
-      prompt:
-        "How does the UN help coordinate states inside the global governance system?",
-    },
-    sourceAwareChatStarterPrompts[3],
-  ],
   "hero-narrative-frame": [
     sourceAwareChatStarterPrompts[0],
     {

@@ -16,7 +16,7 @@ describe("resolveNarrativeRecapCue", () => {
       "governance-limits",
       "west-philippine-sea-dossier",
       "conclusion-references",
-      "journey-start",
+      "hero-narrative-frame",
     ])
   })
 

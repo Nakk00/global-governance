@@ -638,13 +638,6 @@ test("@journey recap cues explain re-entry and use canonical next anchors", asyn
     await expect(
       page.getByRole("region", { name: cue.targetName })
     ).toBeFocused()
-
-    if (cue.targetName === "Journey start") {
-      await page.waitForTimeout(900)
-      await expect(
-        page.getByText("Current chapter: Journey start")
-      ).toBeVisible()
-    }
   }
 })
 

@@ -314,7 +314,9 @@ test("@layout core journey has no horizontal overflow in default and reduced mot
 
       await expectNoHorizontalOverflow(page)
       await expectReadableBodyText(
-        page.getByRole("region", { name: "Journey start" }).locator("p").nth(2)
+        page
+          .getByRole("region", { name: "Global governance overview" })
+          .getByText(/A closer look at the system/i)
       )
 
       const menuButton = page.getByRole("button", { name: "Open navigation" })
@@ -417,8 +419,8 @@ test("@layout touch interactions keep controls usable without trapping reading f
   await expectTouchTarget(heroCta)
   await expectTouchTarget(menuButton)
 
-  await page.tap('a[href="#journey-start"]')
-  await expect(page).toHaveURL(/#journey-start$/)
+  await heroCta.tap()
+  await expect(page).toHaveURL(/#global-governance-overview$/)
 
   await menuButton.tap()
   const mobileNav = page.getByRole("navigation", { name: "Mobile chapters" })
@@ -471,7 +473,7 @@ test("@layout semantic landmarks and headings describe the core journey", async 
     page.getByRole("heading", { level: 1, name: "Global Governance" })
   ).toBeVisible()
 
-  for (const sectionName of ["Journey start", ...narrativeSections]) {
+  for (const sectionName of narrativeSections) {
     const region = page.getByRole("region", { name: sectionName })
     await expect(region).toBeVisible()
     await expect(region.getByRole("heading", { level: 2 })).toBeVisible()
@@ -528,15 +530,15 @@ test("@layout home page respects reduced motion and keeps hero responsive", asyn
   }
 
   const continueLink = page.getByRole("link", { name: "Begin the journey" })
-  const journeyStart = page.getByRole("region", {
-    name: "Journey start",
+  const overview = page.getByRole("region", {
+    name: "Global governance overview",
   })
 
   await continueLink.focus()
   await page.keyboard.press("Enter")
 
-  await expect(page).toHaveURL(/#journey-start$/)
-  await expect(journeyStart).toBeFocused()
+  await expect(page).toHaveURL(/#global-governance-overview$/)
+  await expect(overview).toBeFocused()
 })
 
 test("@layout editorial system applies shared surfaces and action hierarchy", async ({

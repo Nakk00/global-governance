@@ -110,6 +110,9 @@ export const journeyStartSection: ChapterNavigationItem = {
 
 export const defaultChapterId = chapterNavigation[0].id
 export const chapterCount = chapterNavigation.length
+const legacySectionRedirects = {
+  [journeyStartSection.id]: "global-governance-overview",
+} as const
 
 export function isChapterId(value: string) {
   return chapterNavigation.some((item) => item.id === value)
@@ -120,7 +123,17 @@ export function getChapterById(id: string) {
 }
 
 export function isKnownSectionId(value: string) {
-  return isChapterId(value) || value === journeyStartSection.id
+  return isChapterId(value) || value in legacySectionRedirects
+}
+
+export function resolveKnownSectionId(value: string) {
+  if (isChapterId(value)) {
+    return value
+  }
+
+  return (
+    legacySectionRedirects[value as keyof typeof legacySectionRedirects] ?? null
+  )
 }
 
 export function getChapterIndex(id: string) {

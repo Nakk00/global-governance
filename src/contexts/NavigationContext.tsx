@@ -15,11 +15,14 @@ import {
   getChapterIndex,
   isChapterId,
   isKnownSectionId,
+  resolveKnownSectionId,
 } from "@/data/navigation"
 
 type NavigationProviderProps = {
   children: ReactNode
 }
+
+const FULL_PAGE_SECTION_CLASS = "mockup-chapter-stage"
 
 const focusSection = (sectionId: string) => {
   const target = document.getElementById(sectionId)
@@ -28,7 +31,14 @@ const focusSection = (sectionId: string) => {
     return
   }
 
-  target.scrollIntoView({ block: "start" })
+  if (target.classList.contains(FULL_PAGE_SECTION_CLASS)) {
+    window.scrollTo({
+      top: target.getBoundingClientRect().top + window.scrollY,
+    })
+  } else {
+    target.scrollIntoView({ block: "start" })
+  }
+
   window.setTimeout(() => {
     target.focus({ preventScroll: true })
   }, 0)
@@ -67,21 +77,23 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
 
   const navigateToSection = useCallback(
     (sectionId: string) => {
-      if (!isKnownSectionId(sectionId)) {
+      const resolvedSectionId = resolveKnownSectionId(sectionId)
+
+      if (!resolvedSectionId) {
         return
       }
 
-      if (activeSectionIdRef.current === sectionId) {
-        if (getHashSectionId() !== sectionId) {
-          window.history.replaceState(null, "", `#${sectionId}`)
+      if (activeSectionIdRef.current === resolvedSectionId) {
+        if (getHashSectionId() !== resolvedSectionId) {
+          window.history.replaceState(null, "", `#${resolvedSectionId}`)
         }
 
-        focusSection(sectionId)
+        focusSection(resolvedSectionId)
         return
       }
 
-      window.history.pushState(null, "", `#${sectionId}`)
-      setActiveAndFocus(sectionId)
+      window.history.pushState(null, "", `#${resolvedSectionId}`)
+      setActiveAndFocus(resolvedSectionId)
     },
     [setActiveAndFocus]
   )
@@ -153,11 +165,8 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
         return
       }
 
-      const nextSectionId = isChapterId(hashSectionId)
-        ? hashSectionId
-        : isKnownSectionId(hashSectionId)
-          ? hashSectionId
-          : defaultChapterId
+      const nextSectionId =
+        resolveKnownSectionId(hashSectionId) ?? defaultChapterId
 
       if (hashSectionId !== nextSectionId) {
         window.history.replaceState(null, "", `#${nextSectionId}`)
@@ -227,7 +236,8 @@ export function NavigationProvider({ children }: NavigationProviderProps) {
       if (
         hashSectionId &&
         isKnownSectionId(hashSectionId) &&
-        !isChapterId(hashSectionId)
+        !isChapterId(hashSectionId) &&
+        document.getElementById(hashSectionId)
       ) {
         const firstChapter = document.getElementById(chapterNavigation[1]?.id)
         const firstChapterTop = firstChapter

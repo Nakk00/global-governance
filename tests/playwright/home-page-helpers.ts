@@ -55,9 +55,9 @@ export const recapCues = [
   {
     sectionId: "conclusion-references",
     sectionName: "Conclusion and references",
-    cueName: "Return to Journey start",
-    hash: /#journey-start$/,
-    targetName: "Journey start",
+    cueName: "Return to opening chapter",
+    hash: /#hero-narrative-frame$/,
+    targetName: "Global Governance",
   },
 ]
 

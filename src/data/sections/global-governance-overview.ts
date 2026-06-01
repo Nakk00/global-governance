@@ -3,17 +3,6 @@ import type {
   NarrativeSectionContent,
 } from "@/data/sections/narrative-types"
 
-export const journeyStartContent = {
-  id: "journey-start",
-  navigationLabel: "Journey start",
-  eyebrow: "Orientation",
-  title: "A guide to cooperation without a world government",
-  summary:
-    "Global governance starts with a simple tension: shared problems cross borders, but political authority still belongs mostly to states.",
-  body: "This journey follows how countries use institutions, law, norms, and pressure to coordinate action even when no single global authority can command everyone.",
-  note: "No account needed. The core narrative is open from the first screen so a first-time visitor can read, scroll, and return to any chapter by anchor link.",
-}
-
 export const globalGovernanceOverview: NarrativeSectionContent = {
   id: "global-governance-overview",
   navigationLabel: "Global governance overview",
