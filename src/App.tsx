@@ -34,6 +34,12 @@ const PublicHomepageOverviewMockup = lazy(() =>
   )
 )
 
+const PublicHomepageSystemUnderPressureMockup = lazy(() =>
+  import("@/mockups/public-homepage-redesign/SystemUnderPressureMockupPage").then(
+    (module) => ({ default: module.SystemUnderPressureMockupPage })
+  )
+)
+
 export function App() {
   const pathname = window.location.pathname
 
@@ -63,6 +69,16 @@ export function App() {
         fallback={<main className="min-h-svh bg-background text-foreground" />}
       >
         <PublicHomepageOverviewMockup />
+      </Suspense>
+    )
+  }
+
+  if (pathname === "/mockups/public-homepage-redesign/system-under-pressure") {
+    return (
+      <Suspense
+        fallback={<main className="min-h-svh bg-background text-foreground" />}
+      >
+        <PublicHomepageSystemUnderPressureMockup />
       </Suspense>
     )
   }
