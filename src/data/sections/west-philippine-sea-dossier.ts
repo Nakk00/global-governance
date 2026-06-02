@@ -198,7 +198,7 @@ export const wpsEvidenceRegistry: WpsEvidenceRegistry =
 
 export const westPhilippineSeaDossier: NarrativeSectionContent = {
   id: "west-philippine-sea-dossier",
-  navigationLabel: "West Philippine Sea dossier",
+  navigationLabel: "West Philippine Sea Case File",
   eyebrow: "Case file",
   title: "The West Philippine Sea turns the theory into a test",
   summary:
@@ -225,13 +225,13 @@ export const westPhilippineSeaDossier: NarrativeSectionContent = {
   recap: {
     takeaway:
       "This chapter tested the theory in a real dispute, where law clarifies claims while politics shapes what changes on the water.",
-    nextStepLabel: "Continue to Conclusion and references",
-    nextStepTargetId: "conclusion-references",
+    nextStepLabel: "Return to opening chapter",
+    nextStepTargetId: "hero-narrative-frame",
   },
 }
 
 export const wpsDossierShell: WpsDossierShellContent = {
-  chapterLabel: "Chapter: West Philippine Sea dossier",
+  chapterLabel: "Chapter: West Philippine Sea Case File",
   investigationLabel: "Evidence-led investigation",
   openingCue:
     "Open the case as a continuation of the journey: the same question about rules and power now meets a concrete maritime dispute.",

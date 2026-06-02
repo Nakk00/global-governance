@@ -32,13 +32,13 @@ export const globalGovernanceOverview: NarrativeSectionContent = {
   recap: {
     takeaway:
       "This chapter established global governance as coordination under constraint: useful tools for shared problems, not a world government.",
-    nextStepLabel: "Continue to UN Command Center",
+    nextStepLabel: "Continue to The System Under Pressure",
     nextStepTargetId: "un-command-center",
   },
 }
 
 export const institutionsTransition: ChapterTransitionContent = {
-  label: "Next: Institutions",
-  title: "From the big idea to the main room",
-  body: "Once the system needs a place to debate, monitor, and coordinate, institutions become the operating rooms of global governance.",
+  label: "Next: System under pressure",
+  title: "From the big idea to the stress test",
+  body: "Once cooperation needs a place to debate, monitor, and coordinate, institutions become the rooms where politics tests how far rules can travel.",
 }

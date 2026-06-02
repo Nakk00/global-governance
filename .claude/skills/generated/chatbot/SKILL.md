@@ -39,14 +39,6 @@ Start here when exploring this area:
 | `validateProtectionCase` | Function | `scripts/chatbot/validate-chatbot-boundaries.ts` | 159 |
 | `main` | Function | `scripts/chatbot/validate-chatbot-boundaries.ts` | 208 |
 
-## Execution Flows
-
-| Flow | Type | Steps |
-|------|------|-------|
-| `Main → NormalizeSourceIds` | intra_community | 4 |
-| `Main → PostJson` | intra_community | 3 |
-| `Main → RequireSuccess` | intra_community | 3 |
-
 ## How to Explore
 
 1. `gitnexus_context({name: "normalizeSourceIds"})` — see callers and callees

@@ -1,56 +1,75 @@
 ---
 name: layout
-description: "Skill for the Layout area of global-governance-docuweb. 8 symbols across 8 files."
+description: "Skill for the Layout area of global-governance-docuweb. 10 symbols across 6 files."
 ---
 
 # Layout
 
-8 symbols | 8 files | Cohesion: 78%
+10 symbols | 6 files | Cohesion: 73%
 
 ## When to Use
 
 - Working with code in `src/`
-- Understanding how cn, useNavigation, InsightRecapCard work
+- Understanding how useNavigation, SectionProgressRail, Navbar work
 - Modifying layout-related functionality
 
 ## Key Files
 
 | File | Symbols |
 |------|---------|
-| `src/lib/utils.ts` | cn |
+| `src/components/layout/IdleScrollCue.tsx` | IdleScrollCue, isChatPanelOpen, timeout, resetIdle |
+| `src/components/layout/MobileMenu.tsx` | MobileMenu, closeAtDesktop |
 | `src/hooks/useNavigation.ts` | useNavigation |
-| `src/components/ui/button.tsx` | Button |
-| `src/components/sections/InsightRecapCard.tsx` | InsightRecapCard |
 | `src/components/layout/SectionProgressRail.tsx` | SectionProgressRail |
 | `src/components/layout/Navbar.tsx` | Navbar |
-| `src/components/layout/MobileMenu.tsx` | MobileMenu |
-| `src/components/chat/SourceAwareChat.tsx` | GroundedAnswerSurface |
+| `src/components/layout/AppShell.tsx` | AppShell |
 
 ## Entry Points
 
 Start here when exploring this area:
 
-- **`cn`** (Function) — `src/lib/utils.ts:3`
 - **`useNavigation`** (Function) — `src/hooks/useNavigation.ts:4`
-- **`InsightRecapCard`** (Function) — `src/components/sections/InsightRecapCard.tsx:10`
-- **`SectionProgressRail`** (Function) — `src/components/layout/SectionProgressRail.tsx:7`
-- **`Navbar`** (Function) — `src/components/layout/Navbar.tsx:12`
+- **`SectionProgressRail`** (Function) — `src/components/layout/SectionProgressRail.tsx:3`
+- **`Navbar`** (Function) — `src/components/layout/Navbar.tsx:13`
+- **`MobileMenu`** (Function) — `src/components/layout/MobileMenu.tsx:8`
+- **`closeAtDesktop`** (Function) — `src/components/layout/MobileMenu.tsx:18`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `cn` | Function | `src/lib/utils.ts` | 3 |
 | `useNavigation` | Function | `src/hooks/useNavigation.ts` | 4 |
-| `InsightRecapCard` | Function | `src/components/sections/InsightRecapCard.tsx` | 10 |
-| `SectionProgressRail` | Function | `src/components/layout/SectionProgressRail.tsx` | 7 |
-| `Navbar` | Function | `src/components/layout/Navbar.tsx` | 12 |
+| `SectionProgressRail` | Function | `src/components/layout/SectionProgressRail.tsx` | 3 |
+| `Navbar` | Function | `src/components/layout/Navbar.tsx` | 13 |
 | `MobileMenu` | Function | `src/components/layout/MobileMenu.tsx` | 8 |
-| `Button` | Function | `src/components/ui/button.tsx` | 44 |
-| `GroundedAnswerSurface` | Function | `src/components/chat/SourceAwareChat.tsx` | 350 |
+| `closeAtDesktop` | Function | `src/components/layout/MobileMenu.tsx` | 18 |
+| `IdleScrollCue` | Function | `src/components/layout/IdleScrollCue.tsx` | 21 |
+| `AppShell` | Function | `src/components/layout/AppShell.tsx` | 12 |
+| `timeout` | Function | `src/components/layout/IdleScrollCue.tsx` | 32 |
+| `resetIdle` | Function | `src/components/layout/IdleScrollCue.tsx` | 36 |
+| `isChatPanelOpen` | Function | `src/components/layout/IdleScrollCue.tsx` | 17 |
+
+## Execution Flows
+
+| Flow | Type | Steps |
+|------|------|-------|
+| `AppShell → GetHashSectionId` | cross_community | 4 |
+| `AppShell → Cn` | cross_community | 4 |
+| `AppShell → UseNavigation` | intra_community | 4 |
+| `AppShell → CloseAtDesktop` | intra_community | 4 |
+| `Navbar → Cn` | cross_community | 4 |
+
+## Connected Areas
+
+| Area | Connections |
+|------|-------------|
+| Public-homepage-redesign | 3 calls |
+| Overview | 2 calls |
+| Contexts | 1 calls |
+| Chat | 1 calls |
 
 ## How to Explore
 
-1. `gitnexus_context({name: "cn"})` — see callers and callees
+1. `gitnexus_context({name: "useNavigation"})` — see callers and callees
 2. `gitnexus_query({query: "layout"})` — find related execution flows
 3. Read key files listed above for implementation details

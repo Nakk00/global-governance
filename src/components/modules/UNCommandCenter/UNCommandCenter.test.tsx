@@ -12,6 +12,34 @@ import { renderWithNavigation } from "../../../../tests/support/render-with-navi
 import { UNCommandCenter } from "./UNCommandCenter"
 
 describe("UNCommandCenter", () => {
+  it("renders the merged system pressure chapter surface", () => {
+    renderWithNavigation(
+      <UNCommandCenter content={unCommandCenter} shell={unCommandCenterShell} />
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "The System Under Pressure" })
+    ).toBeVisible()
+    const diagram = screen.getByRole("region", {
+      name: /pressure diagram/i,
+    })
+
+    expect(within(diagram).getByText("Rules")).toBeVisible()
+    expect(within(diagram).getByText("Institutions")).toBeVisible()
+    expect(within(diagram).getByText("State Choices")).toBeVisible()
+    expect(within(diagram).getByText("Outcomes")).toBeVisible()
+    expect(screen.getByText("Consent")).toBeVisible()
+    expect(screen.getByText("Veto")).toBeVisible()
+    expect(screen.getByText("Political Will")).toBeVisible()
+    expect(screen.getByText("Leverage")).toBeVisible()
+    expect(screen.getByText("Uneven Enforcement")).toBeVisible()
+    expect(
+      screen.getByRole("link", {
+        name: /Continue to West Philippine Sea Case File/i,
+      })
+    ).toHaveAttribute("href", "#west-philippine-sea-dossier")
+  })
+
   it("updates the organ explorer locally when a different organ is selected", async () => {
     const user = userEvent.setup()
 
@@ -27,45 +55,27 @@ describe("UNCommandCenter", () => {
     })
 
     expect(defaultOrgan).toHaveAttribute("aria-pressed", "true")
-    expect(
-      screen.getByRole("region", { name: "General Assembly details" })
-    ).toBeVisible()
 
     await user.click(securityCouncil)
 
-    const details = screen.getByRole("region", {
-      name: "Security Council details",
-    })
-
     expect(securityCouncil).toHaveAttribute("aria-pressed", "true")
     expect(defaultOrgan).toHaveAttribute("aria-pressed", "false")
-    expect(details).toBeVisible()
+    expect(securityCouncil).toHaveTextContent(/focus on peace and security/i)
     expect(
-      within(details).getByText(
-        /primary responsibility for peace and security/i
-      )
-    ).toBeVisible()
+      screen.getByText(/Security Council: Assesses threats/i)
+    ).toBeInTheDocument()
   })
 
-  it("reveals the local disclosure content without relying on browser routing", async () => {
-    const user = userEvent.setup()
-
+  it("keeps selected room detail inside the composed chapter surface", () => {
     renderWithNavigation(
       <UNCommandCenter content={unCommandCenter} shell={unCommandCenterShell} />
     )
 
-    const trigger = screen.getByRole("button", { name: "Inside this section" })
-
+    expect(screen.getByText("How the system rooms work together")).toBeVisible()
     expect(
-      screen.queryByText(
-        /The General Assembly gives every member state a forum/i
-      )
-    ).not.toBeInTheDocument()
-
-    await user.click(trigger)
-
-    expect(
-      screen.getByText(/The General Assembly gives every member state a forum/i)
+      screen.getByRole("link", {
+        name: "Continue to West Philippine Sea Case File",
+      })
     ).toBeVisible()
   })
 })

@@ -1,11 +1,11 @@
 ---
 name: contexts
-description: "Skill for the Contexts area of global-governance-docuweb. 16 symbols across 3 files."
+description: "Skill for the Contexts area of global-governance-docuweb. 29 symbols across 3 files."
 ---
 
 # Contexts
 
-16 symbols | 3 files | Cohesion: 98%
+29 symbols | 3 files | Cohesion: 89%
 
 ## When to Use
 
@@ -17,51 +17,59 @@ description: "Skill for the Contexts area of global-governance-docuweb. 16 symbo
 
 | File | Symbols |
 |------|---------|
-| `src/contexts/theme-provider.tsx` | isTheme, getSystemTheme, disableTransitionsTemporarily, isEditableTarget, ThemeProvider (+2) |
-| `src/contexts/NavigationContext.tsx` | focusSection, getHashSectionId, NavigationProvider, reconcileHash, updateActiveSection (+1) |
-| `src/data/navigation.ts` | isChapterId, isKnownSectionId, getChapterIndex |
+| `src/contexts/NavigationContext.tsx` | getSectionDocumentTop, NavigationProvider, navigateToChapter, navigateToAdjacentChapter, setActiveChapterPanel (+10) |
+| `src/contexts/theme-provider.tsx` | isTheme, getSystemTheme, disableTransitionsTemporarily, isEditableTarget, ThemeProvider (+4) |
+| `src/data/navigation.ts` | isChapterId, isKnownSectionId, getChapterIndex, getAdjacentChapterId, resolveKnownSectionId |
 
 ## Entry Points
 
 Start here when exploring this area:
 
-- **`isChapterId`** (Function) — `src/data/navigation.ts:62`
-- **`isKnownSectionId`** (Function) — `src/data/navigation.ts:66`
-- **`getChapterIndex`** (Function) — `src/data/navigation.ts:70`
-- **`NavigationProvider`** (Function) — `src/contexts/NavigationContext.tsx:37`
-- **`reconcileHash`** (Function) — `src/contexts/NavigationContext.tsx:78`
+- **`isChapterId`** (Function) — `src/data/navigation.ts:116`
+- **`isKnownSectionId`** (Function) — `src/data/navigation.ts:124`
+- **`getChapterIndex`** (Function) — `src/data/navigation.ts:138`
+- **`getAdjacentChapterId`** (Function) — `src/data/navigation.ts:142`
+- **`NavigationProvider`** (Function) — `src/contexts/NavigationContext.tsx:56`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `isChapterId` | Function | `src/data/navigation.ts` | 62 |
-| `isKnownSectionId` | Function | `src/data/navigation.ts` | 66 |
-| `getChapterIndex` | Function | `src/data/navigation.ts` | 70 |
-| `NavigationProvider` | Function | `src/contexts/NavigationContext.tsx` | 37 |
-| `reconcileHash` | Function | `src/contexts/NavigationContext.tsx` | 78 |
-| `updateActiveSection` | Function | `src/contexts/NavigationContext.tsx` | 114 |
-| `scheduleUpdate` | Function | `src/contexts/NavigationContext.tsx` | 172 |
+| `isChapterId` | Function | `src/data/navigation.ts` | 116 |
+| `isKnownSectionId` | Function | `src/data/navigation.ts` | 124 |
+| `getChapterIndex` | Function | `src/data/navigation.ts` | 138 |
+| `getAdjacentChapterId` | Function | `src/data/navigation.ts` | 142 |
+| `NavigationProvider` | Function | `src/contexts/NavigationContext.tsx` | 56 |
+| `navigateToChapter` | Function | `src/contexts/NavigationContext.tsx` | 104 |
+| `navigateToAdjacentChapter` | Function | `src/contexts/NavigationContext.tsx` | 115 |
+| `setActiveChapterPanel` | Function | `src/contexts/NavigationContext.tsx` | 134 |
+| `resetToStart` | Function | `src/contexts/NavigationContext.tsx` | 154 |
+| `updateActiveSection` | Function | `src/contexts/NavigationContext.tsx` | 192 |
+| `scheduleUpdate` | Function | `src/contexts/NavigationContext.tsx` | 275 |
+| `completedChapterIds` | Function | `src/contexts/NavigationContext.tsx` | 306 |
 | `ThemeProvider` | Function | `src/contexts/theme-provider.tsx` | 79 |
+| `applyTheme` | Function | `src/contexts/theme-provider.tsx` | 103 |
+| `handleChange` | Function | `src/contexts/theme-provider.tsx` | 130 |
 | `handleKeyDown` | Function | `src/contexts/theme-provider.tsx` | 142 |
 | `handleStorageChange` | Function | `src/contexts/theme-provider.tsx` | 182 |
-| `focusSection` | Function | `src/contexts/NavigationContext.tsx` | 22 |
-| `getHashSectionId` | Function | `src/contexts/NavigationContext.tsx` | 35 |
-| `isTheme` | Function | `src/contexts/theme-provider.tsx` | 25 |
-| `getSystemTheme` | Function | `src/contexts/theme-provider.tsx` | 33 |
-| `disableTransitionsTemporarily` | Function | `src/contexts/theme-provider.tsx` | 41 |
-| `isEditableTarget` | Function | `src/contexts/theme-provider.tsx` | 60 |
+| `resolveKnownSectionId` | Function | `src/data/navigation.ts` | 128 |
+| `setActiveAndFocus` | Function | `src/contexts/NavigationContext.tsx` | 69 |
+| `navigateToSection` | Function | `src/contexts/NavigationContext.tsx` | 77 |
 
 ## Execution Flows
 
 | Flow | Type | Steps |
 |------|------|-------|
-| `WpsDossier → IsChapterId` | cross_community | 4 |
+| `NavigateToAdjacentChapter → IsChapterId` | cross_community | 5 |
+| `NavigateToAdjacentChapter → FocusSection` | cross_community | 5 |
+| `AppShell → GetHashSectionId` | cross_community | 4 |
+| `NavigateToAdjacentChapter → GetHashSectionId` | cross_community | 4 |
 | `NarrativeSection → IsChapterId` | cross_community | 4 |
+| `WpsDossier → IsChapterId` | cross_community | 4 |
+| `NavigationProvider → FocusSection` | cross_community | 4 |
+| `NavigationProvider → IsChapterId` | cross_community | 4 |
 | `UNCommandCenter → IsChapterId` | cross_community | 4 |
-| `NavigationProvider → IsChapterId` | intra_community | 3 |
-| `UpdateActiveSection → IsChapterId` | intra_community | 3 |
-| `ReconcileHash → IsChapterId` | intra_community | 3 |
+| `GlobalGovernanceOverviewChapter → IsChapterId` | cross_community | 4 |
 
 ## How to Explore
 

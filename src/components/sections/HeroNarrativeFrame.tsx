@@ -64,7 +64,7 @@ export function HeroNarrativeFrame({ content, id }: HeroNarrativeFrameProps) {
       id={id}
       aria-labelledby="hero-heading"
       data-editorial-surface="hero"
-      className="mockup-chapter-stage chapter-hero-stage editorial-section relative isolate flex min-h-svh overflow-hidden px-4 py-10 sm:px-8 lg:px-12"
+      className="mockup-chapter-stage chapter-hero-stage editorial-section relative isolate flex min-h-svh overflow-hidden px-4 sm:px-8 lg:px-12"
       tabIndex={id ? -1 : undefined}
     >
       <div
@@ -95,7 +95,7 @@ export function HeroNarrativeFrame({ content, id }: HeroNarrativeFrameProps) {
           </div>
         </aside>
 
-        <div className="chapter-hero-copy mockup-hero-center space-y-7 text-center">
+        <div className="chapter-hero-copy mockup-hero-center text-center">
           <p className="mockup-chapter-kicker">Global Systems Overview</p>
           <span className="mockup-hero-divider" aria-hidden="true" />
           <h1

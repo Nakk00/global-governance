@@ -29,8 +29,8 @@ Start here when exploring this area:
 - **`validateIngestionInput`** (Function) — `supabase/functions/_shared/ingestion-pipeline.ts:34`
 - **`getServerChatApprovedSources`** (Function) — `supabase/functions/_shared/approved-source-bundle.ts:14`
 - **`getServerSectionSourceMap`** (Function) — `supabase/functions/_shared/approved-source-bundle.ts:18`
-- **`resolveApprovedSourceId`** (Function) — `src/data/source-bundles/approved-source-bundle.ts:376`
-- **`getApprovedSource`** (Function) — `src/data/source-bundles/approved-source-bundle.ts:393`
+- **`resolveApprovedSourceId`** (Function) — `src/data/source-bundles/approved-source-bundle.ts:375`
+- **`getApprovedSource`** (Function) — `src/data/source-bundles/approved-source-bundle.ts:392`
 
 ## Key Symbols
 
@@ -39,11 +39,11 @@ Start here when exploring this area:
 | `validateIngestionInput` | Function | `supabase/functions/_shared/ingestion-pipeline.ts` | 34 |
 | `getServerChatApprovedSources` | Function | `supabase/functions/_shared/approved-source-bundle.ts` | 14 |
 | `getServerSectionSourceMap` | Function | `supabase/functions/_shared/approved-source-bundle.ts` | 18 |
-| `resolveApprovedSourceId` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 376 |
-| `getApprovedSource` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 393 |
-| `getConclusionReferenceSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 406 |
-| `getDossierEvidenceSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 422 |
-| `getChatCitationSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 438 |
+| `resolveApprovedSourceId` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 375 |
+| `getApprovedSource` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 392 |
+| `getConclusionReferenceSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 405 |
+| `getDossierEvidenceSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 421 |
+| `getChatCitationSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 437 |
 | `normalizeSourcePath` | Function | `supabase/functions/_shared/ingestion-pipeline.ts` | 226 |
 | `createWpsEvidenceRegistry` | Function | `src/data/sections/west-philippine-sea-dossier.ts` | 64 |
 
@@ -51,15 +51,7 @@ Start here when exploring this area:
 
 | Flow | Type | Steps |
 |------|------|-------|
-| `IngestIntoMemoryStore → ResolveApprovedSourceId` | cross_community | 5 |
-| `Main → ResolveApprovedSourceId` | cross_community | 5 |
-| `Main → ResolveApprovedSourceId` | cross_community | 5 |
-| `GetServerSectionSourceMap → ResolveApprovedSourceId` | intra_community | 5 |
-| `IngestIntoMemoryStore → NormalizeSourcePath` | cross_community | 4 |
-| `Main → NormalizeSourcePath` | cross_community | 4 |
-| `Main → NormalizeSourcePath` | cross_community | 4 |
-| `CreateWpsEvidenceRegistry → ResolveApprovedSourceId` | intra_community | 4 |
-| `GetConclusionReferenceSources → ResolveApprovedSourceId` | intra_community | 3 |
+| `BuildIngestionPayload → ResolveApprovedSourceId` | cross_community | 4 |
 
 ## How to Explore
 

@@ -1,11 +1,11 @@
 ---
 name: shared
-description: "Skill for the _shared area of global-governance-docuweb. 55 symbols across 7 files."
+description: "Skill for the _shared area of global-governance-docuweb. 56 symbols across 7 files."
 ---
 
 # _shared
 
-55 symbols | 7 files | Cohesion: 91%
+56 symbols | 7 files | Cohesion: 92%
 
 ## When to Use
 
@@ -19,8 +19,8 @@ description: "Skill for the _shared area of global-governance-docuweb. 55 symbol
 |------|---------|
 | `supabase/functions/_shared/chat-protection.ts` | createMemoryProtectionStore, get, set, delete, getProtectionStore (+20) |
 | `supabase/functions/_shared/ingestion-pipeline.ts` | buildIngestionPayload, ingestIntoMemoryStore, extractPdfText, normalizeContent, chunkContent (+3) |
+| `supabase/functions/_shared/chat-grounding.ts` | getScopedSources, countKeywordHits, isSourceInspectionQuestion, isSpeculativeQuestion, retrieveApprovedSources (+3) |
 | `supabase/functions/_shared/ingestion-request-validation.ts` | parseContentIngestionRequest, readFileType, readOptionalStorage, readOptionalMetadata, parsePdfIngestionRequest (+3) |
-| `supabase/functions/_shared/chat-grounding.ts` | getScopedSources, countKeywordHits, isSourceInspectionQuestion, isSpeculativeQuestion, retrieveApprovedSources (+2) |
 | `supabase/functions/_shared/ingestion-persistence.ts` | persistIngestionPayload, uploadPrivateSourceFile, deletePrivateSourceFile, readSupabaseServiceConfig, encodeStorageObjectPath |
 | `scripts/chatbot/validate-chatbot-set.ts` | main |
 | `scripts/chatbot/prepare-ingestion.ts` | main |
@@ -66,14 +66,8 @@ Start here when exploring this area:
 |------|------|-------|
 | `EvaluateChatProtection → ToRedisKey` | cross_community | 5 |
 | `EvaluateChatProtection → ParseProtectionRecord` | cross_community | 5 |
-| `IngestIntoMemoryStore → ResolveApprovedSourceId` | cross_community | 5 |
-| `Main → ResolveApprovedSourceId` | cross_community | 5 |
-| `Main → ResolveApprovedSourceId` | cross_community | 5 |
 | `EvaluateChatProtection → EscapeRegExp` | intra_community | 4 |
-| `ParseContentIngestionRequest → AsRecord` | cross_community | 4 |
-| `ParseContentIngestionRequest → ReadRequiredString` | cross_community | 4 |
-| `IngestIntoMemoryStore → NormalizeSourcePath` | cross_community | 4 |
-| `Main → NormalizeSourcePath` | cross_community | 4 |
+| `BuildIngestionPayload → ResolveApprovedSourceId` | cross_community | 4 |
 
 ## Connected Areas
 

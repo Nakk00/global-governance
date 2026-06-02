@@ -13,9 +13,7 @@ describe("resolveNarrativeRecapCue", () => {
 
     expect(cues.map((cue) => cue.nextStep?.targetId)).toEqual([
       "un-command-center",
-      "governance-limits",
       "west-philippine-sea-dossier",
-      "conclusion-references",
       "hero-narrative-frame",
     ])
   })

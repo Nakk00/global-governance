@@ -26,6 +26,7 @@ export function IdleScrollCue() {
   const activeIndex = chapterNavigation.findIndex(
     (chapter) => chapter.id === activeChapterId
   )
+  const shouldHideCue = activeChapterId === "un-command-center"
   const hasNextChapter =
     activeIndex >= 0 && activeIndex < chapterNavigation.length - 1
 
@@ -56,7 +57,7 @@ export function IdleScrollCue() {
     }
   }, [activeChapterId])
 
-  if (!hasNextChapter || !isIdle) {
+  if (shouldHideCue || !hasNextChapter || !isIdle) {
     return null
   }
 

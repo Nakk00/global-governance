@@ -92,16 +92,16 @@ const starterPromptsBySection: Partial<
         "How does the UN help coordinate states inside the global governance system?",
     },
     {
-      id: "security-council-role",
-      label: "Security Council",
+      id: "security-council-limits",
+      label: "Security Council limits",
       prompt:
-        "What role does the Security Council play in coordinating collective action?",
+        "How does the Security Council show both coordination and enforcement limits?",
     },
     {
-      id: "un-without-world-government",
-      label: "UN vs. world government",
+      id: "institutions-and-limits",
+      label: "Institutions and limits",
       prompt:
-        "Why does the course treat the UN as a coordinating institution instead of a world government?",
+        "Why can institutions matter even when enforcement depends on politics and consent?",
     },
     sourceAwareChatStarterPrompts[3],
   ],

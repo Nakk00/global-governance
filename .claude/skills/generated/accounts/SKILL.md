@@ -1,11 +1,11 @@
 ---
 name: accounts
-description: "Skill for the Accounts area of global-governance-docuweb. 23 symbols across 5 files."
+description: "Skill for the Accounts area of global-governance-docuweb. 20 symbols across 4 files."
 ---
 
 # Accounts
 
-23 symbols | 5 files | Cohesion: 100%
+20 symbols | 4 files | Cohesion: 98%
 
 ## When to Use
 
@@ -20,8 +20,7 @@ description: "Skill for the Accounts area of global-governance-docuweb. 23 symbo
 | `backend/accounts/services.py` | get_by_supabase_user_id, record_login, upsert, revoke, _request (+6) |
 | `backend/tests/test_admin_auth.py` | test_verifier_uses_configured_issuer_audience_role_and_jwks, test_jwks_failure_refreshes_cache_and_fails_safely, test_verified_claims_reject_wrong_supabase_role, test_upsert_targets_supabase_user_id_conflict |
 | `backend/accounts/auth.py` | verify, refresh_keys, _jwks_client, _claims_from_payload |
-| `backend/accounts/views.py` | admin_me, _has_unexpected_body |
-| `backend/accounts/permissions.py` | authorize_admin_request, _identity_from_profile |
+| `backend/accounts/management/commands/provision_admin.py` | handle |
 
 ## Entry Points
 
@@ -30,8 +29,8 @@ Start here when exploring this area:
 - **`get_admin_profile_repository`** (Function) — `backend/accounts/services.py:149`
 - **`provision_admin_profile`** (Function) — `backend/accounts/services.py:156`
 - **`revoke_admin_profile`** (Function) — `backend/accounts/services.py:178`
-- **`admin_me`** (Function) — `backend/accounts/views.py:10`
-- **`authorize_admin_request`** (Function) — `backend/accounts/permissions.py:33`
+- **`AdminProfileRepositoryError`** (Class) — `backend/accounts/services.py:16`
+- **`AdminProfileNotFoundError`** (Class) — `backend/accounts/services.py:20`
 
 ## Key Symbols
 
@@ -42,8 +41,6 @@ Start here when exploring this area:
 | `get_admin_profile_repository` | Function | `backend/accounts/services.py` | 149 |
 | `provision_admin_profile` | Function | `backend/accounts/services.py` | 156 |
 | `revoke_admin_profile` | Function | `backend/accounts/services.py` | 178 |
-| `admin_me` | Function | `backend/accounts/views.py` | 10 |
-| `authorize_admin_request` | Function | `backend/accounts/permissions.py` | 33 |
 | `test_verifier_uses_configured_issuer_audience_role_and_jwks` | Method | `backend/tests/test_admin_auth.py` | 244 |
 | `test_jwks_failure_refreshes_cache_and_fails_safely` | Method | `backend/tests/test_admin_auth.py` | 277 |
 | `test_verified_claims_reject_wrong_supabase_role` | Method | `backend/tests/test_admin_auth.py` | 297 |
@@ -54,9 +51,26 @@ Start here when exploring this area:
 | `record_login` | Method | `backend/accounts/services.py` | 60 |
 | `upsert` | Method | `backend/accounts/services.py` | 70 |
 | `revoke` | Method | `backend/accounts/services.py` | 88 |
+| `handle` | Method | `backend/accounts/management/commands/provision_admin.py` | 24 |
 | `_profile_from_record` | Function | `backend/accounts/services.py` | 135 |
-| `_has_unexpected_body` | Function | `backend/accounts/views.py` | 40 |
-| `_identity_from_profile` | Function | `backend/accounts/permissions.py` | 78 |
+| `_jwks_client` | Method | `backend/accounts/auth.py` | 109 |
+| `_claims_from_payload` | Method | `backend/accounts/auth.py` | 119 |
+| `_request` | Method | `backend/accounts/services.py` | 104 |
+
+## Execution Flows
+
+| Flow | Type | Steps |
+|------|------|-------|
+| `Source_detail → Get_admin_profile_repository` | cross_community | 5 |
+| `Source_activate → Get_admin_profile_repository` | cross_community | 5 |
+| `Source_approve → Get_admin_profile_repository` | cross_community | 5 |
+| `Source_disable → Get_admin_profile_repository` | cross_community | 5 |
+| `Source_archive → Get_admin_profile_repository` | cross_community | 5 |
+| `Validation_runs → Get_admin_profile_repository` | cross_community | 4 |
+| `Validation_run_detail → Get_admin_profile_repository` | cross_community | 4 |
+| `Dashboard → Get_admin_profile_repository` | cross_community | 4 |
+| `Source_chunks → Get_admin_profile_repository` | cross_community | 4 |
+| `Source_citations → Get_admin_profile_repository` | cross_community | 4 |
 
 ## How to Explore
 

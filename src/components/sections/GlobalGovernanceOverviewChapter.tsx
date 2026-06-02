@@ -32,14 +32,15 @@ export function GlobalGovernanceOverviewChapter({
   const CenterIcon = overviewVisualCopy.centerIcon
   const NextIcon = overviewVisualCopy.nextIcon
   const nextTargetId = recapCue.nextStep?.targetId ?? "un-command-center"
-  const nextLabel = recapCue.nextStep?.label ?? "Continue to UN Command Center"
+  const nextLabel =
+    recapCue.nextStep?.label ?? "Continue to The System Under Pressure"
 
   return (
     <section
       id={content.id}
       aria-labelledby={headingId}
       data-editorial-surface="narrative"
-      className="mockup-chapter-stage overview-chapter-stage editorial-section relative isolate min-h-svh overflow-hidden px-4 pt-28 pb-4 sm:px-8 lg:px-12"
+      className="mockup-chapter-stage overview-chapter-stage editorial-section relative isolate min-h-svh overflow-hidden px-4 sm:px-8 lg:px-12"
       tabIndex={-1}
     >
       <div
@@ -47,7 +48,7 @@ export function GlobalGovernanceOverviewChapter({
         className="overview-chapter-backdrop pointer-events-none absolute inset-0 -z-10"
       />
 
-      <div className="editorial-container mockup-overview-grid min-h-[calc(100svh-8rem)]">
+      <div className="editorial-container mockup-overview-grid">
         <header className="mockup-overview-header text-center">
           <p className="overview-eyebrow">
             <span aria-hidden="true" />

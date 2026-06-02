@@ -141,9 +141,9 @@ export const overviewVisualCopy = {
     "Effective cooperation today shapes a more secure, just, and sustainable future.",
   lensesKicker: "View the system through different lenses",
   nextKicker: "Next Chapter",
-  nextTitle: "UN Command Center",
+  nextTitle: "The System Under Pressure",
   nextBody:
-    "Explore the core institution designed to maintain peace and security.",
+    "See how institutions organize cooperation while politics tests their limits.",
   centerLabel: "Global Governance",
   centerIcon: Globe2,
   nextIcon: ArrowRight,

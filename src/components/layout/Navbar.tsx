@@ -46,7 +46,7 @@ export function Navbar() {
 
         <nav
           aria-label="Primary"
-          className="chapter-command-track hidden min-w-0 flex-1 items-center justify-center gap-1 lg:flex"
+          className="chapter-command-track hidden min-w-0 flex-1 items-center justify-center gap-1 lg:grid"
         >
           {chapterNavigation.map((item) => {
             const isActive = item.id === activeChapterId

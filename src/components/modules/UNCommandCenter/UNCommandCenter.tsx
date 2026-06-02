@@ -1,48 +1,76 @@
+import type { ComponentType } from "react"
 import { useState } from "react"
 import {
-  ChevronDown,
-  Compass,
-  Info,
+  ArrowRight,
+  CircleDot,
+  FileText,
+  Globe2,
+  Hand,
   Landmark,
+  Lightbulb,
+  Map,
+  Network,
   Scale,
+  ShieldCheck,
+  Target,
   Users,
+  UsersRound,
+  Vote,
 } from "lucide-react"
 
-import { InsightRecapCard } from "@/components/sections/InsightRecapCard"
-import { Button } from "@/components/ui/button"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { resolveNarrativeRecapCue } from "@/data/sections/core-narrative"
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
 import {
+  systemPressureBackground,
+  systemPressureConstraints,
+  systemPressureNodes,
+  systemPressurePreviewChapters,
   unOrgans,
   type UNCommandCenterShellContent,
 } from "@/data/sections/un-command-center"
-import { cn } from "@/lib/utils"
 
 type UNCommandCenterProps = {
   content: NarrativeSectionContent
   shell: UNCommandCenterShellContent
 }
 
-const controlIcons = [Compass, Info]
-const organIcons = [Users, Scale, Compass, Landmark, Info]
-const comparisonFrame = {
-  selectorLabel: "Organ selector",
-  detailsLabel: "Comparison details",
-}
+type IconComponent = ComponentType<{
+  "aria-hidden"?: boolean
+  className?: string
+}>
+
+const organIcons: IconComponent[] = [
+  Users,
+  ShieldCheck,
+  Network,
+  Landmark,
+  Scale,
+]
+const pressureNodeIcons: IconComponent[] = [
+  FileText,
+  Landmark,
+  UsersRound,
+  Target,
+]
+const constraintIcons: IconComponent[] = [
+  UsersRound,
+  Hand,
+  Vote,
+  ShieldCheck,
+  CircleDot,
+]
+const previewIcons: IconComponent[] = [Globe2, Network, Landmark, Map]
 
 export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
   const [selectedOrganId, setSelectedOrganId] = useState(unOrgans[0]?.id)
   const headingId = `${content.id}-heading`
-  const organExplorerHeadingId = `${content.id}-organ-explorer-heading`
   const organPanelId = `${content.id}-organ-panel`
-  const recapCue = resolveNarrativeRecapCue(content)
+  const pressureMapId = `${content.id}-pressure-map`
   const selectedOrgan =
     unOrgans.find((organ) => organ.id === selectedOrganId) ?? unOrgans[0]
+  const nextStep = content.recap
+  const nextPreview = systemPressurePreviewChapters.find(
+    (chapter) => chapter.id === nextStep?.nextStepTargetId
+  )
 
   if (!selectedOrgan) {
     return null
@@ -51,232 +79,204 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
   return (
     <section
       id={content.id}
-      aria-label={content.navigationLabel}
-      data-editorial-surface="un-command-center"
-      className="editorial-section editorial-container min-h-[54svh]"
+      aria-labelledby={headingId}
+      data-editorial-surface="system-under-pressure"
+      className="mockup-chapter-stage system-pressure-chapter-stage editorial-section relative isolate min-h-svh overflow-hidden"
       tabIndex={-1}
     >
-      <div className="editorial-measure space-y-8">
-        <header className="space-y-4">
-          <p className="editorial-kicker">{content.eyebrow}</p>
-          <h2 id={headingId} className="editorial-heading">
+      <img
+        className="system-pressure-background pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover"
+        src={systemPressureBackground}
+        alt=""
+        aria-hidden="true"
+      />
+      <div
+        aria-hidden="true"
+        className="system-pressure-backdrop pointer-events-none absolute inset-0 -z-10"
+      />
+
+      <div className="editorial-container system-pressure-grid">
+        <header className="system-pressure-heading-block text-center">
+          <p className="system-pressure-eyebrow">
+            <span aria-hidden="true" />
+            Chapter 3
+            <span aria-hidden="true" />
+          </p>
+          <h2 id={headingId} className="system-pressure-title">
             {content.title}
           </h2>
-          <p className="editorial-lede">{shell.introduction}</p>
-          <div
-            role="region"
-            aria-label={shell.summaryLabel}
-            className="editorial-surface editorial-summary"
-          >
-            <p className="editorial-kicker">Summary</p>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-card-foreground">
-              {content.summary}
-            </p>
-          </div>
+          <p className="system-pressure-support">
+            Institutions organize cooperation. Politics tests the limits.
+          </p>
+          <p className="sr-only">{content.summary}</p>
         </header>
 
-        <div
-          role="region"
-          aria-label="Command Center entry controls"
-          className="editorial-surface space-y-5"
-        >
-          <div className="space-y-2">
-            <p className="editorial-kicker">{shell.entryLabel}</p>
-            <p className="editorial-prose">{shell.entryPrompt}</p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {shell.controls.map((control, index) => {
-              const Icon = controlIcons[index] ?? Compass
+        <aside className="system-pressure-panel system-pressure-rooms">
+          <p className="system-pressure-kicker">Institution Rooms</p>
+          <div
+            role="group"
+            aria-label="Institution room selector"
+            className="system-pressure-room-list"
+          >
+            {unOrgans.map((organ, index) => {
+              const isSelected = organ.id === selectedOrgan.id
+              const Icon = organIcons[index] ?? Landmark
 
               return (
-                <Collapsible key={control.title} className="space-y-3">
-                  <CollapsibleTrigger asChild>
-                    <Button
-                      type="button"
-                      variant={index === 0 ? "default" : "outline"}
-                      data-action-priority={
-                        index === 0 ? "primary" : "secondary"
-                      }
-                      className={cn(
-                        "w-full justify-between gap-3 rounded-2xl text-left whitespace-normal",
-                        index === 0 && "editorial-primary-action"
-                      )}
-                    >
-                      <span className="flex min-w-0 items-center gap-2">
-                        <Icon aria-hidden="true" data-icon="inline-start" />
-                        <span>{control.title}</span>
-                      </span>
-                      <ChevronDown
-                        aria-hidden="true"
-                        data-icon="inline-end"
-                        className="transition-transform duration-200 group-aria-expanded/button:rotate-180 motion-reduce:transition-none"
-                      />
-                    </Button>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="rounded-2xl border border-border bg-background/45 px-4 py-3 data-[state=closed]:animate-none data-[state=open]:animate-none">
-                    <p className="editorial-prose">{control.detail}</p>
-                  </CollapsibleContent>
-                </Collapsible>
+                <button
+                  key={organ.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  aria-controls={organPanelId}
+                  data-active={isSelected || undefined}
+                  data-state={isSelected ? "selected" : "idle"}
+                  className="system-pressure-room"
+                  onClick={() => setSelectedOrganId(organ.id)}
+                >
+                  <span className="system-pressure-room-icon">
+                    <Icon aria-hidden={true} />
+                  </span>
+                  <span className="min-w-0">
+                    <strong>{organ.label}</strong>
+                    <small>{organ.summary}</small>
+                  </span>
+                  <ArrowRight aria-hidden="true" className="size-4" />
+                </button>
               )
             })}
           </div>
-        </div>
+          <p id={organPanelId} aria-live="polite" className="sr-only">
+            {selectedOrgan.label}: {selectedOrgan.role}
+          </p>
+          <button className="system-pressure-room-link" type="button">
+            <Landmark aria-hidden="true" />
+            <span>
+              {shell.controls[0]?.title ?? "How the rooms work together"}
+            </span>
+          </button>
+        </aside>
 
-        <div
-          role="region"
-          aria-labelledby={organExplorerHeadingId}
-          className="editorial-surface scroll-mt-36 space-y-6"
+        <section
+          className="system-pressure-diagram"
+          aria-labelledby={pressureMapId}
         >
-          <div className="space-y-2">
-            <p className="editorial-kicker">Organ explorer</p>
-            <h3
-              id={organExplorerHeadingId}
-              className="text-2xl font-semibold tracking-normal text-foreground"
-            >
-              Inspect the rooms of the UN system
-            </h3>
-            <p className="editorial-prose">
-              Select an organ to compare what it does, where its authority comes
-              from, and where politics still limits the room.
-            </p>
+          <h3 id={pressureMapId} className="sr-only">
+            Rules, institutions, state choices, and outcomes pressure diagram
+          </h3>
+          <p className="sr-only">
+            Rules and institutions organize cooperation, while state choices and
+            outcomes show how politics tests enforcement.
+          </p>
+          <div className="system-pressure-coordination" aria-hidden="true">
+            <span>Coordination</span>
           </div>
+          <div className="system-pressure-node-row">
+            {systemPressureNodes.map((node, index) => {
+              const Icon = pressureNodeIcons[index] ?? CircleDot
 
-          <div
-            data-un-comparison-layout="organ-comparison"
-            className="grid min-w-0 gap-4 lg:grid-cols-[minmax(16rem,0.85fr)_minmax(0,1.15fr)] lg:items-start xl:grid-cols-[minmax(18rem,0.78fr)_minmax(0,1.22fr)]"
-          >
-            <div
-              role="group"
-              aria-labelledby={organExplorerHeadingId}
-              aria-label={comparisonFrame.selectorLabel}
-              data-un-comparison-part="selector"
-              className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-1"
-            >
-              {unOrgans.map((organ, index) => {
-                const isSelected = organ.id === selectedOrgan.id
-                const Icon = organIcons[index] ?? Landmark
-
-                return (
-                  <Button
-                    key={organ.id}
-                    type="button"
-                    variant={isSelected ? "default" : "outline"}
-                    aria-pressed={isSelected}
-                    aria-controls={organPanelId}
-                    data-state={isSelected ? "selected" : "idle"}
-                    data-action-priority={isSelected ? "primary" : "secondary"}
-                    className={cn(
-                      "min-h-24 w-full min-w-0 justify-start gap-3 rounded-2xl px-4 py-3 text-left whitespace-normal",
-                      isSelected && "editorial-primary-action"
-                    )}
-                    onClick={() => setSelectedOrganId(organ.id)}
-                  >
-                    <Icon
-                      aria-hidden="true"
-                      data-icon="inline-start"
-                      className="mt-0.5"
-                    />
-                    <span className="grid min-w-0 gap-1">
-                      <span className="font-semibold">{organ.label}</span>
-                      <span
-                        className={cn(
-                          "text-sm leading-6",
-                          isSelected
-                            ? "text-primary-foreground/90"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        {organ.summary}
-                      </span>
-                    </span>
-                  </Button>
-                )
-              })}
-            </div>
-
-            <div
-              id={organPanelId}
-              role="region"
-              aria-live="polite"
-              aria-label={`${selectedOrgan.label} details`}
-              data-un-comparison-part="details"
-              className="min-w-0 rounded-2xl border border-border bg-background/50 p-4 shadow-sm transition-none sm:p-5"
-            >
-              <div className="space-y-3">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 space-y-3">
-                    <p className="editorial-kicker">
-                      {comparisonFrame.detailsLabel}
-                    </p>
-                    <h4 className="text-xl font-semibold text-foreground">
-                      {selectedOrgan.label}
-                    </h4>
-                  </div>
-                  <span className="w-fit rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold tracking-normal text-muted-foreground">
-                    Selected organ
+              return (
+                <article
+                  key={node.label}
+                  className="system-pressure-node"
+                  data-tone={node.tone}
+                >
+                  <span className="system-pressure-node-icon">
+                    <Icon aria-hidden={true} />
                   </span>
-                </div>
-                <p className="editorial-prose">{selectedOrgan.summary}</p>
-              </div>
-
-              <dl className="mt-5 grid min-w-0 gap-3 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                {[
-                  ["Role", selectedOrgan.role],
-                  ["Scope of power", selectedOrgan.power],
-                  ["Limitation", selectedOrgan.limit],
-                  ["Why it matters", selectedOrgan.whyItMatters],
-                ].map(([label, value]) => (
-                  <div
-                    key={label}
-                    className="min-w-0 rounded-xl border border-border bg-card/70 p-4"
-                  >
-                    <dt className="editorial-kicker">{label}</dt>
-                    <dd className="mt-2 text-base leading-7 break-words text-card-foreground">
-                      {value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+                  <h4>{node.label}</h4>
+                  <p>{node.body}</p>
+                  {index < systemPressureNodes.length - 1 ? (
+                    <ArrowRight
+                      className="system-pressure-flow"
+                      aria-hidden="true"
+                    />
+                  ) : null}
+                </article>
+              )
+            })}
           </div>
-        </div>
+          <div className="system-pressure-pressure" aria-hidden="true">
+            <span>Pressure</span>
+          </div>
+          <aside className="system-pressure-takeaway">
+            <span className="system-pressure-takeaway-icon">
+              <Lightbulb aria-hidden="true" />
+            </span>
+            <span>
+              <strong>Key takeaway</strong>
+              <small>{content.synthesis}</small>
+            </span>
+          </aside>
+        </section>
 
-        <Collapsible className="editorial-surface orbital-disclosure shadow-none">
-          <div className="space-y-3 p-5 sm:p-6">
-            <p className="text-sm leading-6 text-muted-foreground">
-              Open a short map of the institutions this shell will unpack next.
-            </p>
-            <CollapsibleTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                data-action-priority="secondary"
-                className="group w-full justify-between rounded-2xl text-left whitespace-normal sm:w-auto sm:rounded-full"
+        <aside className="system-pressure-panel system-pressure-constraints">
+          <p className="system-pressure-kicker">
+            Constraints That Limit Outcomes
+          </p>
+          <div className="system-pressure-constraint-list">
+            {systemPressureConstraints.map((constraint, index) => {
+              const Icon = constraintIcons[index] ?? CircleDot
+
+              return (
+                <article
+                  key={constraint.label}
+                  className="system-pressure-constraint"
+                >
+                  <Icon aria-hidden={true} />
+                  <span>
+                    <strong>{constraint.label}</strong>
+                    <small>{constraint.body}</small>
+                  </span>
+                </article>
+              )
+            })}
+          </div>
+          <strong className="system-pressure-closing">
+            The system is not powerless. But it is not all-powerful either.
+          </strong>
+        </aside>
+
+        <footer className="system-pressure-bottom-nav">
+          {systemPressurePreviewChapters.map((chapter, index) => {
+            const isActive = chapter.id === content.id
+            const Icon = previewIcons[index] ?? CircleDot
+
+            return (
+              <a
+                key={chapter.id}
+                href={`#${chapter.id}`}
+                className="system-pressure-bottom-chapter"
+                data-active={isActive || undefined}
+                aria-current={isActive ? "location" : undefined}
               >
-                Inside this section
-                <ChevronDown
-                  aria-hidden="true"
-                  data-icon="inline-end"
-                  className="transition-transform duration-200 group-aria-expanded/button:rotate-180 motion-reduce:transition-none"
-                />
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-          <CollapsibleContent className="border-t border-border px-5 py-4 data-[state=closed]:animate-none data-[state=open]:animate-none sm:px-6">
-            <div className="space-y-4">
-              {content.supportingDetails.map((detail) => (
-                <p key={detail} className="editorial-prose">
-                  {detail}
-                </p>
-              ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-
-        <InsightRecapCard nextStep={recapCue.nextStep}>
-          {recapCue.takeaway}
-        </InsightRecapCard>
+                <span className="system-pressure-bottom-icon">
+                  <Icon aria-hidden={true} />
+                </span>
+                <span>
+                  <strong>
+                    <small>{chapter.number}</small> {chapter.label}
+                  </strong>
+                  <em>{chapter.summary}</em>
+                </span>
+              </a>
+            )
+          })}
+          {nextStep ? (
+            <a
+              href={`#${nextStep.nextStepTargetId}`}
+              className="system-pressure-next-card"
+              aria-label={nextStep.nextStepLabel}
+            >
+              <span>
+                <small>Next</small>
+                <strong>{nextPreview?.label ?? nextStep.nextStepLabel}</strong>
+              </span>
+              <span className="system-pressure-next-icon">
+                <ArrowRight aria-hidden="true" />
+              </span>
+            </a>
+          ) : null}
+        </footer>
       </div>
     </section>
   )

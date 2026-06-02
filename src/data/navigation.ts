@@ -33,7 +33,7 @@ export const chapterNavigation: ChapterNavigationItem[] = [
   {
     id: "global-governance-overview",
     number: 2,
-    label: "Global governance overview",
+    label: "Global Governance Overview",
     shellLabel: "Global Governance Overview",
     mobileLabel: "Overview",
     eyebrow: "Big idea",
@@ -46,53 +46,28 @@ export const chapterNavigation: ChapterNavigationItem[] = [
   {
     id: "un-command-center",
     number: 3,
-    label: "UN Command Center",
-    shellLabel: "UN Command Center",
-    mobileLabel: "UN",
-    eyebrow: "Institutions",
+    label: "The System Under Pressure",
+    shellLabel: "The System Under Pressure",
+    mobileLabel: "Pressure",
+    eyebrow: "Institutions under pressure",
     summary:
-      "Meet the major UN bodies and the different jobs they perform in the system.",
-    themeKey: "command-center",
+      "Institutions organize cooperation while politics tests enforcement limits.",
+    themeKey: "system-pressure",
     defaultPanelId: "general-assembly",
-    chapterKind: "module",
-  },
-  {
-    id: "governance-limits",
-    number: 4,
-    label: "Governance limits and enforcement",
-    shellLabel: "Governance Limits and Enforcement",
-    mobileLabel: "Limits",
-    eyebrow: "Constraints",
-    summary:
-      "Track why global rules can matter even when enforcement depends on politics and consent.",
-    themeKey: "limits",
-    defaultPanelId: "ideal-vs-reality",
     chapterKind: "analysis",
   },
   {
     id: "west-philippine-sea-dossier",
-    number: 5,
-    label: "West Philippine Sea dossier",
-    shellLabel: "West Philippine Sea Dossier",
-    mobileLabel: "WPS",
+    number: 4,
+    label: "West Philippine Sea Case File",
+    shellLabel: "West Philippine Sea Case File",
+    mobileLabel: "WPS Case",
     eyebrow: "Case file",
     summary:
       "Use a regional dispute to test how law, institutions, and state behavior interact.",
     themeKey: "dossier",
     defaultPanelId: "timeline",
     chapterKind: "case-file",
-  },
-  {
-    id: "conclusion-references",
-    number: 6,
-    label: "Conclusion and references",
-    shellLabel: "Conclusion and References",
-    mobileLabel: "Conclusion",
-    eyebrow: "Wrap-up",
-    summary:
-      "Return to the core thesis and the sources that ground the learning journey.",
-    themeKey: "conclusion",
-    chapterKind: "conclusion",
   },
 ]
 
@@ -112,6 +87,8 @@ export const defaultChapterId = chapterNavigation[0].id
 export const chapterCount = chapterNavigation.length
 const legacySectionRedirects = {
   [journeyStartSection.id]: "global-governance-overview",
+  "governance-limits": "un-command-center",
+  "conclusion-references": "west-philippine-sea-dossier",
 } as const
 
 export function isChapterId(value: string) {

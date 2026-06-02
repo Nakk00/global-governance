@@ -86,6 +86,42 @@ describe("SourceAwareChat", () => {
     expect(input).not.toBeInTheDocument()
   })
 
+  it("shows the floating dock on the system under pressure chapter", async () => {
+    const user = userEvent.setup()
+    const chatClient = vi.fn().mockResolvedValue(answeredResponse)
+
+    renderWithNavigation(<SourceAwareChat chatClient={chatClient} />, {
+      navigation: {
+        activeSectionId: "un-command-center",
+      },
+    })
+
+    const trigger = screen.getByRole("button", {
+      name: "Open source-aware chat",
+    })
+    expect(trigger).toBeVisible()
+
+    await user.click(trigger)
+
+    const panel = screen.getByRole("region", {
+      name: "Source-aware academic chat",
+    })
+
+    await user.click(
+      within(panel).getByRole("button", { name: "Security Council limits" })
+    )
+    await user.click(within(panel).getByRole("button", { name: "Ask" }))
+
+    await waitFor(() =>
+      expect(chatClient).toHaveBeenCalledWith(
+        "How does the Security Council show both coordination and enforcement limits?",
+        {
+          currentSectionId: "un-command-center",
+        }
+      )
+    )
+  })
+
   it("loads starter prompts into the composer, keeps shift-enter multiline, and forwards section context", async () => {
     const chatClient = vi.fn().mockResolvedValue(answeredResponse)
     const { open, user } = openChat(chatClient)
