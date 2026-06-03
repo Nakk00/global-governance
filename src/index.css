@@ -2460,14 +2460,14 @@
     grid-area: left;
     align-self: start;
     padding: 0.92rem 1.1rem;
-    transform: translateY(clamp(-1.8rem, -2.25svh, -1.2rem));
+    transform: translateY(clamp(-3.15rem, -4.2svh, -1.9rem));
   }
 
   .overview-right-panel {
     grid-area: right;
     align-self: start;
     padding: 0.92rem 1.1rem;
-    transform: translateY(clamp(-1.8rem, -2.25svh, -1.2rem));
+    transform: translateY(clamp(-3.15rem, -4.2svh, -1.9rem));
   }
 
   .overview-panel-rule {
@@ -2490,10 +2490,15 @@
     border: 1px solid color-mix(in oklch, var(--mockup-blue) 24%, transparent);
     border-radius: 999px;
     background: color-mix(in oklch, black 42%, transparent);
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease;
   }
 
   .overview-relation-card svg {
     color: var(--mockup-blue);
+    transition: color 180ms ease;
   }
 
   .overview-relation-card h4 {
@@ -2507,6 +2512,29 @@
     color: color-mix(in oklch, white 66%, var(--mockup-blue));
     font-size: 0.68rem;
     line-height: 1.35;
+  }
+
+  .overview-relation-card[data-focus="true"] {
+    border-color: color-mix(in oklch, var(--mockup-gold) 86%, white);
+    background:
+      radial-gradient(
+        circle at 14% 50%,
+        color-mix(in oklch, var(--mockup-gold) 30%, transparent),
+        transparent 54%
+      ),
+      color-mix(in oklch, var(--mockup-blue) 24%, black 30%);
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--mockup-gold) 34%, transparent),
+      0 0 18px color-mix(in oklch, var(--mockup-gold) 30%, transparent),
+      0 0 32px color-mix(in oklch, var(--mockup-blue) 34%, transparent),
+      0 14px 30px color-mix(in oklch, black 38%, transparent);
+  }
+
+  .overview-relation-card[data-focus="true"] svg {
+    color: color-mix(in oklch, var(--mockup-gold) 84%, white);
+    filter: drop-shadow(
+      0 0 8px color-mix(in oklch, var(--mockup-gold) 58%, transparent)
+    );
   }
 
   .overview-system-diagram {
@@ -2699,10 +2727,46 @@
     text-align: center;
     text-transform: uppercase;
     box-shadow: 0 16px 34px color-mix(in oklch, black 32%, transparent);
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
   }
 
   .overview-system-node svg {
     color: color-mix(in oklch, white 76%, transparent);
+    transition: color 180ms ease;
+  }
+
+  .overview-system-node[data-focus="true"] {
+    border-color: color-mix(in oklch, var(--mockup-gold) 94%, white);
+    background:
+      radial-gradient(
+        circle,
+        color-mix(in oklch, var(--mockup-gold) 34%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        circle,
+        color-mix(in oklch, var(--mockup-blue) 30%, transparent),
+        transparent 74%
+      ),
+      color-mix(in oklch, oklch(0.16 0.04 250) 88%, transparent);
+    color: white;
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--mockup-gold) 52%, transparent),
+      0 0 18px color-mix(in oklch, var(--mockup-gold) 46%, transparent),
+      0 0 42px color-mix(in oklch, var(--mockup-blue) 54%, transparent),
+      0 0 76px color-mix(in oklch, var(--mockup-blue) 22%, transparent),
+      0 18px 36px color-mix(in oklch, black 38%, transparent);
+  }
+
+  .overview-system-node[data-focus="true"] svg {
+    color: color-mix(in oklch, var(--mockup-gold) 86%, white);
+    filter: drop-shadow(
+      0 0 10px color-mix(in oklch, var(--mockup-gold) 66%, transparent)
+    );
   }
 
   .overview-system-node[data-position="top"] {
@@ -2759,6 +2823,9 @@
     align-items: center;
     color: color-mix(in oklch, white 72%, transparent);
     font-size: 0.78rem;
+    transition:
+      color 180ms ease,
+      text-shadow 180ms ease;
   }
 
   .overview-legend li span {
@@ -2779,6 +2846,16 @@
     height: 0;
     border-top: 2px dotted var(--mockup-gold);
     background: transparent;
+  }
+
+  .overview-legend li[data-focus="true"] {
+    color: white;
+    text-shadow: 0 0 18px
+      color-mix(in oklch, var(--mockup-blue) 24%, transparent);
+  }
+
+  .overview-legend li[data-focus="true"] span {
+    box-shadow: 0 0 14px currentColor;
   }
 
   .overview-lenses {
@@ -2845,12 +2922,27 @@
     font-size: 0.86rem;
     font-weight: 850;
     text-align: left;
+    transition:
+      border-color 180ms ease,
+      background 180ms ease,
+      box-shadow 180ms ease,
+      color 180ms ease;
   }
 
   .mockup-lens-button[aria-pressed="true"] {
-    border-color: color-mix(in oklch, var(--mockup-blue) 50%, transparent);
-    background: color-mix(in oklch, var(--mockup-blue) 20%, transparent);
+    border-color: color-mix(in oklch, var(--mockup-gold) 74%, white);
+    background:
+      radial-gradient(
+        circle at 20% 50%,
+        color-mix(in oklch, var(--mockup-gold) 28%, transparent),
+        transparent 58%
+      ),
+      color-mix(in oklch, var(--mockup-blue) 28%, transparent);
     color: white;
+    box-shadow:
+      0 0 0 1px color-mix(in oklch, var(--mockup-gold) 22%, transparent),
+      0 0 22px color-mix(in oklch, var(--mockup-blue) 36%, transparent),
+      0 0 30px color-mix(in oklch, var(--mockup-gold) 18%, transparent);
   }
 
   .mockup-lens-button svg,
@@ -2979,6 +3071,17 @@
     white-space: nowrap;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .overview-relation-card,
+    .overview-relation-card svg,
+    .overview-system-node,
+    .overview-system-node svg,
+    .overview-legend li,
+    .mockup-lens-button {
+      transition: none;
+    }
+  }
+
   [data-source-aware-chat-trigger] {
     display: grid !important;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -3006,6 +3109,18 @@
       0 18px 40px color-mix(in oklch, black 28%, transparent),
       inset 0 1px 0 color-mix(in oklch, white 12%, transparent) !important;
     backdrop-filter: blur(18px) !important;
+  }
+
+  @media (min-width: 72.01rem) {
+    body:has(a[href="#global-governance-overview"][aria-current="location"])
+      .idle-scroll-cue {
+      display: none !important;
+    }
+
+    body:has(a[href="#global-governance-overview"][aria-current="location"])
+      [data-source-aware-chat-trigger] {
+      transform: translateY(clamp(-7.5rem, -10.5svh, -6rem));
+    }
   }
 
   .source-chat-dock-icon,
@@ -3553,6 +3668,30 @@
       min-height: 2.35rem;
       padding: 0.24rem 0.48rem;
       font-size: 0.64rem;
+    }
+  }
+
+  @media (min-width: 72.01rem) and (max-height: 50rem) {
+    .overview-left-panel > p.mt-3,
+    .overview-right-panel > p.mt-3 {
+      display: none;
+    }
+
+    .overview-left-panel > .mt-3.grid {
+      gap: 0.24rem;
+    }
+
+    .overview-relation-card {
+      min-height: 1.45rem;
+    }
+
+    .overview-relation-card p {
+      display: none;
+    }
+
+    body:has(a[href="#global-governance-overview"][aria-current="location"])
+      [data-source-aware-chat-trigger] {
+      transform: translateY(clamp(-12rem, -23svh, -10.8rem));
     }
   }
 

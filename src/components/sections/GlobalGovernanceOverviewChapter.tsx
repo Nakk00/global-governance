@@ -22,18 +22,23 @@ export function GlobalGovernanceOverviewChapter({
   const recapCue = resolveNarrativeRecapCue(content)
   const { activePanelByChapter, navigateToSection, setActiveChapterPanel } =
     useNavigation()
+  const fallbackLens = overviewLensControls[0]
   const activeLensId =
-    activePanelByChapter[content.id] ??
-    overviewLensControls[0]?.id ??
-    "system-framing"
+    activePanelByChapter[content.id] ?? fallbackLens?.id ?? "system-framing"
+
+  if (!fallbackLens) {
+    return null
+  }
+
   const activeLens =
     overviewLensControls.find((lens) => lens.id === activeLensId) ??
-    overviewLensControls[0]
+    fallbackLens
   const CenterIcon = overviewVisualCopy.centerIcon
   const NextIcon = overviewVisualCopy.nextIcon
   const nextTargetId = recapCue.nextStep?.targetId ?? "un-command-center"
   const nextLabel =
     recapCue.nextStep?.label ?? "Continue to The System Under Pressure"
+  const activeLensRegionId = `${content.id}-active-lens`
 
   return (
     <section
@@ -69,13 +74,13 @@ export function GlobalGovernanceOverviewChapter({
             {overviewVisualCopy.selectedKicker}
           </p>
           <h3 className="mt-3 font-heading text-2xl leading-tight text-card-foreground">
-            {overviewVisualCopy.selectedTitle}
+            {activeLens.selectedTitle}
           </h3>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
-            {overviewVisualCopy.selectedBody}
+            {activeLens.selectedBody}
           </p>
           <p className="mt-3 text-base leading-7 text-muted-foreground">
-            {overviewVisualCopy.selectedDetail}
+            {activeLens.selectedDetail}
           </p>
 
           <div className="overview-panel-rule" aria-hidden="true" />
@@ -85,11 +90,14 @@ export function GlobalGovernanceOverviewChapter({
           <div className="mt-3 grid gap-3">
             {overviewRelationships.map((relationship) => {
               const Icon = relationship.icon
+              const isRelationshipFocused =
+                activeLens.focusRelationshipIds.includes(relationship.id)
 
               return (
                 <article
                   key={relationship.id}
                   className="overview-relation-card"
+                  data-focus={isRelationshipFocused ? "true" : undefined}
                 >
                   <Icon className="size-4" aria-hidden={true} />
                   <div>
@@ -106,11 +114,7 @@ export function GlobalGovernanceOverviewChapter({
           className="overview-system-diagram"
           aria-label="Global governance system diagram"
         >
-          <p className="sr-only">
-            Global governance connects states, institutions, norms, civil
-            society, markets and technology, and issue areas through
-            coordination, influence, information flow, and response pathways.
-          </p>
+          <p className="sr-only">{activeLens.diagramSummary}</p>
           <div className="overview-system-lines" aria-hidden="true">
             <span data-line="horizontal" />
             <span data-line="vertical" />
@@ -128,12 +132,16 @@ export function GlobalGovernanceOverviewChapter({
 
           {overviewSystemNodes.map((node) => {
             const Icon = node.icon
+            const isNodeFocused = activeLens.focusNodeLabels.includes(
+              node.label
+            )
 
             return (
               <div
                 key={node.label}
                 className="overview-system-node"
                 data-position={node.position}
+                data-focus={isNodeFocused ? "true" : undefined}
               >
                 <Icon className="size-5" aria-hidden={true} />
                 <span>{node.label}</span>
@@ -145,32 +153,40 @@ export function GlobalGovernanceOverviewChapter({
         <aside className="mockup-panel overview-right-panel">
           <p className="mockup-panel-kicker">{overviewVisualCopy.whyKicker}</p>
           <h3 className="mt-3 font-heading text-2xl leading-tight text-card-foreground">
-            {overviewVisualCopy.whyTitle}
+            {activeLens.whyTitle}
           </h3>
           <p className="mt-4 text-base leading-7 text-muted-foreground">
-            {overviewVisualCopy.whyBody}
+            {activeLens.whyBody}
           </p>
           <p className="mt-3 text-base leading-7 text-muted-foreground">
-            {overviewVisualCopy.whyDetail}
+            {activeLens.whyDetail}
           </p>
 
           <div className="overview-quote-card">
             <span aria-hidden="true">
               <img src={overviewVisualCopy.quoteAsset} alt="" />
             </span>
-            <strong>{overviewVisualCopy.whyQuote}</strong>
+            <strong>{activeLens.whyQuote}</strong>
           </div>
         </aside>
 
         <aside className="mockup-panel overview-legend">
           <p className="mockup-panel-kicker">System Connections Legend</p>
           <ul>
-            {overviewLegendItems.map((item) => (
-              <li key={item.label}>
-                <span data-tone={item.tone} aria-hidden="true" />
-                {item.label}
-              </li>
-            ))}
+            {overviewLegendItems.map((item) => {
+              const isLegendFocused =
+                activeLens.focusLegendTones?.includes(item.tone) ?? false
+
+              return (
+                <li
+                  key={item.label}
+                  data-focus={isLegendFocused ? "true" : undefined}
+                >
+                  <span data-tone={item.tone} aria-hidden="true" />
+                  {item.label}
+                </li>
+              )
+            })}
           </ul>
         </aside>
 
@@ -191,6 +207,7 @@ export function GlobalGovernanceOverviewChapter({
                   className="mockup-lens-button"
                   type="button"
                   aria-pressed={isActive}
+                  aria-controls={activeLensRegionId}
                   onClick={() => setActiveChapterPanel(content.id, lens.id)}
                 >
                   {isActive ? (
@@ -227,7 +244,11 @@ export function GlobalGovernanceOverviewChapter({
           <span className="sr-only">{nextLabel}</span>
         </a>
 
-        <aside className="overview-active-lens" aria-live="polite">
+        <aside
+          id={activeLensRegionId}
+          className="overview-active-lens"
+          aria-live="polite"
+        >
           <p className="mockup-panel-kicker">Active lens</p>
           <strong>{activeLens.label}</strong>
           <span>{activeLens.description}</span>

@@ -14,9 +14,17 @@ export function createNavigationContextValue(
   overrides: Partial<NavigationContextValue> = {}
 ): NavigationContextValue {
   return {
+    activeChapterId: "hero-narrative-frame",
+    activeChapterIndex: 0,
     activeSectionId: "hero-narrative-frame",
+    activePanelByChapter: {},
+    completedChapterIds: new Set<string>(),
     completedSectionIds: new Set<string>(),
+    navigateToChapter: () => undefined,
     navigateToSection: () => undefined,
+    navigateToAdjacentChapter: () => undefined,
+    setActiveChapterPanel: () => undefined,
+    resetToStart: () => undefined,
     resetToTop: () => undefined,
     ...overrides,
   }
