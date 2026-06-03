@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
@@ -19,70 +19,91 @@ describe("WpsDossier", () => {
       <WpsDossier content={westPhilippineSeaDossier} shell={wpsDossierShell} />
     )
 
-    expect(screen.getByText(/2012: Scarborough Shoal incident/i)).toBeVisible()
+    const timelineDetail = document.querySelector(
+      '[data-wps-timeline-part="details"]'
+    )
 
-    await user.click(screen.getByRole("button", { name: /Tribunal ruling/i }))
-
-    expect(screen.getByText(/2016: Tribunal ruling/i)).toBeVisible()
+    expect(timelineDetail).not.toBeNull()
     expect(
-      screen.getByText(/rejected broad historic-rights claims/i)
+      within(timelineDetail as HTMLElement).getByText(
+        /A maritime standoff becomes a legal case/i
+      )
+    ).toBeVisible()
+
+    await user.click(
+      screen.getByRole("button", { name: /Final Award on 12 July 2016/i })
+    )
+
+    expect(
+      within(timelineDetail as HTMLElement).getByText(
+        /Legal clarity enters the record/i
+      )
+    ).toBeVisible()
+    expect(
+      within(timelineDetail as HTMLElement).getByText(
+        /rejects broad historic-rights claims/i
+      )
     ).toBeVisible()
   })
 
-  it("supports keyboard-driven comparison changes without a full browser journey", async () => {
+  it("renders the approved ruling versus reality matrix without extra comparison controls", () => {
+    renderWithNavigation(
+      <WpsDossier content={westPhilippineSeaDossier} shell={wpsDossierShell} />
+    )
+
+    expect(screen.getByText(/Nine-dash line has no legal basis/i)).toBeVisible()
+    expect(screen.getByText(/The line continues to be asserted/i)).toBeVisible()
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument()
+    expect(screen.queryByText(/Enforcement gap/i)).not.toBeInTheDocument()
+  })
+
+  it("updates the evidence detail from source-backed category cards", async () => {
     const user = userEvent.setup()
 
     renderWithNavigation(
       <WpsDossier content={westPhilippineSeaDossier} shell={wpsDossierShell} />
     )
 
-    const enforcementGap = screen.getByRole("radio", {
-      name: /Enforcement gap/i,
-    })
+    const evidenceDetail = document.querySelector("[data-wps-evidence-surface]")
 
-    enforcementGap.focus()
-    await user.keyboard("{ArrowDown}")
-
-    const politicalReality = screen.getByRole("radio", {
-      name: /Political reality/i,
-    })
-
-    expect(politicalReality).toHaveFocus()
-    expect(politicalReality).toHaveAttribute("aria-checked", "true")
+    expect(evidenceDetail).not.toBeNull()
     expect(
-      screen.getByText(/states still calculate interests, capacity/i)
+      within(evidenceDetail as HTMLElement).getByText(/Historical records/i)
     ).toBeVisible()
-  })
-
-  it("opens and closes the evidence surface locally", async () => {
-    const user = userEvent.setup()
-
-    renderWithNavigation(
-      <WpsDossier content={westPhilippineSeaDossier} shell={wpsDossierShell} />
-    )
-
-    const trigger = screen.getByRole("button", {
-      name: /Inspect evidence for Scarborough Shoal incident/i,
-    })
-
-    await user.click(trigger)
-
     expect(
-      screen.getByRole("region", {
-        name: "Evidence for Scarborough Shoal incident",
-      })
+      screen.getByRole("link", { name: /Explore all evidence/i })
     ).toBeVisible()
 
     await user.click(
       screen.getByRole("button", {
-        name: "Close evidence for Scarborough Shoal incident",
+        name: /Inspect evidence for Legal Findings/i,
       })
     )
 
     expect(
-      screen.queryByRole("region", {
-        name: "Evidence for Scarborough Shoal incident",
-      })
+      within(evidenceDetail as HTMLElement).getByText(/Tribunal award/i)
+    ).toBeVisible()
+    expect(
+      screen.queryByText(/gg-src-south-china-sea-award/i)
     ).not.toBeInTheDocument()
+  })
+
+  it("renders the final thesis with visible source trust cues", () => {
+    renderWithNavigation(
+      <WpsDossier content={westPhilippineSeaDossier} shell={wpsDossierShell} />
+    )
+
+    expect(screen.getByRole("heading", { name: "Final Thesis" })).toBeVisible()
+    expect(screen.getByText(/References & Sources/i)).toBeVisible()
+    expect(screen.getByText(/Source Trust Guide/i)).toBeVisible()
+    expect(screen.getByText(/PCA Case No\. 2013-19/i)).toBeVisible()
+    expect(
+      screen.getByText(/United Nations Convention on the Law of the Sea/i)
+    ).toBeVisible()
+    expect(screen.getByText(/ASEAN Regional Forum/i)).toBeVisible()
+    expect(
+      screen.queryByText(/Open the case as a continuation of the journey/i)
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/gg-src-/i)).not.toBeInTheDocument()
   })
 })

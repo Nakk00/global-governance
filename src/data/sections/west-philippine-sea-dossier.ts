@@ -62,6 +62,59 @@ export type WpsEvidenceRegistry = {
   comparison: Record<string, WpsEvidenceItem[]>
 }
 
+export type WpsCaseFileMapLabel = {
+  id: string
+  label: string
+  position:
+    | "luzon"
+    | "palawan"
+    | "west-philippine-sea"
+    | "spratly-islands"
+    | "scarborough-shoal"
+}
+
+export type WpsCaseFileLegendItem = {
+  label: string
+  tone: "eez" | "tribunal" | "claim" | "baseline"
+}
+
+export type WpsCaseFileEvidenceCategory = {
+  id: string
+  title: string
+  summary: string
+  sourceTypeLabel: string
+  tone: "history" | "geography" | "legal" | "conduct"
+  sourceIds: string[]
+}
+
+export type WpsCaseFileRulingRealityRow = {
+  id: string
+  legalClarity: string
+  politicalReality: string
+}
+
+export type WpsCaseFileThesisAction = {
+  id: string
+  label: string
+  detail: string
+  iconKey: "shield" | "globe" | "users" | "book"
+}
+
+export type WpsCaseFileReferenceItem = {
+  id: string
+  title: string
+  detail: string
+  iconKey: "book" | "landmark" | "file" | "compass" | "users"
+  sourceIds: string[]
+}
+
+export type WpsCaseFileTrustCategory = {
+  id: string
+  label: string
+  detail: string
+  tone: "primary" | "secondary"
+}
+
 function createWpsEvidenceRegistry(): WpsEvidenceRegistry {
   const registry: WpsEvidenceRegistry = {
     timeline: {
@@ -91,6 +144,57 @@ function createWpsEvidenceRegistry(): WpsEvidenceRegistry {
 
   return registry
 }
+
+export const wpsCaseFileTimelineEvents: WpsTimelineEvent[] = [
+  {
+    id: "arbitration-filing",
+    year: "2012",
+    label: "Philippines initiates arbitration under UNCLOS.",
+    summary: "A maritime standoff becomes a legal case.",
+    context:
+      "The Philippines initiated arbitration to challenge parts of China's maritime claims and seek legal clarification without trying to settle sovereignty over land features.",
+    legalContext:
+      "The filing used UNCLOS dispute-settlement procedures to ask a tribunal to interpret maritime rights, entitlements, and the legal status of features.",
+    significance:
+      "The dispute moves from contested access at sea into a formal legal track, showing how public claims can become institutional questions.",
+  },
+  {
+    id: "tribunal-constituted",
+    year: "2013",
+    label: "The Tribunal is constituted; proceedings begin.",
+    summary: "The case record starts to take shape.",
+    context:
+      "A tribunal was constituted under UNCLOS procedures, giving the dispute a formal venue and procedural record.",
+    legalContext:
+      "Arbitration gave the Philippines a forum to clarify maritime rights without asking the tribunal to decide sovereignty over land features.",
+    significance:
+      "Arbitration gives the Philippines a forum to clarify maritime rights without asking the tribunal to decide sovereignty over land features.",
+  },
+  {
+    id: "final-award",
+    year: "2016",
+    label: "Arbitral Tribunal issues the Final Award on 12 July 2016.",
+    summary: "Legal clarity enters the record.",
+    context:
+      "The tribunal issued its award after reviewing the legal claims and evidence presented in the case.",
+    legalContext:
+      "The ruling found no legal basis for broad historic-rights claims within the nine-dash line and clarified how UNCLOS treats maritime zones and features.",
+    significance:
+      "The Award rejects broad historic-rights claims and clarifies the role of UNCLOS in maritime entitlements.",
+  },
+  {
+    id: "post-award",
+    year: "Post-2016",
+    label: "Implementation remains limited; conditions on the ground persist.",
+    summary: "Politics still shapes practical change.",
+    context:
+      "After the ruling, tensions and contested activity continued, showing that a legal outcome can shape the debate without instantly settling conduct at sea.",
+    legalContext:
+      "International rulings can clarify obligations and rights, but institutions often depend on state compliance, diplomacy, and collective pressure for practical effect.",
+    significance:
+      "The ruling changes the diplomatic and legal frame, but compliance, enforcement, and daily access still depend on state choices.",
+  },
+]
 
 export const wpsTimelineEvents: WpsTimelineEvent[] = [
   {
@@ -196,15 +300,213 @@ export const wpsRulingRealityComparison: WpsRulingRealityComparison = {
 export const wpsEvidenceRegistry: WpsEvidenceRegistry =
   createWpsEvidenceRegistry()
 
+export const wpsCaseFileBackground =
+  "/images/public-homepage/resource-pack/west-philippine-sea-case-file/backgrounds/chapter-4-west-philippine-sea-case-file-background-01.png"
+
+export const wpsCaseFileMapBase =
+  "/images/public-homepage/resource-pack/west-philippine-sea-case-file/maps/chapter-4-west-philippine-sea-maritime-map-base-01.png"
+
+export const wpsCaseFileMapSummary =
+  "The map frames Luzon, Palawan, Scarborough Shoal, and the Spratly Islands against EEZ, tribunal, claim, and baseline references."
+
+export const wpsCaseFileMapLabels: WpsCaseFileMapLabel[] = [
+  { id: "luzon", label: "Luzon", position: "luzon" },
+  { id: "palawan", label: "Palawan", position: "palawan" },
+  {
+    id: "west-philippine-sea",
+    label: "West Philippine Sea",
+    position: "west-philippine-sea",
+  },
+  {
+    id: "spratly-islands",
+    label: "Spratly Islands",
+    position: "spratly-islands",
+  },
+  {
+    id: "scarborough-shoal",
+    label: "Scarborough Shoal",
+    position: "scarborough-shoal",
+  },
+]
+
+export const wpsCaseFileLegend: WpsCaseFileLegendItem[] = [
+  { label: "Philippine EEZ (200 nm)", tone: "eez" },
+  { label: "Arbitral Tribunal Jurisdiction", tone: "tribunal" },
+  { label: "Claim Line (Nine-Dash Line)", tone: "claim" },
+  { label: "Baselines", tone: "baseline" },
+]
+
+export const wpsCaseFileEvidenceCategories: WpsCaseFileEvidenceCategory[] = [
+  {
+    id: "historic-use",
+    title: "Historic Use of Waters and Features",
+    summary: "Longstanding Philippine activities in the area.",
+    sourceTypeLabel: "Historical Records",
+    tone: "history",
+    sourceIds: [
+      "gg-src-scarborough-standoff-record",
+      "gg-src-philippines-arbitration-filing",
+    ],
+  },
+  {
+    id: "geographic-realities",
+    title: "Geographic & Maritime Realities",
+    summary: "Features, distances, and entitlements under UNCLOS.",
+    sourceTypeLabel: "Geo-Spatial Data",
+    tone: "geography",
+    sourceIds: ["gg-src-south-china-sea-award"],
+  },
+  {
+    id: "legal-findings",
+    title: "Legal Findings (2016 Award)",
+    summary: "Rulings on jurisdiction, maritime rights, and entitlements.",
+    sourceTypeLabel: "Tribunal Award",
+    tone: "legal",
+    sourceIds: [
+      "gg-src-south-china-sea-award",
+      "gg-src-wps-enforcement-gap-comparison",
+    ],
+  },
+  {
+    id: "state-practice",
+    title: "State Practice & Conduct",
+    summary: "Official acts, protests, and diplomacy.",
+    sourceTypeLabel: "Official Records",
+    tone: "conduct",
+    sourceIds: [
+      "gg-src-post-award-compliance-record",
+      "gg-src-wps-political-reality-record",
+    ],
+  },
+]
+
+export const wpsCaseFileRulingRealityRows: WpsCaseFileRulingRealityRow[] = [
+  {
+    id: "nine-dash-line",
+    legalClarity: "Nine-dash line has no legal basis.",
+    politicalReality: "The line continues to be asserted.",
+  },
+  {
+    id: "scarborough-eez",
+    legalClarity:
+      "Features like Scarborough Shoal are within the Philippine EEZ.",
+    politicalReality: "Access remains restricted; incidents continue.",
+  },
+  {
+    id: "spratly-entitlements",
+    legalClarity:
+      "Spratly features do not generate their own EEZ or continental shelf.",
+    politicalReality:
+      "Artificial features and outposts still influence facts on the water.",
+  },
+  {
+    id: "sovereign-rights",
+    legalClarity: "Philippines' sovereign rights in its EEZ are well-founded.",
+    politicalReality:
+      "Interference with fishing, surveys, and resource activities persists.",
+  },
+  {
+    id: "respect-rights",
+    legalClarity: "Obligation to respect Philippines' rights under UNCLOS.",
+    politicalReality: "Compliance remains inadequate.",
+  },
+]
+
+export const wpsCaseFileThesisActions: WpsCaseFileThesisAction[] = [
+  {
+    id: "protect-rights",
+    label: "Protect rights through law and diplomacy.",
+    detail: "Legal clarity needs steady public and diplomatic follow-through.",
+    iconKey: "shield",
+  },
+  {
+    id: "strengthen-capacity",
+    label: "Strengthen institutions and maritime capacity.",
+    detail: "Implementation depends on institutions able to act lawfully.",
+    iconKey: "globe",
+  },
+  {
+    id: "build-partnerships",
+    label: "Build partnerships for a rules-based maritime order.",
+    detail: "Regional and international support raises the cost of disregard.",
+    iconKey: "users",
+  },
+  {
+    id: "educate-public",
+    label: "Educate, inform, and uphold the truth at sea.",
+    detail: "Public understanding keeps the record visible and accountable.",
+    iconKey: "book",
+  },
+]
+
+export const wpsCaseFileReferences: WpsCaseFileReferenceItem[] = [
+  {
+    id: "pca-award",
+    title:
+      "PCA Case No. 2013-19, The Republic of the Philippines v. The People's Republic of China",
+    detail: "12 July 2016",
+    iconKey: "book",
+    sourceIds: ["gg-src-south-china-sea-award"],
+  },
+  {
+    id: "unclos",
+    title: "United Nations Convention on the Law of the Sea (UNCLOS)",
+    detail: "1982",
+    iconKey: "landmark",
+    sourceIds: [
+      "gg-src-south-china-sea-award",
+      "gg-src-philippines-arbitration-filing",
+    ],
+  },
+  {
+    id: "dfa",
+    title: "Philippine Department of Foreign Affairs (DFA)",
+    detail: "Official statements and briefs",
+    iconKey: "file",
+    sourceIds: [
+      "gg-src-post-award-compliance-record",
+      "gg-src-wps-political-reality-record",
+    ],
+  },
+  {
+    id: "namria",
+    title: "National Mapping & Resource Information Authority (NAMRIA)",
+    detail: "Maritime baselines",
+    iconKey: "compass",
+    sourceIds: ["gg-src-south-china-sea-award"],
+  },
+  {
+    id: "asean",
+    title: "ASEAN Regional Forum (ARF)",
+    detail: "Statements on maritime security and cooperation",
+    iconKey: "users",
+    sourceIds: ["gg-src-post-award-compliance-record"],
+  },
+]
+
+export const wpsCaseFileTrustCategories: WpsCaseFileTrustCategory[] = [
+  {
+    id: "primary",
+    label: "Primary",
+    detail: "Official, legal, and case records approved for the course.",
+    tone: "primary",
+  },
+  {
+    id: "secondary",
+    label: "Secondary",
+    detail: "Comparison records and source clusters used for review context.",
+    tone: "secondary",
+  },
+]
+
 export const westPhilippineSeaDossier: NarrativeSectionContent = {
   id: "west-philippine-sea-dossier",
   navigationLabel: "West Philippine Sea Case File",
-  eyebrow: "Case file",
-  title: "The West Philippine Sea turns the theory into a test",
+  eyebrow: "Chapter 4",
+  title: "West Philippine Sea Case File",
   summary:
     "The West Philippine Sea dispute shows how legal rulings, maritime claims, regional diplomacy, and state behavior interact when institutions clarify rules but cannot instantly settle power politics.",
-  thesis:
-    "The case matters because it makes the abstract tension visible: rules can clarify rights, while enforcement still depends on political strategy and collective response.",
+  thesis: "A ruling can clarify rights. Politics decides what changes.",
   supportingDetails: [
     "A case dossier approach helps separate the legal question from the political question. What does the rule say? Who accepts it? What behavior changes, and what behavior continues?",
     "It also shows why public explanation matters. Citizens need more than slogans; they need a way to connect institutions, evidence, and consequences.",
@@ -221,7 +523,7 @@ export const westPhilippineSeaDossier: NarrativeSectionContent = {
     },
   ],
   synthesis:
-    "The case shows the central lesson of the journey: global governance is strongest when law, institutions, evidence, and public accountability reinforce one another.",
+    "International law provides clarity; it does not by itself ensure change. The 2016 Award affirms the Philippines' rights in the West Philippine Sea. Sustained diplomacy, lawful conduct, and stronger institutions are needed to turn legal victories into lasting realities.",
   recap: {
     takeaway:
       "This chapter tested the theory in a real dispute, where law clarifies claims while politics shapes what changes on the water.",
