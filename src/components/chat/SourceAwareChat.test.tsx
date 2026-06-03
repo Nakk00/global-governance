@@ -122,6 +122,32 @@ describe("SourceAwareChat", () => {
     )
   })
 
+  it("expands the compact dock on hover and keyboard focus", async () => {
+    const user = userEvent.setup()
+
+    renderWithNavigation(<SourceAwareChat />, {
+      navigation: {
+        activeSectionId: "global-governance-overview",
+      },
+    })
+
+    const trigger = screen.getByRole("button", {
+      name: "Open source-aware chat",
+    })
+
+    expect(trigger).toHaveAttribute("data-expanded", "false")
+
+    await user.hover(trigger)
+    expect(trigger).toHaveAttribute("data-expanded", "true")
+
+    await user.unhover(trigger)
+    expect(trigger).toHaveAttribute("data-expanded", "false")
+
+    await user.tab()
+    expect(trigger).toHaveFocus()
+    expect(trigger).toHaveAttribute("data-expanded", "true")
+  })
+
   it("loads starter prompts into the composer, keeps shift-enter multiline, and forwards section context", async () => {
     const chatClient = vi.fn().mockResolvedValue(answeredResponse)
     const { open, user } = openChat(chatClient)

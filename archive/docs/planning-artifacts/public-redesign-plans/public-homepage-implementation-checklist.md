@@ -1,7 +1,7 @@
 # Public Homepage Implementation Checklist
 
 Status: Working checklist
-Last updated: 2026-05-26
+Last updated: 2026-06-03
 Scope: Build-oriented checklist for the public homepage redesign
 Depends on: `archive/docs/planning-artifacts/public-homepage-redesign-proposal.md`
 
@@ -99,7 +99,7 @@ Exit condition:
 
 ### Global Governance Overview
 
-- [ ] Finalize Overview state model
+- [x] Finalize Overview state model
 - [x] Finalize Overview panel structure
 - [x] Finalize Overview educational content priorities
 - [x] Finalize Overview mobile composition
@@ -108,7 +108,7 @@ Exit condition:
 ### First Proof Milestone
 
 - [x] Connect `Hero` and `Overview` through real chapter navigation
-- [ ] Validate that both chapters feel like the same product family
+- [x] Validate that both chapters feel like the same product family
 - [x] Validate that the shell works across desktop and mobile
 - [x] Validate that chat remains available without overpowering the chapters
 

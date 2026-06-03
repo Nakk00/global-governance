@@ -15,6 +15,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react"
+import { motion, useReducedMotion, type Transition } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -50,12 +51,70 @@ export function SourceAwareChat({
     status: "idle",
   })
   const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null)
+  const [isDockHovered, setIsDockHovered] = useState(false)
+  const [isDockFocused, setIsDockFocused] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const panelId = useId()
   const inputId = useId()
   const promptGroupId = useId()
+  const shouldReduceMotion = useReducedMotion()
+  const isDockExpanded = isOpen || isDockHovered || isDockFocused
+  const dockMotionState = isDockExpanded ? "expanded" : "collapsed"
+  const dockEase = [0.16, 1, 0.3, 1] as const
+  const dockTransition: Transition = shouldReduceMotion
+    ? { duration: 0 }
+    : { type: "spring", stiffness: 430, damping: 34, mass: 0.72 }
+  const dockRevealTransition: Transition = shouldReduceMotion
+    ? { duration: 0 }
+    : { duration: 0.2, ease: dockEase }
+  const dockVariants = {
+    collapsed: {
+      width: "3.55rem",
+      scale: 0.985,
+      borderRadius: "999px",
+    },
+    expanded: {
+      width: "23rem",
+      scale: 1,
+      borderRadius: "1.35rem",
+    },
+  }
+  const dockIconVariants = {
+    collapsed: {
+      scale: 1,
+      rotate: 0,
+    },
+    expanded: {
+      scale: shouldReduceMotion ? 1 : 1.04,
+      rotate: shouldReduceMotion ? 0 : -4,
+    },
+  }
+  const dockCopyVariants = {
+    collapsed: {
+      opacity: 0,
+      x: shouldReduceMotion ? 0 : 10,
+      filter: shouldReduceMotion ? "blur(0px)" : "blur(5px)",
+    },
+    expanded: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+    },
+  }
+  const dockArrowVariants = {
+    collapsed: {
+      opacity: 0,
+      x: shouldReduceMotion ? 0 : 12,
+      scale: shouldReduceMotion ? 1 : 0.82,
+    },
+    expanded: {
+      opacity: 1,
+      x: 0,
+      scale: 1,
+    },
+  }
   const promptCatalog =
     starterPrompts === sourceAwareChatStarterPrompts
       ? getSourceAwareChatStarterPrompts(activeSectionId)
@@ -324,7 +383,7 @@ export function SourceAwareChat({
           </section>
         ) : null}
 
-        <Button
+        <motion.button
           ref={triggerRef}
           type="button"
           aria-controls={panelId}
@@ -332,20 +391,43 @@ export function SourceAwareChat({
           aria-label="Open source-aware chat"
           tabIndex={isOpen ? -1 : undefined}
           data-source-aware-chat-trigger=""
+          data-expanded={isDockExpanded ? "true" : "false"}
           className="source-chat-dock"
+          initial={false}
+          animate={dockMotionState}
+          variants={dockVariants}
+          transition={dockTransition}
+          onPointerEnter={() => setIsDockHovered(true)}
+          onPointerLeave={() => setIsDockHovered(false)}
+          onFocus={() => setIsDockFocused(true)}
+          onBlur={() => setIsDockFocused(false)}
           onClick={() => setIsOpen((current) => !current)}
         >
-          <span className="source-chat-dock-icon" aria-hidden="true">
+          <motion.span
+            className="source-chat-dock-icon"
+            aria-hidden="true"
+            variants={dockIconVariants}
+            transition={dockRevealTransition}
+          >
             <MessageCircle />
-          </span>
-          <span className="source-chat-dock-copy">
+          </motion.span>
+          <motion.span
+            className="source-chat-dock-copy"
+            variants={dockCopyVariants}
+            transition={dockRevealTransition}
+          >
             <strong>Ask a question about this chapter</strong>
             <small>Source-aware • Cite-verified</small>
-          </span>
-          <span className="source-chat-dock-arrow" aria-hidden="true">
+          </motion.span>
+          <motion.span
+            className="source-chat-dock-arrow"
+            aria-hidden="true"
+            variants={dockArrowVariants}
+            transition={dockRevealTransition}
+          >
             <ArrowRight />
-          </span>
-        </Button>
+          </motion.span>
+        </motion.button>
       </div>
     </div>
   )
