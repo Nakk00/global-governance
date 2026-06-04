@@ -58,13 +58,28 @@ sync_graph_out() {
   cp -a "$source_dir/." "$target_dir/"
 }
 
+cleanup_nested_graph_out() {
+  nested_dir=$1
+
+  case "$nested_dir" in
+    backend/graphify-out|supabase/graphify-out)
+      rm -rf "$nested_dir"
+      ;;
+    *)
+      fail "refusing to remove unexpected graph output path: $nested_dir"
+      ;;
+  esac
+}
+
 refresh_graph "."
 
 refresh_graph "backend"
 sync_graph_out "backend/graphify-out" "graphify-out-backend"
+cleanup_nested_graph_out "backend/graphify-out"
 
 refresh_graph "supabase"
 sync_graph_out "supabase/graphify-out" "graphify-out-supabase"
+cleanup_nested_graph_out "supabase/graphify-out"
 
 log "[graphify hook] rebuilding graphify-out-merged"
 "$PYTHON_BIN" - "$REPO_ROOT" <<'PY'

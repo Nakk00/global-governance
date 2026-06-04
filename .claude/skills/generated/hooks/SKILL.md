@@ -1,11 +1,11 @@
 ---
 name: hooks
-description: "Skill for the Hooks area of global-governance-docuweb. 27 symbols across 5 files."
+description: "Skill for the Hooks area of global-governance-docuweb. 38 symbols across 8 files."
 ---
 
 # Hooks
 
-27 symbols | 5 files | Cohesion: 73%
+38 symbols | 8 files | Cohesion: 74%
 
 ## When to Use
 
@@ -18,10 +18,13 @@ description: "Skill for the Hooks area of global-governance-docuweb. 27 symbols 
 | File | Symbols |
 |------|---------|
 | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | applyMutationResult, runMutation, uploadDraft, updateSource, runLifecycleAction (+7) |
-| `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | MaintainerDashboard, syncRouteFromHistory, applyMutationResult, navigateTo, parseMaintainerRoute (+1) |
+| `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | MaintainerDashboard, MaintainerFrame, AccessStateView, loadSourceDetail, loadDashboard (+5) |
 | `src/lib/maintainer/mutation-api.ts` | uploadSource, updateSourceMetadata, mutateSourceLifecycle, ingestSource |
+| `src/components/modules/MaintainerDashboard/hooks/useMaintainerGate.ts` | useMaintainerGate, resolveGate, signOut |
 | `src/components/modules/MaintainerDashboard/hooks/useMaintainerNavigation.ts` | useMaintainerNavigation, navigateTo, syncRouteFromHistory |
+| `src/components/modules/MaintainerDashboard/MaintainerLogin.tsx` | MaintainerLogin, reveal |
 | `src/lib/maintainer/source-api.ts` | fetchStewardshipDashboard, fetchSourceDetail |
+| `src/lib/supabase/browser-client.ts` | getSupabaseSession, clearSupabaseSession |
 
 ## Entry Points
 
@@ -47,42 +50,40 @@ Start here when exploring this area:
 | `updateSource` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 286 |
 | `runLifecycleAction` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 300 |
 | `queueIngest` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 317 |
+| `MaintainerLogin` | Function | `src/components/modules/MaintainerDashboard/MaintainerLogin.tsx` | 24 |
+| `reveal` | Function | `src/components/modules/MaintainerDashboard/MaintainerLogin.tsx` | 35 |
 | `MaintainerDashboard` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 246 |
+| `MaintainerFrame` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 539 |
+| `AccessStateView` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 554 |
 | `fetchStewardshipDashboard` | Function | `src/lib/maintainer/source-api.ts` | 28 |
 | `fetchSourceDetail` | Function | `src/lib/maintainer/source-api.ts` | 35 |
 | `useMaintainerDashboardData` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 37 |
 | `loadSourceDetail` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 63 |
 | `loadSourcePreview` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 101 |
-| `retrySelectedSourcePreview` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 141 |
-| `loadDashboard` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 148 |
-| `selectSource` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerDashboardData.ts` | 215 |
-| `useMaintainerNavigation` | Function | `src/components/modules/MaintainerDashboard/hooks/useMaintainerNavigation.ts` | 7 |
 
 ## Execution Flows
 
 | Flow | Type | Steps |
 |------|------|-------|
+| `MaintainerDashboard → IsApiEnvelope` | cross_community | 7 |
 | `UseMaintainerDashboardData → IsApiEnvelope` | cross_community | 7 |
+| `MaintainerDashboard → ClearSupabaseSession` | cross_community | 6 |
+| `MaintainerDashboard → MaintainerApiError` | cross_community | 6 |
 | `UseMaintainerDashboardData → ClearSupabaseSession` | cross_community | 6 |
 | `UseMaintainerDashboardData → MaintainerApiError` | cross_community | 6 |
 | `MaintainerDashboard → ClearSupabaseSession` | cross_community | 5 |
 | `MaintainerDashboard → MaintainerApiError` | cross_community | 5 |
-| `UploadDraft → IsApiEnvelope` | cross_community | 5 |
-| `UpdateSource → IsApiEnvelope` | cross_community | 5 |
-| `RunLifecycleAction → IsApiEnvelope` | cross_community | 5 |
-| `QueueIngest → IsApiEnvelope` | cross_community | 5 |
-| `MaintainerDashboard → ParseMaintainerPreset` | cross_community | 4 |
+| `ValidationWorkbench → ClearSupabaseSession` | cross_community | 5 |
+| `ValidationWorkbench → ClearSupabaseSession` | cross_community | 5 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
 | Maintainer | 6 calls |
-| Cluster_74 | 3 calls |
-| MaintainerDashboard | 3 calls |
-| Supabase | 1 calls |
-| Cluster_75 | 1 calls |
-| Sources | 1 calls |
+| Supabase | 3 calls |
+| MaintainerDashboard | 2 calls |
+| Cluster_74 | 1 calls |
 
 ## How to Explore
 

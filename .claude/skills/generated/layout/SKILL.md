@@ -5,7 +5,7 @@ description: "Skill for the Layout area of global-governance-docuweb. 10 symbols
 
 # Layout
 
-10 symbols | 6 files | Cohesion: 73%
+10 symbols | 6 files | Cohesion: 72%
 
 ## When to Use
 
@@ -45,8 +45,8 @@ Start here when exploring this area:
 | `closeAtDesktop` | Function | `src/components/layout/MobileMenu.tsx` | 18 |
 | `IdleScrollCue` | Function | `src/components/layout/IdleScrollCue.tsx` | 21 |
 | `AppShell` | Function | `src/components/layout/AppShell.tsx` | 12 |
-| `timeout` | Function | `src/components/layout/IdleScrollCue.tsx` | 32 |
-| `resetIdle` | Function | `src/components/layout/IdleScrollCue.tsx` | 36 |
+| `timeout` | Function | `src/components/layout/IdleScrollCue.tsx` | 33 |
+| `resetIdle` | Function | `src/components/layout/IdleScrollCue.tsx` | 37 |
 | `isChatPanelOpen` | Function | `src/components/layout/IdleScrollCue.tsx` | 17 |
 
 ## Execution Flows
@@ -58,6 +58,9 @@ Start here when exploring this area:
 | `AppShell → UseNavigation` | intra_community | 4 |
 | `AppShell → CloseAtDesktop` | intra_community | 4 |
 | `Navbar → Cn` | cross_community | 4 |
+| `AppShell → ScheduleUpdate` | cross_community | 3 |
+| `AppShell → IsChapterId` | cross_community | 3 |
+| `AppShell → GetChapterIndex` | cross_community | 3 |
 
 ## Connected Areas
 

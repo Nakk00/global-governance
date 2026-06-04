@@ -40,6 +40,14 @@ const PublicHomepageSystemUnderPressureMockup = lazy(() =>
   )
 )
 
+const PublicHomepageWestPhilippineSeaCaseFileMockup = lazy(() =>
+  import("@/mockups/public-homepage-redesign/WestPhilippineSeaCaseFileMockupPage").then(
+    (module) => ({
+      default: module.WestPhilippineSeaCaseFileMockupPage,
+    })
+  )
+)
+
 export function App() {
   const pathname = window.location.pathname
 
@@ -79,6 +87,19 @@ export function App() {
         fallback={<main className="min-h-svh bg-background text-foreground" />}
       >
         <PublicHomepageSystemUnderPressureMockup />
+      </Suspense>
+    )
+  }
+
+  if (
+    pathname ===
+    "/mockups/public-homepage-redesign/west-philippine-sea-case-file"
+  ) {
+    return (
+      <Suspense
+        fallback={<main className="min-h-svh bg-background text-foreground" />}
+      >
+        <PublicHomepageWestPhilippineSeaCaseFileMockup />
       </Suspense>
     )
   }

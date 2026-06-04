@@ -45,7 +45,7 @@ Start here when exploring this area:
 | `getDossierEvidenceSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 421 |
 | `getChatCitationSources` | Function | `src/data/source-bundles/approved-source-bundle.ts` | 437 |
 | `normalizeSourcePath` | Function | `supabase/functions/_shared/ingestion-pipeline.ts` | 226 |
-| `createWpsEvidenceRegistry` | Function | `src/data/sections/west-philippine-sea-dossier.ts` | 64 |
+| `createWpsEvidenceRegistry` | Function | `src/data/sections/west-philippine-sea-dossier.ts` | 117 |
 
 ## Execution Flows
 

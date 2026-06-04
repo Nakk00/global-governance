@@ -1,9 +1,11 @@
 import { globalGovernanceOverview } from "@/data/sections/global-governance-overview"
-import { caseFileTransition } from "@/data/sections/governance-limits"
 import { unCommandCenter } from "@/data/sections/un-command-center"
 import { westPhilippineSeaDossier } from "@/data/sections/west-philippine-sea-dossier"
 import { defaultChapterId, isKnownSectionId } from "@/data/navigation"
-import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
+import type {
+  ChapterTransitionContent,
+  NarrativeSectionContent,
+} from "@/data/sections/narrative-types"
 
 export const coreNarrativeSections = [
   globalGovernanceOverview,
@@ -11,9 +13,10 @@ export const coreNarrativeSections = [
   westPhilippineSeaDossier,
 ]
 
-export const chapterTransitionsBySectionId = new Map([
-  [unCommandCenter.id, caseFileTransition],
-])
+export const chapterTransitionsBySectionId = new Map<
+  string,
+  ChapterTransitionContent
+>()
 
 export type ResolvedNarrativeRecapCue = {
   takeaway: string

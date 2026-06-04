@@ -34,7 +34,7 @@ test("@smoke Chapter 1 and 2 render the approved public homepage redesign shell"
     waitUntil: "domcontentloaded",
   })
   const overview = page.getByRole("region", {
-    name: "Global governance overview",
+    name: "Global Governance Overview",
   })
   const overviewDiagram = overview.locator(".overview-system-diagram")
 
@@ -66,7 +66,9 @@ test("@smoke Chapter 1 and 2 render the approved public homepage redesign shell"
   await expect(overview.getByText("Active lens")).toBeVisible()
   await expect(overview.getByText("Power & Inequality").last()).toBeVisible()
   await expect(
-    overview.getByRole("link", { name: "Continue to UN Command Center" })
+    overview.getByRole("link", {
+      name: "Continue to The System Under Pressure",
+    })
   ).toBeVisible()
   await expectNoHorizontalOverflow(page)
 })

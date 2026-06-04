@@ -2,59 +2,40 @@ import { expect, type Locator, type Page } from "@playwright/test"
 
 export const chapterNames = [
   "Hero Narrative Frame",
-  "Global governance overview",
-  "UN Command Center",
-  "Governance limits and enforcement",
-  "West Philippine Sea dossier",
-  "Conclusion and references",
+  "Global Governance Overview",
+  "The System Under Pressure",
+  "West Philippine Sea Case File",
 ]
 
 export const narrativeSections = [
-  "Global governance overview",
-  "UN Command Center",
-  "Governance limits and enforcement",
-  "West Philippine Sea dossier",
-  "Conclusion and references",
+  "Global Governance Overview",
+  "The System Under Pressure",
+  "West Philippine Sea Case File",
 ]
 
 export const summaryFirstSections = [
-  "Governance limits and enforcement",
-  "West Philippine Sea dossier",
-  "Conclusion and references",
+  "The System Under Pressure",
+  "West Philippine Sea Case File",
 ]
 
 export const recapCues = [
   {
     sectionId: "global-governance-overview",
-    sectionName: "Global governance overview",
-    cueName: "Continue to UN Command Center",
+    sectionName: "Global Governance Overview",
+    cueName: "Continue to The System Under Pressure",
     hash: /#un-command-center$/,
-    targetName: "UN Command Center",
+    targetName: "The System Under Pressure",
   },
   {
     sectionId: "un-command-center",
-    sectionName: "UN Command Center",
-    cueName: "Continue to Governance limits and enforcement",
-    hash: /#governance-limits$/,
-    targetName: "Governance limits and enforcement",
-  },
-  {
-    sectionId: "governance-limits",
-    sectionName: "Governance limits and enforcement",
-    cueName: "Continue to West Philippine Sea dossier",
+    sectionName: "The System Under Pressure",
+    cueName: "Continue to West Philippine Sea Case File",
     hash: /#west-philippine-sea-dossier$/,
-    targetName: "West Philippine Sea dossier",
+    targetName: "West Philippine Sea Case File",
   },
   {
     sectionId: "west-philippine-sea-dossier",
-    sectionName: "West Philippine Sea dossier",
-    cueName: "Continue to Conclusion and references",
-    hash: /#conclusion-references$/,
-    targetName: "Conclusion and references",
-  },
-  {
-    sectionId: "conclusion-references",
-    sectionName: "Conclusion and references",
+    sectionName: "West Philippine Sea Case File",
     cueName: "Return to opening chapter",
     hash: /#hero-narrative-frame$/,
     targetName: "Global Governance",
@@ -218,7 +199,7 @@ export async function expectVisibleFocus(locator: Locator) {
 
 export async function expectUNComparisonLayout(page: Page, width: number) {
   const commandCenter = page.getByRole("region", {
-    name: "UN Command Center",
+    name: "The System Under Pressure",
   })
   const explorer = commandCenter.getByRole("region", {
     name: "Inspect the rooms of the UN system",
@@ -261,7 +242,7 @@ export async function expectUNComparisonLayout(page: Page, width: number) {
 
 export async function expectWpsTimelineLayout(page: Page, width: number) {
   const dossier = page.getByRole("region", {
-    name: "West Philippine Sea dossier",
+    name: "West Philippine Sea Case File",
   })
   const timeline = dossier.getByRole("region", {
     name: "Follow the dispute in order",
@@ -305,7 +286,7 @@ export async function expectWpsTimelineLayout(page: Page, width: number) {
 
 export async function expectWpsComparisonLayout(page: Page, width: number) {
   const dossier = page.getByRole("region", {
-    name: "West Philippine Sea dossier",
+    name: "West Philippine Sea Case File",
   })
   const comparison = dossier.getByRole("region", {
     name: "Legal clarity met political limits",

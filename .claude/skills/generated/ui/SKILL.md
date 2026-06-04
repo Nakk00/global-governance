@@ -47,6 +47,12 @@ Start here when exploring this area:
 | `ResponsiveChunkTable` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3203 |
 | `ResponsiveCitationTable` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3283 |
 
+## Execution Flows
+
+| Flow | Type | Steps |
+|------|------|-------|
+| `ValidationResultsTable → Cn` | cross_community | 3 |
+
 ## Connected Areas
 
 | Area | Connections |

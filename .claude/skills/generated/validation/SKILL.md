@@ -71,9 +71,9 @@ Start here when exploring this area:
 | `ValidationWorkbench → MaintainerApiError` | cross_community | 5 |
 | `Launch_validation_run → _now` | cross_community | 4 |
 | `Launch_validation_run → _answer_preview` | cross_community | 4 |
+| `ValidationRemediationQueue → Cn` | cross_community | 4 |
 | `Launch_run → _request` | cross_community | 3 |
 | `ValidationWorkbench → ValidationAlertForRun` | cross_community | 3 |
-| `ValidationWorkbench → Cn` | cross_community | 3 |
 
 ## Connected Areas
 
@@ -82,7 +82,7 @@ Start here when exploring this area:
 | Public-homepage-redesign | 7 calls |
 | Maintainer | 4 calls |
 | Ui | 3 calls |
-| Cluster_75 | 2 calls |
+| MaintainerDashboard | 2 calls |
 | Tests | 1 calls |
 
 ## How to Explore
