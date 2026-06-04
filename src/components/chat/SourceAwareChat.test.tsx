@@ -122,6 +122,26 @@ describe("SourceAwareChat", () => {
     )
   })
 
+  it("renders the redesigned assistant header, transcript seed, and trust footer", async () => {
+    const { open } = openChat()
+    const { panel, input } = await open()
+
+    expect(within(panel).getByText("Governance Guide")).toBeVisible()
+    expect(within(panel).getByText("Source-aware • Online")).toBeVisible()
+    expect(
+      within(panel).getByText(
+        "Ask course questions, compare concepts, or verify sources from the chapter."
+      )
+    ).toBeVisible()
+    expect(
+      within(panel).getByText(/I can help explain institutions/i)
+    ).toBeVisible()
+    expect(within(panel).getByText("Suggested prompts")).toBeVisible()
+    expect(within(panel).getByText("Grounded in course sources")).toBeVisible()
+    expect(within(panel).getByText("Cite-verified")).toBeVisible()
+    expect(input).toHaveAttribute("placeholder", "Ask about this chapter...")
+  })
+
   it("expands the compact dock on hover and keyboard focus", async () => {
     const user = userEvent.setup()
 
@@ -184,6 +204,15 @@ describe("SourceAwareChat", () => {
 
     await user.type(input, "How does this course frame global governance?")
     await user.click(within(panel).getByRole("button", { name: "Ask" }))
+
+    const submittedQuestion = within(panel).getByRole("article", {
+      name: "Submitted question",
+    })
+    expect(
+      within(submittedQuestion).getByText(
+        "How does this course frame global governance?"
+      )
+    ).toBeVisible()
 
     await waitFor(() =>
       expect(within(panel).getByText(answeredResponse.answer)).toBeVisible()

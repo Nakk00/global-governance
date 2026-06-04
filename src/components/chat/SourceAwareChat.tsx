@@ -1,10 +1,14 @@
 import {
   ArrowRight,
+  BookOpenCheck,
   ChevronDown,
   FileText,
   LoaderCircle,
   MessageCircle,
+  Minus,
   Send,
+  ShieldCheck,
+  Sparkles,
   X,
 } from "lucide-react"
 import {
@@ -14,6 +18,7 @@ import {
   useState,
   type FormEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from "react"
 import { motion, useReducedMotion, type Transition } from "motion/react"
 
@@ -40,6 +45,9 @@ type SourceAwareChatProps = {
   ) => Promise<GroundedChatSuccess>
 }
 
+const assistantGreeting =
+  "I can help explain institutions, norms, and collective action using the approved course materials."
+
 export function SourceAwareChat({
   starterPrompts = sourceAwareChatStarterPrompts,
   chatClient = requestGroundedAnswer,
@@ -47,6 +55,9 @@ export function SourceAwareChat({
   const { activeSectionId } = useNavigation()
   const [isOpen, setIsOpen] = useState(false)
   const [question, setQuestion] = useState("")
+  const [submittedQuestion, setSubmittedQuestion] = useState<string | null>(
+    null
+  )
   const [answerState, setAnswerState] = useState<ChatAsyncState>({
     status: "idle",
   })
@@ -157,6 +168,7 @@ export function SourceAwareChat({
     }
 
     setExpandedSourceId(null)
+    setSubmittedQuestion(trimmedQuestion)
     setAnswerState({
       status: "loading",
       question: trimmedQuestion,
@@ -232,58 +244,130 @@ export function SourceAwareChat({
             aria-label="Source-aware academic chat"
             data-source-aware-chat-panel=""
             className={cn(
-              "fixed inset-x-3 bottom-3 max-h-[calc(100svh-1.5rem)] min-w-0 overflow-y-auto rounded-2xl border border-border bg-card p-4 text-card-foreground shadow-2xl",
-              "motion-reduce:transition-none sm:inset-x-auto sm:right-6 sm:bottom-20 sm:w-[24rem] sm:max-w-[calc(100vw-3rem)] sm:p-5",
-              "md:w-[26rem]"
+              "fixed inset-x-3 bottom-3 flex max-h-[calc(100svh-1.5rem)] min-w-0 flex-col overflow-hidden rounded-[1.45rem] border border-sky-300/25 bg-slate-950/95 text-slate-100 shadow-[0_30px_90px_rgba(2,8,23,0.58)] backdrop-blur-2xl",
+              "sm:inset-x-auto sm:right-6 sm:bottom-20 sm:w-[26rem] sm:max-w-[calc(100vw-3rem)]",
+              "md:w-[31rem]"
             )}
           >
-            <div className="flex min-w-0 items-start justify-between gap-3">
-              <div className="min-w-0 space-y-2">
-                <p className="editorial-kicker">Source-aware assistant</p>
-                <h2 className="text-lg leading-7 font-semibold text-card-foreground">
-                  Ask about this course
-                </h2>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  This academic assistant is bounded to the Global Governance
-                  learning experience. Use it for course questions, source
-                  orientation, and chapter review.
+            <div className="relative shrink-0 overflow-hidden">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_16%_12%,rgba(125,211,252,0.18),transparent_38%),radial-gradient(circle_at_86%_0%,rgba(245,158,11,0.14),transparent_34%)]"
+              />
+              <div className="relative p-4 pb-3 sm:p-5 sm:pb-4">
+                <div className="flex min-w-0 items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-amber-300/35 bg-amber-300/10 text-amber-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+                      <Sparkles aria-hidden="true" className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[0.68rem] leading-4 font-black tracking-[0.16em] text-sky-300 uppercase">
+                        Source-aware assistant
+                      </p>
+                      <h2 className="mt-1 text-xl leading-7 font-semibold text-white">
+                        Governance Guide
+                      </h2>
+                      <p className="mt-1 flex items-center gap-2 text-sm leading-5 text-slate-300">
+                        <span
+                          aria-hidden="true"
+                          className="size-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]"
+                        />
+                        Source-aware • Online
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Minimize source-aware chat"
+                      className="rounded-2xl border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white"
+                      onClick={closeChat}
+                    >
+                      <Minus aria-hidden="true" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Close source-aware chat"
+                      className="rounded-2xl border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white"
+                      onClick={closeChat}
+                    >
+                      <X aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
+
+                <p className="mt-4 max-w-[28rem] text-sm leading-6 text-slate-300">
+                  Ask course questions, compare concepts, or verify sources from
+                  the chapter.
                 </p>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Close source-aware chat"
-                onClick={closeChat}
-              >
-                <X aria-hidden="true" />
-              </Button>
             </div>
 
-            <form
-              ref={formRef}
-              className="mt-5 space-y-4"
-              onSubmit={handleSubmit}
+            <div
+              className="min-h-0 flex-1 overflow-y-auto border-y border-white/10 px-4 py-4 sm:px-5"
+              aria-live="polite"
+              aria-label="Conversation with Governance Guide"
             >
-              <div className="space-y-2">
-                <label
-                  htmlFor={inputId}
-                  className="text-sm font-semibold text-card-foreground"
-                >
-                  Course question
-                </label>
-                <textarea
-                  ref={inputRef}
-                  id={inputId}
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  onKeyDown={handleQuestionKeyDown}
-                  rows={4}
-                  placeholder="Ask a question about global governance, the UN, or the West Philippine Sea case."
-                  className="min-h-28 w-full resize-none rounded-xl border border-input bg-background px-3 py-3 text-base leading-6 text-foreground transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none"
-                />
-              </div>
+              <div className="space-y-4">
+                <AssistantMessage>{assistantGreeting}</AssistantMessage>
 
+                {submittedQuestion ? (
+                  <div
+                    role="article"
+                    aria-label="Submitted question"
+                    className="flex justify-end"
+                  >
+                    <div className="max-w-[82%] rounded-2xl rounded-tr-md border border-sky-300/30 bg-sky-500/20 px-4 py-3 text-sm leading-6 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                      {submittedQuestion}
+                    </div>
+                  </div>
+                ) : null}
+
+                {answerState.status === "loading" ? (
+                  <AssistantMessage>
+                    <span className="inline-flex items-center gap-2">
+                      <LoaderCircle
+                        aria-hidden="true"
+                        className="size-4 animate-spin text-sky-300 motion-reduce:animate-none"
+                      />
+                      Checking approved materials for a grounded answer.
+                    </span>
+                  </AssistantMessage>
+                ) : null}
+
+                {answerState.status === "error" ? (
+                  <AssistantMessage tone="alert">
+                    <span role="alert">{answerState.error.message}</span>
+                  </AssistantMessage>
+                ) : null}
+
+                {answerState.status === "success" ? (
+                  <div className="flex min-w-0 items-start gap-3">
+                    <AssistantAvatar />
+                    <div className="min-w-0 flex-1">
+                      <GroundedAnswerSurface
+                        response={answerState.response}
+                        expandedSourceId={expandedSourceId}
+                        onRefocusQuestion={() =>
+                          inputRef.current?.focus({ preventScroll: true })
+                        }
+                        onToggleSource={(sourceId) =>
+                          setExpandedSourceId((current) =>
+                            current === sourceId ? null : sourceId
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="shrink-0 space-y-4 p-4 sm:p-5">
               <div
                 role="group"
                 aria-labelledby={promptGroupId}
@@ -291,20 +375,25 @@ export function SourceAwareChat({
               >
                 <p
                   id={promptGroupId}
-                  className="text-sm font-semibold text-card-foreground"
+                  className="text-[0.68rem] leading-4 font-black tracking-[0.14em] text-slate-400 uppercase"
                 >
                   Suggested prompts
                 </p>
                 {promptState.status === "available" ? (
-                  <div className="grid gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {promptState.prompts.map((prompt) => (
                       <Button
                         key={prompt.id}
                         type="button"
                         variant="outline"
-                        className="h-auto min-h-11 w-full justify-start rounded-xl px-3 py-3 text-left whitespace-normal"
+                        size="sm"
+                        className="h-auto min-h-11 rounded-full border-white/15 bg-white/5 px-3 py-2 text-left text-xs font-semibold whitespace-normal text-slate-100 hover:border-sky-300/45 hover:bg-sky-300/10 hover:text-white"
                         onClick={() => chooseStarterPrompt(prompt.prompt)}
                       >
+                        <BookOpenCheck
+                          aria-hidden="true"
+                          className="size-3.5 text-sky-300"
+                        />
                         {prompt.label}
                       </Button>
                     ))}
@@ -312,73 +401,64 @@ export function SourceAwareChat({
                 ) : (
                   <p
                     role="status"
-                    className="rounded-xl border border-dashed border-border bg-background/70 p-3 text-sm leading-6 text-muted-foreground"
+                    className="rounded-2xl border border-dashed border-white/15 bg-white/[0.04] p-3 text-sm leading-6 text-slate-300"
                   >
                     {promptState.message}
                   </p>
                 )}
               </div>
 
-              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs leading-5 text-muted-foreground">
-                  Answers stay inside the approved course materials.
-                </p>
-                <Button
-                  type="submit"
-                  className="w-full sm:w-auto"
-                  disabled={answerState.status === "loading"}
-                >
-                  {answerState.status === "loading" ? (
-                    <LoaderCircle
+              <form ref={formRef} className="space-y-3" onSubmit={handleSubmit}>
+                <label htmlFor={inputId} className="sr-only">
+                  Course question
+                </label>
+                <div className="flex min-w-0 items-center gap-3 rounded-2xl border border-sky-300/25 bg-slate-900/80 p-2 pl-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition-colors focus-within:border-sky-300/60 focus-within:ring-3 focus-within:ring-sky-300/20 motion-reduce:transition-none">
+                  <textarea
+                    ref={inputRef}
+                    id={inputId}
+                    value={question}
+                    onChange={(event) => setQuestion(event.target.value)}
+                    onKeyDown={handleQuestionKeyDown}
+                    rows={1}
+                    placeholder="Ask about this chapter..."
+                    className="max-h-28 min-h-12 flex-1 resize-none bg-transparent px-0 py-3 text-base leading-6 text-white outline-none placeholder:text-slate-500 sm:text-sm"
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    aria-label={
+                      answerState.status === "loading" ? "Asking" : "Ask"
+                    }
+                    className="size-12 shrink-0 rounded-2xl bg-amber-300 text-slate-950 shadow-[0_12px_28px_rgba(245,158,11,0.22)] hover:bg-amber-200"
+                    disabled={answerState.status === "loading"}
+                  >
+                    {answerState.status === "loading" ? (
+                      <LoaderCircle
+                        aria-hidden="true"
+                        className="animate-spin motion-reduce:animate-none"
+                      />
+                    ) : (
+                      <Send aria-hidden="true" />
+                    )}
+                  </Button>
+                </div>
+
+                <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 text-xs leading-5 text-slate-400">
+                  <span className="inline-flex items-center gap-2 text-emerald-300">
+                    <ShieldCheck aria-hidden="true" className="size-4" />
+                    Grounded in course sources
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    Cite-verified
+                    <span
                       aria-hidden="true"
-                      data-icon="inline-start"
-                      className="animate-spin motion-reduce:animate-none"
-                    />
-                  ) : (
-                    <Send aria-hidden="true" data-icon="inline-start" />
-                  )}
-                  {answerState.status === "loading" ? "Asking" : "Ask"}
-                </Button>
-              </div>
-            </form>
-
-            <div
-              className="mt-4"
-              aria-live="polite"
-              aria-label="Grounded answer status"
-            >
-              {answerState.status === "loading" ? (
-                <div
-                  role="status"
-                  className="rounded-xl border border-border bg-background/80 p-3 text-sm leading-6 text-muted-foreground"
-                >
-                  Checking approved materials for a grounded answer.
+                      className="grid size-4 place-items-center rounded-full border border-white/20 text-[0.62rem] text-slate-300"
+                    >
+                      i
+                    </span>
+                  </span>
                 </div>
-              ) : null}
-
-              {answerState.status === "error" ? (
-                <div
-                  role="alert"
-                  className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm leading-6 text-foreground"
-                >
-                  {answerState.error.message}
-                </div>
-              ) : null}
-
-              {answerState.status === "success" ? (
-                <GroundedAnswerSurface
-                  response={answerState.response}
-                  expandedSourceId={expandedSourceId}
-                  onRefocusQuestion={() =>
-                    inputRef.current?.focus({ preventScroll: true })
-                  }
-                  onToggleSource={(sourceId) =>
-                    setExpandedSourceId((current) =>
-                      current === sourceId ? null : sourceId
-                    )
-                  }
-                />
-              ) : null}
+              </form>
             </div>
           </section>
         ) : null}
@@ -433,6 +513,52 @@ export function SourceAwareChat({
   )
 }
 
+type AssistantMessageProps = {
+  children: ReactNode
+  tone?: "default" | "alert"
+}
+
+function AssistantMessage({
+  children,
+  tone = "default",
+}: AssistantMessageProps) {
+  return (
+    <div className="flex min-w-0 items-start gap-3">
+      <AssistantAvatar tone={tone} />
+      <div
+        className={cn(
+          "max-w-[82%] rounded-2xl rounded-tl-md border px-4 py-3 text-sm leading-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]",
+          tone === "alert"
+            ? "border-rose-300/30 bg-rose-500/10 text-rose-50"
+            : "border-white/10 bg-white/[0.06] text-slate-100"
+        )}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
+type AssistantAvatarProps = {
+  tone?: "default" | "alert"
+}
+
+function AssistantAvatar({ tone = "default" }: AssistantAvatarProps) {
+  return (
+    <span
+      className={cn(
+        "grid size-8 shrink-0 place-items-center rounded-full border shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]",
+        tone === "alert"
+          ? "border-rose-300/35 bg-rose-400/10 text-rose-200"
+          : "border-amber-300/35 bg-amber-300/10 text-amber-200"
+      )}
+      aria-hidden="true"
+    >
+      <Sparkles className="size-4" />
+    </span>
+  )
+}
+
 type GroundedAnswerSurfaceProps = {
   response: GroundedChatSuccess
   expandedSourceId: string | null
@@ -450,28 +576,24 @@ function GroundedAnswerSurface({
 
   if (response.state === "weakSupport") {
     return (
-      <article className="space-y-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm leading-6">
-        <p className="font-semibold text-card-foreground">
-          {response.grounding.cue}
-        </p>
-        <p className="text-foreground">{response.message}</p>
-        <p className="text-muted-foreground">{response.nextStep}</p>
+      <article className="space-y-3 rounded-2xl rounded-tl-md border border-amber-300/35 bg-amber-300/10 p-4 text-sm leading-6 text-amber-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <p className="font-semibold text-amber-100">{response.grounding.cue}</p>
+        <p>{response.message}</p>
+        <p className="text-amber-100/75">{response.nextStep}</p>
       </article>
     )
   }
 
   if (response.state === "refused") {
     return (
-      <article className="space-y-3 rounded-xl border border-sky-500/40 bg-sky-500/10 p-3 text-sm leading-6">
-        <p className="font-semibold text-card-foreground">
-          Course boundary reached
-        </p>
-        <p className="text-foreground">{response.message}</p>
-        <p className="text-muted-foreground">{response.nextStep}</p>
+      <article className="space-y-3 rounded-2xl rounded-tl-md border border-sky-300/30 bg-sky-400/10 p-4 text-sm leading-6 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <p className="font-semibold text-sky-100">Course boundary reached</p>
+        <p>{response.message}</p>
+        <p className="text-sky-100/75">{response.nextStep}</p>
         <Button
           type="button"
           variant="outline"
-          className="min-h-11"
+          className="min-h-11 rounded-full border-sky-300/30 bg-sky-300/10 text-sky-50 hover:bg-sky-300/20 hover:text-white"
           onClick={onRefocusQuestion}
         >
           Rephrase a course question
@@ -482,19 +604,19 @@ function GroundedAnswerSurface({
 
   if (response.state === "cooldown") {
     return (
-      <article className="space-y-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm leading-6">
-        <p className="font-semibold text-card-foreground">
+      <article className="space-y-3 rounded-2xl rounded-tl-md border border-amber-300/35 bg-amber-300/10 p-4 text-sm leading-6 text-amber-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <p className="font-semibold text-amber-100">
           Assistant temporarily limited
         </p>
-        <p className="text-foreground">{response.message}</p>
-        <p className="text-muted-foreground">
+        <p>{response.message}</p>
+        <p className="text-amber-100/75">
           {response.nextStep} Retry in about {response.retryAfterSeconds}{" "}
           seconds.
         </p>
         <Button
           type="button"
           variant="outline"
-          className="min-h-11"
+          className="min-h-11 rounded-full border-amber-300/35 bg-amber-300/10 text-amber-50 hover:bg-amber-300/20 hover:text-white"
           onClick={onRefocusQuestion}
         >
           Try again shortly
@@ -504,19 +626,18 @@ function GroundedAnswerSurface({
   }
 
   return (
-    <article className="space-y-4 rounded-xl border border-border bg-background/80 p-3">
+    <article className="space-y-4 rounded-2xl rounded-tl-md border border-white/10 bg-white/[0.06] p-4 text-sm leading-6 text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
       <div className="space-y-2">
-        <p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-emerald-300 uppercase">
+          <ShieldCheck aria-hidden="true" className="size-4" />
           {response.grounding.cue}
         </p>
-        <p className="text-sm leading-6 text-foreground">{response.answer}</p>
+        <p>{response.answer}</p>
       </div>
 
       <div className="space-y-2" aria-label="Approved source support">
-        <p className="text-sm font-semibold text-card-foreground">
-          Source support
-        </p>
-        <div className="flex flex-wrap gap-2">
+        <p className="text-sm font-semibold text-slate-100">Source support</p>
+        <div className="grid gap-2">
           {response.citations.map((citation) => {
             const isExpanded = expandedSourceId === citation.sourceId
             const sourceDetailsId = `${detailsId}-${citation.sourceId}`
@@ -527,17 +648,20 @@ function GroundedAnswerSurface({
                   type="button"
                   aria-expanded={isExpanded}
                   aria-controls={sourceDetailsId}
-                  className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-left text-xs font-semibold text-card-foreground transition-colors hover:border-ring focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none motion-reduce:transition-none"
+                  className="inline-flex min-h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-slate-950/50 px-3 py-2 text-left text-xs font-semibold text-slate-100 transition-colors hover:border-sky-300/45 hover:bg-sky-300/10 focus-visible:border-sky-300 focus-visible:ring-3 focus-visible:ring-sky-300/25 focus-visible:outline-none motion-reduce:transition-none"
                   onClick={() => onToggleSource(citation.sourceId)}
                 >
-                  <FileText aria-hidden="true" className="size-4 shrink-0" />
-                  <span className="min-w-0 truncate">
+                  <FileText
+                    aria-hidden="true"
+                    className="size-4 shrink-0 text-amber-200"
+                  />
+                  <span className="min-w-0 flex-1 truncate">
                     {citation.shortTitle}
                   </span>
                   <ChevronDown
                     aria-hidden="true"
                     className={cn(
-                      "size-4 shrink-0 transition-transform motion-reduce:transition-none",
+                      "size-4 shrink-0 text-slate-400 transition-transform motion-reduce:transition-none",
                       isExpanded ? "rotate-180" : null
                     )}
                   />
@@ -546,19 +670,17 @@ function GroundedAnswerSurface({
                 {isExpanded ? (
                   <div
                     id={sourceDetailsId}
-                    className="mt-2 w-full min-w-0 rounded-xl border border-border bg-card p-3 text-sm leading-6 text-card-foreground"
+                    className="mt-2 min-w-0 rounded-xl border border-white/10 bg-slate-950/65 p-3 text-sm leading-6 text-slate-100"
                   >
                     <p className="font-semibold">{citation.title}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {citation.sourceId} · {citation.sourceType}
+                    <p className="mt-1 text-xs text-slate-400">
+                      {citation.sourceId} - {citation.sourceType}
                     </p>
-                    <p className="mt-2 text-muted-foreground">
-                      {citation.detail}
-                    </p>
+                    <p className="mt-2 text-slate-300">{citation.detail}</p>
                     {citation.url ? (
                       <a
                         href={citation.url}
-                        className="mt-2 inline-flex text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                        className="mt-2 inline-flex text-sm font-semibold text-sky-300 underline-offset-4 hover:text-sky-200 hover:underline focus-visible:ring-3 focus-visible:ring-sky-300/25 focus-visible:outline-none"
                         target="_blank"
                         rel="noreferrer"
                       >
