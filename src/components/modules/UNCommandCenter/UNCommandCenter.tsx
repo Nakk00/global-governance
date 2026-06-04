@@ -1,5 +1,4 @@
 import type { ComponentType } from "react"
-import { useState } from "react"
 import {
   ArrowRight,
   CircleDot,
@@ -18,6 +17,7 @@ import {
   Vote,
 } from "lucide-react"
 
+import { getChapterById } from "@/data/navigation"
 import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
 import {
   systemPressureBackground,
@@ -27,6 +27,7 @@ import {
   unOrgans,
   type UNCommandCenterShellContent,
 } from "@/data/sections/un-command-center"
+import { useNavigation } from "@/hooks/useNavigation"
 
 type UNCommandCenterProps = {
   content: NarrativeSectionContent
@@ -59,14 +60,50 @@ const constraintIcons: IconComponent[] = [
   CircleDot,
 ]
 const previewIcons: IconComponent[] = [Globe2, Network, Landmark, Map]
+const detailIcons: IconComponent[] = [ShieldCheck, Globe2, Hand, Lightbulb]
 
 export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
-  const [selectedOrganId, setSelectedOrganId] = useState(unOrgans[0]?.id)
+  const { activePanelByChapter, setActiveChapterPanel } = useNavigation()
   const headingId = `${content.id}-heading`
   const organPanelId = `${content.id}-organ-panel`
+  const organDetailHeadingId = `${content.id}-organ-detail-heading`
   const pressureMapId = `${content.id}-pressure-map`
+  const fallbackOrganId =
+    getChapterById(content.id)?.defaultPanelId ?? unOrgans[0]?.id
+  const activeOrganId = activePanelByChapter[content.id] ?? fallbackOrganId
+  const fallbackOrgan =
+    unOrgans.find((organ) => organ.id === fallbackOrganId) ?? unOrgans[0]
   const selectedOrgan =
-    unOrgans.find((organ) => organ.id === selectedOrganId) ?? unOrgans[0]
+    unOrgans.find((organ) => organ.id === activeOrganId) ?? fallbackOrgan
+  const selectedOrganIndex = Math.max(
+    unOrgans.findIndex((organ) => organ.id === selectedOrgan?.id),
+    0
+  )
+  const SelectedOrganIcon = organIcons[selectedOrganIndex] ?? Landmark
+  const selectedOrganDetails = selectedOrgan
+    ? [
+        {
+          label: "Role",
+          body: selectedOrgan.role,
+          Icon: detailIcons[0] ?? ShieldCheck,
+        },
+        {
+          label: "Scope of power",
+          body: selectedOrgan.power,
+          Icon: detailIcons[1] ?? Globe2,
+        },
+        {
+          label: "Limitation",
+          body: selectedOrgan.limit,
+          Icon: detailIcons[2] ?? Hand,
+        },
+        {
+          label: "Why it matters",
+          body: selectedOrgan.whyItMatters,
+          Icon: detailIcons[3] ?? Lightbulb,
+        },
+      ]
+    : []
   const nextStep = content.recap
   const nextPreview = systemPressurePreviewChapters.find(
     (chapter) => chapter.id === nextStep?.nextStepTargetId
@@ -108,11 +145,14 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
           <p className="system-pressure-support">
             Institutions organize cooperation. Politics tests the limits.
           </p>
-          <p className="sr-only">{content.summary}</p>
+          <p className="sr-only">{content.thesis}</p>
         </header>
 
         <aside className="system-pressure-panel system-pressure-rooms">
           <p className="system-pressure-kicker">Institution Rooms</p>
+          <p className="system-pressure-room-intro">
+            Explore the key institutions that shape global governance.
+          </p>
           <div
             role="group"
             aria-label="Institution room selector"
@@ -131,7 +171,7 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
                   data-active={isSelected || undefined}
                   data-state={isSelected ? "selected" : "idle"}
                   className="system-pressure-room"
-                  onClick={() => setSelectedOrganId(organ.id)}
+                  onClick={() => setActiveChapterPanel(content.id, organ.id)}
                 >
                   <span className="system-pressure-room-icon">
                     <Icon aria-hidden={true} />
@@ -145,9 +185,6 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
               )
             })}
           </div>
-          <p id={organPanelId} aria-live="polite" className="sr-only">
-            {selectedOrgan.label}: {selectedOrgan.role}
-          </p>
           <button className="system-pressure-room-link" type="button">
             <Landmark aria-hidden="true" />
             <span>
@@ -157,56 +194,89 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
         </aside>
 
         <section
-          className="system-pressure-diagram"
-          aria-labelledby={pressureMapId}
+          className="system-pressure-center-stage"
+          aria-label="Inspect the rooms of the UN system"
         >
-          <h3 id={pressureMapId} className="sr-only">
-            Rules, institutions, state choices, and outcomes pressure diagram
-          </h3>
-          <p className="sr-only">
-            Rules and institutions organize cooperation, while state choices and
-            outcomes show how politics tests enforcement.
-          </p>
-          <div className="system-pressure-coordination" aria-hidden="true">
-            <span>Coordination</span>
-          </div>
-          <div className="system-pressure-node-row">
-            {systemPressureNodes.map((node, index) => {
-              const Icon = pressureNodeIcons[index] ?? CircleDot
+          <section
+            id={organPanelId}
+            className="system-pressure-detail"
+            aria-labelledby={organDetailHeadingId}
+          >
+            <div className="system-pressure-detail-header">
+              <span className="system-pressure-detail-emblem">
+                <SelectedOrganIcon aria-hidden={true} />
+              </span>
+              <div>
+                <p className="system-pressure-kicker">
+                  Selected institution room
+                </p>
+                <h3 id={organDetailHeadingId}>{selectedOrgan.label} details</h3>
+                <p className="system-pressure-selected-badge">
+                  <CircleDot aria-hidden={true} />
+                  <span>Selected room: {selectedOrgan.label}</span>
+                </p>
+              </div>
+            </div>
 
-              return (
-                <article
-                  key={node.label}
-                  className="system-pressure-node"
-                  data-tone={node.tone}
-                >
-                  <span className="system-pressure-node-icon">
+            <div className="system-pressure-detail-grid">
+              {selectedOrganDetails.map(({ label, body, Icon }) => (
+                <article key={label} className="system-pressure-detail-block">
+                  <span className="system-pressure-detail-icon">
                     <Icon aria-hidden={true} />
                   </span>
-                  <h4>{node.label}</h4>
-                  <p>{node.body}</p>
-                  {index < systemPressureNodes.length - 1 ? (
-                    <ArrowRight
-                      className="system-pressure-flow"
-                      aria-hidden="true"
-                    />
-                  ) : null}
+                  <span>
+                    <strong>{label}</strong>
+                    <small>{body}</small>
+                  </span>
                 </article>
-              )
-            })}
-          </div>
-          <div className="system-pressure-pressure" aria-hidden="true">
-            <span>Pressure</span>
-          </div>
-          <aside className="system-pressure-takeaway">
-            <span className="system-pressure-takeaway-icon">
-              <Lightbulb aria-hidden="true" />
-            </span>
-            <span>
-              <strong>Key takeaway</strong>
-              <small>{content.synthesis}</small>
-            </span>
-          </aside>
+              ))}
+            </div>
+            <p aria-live="polite" className="sr-only">
+              {selectedOrgan.label}: {selectedOrgan.role}
+            </p>
+          </section>
+
+          <section
+            className="system-pressure-diagram"
+            aria-labelledby={pressureMapId}
+          >
+            <h3 id={pressureMapId}>Pressure flow</h3>
+            <p className="sr-only">
+              The diagram moves from shared rules to institutional rooms, then
+              to state choices and real-world outcomes.
+            </p>
+            <div className="system-pressure-coordination" aria-hidden="true">
+              <span>Coordination</span>
+            </div>
+            <div className="system-pressure-node-row">
+              {systemPressureNodes.map((node, index) => {
+                const Icon = pressureNodeIcons[index] ?? CircleDot
+
+                return (
+                  <article
+                    key={node.label}
+                    className="system-pressure-node"
+                    data-tone={node.tone}
+                  >
+                    <span className="system-pressure-node-icon">
+                      <Icon aria-hidden={true} />
+                    </span>
+                    <h4>{node.label}</h4>
+                    <p>{node.body}</p>
+                    {index < systemPressureNodes.length - 1 ? (
+                      <ArrowRight
+                        className="system-pressure-flow"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </article>
+                )
+              })}
+            </div>
+            <div className="system-pressure-pressure" aria-hidden="true">
+              <span>Pressure</span>
+            </div>
+          </section>
         </section>
 
         <aside className="system-pressure-panel system-pressure-constraints">

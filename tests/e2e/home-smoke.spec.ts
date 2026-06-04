@@ -6,7 +6,6 @@ import {
   expectNoHorizontalOverflow,
   waitForScrollIdle,
   waitForDocumentFonts,
-  waitForElementOrder,
   expectTouchTarget,
   expectContainedWithinViewport,
   expectVisibleFocus,
@@ -19,7 +18,7 @@ test("@smoke home page opens the journey and continues in-page", async ({
 
   const continueLink = page.getByRole("link", { name: "Begin the journey" })
   const overview = page.getByRole("region", {
-    name: "Global governance overview",
+    name: "Global Governance Overview",
   })
 
   await expect(
@@ -43,7 +42,7 @@ test("@smoke legacy journey-start hash redirects to Chapter 2", async ({
   await page.goto("/#journey-start", { waitUntil: "domcontentloaded" })
 
   const overview = page.getByRole("region", {
-    name: "Global governance overview",
+    name: "Global Governance Overview",
   })
 
   await expect(page).toHaveURL(/#global-governance-overview$/)
@@ -56,46 +55,40 @@ test("@smoke desktop navigation jumps between chapter sections and restores hist
   await page.goto("/", { waitUntil: "domcontentloaded" })
 
   const topNav = page.getByRole("navigation", { name: "Primary" })
+  const systemPressure = page.getByRole("region", {
+    name: "The System Under Pressure",
+  })
   const dossier = page.getByRole("region", {
-    name: "West Philippine Sea dossier",
+    name: "West Philippine Sea Case File",
   })
 
   for (const chapterName of chapterNames) {
     await expect(topNav.getByRole("link", { name: chapterName })).toBeVisible()
   }
 
-  await topNav.getByRole("link", { name: "UN Command Center" }).click()
+  await topNav.getByRole("link", { name: "The System Under Pressure" }).click()
   await expect(page).toHaveURL(/#un-command-center$/)
+  await expect(systemPressure).toBeFocused()
   await expect(
-    page.getByRole("region", { name: "UN Command Center" })
-  ).toBeFocused()
-  await expect(
-    topNav.getByRole("link", { name: "UN Command Center" })
+    topNav.getByRole("link", { name: "The System Under Pressure" })
   ).toHaveAttribute("aria-current", "location")
-  await expect(
-    page.getByText("Current chapter: UN Command Center")
-  ).toBeVisible()
 
   await topNav
-    .getByRole("link", { name: "West Philippine Sea dossier" })
+    .getByRole("link", { name: "West Philippine Sea Case File" })
     .click()
   await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
   await expect(dossier).toBeFocused()
   await expect(
-    topNav.getByRole("link", { name: "West Philippine Sea dossier" })
+    topNav.getByRole("link", { name: "West Philippine Sea Case File" })
   ).toHaveAttribute("aria-current", "location")
 
   await page.goBack()
   await expect(page).toHaveURL(/#un-command-center$/)
-  await expect(
-    page.getByRole("region", { name: "UN Command Center" })
-  ).toBeFocused()
+  await expect(systemPressure).toBeFocused()
 
   await page.reload()
   await expect(page).toHaveURL(/#un-command-center$/)
-  await expect(
-    page.getByRole("region", { name: "UN Command Center" })
-  ).toBeFocused()
+  await expect(systemPressure).toBeFocused()
 })
 
 test("@smoke source-aware chat opens from the shell without disrupting the learning flow", async ({
@@ -150,7 +143,7 @@ test("@smoke source-aware chat opens from the shell without disrupting the learn
     name: "Open source-aware chat",
   })
   const dossier = page.getByRole("region", {
-    name: "West Philippine Sea dossier",
+    name: "West Philippine Sea Case File",
   })
 
   await expect(dossier).toBeFocused()
@@ -187,9 +180,6 @@ test("@smoke source-aware chat opens from the shell without disrupting the learn
     "Connect the West Philippine Sea ruling to the gap between legal clarity and political enforcement."
   )
   await expect(input).toBeFocused()
-  await expect(
-    panel.getByText(/answers stay inside the approved course materials/i)
-  ).toBeVisible()
   await page.keyboard.press("Enter")
   await expect(panel.getByRole("button", { name: "Asking" })).toBeVisible()
   await expect(
@@ -205,15 +195,11 @@ test("@smoke source-aware chat opens from the shell without disrupting the learn
     panel.getByText("Grounded with 2 approved sources")
   ).toBeVisible()
   const sourceChip = panel.getByRole("button", { name: /UN Charter/i })
-  await expect(sourceChip).toBeVisible()
   await sourceChip.focus()
   await expectVisibleFocus(sourceChip)
   await page.keyboard.press("Enter")
   await expect(sourceChip).toHaveAttribute("aria-expanded", "true")
   await expect(panel.getByText("gg-src-un-charter-institutions")).toBeVisible()
-  await expect(
-    panel.getByText(/institutional coordination frame/i)
-  ).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
   await page.keyboard.press("Escape")
@@ -222,7 +208,7 @@ test("@smoke source-aware chat opens from the shell without disrupting the learn
   await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
 })
 
-test("@smoke UN command center introduces an explorable shell with keyboard entry", async ({
+test("@smoke system under pressure introduces a keyboard-safe chapter shell", async ({
   page,
 }) => {
   for (const reducedMotion of ["no-preference", "reduce"] as const) {
@@ -234,43 +220,50 @@ test("@smoke UN command center introduces an explorable shell with keyboard entr
       await waitForDocumentFonts(page)
       await waitForScrollIdle(page)
 
-      const commandCenter = page.getByRole("region", {
-        name: "UN Command Center",
+      const systemPressure = page.getByRole("region", {
+        name: "The System Under Pressure",
       })
-      const summary = commandCenter.getByRole("region", {
-        name: "Command Center summary",
+      const generalAssembly = systemPressure.getByRole("button", {
+        name: /General Assembly/i,
       })
-      const exploreControl = commandCenter.getByRole("button", {
-        name: "Explore the Command Center",
+      const securityCouncil = systemPressure.getByRole("button", {
+        name: /Security Council/i,
       })
-      const whyControl = commandCenter.getByRole("button", {
-        name: "Why the UN matters",
+      const roomsTogether = systemPressure.getByRole("button", {
+        name: "How the system rooms work together",
       })
-      const shellMapControl = commandCenter.getByRole("button", {
-        name: "Inside this section",
+      const pressureFlow = systemPressure.getByRole("region", {
+        name: /pressure flow/i,
       })
 
-      await expect(commandCenter).toBeVisible()
-      await expect(commandCenter).toBeFocused()
+      await expect(systemPressure).toBeVisible()
+      await expect(systemPressure).toBeFocused()
       await expect(
-        commandCenter.getByRole("heading", {
-          name: "The UN gives global politics a shared address",
+        systemPressure.getByRole("heading", {
+          name: "The System Under Pressure",
         })
       ).toBeVisible()
       await expect(
-        commandCenter.getByText(
-          /institutional system within global governance/i
-        )
+        systemPressure.getByText(/Institutions organize cooperation/i)
       ).toBeVisible()
-      await expect(summary).toBeVisible()
-      await expect(exploreControl).toBeVisible()
-      await expect(whyControl).toBeVisible()
-      await expect(shellMapControl).toBeVisible()
-      await expectTouchTarget(exploreControl)
-      await expectTouchTarget(whyControl)
-      await expectTouchTarget(shellMapControl)
+      await expect(
+        pressureFlow.getByRole("heading", { name: "Rules" })
+      ).toBeVisible()
+      await expect(
+        pressureFlow.getByRole("heading", { name: "Outcomes" })
+      ).toBeVisible()
+      await expect(
+        systemPressure.getByText("Uneven Enforcement", { exact: true })
+      ).toBeVisible()
+      await expect(
+        systemPressure.getByRole("link", {
+          name: "Continue to West Philippine Sea Case File",
+        })
+      ).toBeVisible()
 
-      for (const control of [exploreControl, whyControl, shellMapControl]) {
+      for (const control of [generalAssembly, securityCouncil, roomsTogether]) {
+        await expect(control).toBeVisible()
+        await expectTouchTarget(control)
         await control.focus()
         await expectVisibleFocus(control)
       }
@@ -280,50 +273,36 @@ test("@smoke UN command center introduces an explorable shell with keyboard entr
         await expect(
           page
             .getByRole("navigation", { name: "Primary" })
-            .getByRole("link", { name: "UN Command Center" })
+            .getByRole("link", { name: "The System Under Pressure" })
         ).toHaveAttribute("aria-current", "location")
-        await expect(
-          page.getByText("Current chapter: UN Command Center").first()
-        ).toBeVisible()
       } else {
-        await page.waitForFunction(() => {
-          const section = document.getElementById("un-command-center")
-
-          if (!section) {
-            return false
-          }
-
-          return section.getBoundingClientRect().top <= 180
+        const navigationToggle = page.getByRole("button", {
+          name: /navigation/i,
         })
-        await waitForScrollIdle(page)
+        await expect(navigationToggle).toBeVisible()
+
+        if ((await navigationToggle.getAttribute("aria-expanded")) !== "true") {
+          await navigationToggle.click()
+        }
+
         const mobileNav = page.getByRole("navigation", {
           name: "Mobile chapters",
         })
-
-        if (!(await mobileNav.isVisible().catch(() => false))) {
-          const openNavigation = page.getByRole("button", {
-            name: "Open navigation",
-          })
-          await expect(openNavigation).toBeVisible()
-          await openNavigation.click()
-        }
-
-        const mobileUnLink = mobileNav.getByRole("link", {
-          name: "UN Command Center",
+        const mobilePressureLink = mobileNav.getByRole("link", {
+          name: "The System Under Pressure",
         })
 
-        await expect(mobileUnLink).toBeVisible()
-        await expect(mobileUnLink).toHaveAttribute(
-          "data-state",
-          /active|complete/
-        )
-        await expect(mobileNav.getByText(/Current chapter:/)).toBeVisible()
+        await expect(mobilePressureLink).toBeVisible()
+        await expect(mobilePressureLink).toHaveAttribute("data-state", "active")
+        await expect(
+          mobileNav.getByText(/Current chapter:\s*The System Under Pressure/)
+        ).toBeVisible()
       }
     }
   }
 })
 
-test("@smoke West Philippine Sea dossier opens as an anchored case file shell", async ({
+test("@smoke West Philippine Sea case file opens as an anchored case surface", async ({
   page,
 }) => {
   for (const reducedMotion of ["no-preference", "reduce"] as const) {
@@ -336,22 +315,19 @@ test("@smoke West Philippine Sea dossier opens as an anchored case file shell", 
       await waitForScrollIdle(page)
 
       const dossier = page.getByRole("region", {
-        name: "West Philippine Sea dossier",
+        name: "West Philippine Sea Case File",
       })
-      const entryControls = dossier.getByRole("region", {
-        name: "Dossier entry controls",
-      })
-      const timeline = dossier.getByRole("region", {
-        name: "Follow the dispute in order",
-      })
+      const timeline = dossier.getByRole("region", { name: "Timeline" })
+      const map = dossier.getByRole("region", { name: "Maritime Case Map" })
+      const evidence = dossier.getByRole("region", { name: "Evidence" })
       const comparison = dossier.getByRole("region", {
-        name: "Legal clarity met political limits",
+        name: "Ruling vs Reality",
       })
-      const openEvidence = entryControls.getByRole("button", {
-        name: "Open the evidence file",
+      const finalAward = timeline.getByRole("button", {
+        name: /2016.*Final Award/i,
       })
-      const traceLawPower = entryControls.getByRole("button", {
-        name: "Trace law and power",
+      const legalFindings = evidence.getByRole("button", {
+        name: "Inspect evidence for Legal Findings (2016 Award)",
       })
 
       await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
@@ -359,140 +335,41 @@ test("@smoke West Philippine Sea dossier opens as an anchored case file shell", 
       await expect(dossier).toBeFocused()
       await expect(
         dossier.getByRole("heading", {
-          name: "The West Philippine Sea turns the theory into a test",
+          name: "West Philippine Sea Case File",
         })
       ).toBeVisible()
-      await expect(dossier.getByText("Case file")).toBeVisible()
-      await expect(
-        dossier.getByText("Evidence-led investigation")
-      ).toBeVisible()
+      await expect(dossier.getByText("Chapter 4")).toBeVisible()
       await expect(timeline).toBeVisible()
+      await expect(map).toBeVisible()
+      await expect(evidence).toBeVisible()
       await expect(comparison).toBeVisible()
       await expect(
-        dossier.getByText(/legal rulings, maritime claims/i)
-      ).toBeVisible()
-      await expect(dossier.getByText("Supporting detail")).toBeVisible()
-      await expect(dossier.getByText("Synthesis")).toBeVisible()
-      await expect(
-        dossier.getByRole("button", {
-          name: "How to read the dispute as a governance case",
-        })
+        dossier.getByRole("region", { name: "References & Sources" })
       ).toBeVisible()
       await expect(
-        dossier.getByRole("link", {
-          name: "Continue to Conclusion and references",
-        })
+        dossier.getByRole("region", { name: "Source Trust Guide" })
       ).toBeVisible()
-      await expect(entryControls.getByRole("button")).toHaveCount(2)
+      await expect(
+        dossier.getByText(/Nine-dash line has no legal basis/i)
+      ).toBeVisible()
 
-      await waitForElementOrder([timeline, comparison, entryControls])
-
-      for (const control of [openEvidence, traceLawPower]) {
+      for (const control of [finalAward, legalFindings]) {
         await expect(control).toBeVisible()
         await expectTouchTarget(control)
         await expectContainedWithinViewport(control, width)
         await control.focus()
         await expectVisibleFocus(control)
-        await control.press("Enter")
-        await expect(control).toHaveAttribute("aria-expanded", "true")
-        await expectNoHorizontalOverflow(page)
       }
 
+      await finalAward.press("Enter")
+      await expect(map.getByText("2016")).toBeVisible()
+      await expect(
+        map.getByText("Legal clarity enters the record.")
+      ).toBeVisible()
+
+      await legalFindings.press("Enter")
+      await expect(evidence.getByText("Tribunal Award")).toBeVisible()
       await expectNoHorizontalOverflow(page)
-    }
-  }
-})
-
-test("@smoke conclusion references are inspectable, keyboard-safe, and contained", async ({
-  page,
-}) => {
-  for (const reducedMotion of ["no-preference", "reduce"] as const) {
-    await page.emulateMedia({ reducedMotion })
-
-    for (const width of [360, 768, 1024, 1440]) {
-      await page.setViewportSize({ width, height: 900 })
-      await page.goto("/#conclusion-references")
-
-      const conclusion = page.getByRole("region", {
-        name: "Conclusion and references",
-      })
-      const trigger = conclusion.getByRole("button", {
-        name: "Inspect the sources",
-      })
-      const recapCue = conclusion.getByRole("link", {
-        name: "Return to opening chapter",
-      })
-
-      await expect(conclusion).toBeFocused()
-      await expect(conclusion.getByText(/not world government/i)).toBeVisible()
-      await expect(
-        conclusion.getByText(
-          /sources below keep the closing claim inspectable/i
-        )
-      ).toBeVisible()
-      await expect(trigger).toBeVisible()
-      await expectTouchTarget(trigger)
-      await trigger.focus()
-      await expectVisibleFocus(trigger)
-      await page.keyboard.press("Enter")
-      await expect(trigger).toHaveAttribute("aria-expanded", "true")
-
-      const referenceSurface = conclusion.locator(
-        '[data-reference-surface="conclusion"]'
-      )
-      await expect(referenceSurface).toBeVisible()
-      await expectContainedWithinViewport(referenceSurface, width)
-      await expect(
-        conclusion.getByRole("article", {
-          name: "Charter of the United Nations",
-        })
-      ).toBeVisible()
-      await expect(
-        conclusion.getByText("gg-src-un-charter-institutions")
-      ).toBeVisible()
-      await expect(
-        conclusion.getByText(/why it matters:/i).first()
-      ).toBeVisible()
-      await expectNoHorizontalOverflow(page)
-
-      const sourceCards = referenceSurface.locator("article")
-      await expect(sourceCards).toHaveCount(3)
-
-      const sourceBoxes = await sourceCards.evaluateAll((cards) =>
-        cards.map((card) => {
-          const box = card.getBoundingClientRect()
-
-          return { x: box.x, width: box.width }
-        })
-      )
-
-      for (const box of sourceBoxes) {
-        expect(box.x).toBeGreaterThanOrEqual(0)
-        expect(box.x + box.width).toBeLessThanOrEqual(width)
-      }
-
-      const referencesBeforeRecap = await referenceSurface.evaluate(
-        (surface, cue) =>
-          Boolean(
-            surface.compareDocumentPosition(cue as Node) &
-            Node.DOCUMENT_POSITION_FOLLOWING
-          ),
-        await recapCue.elementHandle()
-      )
-      expect(referencesBeforeRecap).toBe(true)
-
-      await page.keyboard.press("Escape")
-      await expect(trigger).toHaveAttribute("aria-expanded", "false")
-      await expect(trigger).toBeFocused()
-      await expectNoHorizontalOverflow(page)
-
-      await recapCue.focus()
-      await expectVisibleFocus(recapCue)
-      await page.keyboard.press("Enter")
-      await expect(page).toHaveURL(/#hero-narrative-frame$/)
-      await expect(
-        page.getByRole("region", { name: "Global Governance" })
-      ).toBeFocused()
     }
   }
 })

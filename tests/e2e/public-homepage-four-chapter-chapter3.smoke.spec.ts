@@ -41,9 +41,30 @@ test("@smoke four-chapter Chapter 3 flow renders and redirects legacy hashes", a
       "Institutions organize cooperation. Politics tests the limits."
     )
   ).toBeVisible()
+  await expect(
+    chapter3.getByRole("region", { name: "General Assembly details" })
+  ).toBeVisible()
+
+  await chapter3.getByRole("button", { name: /Security Council/i }).click()
+  const selectedRoom = chapter3.getByRole("region", {
+    name: "Security Council details",
+  })
+
+  await expect(selectedRoom).toBeVisible()
+  await expect(
+    selectedRoom.getByText("Selected room: Security Council")
+  ).toBeVisible()
+  for (const label of [
+    "Role",
+    "Scope of power",
+    "Limitation",
+    "Why it matters",
+  ]) {
+    await expect(selectedRoom.getByText(label, { exact: true })).toBeVisible()
+  }
 
   const diagram = chapter3.getByRole("region", {
-    name: /pressure diagram/i,
+    name: /pressure flow/i,
   })
   for (const label of ["Rules", "Institutions", "State Choices", "Outcomes"]) {
     await expect(diagram.getByText(label, { exact: true })).toBeVisible()
@@ -90,7 +111,7 @@ test("@smoke four-chapter Chapter 3 mobile navigation stays contained", async ({
     await expect(mobileNav.getByRole("link", { name: chapter })).toBeVisible()
   }
   await expect(
-    mobileNav.getByText("Current chapter: The System Under Pressure")
+    mobileNav.getByText(/Current chapter:\s*The System Under Pressure/)
   ).toBeVisible()
 
   await expectNoHorizontalOverflow(page)

@@ -1,7 +1,4 @@
-import type {
-  ChapterTransitionContent,
-  NarrativeSectionContent,
-} from "@/data/sections/narrative-types"
+import type { NarrativeSectionContent } from "@/data/sections/narrative-types"
 
 export type UNCommandCenterShellContent = {
   introduction: string
@@ -238,10 +235,4 @@ export const unCommandCenterShell: UNCommandCenterShellContent = {
         "The UN matters because it makes coordination visible before agreement is easy, but compliance still depends on consent, leverage, political will, and the costs governments are willing to bear.",
     },
   ],
-}
-
-export const constraintsTransition: ChapterTransitionContent = {
-  label: "Next: Constraints",
-  title: "Institutions do not remove politics",
-  body: "The next layer asks why rules and institutions can still matter when enforcement is uneven and powerful states can resist pressure.",
 }
