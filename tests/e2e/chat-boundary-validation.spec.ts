@@ -31,6 +31,24 @@ async function askVisibleChat(page: Page, prompt: string) {
   return { panel, input }
 }
 
+test("@journey source-aware chat keeps shift enter for multiline prompts", async ({
+  page,
+}) => {
+  await page.goto("/#hero-narrative-frame")
+  await page.getByRole("button", { name: "Open source-aware chat" }).click()
+
+  const panel = page.getByRole("region", {
+    name: "Source-aware academic chat",
+  })
+  const input = panel.getByRole("textbox", { name: "Course question" })
+
+  await input.fill("Explain global governance")
+  await page.keyboard.press("Shift+Enter")
+  await input.pressSequentially("with one example")
+
+  await expect(input).toHaveValue("Explain global governance\nwith one example")
+})
+
 test("@journey mocked chat fallback states stay visible and recoverable in the browser", async ({
   page,
 }) => {
@@ -49,7 +67,7 @@ test("@journey mocked chat fallback states stay visible and recoverable in the b
             message:
               "The approved materials do not support a confident answer to that question.",
             nextStep:
-              "Reframe the question around the course sources, the UN, or the West Philippine Sea dossier.",
+              "Reframe the question around the course sources, the UN, or the West Philippine Sea Case File.",
             grounding: {
               supportLevel: "weak",
               cue: "Limited support in approved materials",

@@ -1,7 +1,7 @@
 # Public Homepage Implementation Checklist
 
 Status: Working checklist
-Last updated: 2026-06-03
+Last updated: 2026-06-05
 Scope: Build-oriented checklist for the public homepage redesign
 Depends on: `archive/docs/planning-artifacts/public-homepage-redesign-proposal.md`
 
@@ -138,20 +138,23 @@ Exit condition:
 
 ### The System Under Pressure
 
-- [ ] Merge UN institution content with governance-limits content
-- [ ] Rename the production chapter and navbar stop to `The System Under Pressure`
-- [ ] Keep institution exploration visible while making limits/enforcement the chapter payoff
+- [x] Merge UN institution content with governance-limits content
+- [x] Rename the production chapter and navbar stop to `The System Under Pressure`
+- [x] Keep institution exploration visible while making limits/enforcement the chapter payoff
+- [x] Preserve `#governance-limits` as a compatibility redirect into Chapter 3
 
 ### West Philippine Sea Case File
 
-- [ ] Keep the WPS dossier as the case-study-first final page
-- [ ] Fold conclusion and source-reference inspection into the end of the WPS page
-- [ ] Redirect or retire the old standalone conclusion stop
+- [x] Keep the WPS dossier as the case-study-first final page
+- [x] Fold conclusion and source-reference inspection into the end of the WPS page
+- [x] Preserve `#conclusion-references` as a compatibility redirect into Chapter 4
+- [x] Replace stale WPS journey/layout coverage with chapter-owned Chapter 4 smoke coverage
 
 ### Removed Standalone Stops
 
-- [ ] Remove `Governance Limits and Enforcement` as a separate navbar page
-- [ ] Remove `Conclusion and References` as a separate navbar page
+- [x] Remove `Governance Limits and Enforcement` as a separate navbar page
+- [x] Remove `Conclusion and References` as a separate navbar page
+- [x] Remove dormant old-structure content files after replacement coverage passed
 
 Exit condition:
 - Four public chapters exist in the new shell and tell the complete learning arc without exposing the old six-page scope.
@@ -164,9 +167,9 @@ Exit condition:
 - [ ] Validate keyboard navigation
 - [ ] Validate visible focus states
 - [ ] Validate reduced-motion behavior
-- [ ] Validate chat fallback and containment behavior
+- [x] Validate chat fallback and containment behavior
 - [ ] Validate performance assumptions for heavy visuals
-- [ ] Update homepage tests around chapter navigation and internal states
+- [x] Update homepage tests around chapter navigation and internal states
 - [ ] Re-run the final build verification set
 
 Exit condition:
@@ -174,10 +177,9 @@ Exit condition:
 
 ## Recommended Immediate Next Steps
 
-1. Review the live shell changes in the browser against the approved Phase 0 mockups.
-2. Start Phase 2 by fitting `Hero` and `Overview` into the new chapter shell.
-3. Decide whether the current slimmer `SectionProgressRail` remains during Phase 2 or gets fully absorbed into the top command bar.
-4. Add focused tests for the new previous/next chapter controls once the chapter shell becomes the primary navigation path.
+1. Resolve the unrelated MaintainerDashboard shared-module import and test drift so `pnpm test:unit`, `pnpm typecheck`, and `pnpm build` can return to green.
+2. Use the chapter-owned smoke files as the default browser confidence layer for the four-chapter homepage.
+3. Rebuild optional `@layout` coverage only when a browser-only layout risk remains after the chapter smoke checks.
 
 ## Working Note
 

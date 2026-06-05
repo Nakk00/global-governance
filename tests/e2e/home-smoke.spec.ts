@@ -24,7 +24,9 @@ test("@smoke home page opens the journey and continues in-page", async ({
   await expect(
     page.getByRole("heading", { name: "Global Governance", exact: true })
   ).toBeVisible()
-  await expect(page.getByText(/step into an interactive guide/i)).toBeVisible()
+  await expect(
+    page.getByText(/Explore how global governance connects states/i)
+  ).toBeVisible()
   await expect(continueLink).toBeVisible()
 
   await continueLink.focus()
@@ -170,9 +172,7 @@ test("@smoke source-aware chat opens from the shell without disrupting the learn
   await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
   const scrollAfterOpen = await page.evaluate(() => window.scrollY)
   expect(Math.abs(scrollAfterOpen - scrollBefore)).toBeLessThanOrEqual(2)
-  await expect(
-    panel.getByText(/bounded to the Global Governance learning experience/i)
-  ).toBeVisible()
+  await expect(panel.getByText(/Ask course questions/i)).toBeVisible()
   await expect(panel.getByText("Suggested prompts")).toBeVisible()
 
   await prompt.click()
@@ -317,7 +317,9 @@ test("@smoke West Philippine Sea case file opens as an anchored case surface", a
       const dossier = page.getByRole("region", {
         name: "West Philippine Sea Case File",
       })
-      const timeline = dossier.getByRole("region", { name: "Timeline" })
+      const timeline = dossier.getByRole("complementary", {
+        name: "Timeline",
+      })
       const map = dossier.getByRole("region", { name: "Maritime Case Map" })
       const evidence = dossier.getByRole("region", { name: "Evidence" })
       const comparison = dossier.getByRole("region", {
@@ -329,6 +331,7 @@ test("@smoke West Philippine Sea case file opens as an anchored case surface", a
       const legalFindings = evidence.getByRole("button", {
         name: "Inspect evidence for Legal Findings (2016 Award)",
       })
+      const evidenceDetail = evidence.locator('[data-wps-evidence-surface=""]')
 
       await expect(page).toHaveURL(/#west-philippine-sea-dossier$/)
       await expect(dossier).toBeVisible()
@@ -347,7 +350,7 @@ test("@smoke West Philippine Sea case file opens as an anchored case surface", a
         dossier.getByRole("region", { name: "References & Sources" })
       ).toBeVisible()
       await expect(
-        dossier.getByRole("region", { name: "Source Trust Guide" })
+        dossier.getByRole("complementary", { name: "Source Trust Guide" })
       ).toBeVisible()
       await expect(
         dossier.getByText(/Nine-dash line has no legal basis/i)
@@ -368,7 +371,7 @@ test("@smoke West Philippine Sea case file opens as an anchored case surface", a
       ).toBeVisible()
 
       await legalFindings.press("Enter")
-      await expect(evidence.getByText("Tribunal Award")).toBeVisible()
+      await expect(evidenceDetail).toContainText("Tribunal Award")
       await expectNoHorizontalOverflow(page)
     }
   }

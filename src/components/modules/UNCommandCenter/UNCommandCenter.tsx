@@ -1,4 +1,4 @@
-import type { ComponentType } from "react"
+import { Fragment, type ComponentType } from "react"
 import {
   ArrowRight,
   CircleDot,
@@ -253,23 +253,27 @@ export function UNCommandCenter({ content, shell }: UNCommandCenterProps) {
                 const Icon = pressureNodeIcons[index] ?? CircleDot
 
                 return (
-                  <article
-                    key={node.label}
-                    className="system-pressure-node"
-                    data-tone={node.tone}
-                  >
-                    <span className="system-pressure-node-icon">
-                      <Icon aria-hidden={true} />
-                    </span>
-                    <h4>{node.label}</h4>
-                    <p>{node.body}</p>
+                  <Fragment key={node.label}>
+                    <article
+                      className="system-pressure-node"
+                      data-tone={node.tone}
+                    >
+                      <span className="system-pressure-node-icon">
+                        <Icon aria-hidden={true} />
+                      </span>
+                      <h4>{node.label}</h4>
+                      <p>{node.body}</p>
+                    </article>
                     {index < systemPressureNodes.length - 1 ? (
-                      <ArrowRight
+                      <span
                         className="system-pressure-flow"
+                        data-tone={node.tone}
                         aria-hidden="true"
-                      />
+                      >
+                        <ArrowRight />
+                      </span>
                     ) : null}
-                  </article>
+                  </Fragment>
                 )
               })}
             </div>
