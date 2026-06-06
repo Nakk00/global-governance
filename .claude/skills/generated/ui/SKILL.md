@@ -1,11 +1,11 @@
 ---
 name: ui
-description: "Skill for the Ui area of global-governance-docuweb. 11 symbols across 3 files."
+description: "Skill for the Ui area of global-governance-docuweb. 10 symbols across 2 files."
 ---
 
 # Ui
 
-11 symbols | 3 files | Cohesion: 75%
+10 symbols | 2 files | Cohesion: 72%
 
 ## When to Use
 
@@ -19,7 +19,6 @@ description: "Skill for the Ui area of global-governance-docuweb. 11 symbols acr
 |------|---------|
 | `src/components/ui/table.tsx` | Table, TableHeader, TableBody, TableRow, TableHead (+1) |
 | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | ValidationResultsTable, ResponsiveChunkTable, ResponsiveCitationTable, SectionState |
-| `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | ValidationResultsTable |
 
 ## Entry Points
 
@@ -41,24 +40,17 @@ Start here when exploring this area:
 | `TableRow` | Function | `src/components/ui/table.tsx` | 35 |
 | `TableHead` | Function | `src/components/ui/table.tsx` | 42 |
 | `TableCell` | Function | `src/components/ui/table.tsx` | 49 |
-| `ValidationResultsTable` | Function | `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | 112 |
 | `SectionState` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3945 |
 | `ValidationResultsTable` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1453 |
 | `ResponsiveChunkTable` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3203 |
 | `ResponsiveCitationTable` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3283 |
-
-## Execution Flows
-
-| Flow | Type | Steps |
-|------|------|-------|
-| `ValidationResultsTable → Cn` | cross_community | 3 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
 | Overview | 5 calls |
-| Public-homepage-redesign | 4 calls |
+| Public-homepage-redesign | 3 calls |
 
 ## How to Explore
 

@@ -1,0 +1,142 @@
+{
+  "version": "2026-06-06",
+  "sources": [
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-1-global-governance-basics-knowledge.md",
+      "sourceId": "gg-src-global-governance-course-frame",
+      "fileType": "md",
+      "revision": "topic-1-2026-06-06",
+      "title": "Global Governance Course Frame",
+      "shortTitle": "Course frame",
+      "sourceType": "course",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-1-global-governance-basics-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-1-global-governance-basics-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-2-major-actors-global-governance-knowledge.md",
+      "sourceId": "gg-src-global-governance-course-frame",
+      "fileType": "md",
+      "revision": "topic-2-2026-06-06",
+      "title": "Global Governance Course Frame",
+      "shortTitle": "Course frame",
+      "sourceType": "course",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-2-major-actors-global-governance-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-2-major-actors-global-governance-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-3-united-nations-purpose-structure-knowledge.md",
+      "sourceId": "gg-src-un-charter-institutions",
+      "fileType": "md",
+      "revision": "topic-3-2026-06-06",
+      "title": "Charter of the United Nations",
+      "shortTitle": "UN Charter",
+      "sourceType": "primary",
+      "canonicalUrl": "https://www.un.org/en/about-us/un-charter/full-text",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-3-united-nations-purpose-structure-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-3-united-nations-purpose-structure-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-4-limits-criticisms-global-governance-knowledge.md",
+      "sourceId": "gg-src-global-governance-course-frame",
+      "fileType": "md",
+      "revision": "topic-4-2026-06-06",
+      "title": "Global Governance Course Frame",
+      "shortTitle": "Course frame",
+      "sourceType": "course",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-4-limits-criticisms-global-governance-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-4-limits-criticisms-global-governance-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-5-international-law-dispute-resolution-knowledge.md",
+      "sourceId": "gg-src-philippines-arbitration-filing",
+      "fileType": "md",
+      "revision": "topic-5-2026-06-06",
+      "title": "Philippines Notification and Statement of Claim",
+      "shortTitle": "Arbitration filing",
+      "sourceType": "case",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-5-international-law-dispute-resolution-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-5-international-law-dispute-resolution-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-6-west-philippine-sea-south-china-sea-case-knowledge.md",
+      "sourceId": "gg-src-south-china-sea-award",
+      "fileType": "md",
+      "revision": "topic-6-2026-06-06",
+      "title": "South China Sea Arbitration Award",
+      "shortTitle": "SCS award",
+      "sourceType": "case",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-6-west-philippine-sea-south-china-sea-case-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-6-west-philippine-sea-south-china-sea-case-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-7-enforcement-gap-ruling-vs-reality-knowledge.md",
+      "sourceId": "gg-src-wps-enforcement-gap-comparison",
+      "fileType": "md",
+      "revision": "topic-7-2026-06-06",
+      "title": "Tribunal Award and Post-Award Conduct Comparison",
+      "shortTitle": "Enforcement gap",
+      "sourceType": "case",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-7-enforcement-gap-ruling-vs-reality-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-7-enforcement-gap-ruling-vs-reality-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/topic-8-asean-and-regional-governance-knowledge.md",
+      "sourceId": "gg-src-wps-political-reality-record",
+      "fileType": "md",
+      "revision": "topic-8-2026-06-06",
+      "title": "Diplomatic Response and State Behavior Record",
+      "shortTitle": "Political reality",
+      "sourceType": "case",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/topic-8-asean-and-regional-governance-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/topic-8-asean-and-regional-governance-knowledge.md"
+      }
+    }
+  ]
+}

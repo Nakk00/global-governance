@@ -1,11 +1,11 @@
 ---
 name: sections
-description: "Skill for the Sections area of global-governance-docuweb. 21 symbols across 10 files."
+description: "Skill for the Sections area of global-governance-docuweb. 22 symbols across 11 files."
 ---
 
 # Sections
 
-21 symbols | 10 files | Cohesion: 72%
+22 symbols | 11 files | Cohesion: 65%
 
 ## When to Use
 
@@ -23,10 +23,10 @@ description: "Skill for the Sections area of global-governance-docuweb. 21 symbo
 | `src/components/sections/GlobalGovernanceOverviewChapter.test.tsx` | renderOverview, NavigationHarness |
 | `src/components/sections/HeroNarrativeFrame.tsx` | HeroNarrativeFrame |
 | `src/components/sections/ChapterTransitionBlock.tsx` | ChapterTransitionBlock |
-| `src/components/modules/WpsDossier/WpsDossier.tsx` | WpsDossier |
+| `src/data/navigation.ts` | isKnownSectionId |
 | `src/data/sections/core-narrative.test.ts` | cues |
+| `tests/support/render-with-navigation.tsx` | createNavigationContextValue |
 | `src/components/sections/GlobalGovernanceOverviewChapter.tsx` | GlobalGovernanceOverviewChapter |
-| `src/components/sections/InsightRecapCard.tsx` | InsightRecapCard |
 
 ## Entry Points
 
@@ -35,7 +35,7 @@ Start here when exploring this area:
 - **`App`** (Function) — `src/App.tsx:50`
 - **`HeroNarrativeFrame`** (Function) — `src/components/sections/HeroNarrativeFrame.tsx:46`
 - **`ChapterTransitionBlock`** (Function) — `src/components/sections/ChapterTransitionBlock.tsx:6`
-- **`WpsDossier`** (Function) — `src/components/modules/WpsDossier/WpsDossier.tsx:88`
+- **`isKnownSectionId`** (Function) — `src/data/navigation.ts:101`
 - **`resolveNarrativeRecapCue`** (Function) — `src/data/sections/core-narrative.ts:42`
 
 ## Key Symbols
@@ -45,8 +45,9 @@ Start here when exploring this area:
 | `App` | Function | `src/App.tsx` | 50 |
 | `HeroNarrativeFrame` | Function | `src/components/sections/HeroNarrativeFrame.tsx` | 46 |
 | `ChapterTransitionBlock` | Function | `src/components/sections/ChapterTransitionBlock.tsx` | 6 |
-| `WpsDossier` | Function | `src/components/modules/WpsDossier/WpsDossier.tsx` | 88 |
+| `isKnownSectionId` | Function | `src/data/navigation.ts` | 101 |
 | `resolveNarrativeRecapCue` | Function | `src/data/sections/core-narrative.ts` | 42 |
+| `createNavigationContextValue` | Function | `tests/support/render-with-navigation.tsx` | 12 |
 | `GlobalGovernanceOverviewChapter` | Function | `src/components/sections/GlobalGovernanceOverviewChapter.tsx` | 17 |
 | `NarrativeSection` | Function | `src/components/sections/NarrativeSection.tsx` | 152 |
 | `InsightRecapCard` | Function | `src/components/sections/InsightRecapCard.tsx` | 10 |
@@ -61,7 +62,6 @@ Start here when exploring this area:
 | `NavigationHarness` | Function | `src/components/sections/GlobalGovernanceOverviewChapter.test.tsx` | 19 |
 | `hasInspectableReferences` | Function | `src/components/sections/NarrativeSection.tsx` | 37 |
 | `NarrativeDisclosureBlock` | Function | `src/components/sections/NarrativeSection.tsx` | 43 |
-| `closeAndReturnFocus` | Function | `src/components/sections/NarrativeSection.tsx` | 54 |
 
 ## Execution Flows
 
@@ -69,14 +69,16 @@ Start here when exploring this area:
 |------|------|-------|
 | `NarrativeSection → IsChapterId` | cross_community | 4 |
 | `NarrativeSection → Cn` | cross_community | 4 |
+| `RenderSourceAwareChat → CreateNavigationContextValue` | cross_community | 3 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
 | Layout | 3 calls |
-| UNCommandCenter | 2 calls |
 | Public-homepage-redesign | 2 calls |
+| UNCommandCenter | 1 calls |
+| WpsDossier | 1 calls |
 | Contexts | 1 calls |
 | Overview | 1 calls |
 

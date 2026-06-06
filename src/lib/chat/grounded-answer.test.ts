@@ -138,6 +138,24 @@ describe("grounded chat contract", () => {
     expect("citations" in parsed.data).toBe(false)
   })
 
+  it("accepts unsafe refusal as a typed successful state", () => {
+    const parsed = parseGroundedChatEnvelope({
+      success: true,
+      data: {
+        state: "refused",
+        code: "unsafe",
+        message: "I cannot help with that request.",
+        nextStep: "Try a course-focused question.",
+      },
+    })
+
+    expect(parsed.success).toBe(true)
+    if (!parsed.success || parsed.data.state !== "refused") {
+      throw new Error("Expected refusal")
+    }
+    expect(parsed.data.code).toBe("unsafe")
+  })
+
   it("keeps cooldown as a typed successful state with retry guidance", () => {
     const parsed = parseGroundedChatEnvelope({
       success: true,
@@ -162,6 +180,50 @@ describe("grounded chat contract", () => {
 
     expect(parsed.data.retryAfterSeconds).toBe(60)
     expect(parsed.data.nextStep).toMatch(/course-focused/i)
+  })
+
+  it("keeps lesson fallback as a strict typed successful state", () => {
+    const parsed = parseGroundedChatEnvelope({
+      success: true,
+      data: {
+        state: "fallback",
+        message: "The assistant could not complete a grounded answer right now.",
+        nextStep: "Continue with the lesson or try a course question.",
+        suggestedPrompts: [
+          "What is global governance?",
+          "Why is the UN important?",
+        ],
+        fallbackSource: {
+          label: "Current lesson summary",
+        },
+      },
+    })
+
+    expect(parsed.success).toBe(true)
+    if (!parsed.success || parsed.data.state !== "fallback") {
+      throw new Error("Expected fallback")
+    }
+
+    expect(parsed.data.suggestedPrompts).toHaveLength(2)
+    expect(parsed.data.fallbackSource?.label).toBe("Current lesson summary")
+  })
+
+  it("accepts fallback without an optional source label", () => {
+    const parsed = parseGroundedChatEnvelope({
+      success: true,
+      data: {
+        state: "fallback",
+        message: "Grounded answer unavailable.",
+        nextStep: "Continue with the lesson.",
+        suggestedPrompts: ["What is global governance?"],
+      },
+    })
+
+    expect(parsed.success).toBe(true)
+    if (!parsed.success || parsed.data.state !== "fallback") {
+      throw new Error("Expected fallback")
+    }
+    expect(parsed.data.fallbackSource).toBeUndefined()
   })
 
   it("rejects malformed response shapes before React state commits them", () => {
@@ -201,13 +263,78 @@ describe("grounded chat contract", () => {
     expect(
       createChatRequest(" Explain global governance ", {
         currentSectionId: "governance-limits",
+        depthMode: "expert",
       })
     ).toEqual({
       question: "Explain global governance",
       context: {
         currentSectionId: "governance-limits",
+        depthMode: "expert",
       },
     })
+  })
+
+  it("rejects empty questions before creating requests", () => {
+    expect(() => createChatRequest("   ")).toThrow(/required/i)
+  })
+
+  it.each([
+    "not a url",
+    "ftp://example.test/source",
+    "https://user:password@example.test/source",
+    "http://localhost/source",
+    "http://10.0.0.4/source",
+    "http://172.16.0.4/source",
+    "http://192.168.0.4/source",
+    "http://127.0.0.1:54321/storage/v1/object/private/source.pdf",
+  ])("rejects unsafe citation URL %s", (url) => {
+    expect(() =>
+      parseGroundedChatEnvelope({
+        success: true,
+        data: {
+          state: "answered",
+          answer: "Grounded answer.",
+          grounding: {
+            supportLevel: "strong",
+            cue: "Grounded answer",
+          },
+          citations: [
+            {
+              sourceId: "gg-src-un-charter-institutions",
+              title: "Charter of the United Nations",
+              shortTitle: "UN Charter",
+              sourceType: "primary",
+              detail: "Institutional frame",
+              url,
+            },
+          ],
+        },
+      })
+    ).toThrow(/url/i)
+  })
+
+  it("parses explicit error envelopes and rejects missing success flags", () => {
+    expect(
+      parseGroundedChatEnvelope({
+        success: false,
+        error: {
+          code: "invalid_request",
+          message: "A question is required.",
+        },
+      })
+    ).toEqual({
+      success: false,
+      error: {
+        code: "invalid_request",
+        message: "A question is required.",
+      },
+    })
+
+    expect(() =>
+      parseGroundedChatEnvelope({
+        data: {},
+      })
+    ).toThrow(/envelope/i)
   })
 
   it("maps transport and validation failures to user-safe copy", () => {

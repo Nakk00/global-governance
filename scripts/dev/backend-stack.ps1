@@ -56,23 +56,27 @@ if ($LASTEXITCODE -ne 0) {
   throw "Django backend preflight failed."
 }
 
+pnpm supabase:start
+if ($LASTEXITCODE -ne 0) {
+  throw "Supabase failed to start."
+}
+
+pnpm redis:start
+if ($LASTEXITCODE -ne 0) {
+  throw "Redis failed to start."
+}
+
 Write-Host "Applying Django migrations for development database..."
 & powershell -NoProfile -ExecutionPolicy Bypass -File $backendPythonScript backend/manage.py migrate --settings=config.settings.development
 if ($LASTEXITCODE -ne 0) {
   throw "Django migrations failed."
 }
 
-pnpm supabase:start
-if ($LASTEXITCODE -ne 0) {
-  throw "Supabase failed to start."
-}
-
 $processes = @()
-$processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "pnpm supabase:functions:chat" -WorkingDirectory (Get-Location).Path -NoNewWindow -PassThru
 $processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $backendPythonScript, "backend/manage.py", "runserver", "127.0.0.1:8000", "--settings=config.settings.development" -NoNewWindow -PassThru
 $processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "pnpm dev -- --host 127.0.0.1" -WorkingDirectory (Get-Location).Path -NoNewWindow -PassThru
 
-Write-Host "Started Supabase chat function, Django at http://127.0.0.1:8000, and Vite."
+Write-Host "Started Supabase data services, Redis at redis://127.0.0.1:6379/0, Django at http://127.0.0.1:8000, and Vite."
 Write-Host "Press Ctrl+C to stop this coordinator, then stop child processes if needed."
 
 try {

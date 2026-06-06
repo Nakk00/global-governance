@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import type { GroundedChatSuccess } from "@/types/chat"
+import type { GroundedChatRequest, GroundedChatSuccess } from "@/types/chat"
 
 import { SourceAwareChat } from "./SourceAwareChat"
 
@@ -31,7 +31,7 @@ const answeredResponse: GroundedChatSuccess = {
 function openChat(
   chatClient: (
     question: string,
-    context?: { currentSectionId?: string }
+    context?: GroundedChatRequest["context"]
   ) => Promise<GroundedChatSuccess> = vi
     .fn()
     .mockResolvedValue(answeredResponse)
@@ -117,6 +117,7 @@ describe("SourceAwareChat", () => {
         "How does the Security Council show both coordination and enforcement limits?",
         {
           currentSectionId: "un-command-center",
+          depthMode: "student",
         }
       )
     )
@@ -192,7 +193,63 @@ describe("SourceAwareChat", () => {
         "Connect the West Philippine Sea ruling to the gap between legal clarity and political enforcement.\nwith one example",
         {
           currentSectionId: "west-philippine-sea-dossier",
+          depthMode: "student",
         }
+      )
+    )
+  })
+
+  it("ignores an empty submission and submits a question with Enter", async () => {
+    const chatClient = vi.fn().mockResolvedValue(answeredResponse)
+    const { open, user } = openChat(chatClient)
+    const { panel, input } = await open()
+
+    await user.click(within(panel).getByRole("button", { name: "Ask" }))
+    expect(chatClient).not.toHaveBeenCalled()
+
+    await user.type(input, "How do institutions coordinate action?")
+    await user.keyboard("{Enter}")
+
+    await waitFor(() =>
+      expect(chatClient).toHaveBeenCalledWith(
+        "How do institutions coordinate action?",
+        {
+          currentSectionId: "west-philippine-sea-dossier",
+          depthMode: "student",
+        }
+      )
+    )
+  })
+
+  it("renders typed client failures without losing safe copy", async () => {
+    const chatClient = vi.fn().mockRejectedValue({
+      code: "grounded_chat_unavailable",
+      message: "A safe typed message.",
+    })
+    const { open, user } = openChat(chatClient)
+    const { panel, input } = await open()
+
+    await user.type(input, "Explain the lesson.")
+    await user.keyboard("{Enter}")
+
+    await waitFor(() =>
+      expect(within(panel).getByRole("alert")).toHaveTextContent(
+        "A safe typed message."
+      )
+    )
+  })
+
+  it("renders generic safe copy for unknown client failures", async () => {
+    const chatClient = vi.fn().mockRejectedValue("network unavailable")
+    const { open, user } = openChat(chatClient)
+    const { panel, input } = await open()
+
+    await user.type(input, "Explain the lesson.")
+    await user.keyboard("{Enter}")
+
+    await waitFor(() =>
+      expect(within(panel).getByRole("alert")).toHaveTextContent(
+        /could not return a grounded answer/i
       )
     )
   })
@@ -232,6 +289,30 @@ describe("SourceAwareChat", () => {
     expect(
       within(panel).getByText(/distinguishes global governance/i)
     ).toBeVisible()
+  })
+
+  it("lets the learner select expert depth and sends it with section context", async () => {
+    const chatClient = vi.fn().mockResolvedValue(answeredResponse)
+    const { open, user } = openChat(chatClient)
+    const { panel, input } = await open()
+
+    const expertControl = within(panel).getByRole("button", {
+      name: "Expert depth",
+    })
+    await user.click(expertControl)
+    await user.type(input, "Compare UN legitimacy and enforcement.")
+    await user.click(within(panel).getByRole("button", { name: "Ask" }))
+
+    expect(expertControl).toHaveAttribute("aria-pressed", "true")
+    await waitFor(() =>
+      expect(chatClient).toHaveBeenCalledWith(
+        "Compare UN legitimacy and enforcement.",
+        {
+          currentSectionId: "west-philippine-sea-dossier",
+          depthMode: "expert",
+        }
+      )
+    )
   })
 
   it("renders weak-support guidance without answer citations", async () => {
@@ -318,6 +399,39 @@ describe("SourceAwareChat", () => {
       within(panel).getByRole("button", { name: "Try again shortly" })
     )
 
+    await waitFor(() => expect(input).toHaveFocus())
+  })
+
+  it("renders fallback guidance and lets a suggested prompt refill the composer", async () => {
+    const chatClient = vi.fn().mockResolvedValue({
+      state: "fallback",
+      message: "The assistant could not complete a grounded answer right now.",
+      nextStep: "Continue with the lesson or try a course question.",
+      suggestedPrompts: ["What is global governance?"],
+      fallbackSource: {
+        label: "Current lesson summary",
+      },
+    } satisfies GroundedChatSuccess)
+    const { open, user } = openChat(chatClient)
+    const { panel, input } = await open()
+
+    await user.type(input, "Explain the lesson.")
+    await user.click(within(panel).getByRole("button", { name: "Ask" }))
+
+    await waitFor(() =>
+      expect(
+        within(panel).getByText("Grounded answer unavailable")
+      ).toBeVisible()
+    )
+    expect(within(panel).getByText("Current lesson summary")).toBeVisible()
+
+    await user.click(
+      within(panel).getByRole("button", {
+        name: "What is global governance?",
+      })
+    )
+
+    expect(input).toHaveValue("What is global governance?")
     await waitFor(() => expect(input).toHaveFocus())
   })
 })

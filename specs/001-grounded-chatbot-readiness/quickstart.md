@@ -265,6 +265,205 @@ Expected outcome:
 - Recorded ingest evidence includes provider model identity and vector dimensions for real embeddings; deterministic vectors are valid only in dry-run or test evidence.
 - At least one successfully ingested and approved source is activated before strong grounded-answer acceptance testing begins.
 
+## Phase 3 Ingestion Red Baseline
+
+Recorded on 2026-06-06 for T015-T019 and T094.
+
+Command:
+
+```powershell
+backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml backend\tests\test_approved_source_manifest.py backend\tests\test_ingestion_pipeline.py backend\tests\test_ingestion_repository.py backend\tests\test_admin_stewardship.py -q
+```
+
+Intended red result:
+
+- Pytest collected the four focused Phase 3 files and stopped with four import errors.
+- `backend/tests/test_approved_source_manifest.py` failed because `ingestion.pipeline` did not exist.
+- `backend/tests/test_ingestion_pipeline.py`, `backend/tests/test_ingestion_repository.py`, and `backend/tests/test_admin_stewardship.py` failed because `ingestion.dtos` did not exist.
+- These failures identify the missing manifest, pipeline, persistence, and ingest-job contracts targeted by T020-T025 and T095 rather than unrelated fixture or environment failures.
+
+## Phase 3 Ingestion Implementation Evidence
+
+Recorded on 2026-06-06 after T020-T026 and T095-T096.
+
+Commands and results:
+
+```powershell
+pnpm chatbot:prepare-ingestion
+pnpm backend:ingest:approved -- --dry-run
+pnpm test:functions
+pnpm backend:test
+pnpm backend:typecheck
+pnpm backend:check
+pnpm typecheck
+pnpm chatbot:validate-boundaries
+```
+
+- The canonical manifest covers all `8` staged Markdown files.
+- The Django dry run processed all `8` files into `437` bounded chunks and `8` references using explicit deterministic dry-run vectors.
+- Retained Supabase ingestion tests passed `8` tests and prove both functions are dry-run only, cannot activate sources, and do not call production persistence helpers.
+- The backend suite passed `120` tests on Django `5.2.15`.
+- MyPy passed all `81` backend source files.
+- Ruff, Django system checks, the Python dependency audit, frontend lint/typecheck/build,
+  and the chatbot boundary validator passed.
+- Local Supabase migration `0014_operationalize_source_ingest_jobs.sql` applied successfully and the durable table exposes `processing`, document/count evidence, embedding model, and embedding dimension fields.
+- Local Supabase migration `0015_repair_ingestion_vector_persistence.sql` repairs older
+  applied RPC bodies, requires complete stored vector evidence, and returns vector count
+  plus dimensions to Django.
+
+Changed-scope coverage command:
+
+```powershell
+backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml --cov=ingestion --cov=chatbot.nvidia --cov-branch --cov-report=term-missing --cov-fail-under=80 backend\tests\test_approved_source_manifest.py backend\tests\test_ingestion_pipeline.py backend\tests\test_ingestion_repository.py backend\tests\test_ingestion_services.py backend\tests\test_admin_stewardship.py -q
+```
+
+Result:
+
+- `57` tests and `5` subtests passed.
+- Phase 3 changed-scope coverage reached `89.76%`.
+- The broader `pnpm backend:test:coverage` command passed all `103` tests that were present at that run but remained below its inherited cross-feature gate at `73.23%`, primarily because untouched `sources/repositories/supabase.py` and `validation/repository.py` remain below the Phase 1 baseline target.
+
+Live persistence and activation evidence:
+
+```powershell
+pnpm backend:ingest:approved -- --source-id gg-src-un-charter-institutions
+```
+
+- The first credential attempt reached NVIDIA and failed with HTTP `403` before any
+  document, chunk, or reference write.
+- A working server-only credential then exposed an older applied
+  `persist_ingestion_document` function that inserted chunks without vectors.
+- Migration `0015` restored vector insertion, added database-side count/dimension checks,
+  and the Django repository now rejects incomplete RPC evidence.
+- Re-ingestion persisted document
+  `doc-gg-src-un-charter-institutions-5cee7a602e1f1579`, `62` chunks, `1` reference,
+  and all `62` real NVIDIA vectors at exactly `384` dimensions with nonzero norms.
+- The private object exists in `processed-exports` at
+  `approved-sources/raw/topic-3-united-nations-purpose-structure-knowledge.md`; the
+  reference links to all `62` chunks.
+- A protected stewardship re-ingest completed with `status=succeeded`, recorded
+  `nvidia/llama-nemotron-embed-1b-v2/384`, and left
+  `gg-src-un-charter-institutions` active.
+- The temporary credential was removed from tracked `backend/.env.example` after live
+  verification; `NVIDIA_API_KEY` is blank in the checked-in example.
+
+## Phase 4 Public Chat Evidence
+
+Recorded on 2026-06-06 for T028-T048.
+
+### Red baseline
+
+The first focused backend run stopped with the intended missing-module errors for
+`chatbot.contracts`, `chatbot.dtos`, and `retrieval.repositories`. The first focused
+frontend run reported `5` failures and `22` passes, covering missing fallback parsing,
+private citation URL rejection, typed fallback client handling, expert depth selection,
+and fallback rendering.
+
+### Green implementation
+
+- Django now validates `student` and `expert` requests and returns typed `answered`,
+  `weakSupport`, `refused`, `cooldown`, and `fallback` success envelopes.
+- NVIDIA adapters cover generation, query embedding, reranking, topic control, and
+  safety classification with bounded inputs, timeouts, and safe provider errors.
+- Migration `0016_create_approved_chunk_retrieval_rpc.sql` applied locally and passed
+  `supabase db lint`; the service-role RPC returned active approved UN Charter chunks.
+- The frontend sends section and depth context, rejects private citation URLs, preserves
+  HTTP 429 cooldown successes, and renders depth, trust, citation, refusal, and fallback
+  controls.
+- Focused backend tests passed `53` tests plus `5` subtests with `86.85%` changed-scope
+  coverage across `chatbot` and `retrieval`.
+- Focused frontend tests passed `45` tests with `94.60%` statements, `87.12%` branches,
+  `100%` functions, and `94.52%` lines.
+- Ruff, MyPy, TypeScript type checking, and Supabase schema lint passed.
+- The mocked smoke and live Django Playwright specs were updated for the new contract.
+  The exact default `pnpm test:e2e` command was not executed in this continuation;
+  the allowed mocked journey and live chat lanes are recorded in Phase 5.
+
+### Live provider observation
+
+The runtime-only NVIDIA credential was moved from tracked `backend/.env.example` into
+ignored `backend/.env` before live checks. Query embedding, local retrieval, reranking,
+topic control, safety control, and standalone generation all succeeded. An early full
+supported browser request exposed provider and browser-runtime timing limits and safely
+returned fallback; after Phase 5 operational caching and browser preflight handling,
+the live Django canary returned an `answered` response with citations, a bounded
+`refused` response, and a Redis-backed `cooldown` response.
+
+## Phase 5 Degraded Chat Evidence
+
+Recorded on 2026-06-07 for T049-T063.
+
+### Red baseline
+
+- The first focused backend US2 run failed on missing or incomplete protection,
+  cache, and runtime integration surfaces targeted by `chatbot.protection`,
+  `chatbot.cache`, `chatbot.services`, and `chatbot.views`.
+- Frontend parser, client, starter-prompt, and component tests were extended for
+  fallback suggestions, retry/cooldown copy, session-local continuity, typed
+  transport conversion, focus restoration, and uninterrupted lesson controls.
+- The live browser canary then exposed an additional intended route-contract gap:
+  cross-origin browser requests to Django sent `OPTIONS /api/chat`, and the route
+  returned HTTP `405` before the POST could run. A focused contract test reproduced
+  that failure and also proved the POST response needed public-chat CORS headers.
+
+### Green implementation
+
+- Django now requires Redis for normal public-chat protection and uses hashed
+  anonymous identities, rate windows, repeated-refusal abuse counters, cooldown
+  expiry, and typed runtime fallback when protection storage is unavailable.
+- Operational cache keys are HMAC/versioned, carry explicit TTLs and source-index
+  invalidation markers, and keep final grounded-answer caching disabled by default.
+- The public chat runtime checks protection before expensive model work, records
+  refusals and successes, returns typed cooldowns as HTTP `429`, and keeps Redis out
+  of canonical source, chunk, embedding, citation, and validation storage.
+- The chat UI preserves section-aware starter prompts, fallback source guidance,
+  cooldown/retry states, keyboard behavior, focus restoration, and lesson navigation.
+- The live chat Playwright lane now builds a separate preview on port `4174` with
+  `VITE_CHAT_API_URL=http://127.0.0.1:8000/api/chat`; `/api/chat` accepts browser
+  preflight and returns route-scoped CORS headers without changing protected APIs.
+
+### Verification
+
+Commands and results:
+
+```powershell
+backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml backend\tests\test_chatbot_protection.py backend\tests\test_chatbot_cache.py backend\tests\test_chatbot_orchestration.py backend\tests\test_public_chat_contract.py -q
+pnpm exec vitest run src/lib/chat/grounded-answer.test.ts src/lib/chat/api-client.test.ts src/components/chat/SourceAwareChat.test.tsx src/data/chat/source-aware-chat.test.ts
+pnpm test:e2e:journey
+pnpm test:chat:live
+pnpm typecheck
+pnpm backend:typecheck
+pnpm backend:lint
+pnpm backend:check
+pnpm backend:security
+pnpm chatbot:validate-boundaries
+```
+
+- Focused backend Phase 5 tests passed `32` tests.
+- Focused frontend chat tests passed `48` tests.
+- Mocked browser journey passed `2` tests, including fallback/retry/suggested-prompt
+  recovery and preserved lesson navigation.
+- Live Django chat canary passed `3` tests: one grounded answer with citations, one
+  bounded refusal, and one Redis-backed cooldown.
+- TypeScript type checking, MyPy, Ruff, Django system checks, the Python dependency
+  audit, and the chatbot boundary validator all passed.
+- The exact `pnpm test:e2e` command was not run by request; this phase used
+  `pnpm test:e2e:journey` and `pnpm test:chat:live` instead.
+
+Changed-scope coverage commands:
+
+```powershell
+backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml --cov=chatbot.protection --cov=chatbot.cache --cov=chatbot.services --cov=chatbot.views --cov-branch --cov-report=term-missing --cov-fail-under=80 backend\tests\test_chatbot_protection.py backend\tests\test_chatbot_cache.py backend\tests\test_chatbot_orchestration.py backend\tests\test_public_chat_contract.py -q
+pnpm exec vitest run src/lib/chat/grounded-answer.test.ts src/lib/chat/api-client.test.ts src/components/chat/SourceAwareChat.test.tsx src/data/chat/source-aware-chat.test.ts --coverage --coverage.include=src/lib/chat/grounded-answer.ts --coverage.include=src/lib/chat/api-client.ts --coverage.include=src/components/chat/SourceAwareChat.tsx --coverage.include=src/data/chat/source-aware-chat.ts --coverage.reporter=text --coverage.reportsDirectory=coverage/frontend-us2
+```
+
+Results:
+
+- Backend changed-scope coverage passed at `83.91%` total coverage across
+  `chatbot.protection`, `chatbot.cache`, `chatbot.services`, and `chatbot.views`.
+- Frontend changed-scope coverage reached `94.11%` statements, `87.05%` branches,
+  `100%` functions, and `94%` lines.
+
 ## Validation Scenarios
 
 ### 1. Public chat returns typed learner states

@@ -56,7 +56,10 @@ def validate_ingest_request(snapshot: SourceSnapshot) -> None:
             status=409,
             fields={"lifecycleState": "Only approved, active, or disabled sources can ingest."},
         )
-    if snapshot.latest_ingest_job and snapshot.latest_ingest_job["status"] == "queued":
+    if snapshot.latest_ingest_job and snapshot.latest_ingest_job["status"] in {
+        "queued",
+        "processing",
+    }:
         raise SourceMutationError(
             code="admin_source_ingest_in_progress",
             message="An ingest job is already in progress for this source.",

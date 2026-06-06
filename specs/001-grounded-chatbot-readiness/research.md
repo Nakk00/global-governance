@@ -14,6 +14,10 @@
 
 **Rationale**: The repo already defines `archive/docs/approved-sources/` as the staging area for approved chatbot materials, with `raw/` for original documents and `normalized/` for prepared derivatives. This is the right human-facing intake point for source stewardship, but it should not be the live retrieval layer. The bot should retrieve from private Supabase storage and Supabase/Postgres records created by server-side ingestion, because that is where chunking, embeddings, citation metadata, and canonical `sourceId` mapping can be enforced consistently.
 
+Repository verification found that the existing Supabase helpers can validate, normalize, chunk, construct citation payloads, and persist through `persist_ingestion_document`, but the checked-in batch preparation command only prints summaries, the current vectors are deterministic synthetic values, and the protected maintainer `dispatch_ingest` path marks jobs successful without invoking content processing. The current `source_ingest_jobs` schema also does not allow the planned `processing` state. Therefore this feature must operationalize the missing bridge before strong grounded-answer acceptance: Django owns real NVIDIA embedding orchestration and ingest job truth, the schema must be aligned to the real lifecycle, and Supabase remains the private durable storage and pgvector destination.
+
+Retained Supabase ingestion functions may remain for compatibility or storage-support behavior, but they cannot stay as an activation-capable production path that writes synthetic vectors. They must either delegate to the Django-owned ingestion workflow or be constrained to dry-run and compatibility-only use.
+
 **Information flow**:
 
 1. Maintainers curate approved documents in `archive/docs/approved-sources/raw/` and `archive/docs/approved-sources/normalized/`.
@@ -66,9 +70,9 @@
 - Mix NVIDIA with other providers for embeddings, reranking, or guards: rejected for MVP because the user already has NVIDIA access and a single provider simplifies server-only configuration, testing, and rollout.
 - Let browser code select model IDs: rejected because provider names, model routing, and API keys belong in the Django server-side chat runtime.
 
-## Decision: Put Redis-backed public-chat protection under Django, with memory fallback for local development and tests
+## Decision: Put required Redis-backed public-chat protection under Django, with test-only fallback doubles
 
-**Rationale**: Redis should stay a protection layer, not a source-of-truth layer, but the owner of that protection layer changes with the runtime cutover. Django now owns rate limits, abuse counters, cooldown markers, and any short-lived public-chat operational state because Django owns the public chat route and final protection decision. A memory fallback should still exist for local development and backend tests so Redis is not mandatory for every developer loop.
+**Rationale**: Redis should stay a protection layer, not a source-of-truth layer, but the owner of that protection layer changes with the runtime cutover. Django now owns rate limits, abuse counters, cooldown markers, and any short-lived public-chat operational state because Django owns the public chat route and final protection decision. Redis is required for normal local and runtime chatbot startup so protection behavior is exercised consistently; deterministic in-memory doubles are allowed only in isolated backend tests and failure simulations.
 
 **Redis architecture scope**:
 
@@ -80,14 +84,14 @@
 
 **Alternatives considered**:
 
-- Make Redis mandatory for all environments: rejected because it adds friction to local development and is unnecessary for basic feature validation.
+- Make Redis optional for normal local development: rejected because it would hide protection-state bugs until later integration runs.
 - Store protection state in Supabase tables: rejected because the spec treats Redis as operational state and keeps Supabase as the durable source-of-truth layer.
 - Keep the old Supabase chat protection helper as a bridge: rejected because the user explicitly wants the Supabase chat implementation removed rather than kept as the active or fallback public-chat backend.
 - Let Redis hold chunks, embeddings, or canonical citations for fast retrieval: rejected because that would blur the line between operational state and durable knowledge, weaken auditability, and complicate maintainer trust/reproducibility.
 
 ## Decision: Use narrow Redis caching only for short-lived Django runtime decisions
 
-**Rationale**: Redis can improve public chatbot latency and reduce repeated model/provider work, but caching must not undermine source freshness, citation integrity, privacy, or maintainer auditability. The MVP should cache protection state by default when Redis is configured, allow short-lived guard and query helper caches where they are versioned and safe, and keep final grounded-answer caching disabled by default. Every cache key that depends on learner text should use a server-side HMAC or equivalent non-reversible hash rather than storing raw prompts in Redis.
+**Rationale**: Redis can improve public chatbot latency and reduce repeated model/provider work, but caching must not undermine source freshness, citation integrity, privacy, or maintainer auditability. The MVP should cache protection state through the required runtime Redis service, allow short-lived guard and query helper caches where they are versioned and safe, and keep final grounded-answer caching disabled by default. Every cache key that depends on learner text should use a server-side HMAC or equivalent non-reversible hash rather than storing raw prompts in Redis.
 
 **Cache policy**:
 

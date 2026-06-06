@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  wpsCaseFileDefaultInteractionState,
+  wpsCaseFileEvidenceCategories,
+  wpsCaseFileInteractionModes,
+  wpsCaseFileMapHotspots,
+  wpsCaseFileRulingRealityRows,
   wpsEvidenceRegistry,
   wpsRulingRealityComparison,
   wpsTimelineEvents,
+  wpsCaseFileTimelineEvents,
 } from "./west-philippine-sea-dossier"
 import { getDossierEvidenceSources } from "../source-bundles/approved-source-bundle"
 
@@ -45,6 +51,82 @@ describe("wpsTimelineEvents", () => {
     expect(enforcement).toBeDefined()
     expect(enforcement?.legalContext).toMatch(/compliance|collective pressure/i)
     expect(enforcement?.significance).toMatch(/law|enforcement|power/i)
+  })
+})
+
+describe("wpsCaseFileInteractionModel", () => {
+  it("keeps interaction defaults aligned with existing runtime records", () => {
+    const eventIds = wpsCaseFileTimelineEvents.map((event) => event.id)
+    const evidenceIds = wpsCaseFileEvidenceCategories.map(
+      (category) => category.id
+    )
+    const hotspotIds = wpsCaseFileMapHotspots.map((hotspot) => hotspot.id)
+    const comparisonRowIds = wpsCaseFileRulingRealityRows.map((row) => row.id)
+
+    expect(wpsCaseFileInteractionModes).toHaveLength(2)
+    expect(wpsCaseFileDefaultInteractionState.modeId).toBe("evidence-file")
+
+    for (const mode of wpsCaseFileInteractionModes) {
+      expect(mode.id).toMatch(/^(evidence-file|law-power)$/)
+      expect(mode.title.length).toBeGreaterThan(8)
+      expect(mode.detail.length).toBeGreaterThan(40)
+      expect(eventIds).toContain(mode.defaultEventId)
+      expect(evidenceIds).toContain(mode.defaultEvidenceId)
+      expect(hotspotIds).toContain(mode.defaultHotspotId)
+      expect(comparisonRowIds).toContain(mode.defaultComparisonRowId)
+    }
+  })
+
+  it("links every map hotspot to valid timeline, evidence, and comparison records", () => {
+    const eventIds = wpsCaseFileTimelineEvents.map((event) => event.id)
+    const evidenceIds = wpsCaseFileEvidenceCategories.map(
+      (category) => category.id
+    )
+    const comparisonRowIds = wpsCaseFileRulingRealityRows.map((row) => row.id)
+
+    expect(wpsCaseFileMapHotspots.map((hotspot) => hotspot.id)).toEqual([
+      "scarborough-shoal",
+      "spratly-islands",
+      "palawan",
+      "west-philippine-sea",
+    ])
+
+    for (const hotspot of wpsCaseFileMapHotspots) {
+      expect(hotspot.summary.length).toBeGreaterThan(40)
+      expect(hotspot.whyItMatters.length).toBeGreaterThan(60)
+      expect(hotspot.relatedEventIds.length).toBeGreaterThan(0)
+      expect(hotspot.relatedEvidenceIds.length).toBeGreaterThan(0)
+      expect(hotspot.relatedComparisonRowIds.length).toBeGreaterThan(0)
+
+      for (const eventId of hotspot.relatedEventIds) {
+        expect(eventIds).toContain(eventId)
+      }
+      for (const evidenceId of hotspot.relatedEvidenceIds) {
+        expect(evidenceIds).toContain(evidenceId)
+      }
+      for (const comparisonRowId of hotspot.relatedComparisonRowIds) {
+        expect(comparisonRowIds).toContain(comparisonRowId)
+      }
+    }
+  })
+
+  it("keeps evidence and ruling rows source-linked without exposing display ids", () => {
+    for (const category of wpsCaseFileEvidenceCategories) {
+      expect(category.primaryFinding.length).toBeGreaterThan(40)
+      expect(category.linkedStateLabel).toMatch(/Linked to/i)
+      expect(category.sourceCountLabel).toMatch(/approved source record/i)
+      expect(
+        category.sourceIds.every((sourceId) => sourceId.startsWith("gg-src-"))
+      ).toBe(true)
+    }
+
+    for (const row of wpsCaseFileRulingRealityRows) {
+      expect(row.explanation).toMatch(/legal|law|rights|UNCLOS|governance/i)
+      expect(row.citationLabel.length).toBeGreaterThan(10)
+      expect(row.sourceIds.length).toBeGreaterThan(0)
+      expect(row.relatedEventIds.length).toBeGreaterThan(0)
+      expect(row.relatedEvidenceIds.length).toBeGreaterThan(0)
+    }
   })
 })
 

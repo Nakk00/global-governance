@@ -33,6 +33,7 @@ import { requestGroundedAnswer } from "@/lib/chat/api-client"
 import { cn } from "@/lib/utils"
 import type {
   ChatAsyncState,
+  ChatDepthMode,
   GroundedChatRequest,
   GroundedChatSuccess,
 } from "@/types/chat"
@@ -55,6 +56,7 @@ export function SourceAwareChat({
   const { activeSectionId } = useNavigation()
   const [isOpen, setIsOpen] = useState(false)
   const [question, setQuestion] = useState("")
+  const [depthMode, setDepthMode] = useState<ChatDepthMode>("student")
   const [submittedQuestion, setSubmittedQuestion] = useState<string | null>(
     null
   )
@@ -177,6 +179,7 @@ export function SourceAwareChat({
     try {
       const response = await chatClient(trimmedQuestion, {
         currentSectionId: activeSectionId,
+        depthMode,
       })
 
       setAnswerState({
@@ -355,6 +358,7 @@ export function SourceAwareChat({
                         onRefocusQuestion={() =>
                           inputRef.current?.focus({ preventScroll: true })
                         }
+                        onChooseSuggestedPrompt={chooseStarterPrompt}
                         onToggleSource={(sourceId) =>
                           setExpandedSourceId((current) =>
                             current === sourceId ? null : sourceId
@@ -368,6 +372,37 @@ export function SourceAwareChat({
             </div>
 
             <div className="shrink-0 space-y-4 p-4 sm:p-5">
+              <div
+                role="group"
+                aria-label="Answer depth"
+                className="grid grid-cols-2 rounded-lg border border-white/10 bg-slate-900/70 p-1"
+              >
+                {(["student", "expert"] as const).map((mode) => {
+                  const isSelected = depthMode === mode
+                  const label = mode === "student" ? "Student" : "Expert"
+
+                  return (
+                    <Button
+                      key={mode}
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label={`${label} depth`}
+                      aria-pressed={isSelected}
+                      className={cn(
+                        "min-h-10 rounded-md text-xs font-semibold",
+                        isSelected
+                          ? "bg-sky-300 text-slate-950 hover:bg-sky-200 hover:text-slate-950"
+                          : "text-slate-300 hover:bg-white/10 hover:text-white"
+                      )}
+                      onClick={() => setDepthMode(mode)}
+                    >
+                      {label}
+                    </Button>
+                  )
+                })}
+              </div>
+
               <div
                 role="group"
                 aria-labelledby={promptGroupId}
@@ -563,6 +598,7 @@ type GroundedAnswerSurfaceProps = {
   response: GroundedChatSuccess
   expandedSourceId: string | null
   onRefocusQuestion: () => void
+  onChooseSuggestedPrompt: (prompt: string) => void
   onToggleSource: (sourceId: string) => void
 }
 
@@ -570,9 +606,41 @@ function GroundedAnswerSurface({
   response,
   expandedSourceId,
   onRefocusQuestion,
+  onChooseSuggestedPrompt,
   onToggleSource,
 }: GroundedAnswerSurfaceProps) {
   const detailsId = useId()
+
+  if (response.state === "fallback") {
+    return (
+      <article className="space-y-3 rounded-lg border border-amber-300/35 bg-amber-300/10 p-4 text-sm leading-6 text-amber-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <p className="font-semibold text-amber-100">
+          Grounded answer unavailable
+        </p>
+        <p>{response.message}</p>
+        <p className="text-amber-100/75">{response.nextStep}</p>
+        {response.fallbackSource ? (
+          <p className="inline-flex items-center gap-2 text-xs font-semibold text-slate-200">
+            <BookOpenCheck aria-hidden="true" className="size-4 text-sky-300" />
+            {response.fallbackSource.label}
+          </p>
+        ) : null}
+        <div className="grid gap-2">
+          {response.suggestedPrompts.map((prompt) => (
+            <Button
+              key={prompt}
+              type="button"
+              variant="outline"
+              className="h-auto min-h-11 justify-start rounded-lg border-amber-300/35 bg-slate-950/30 px-3 py-2 text-left text-amber-50 whitespace-normal hover:bg-amber-300/15 hover:text-white"
+              onClick={() => onChooseSuggestedPrompt(prompt)}
+            >
+              {prompt}
+            </Button>
+          ))}
+        </div>
+      </article>
+    )
+  }
 
   if (response.state === "weakSupport") {
     return (

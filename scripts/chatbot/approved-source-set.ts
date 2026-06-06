@@ -1,52 +1,108 @@
+import { readFileSync } from "node:fs"
+
 export type ApprovedSourceFile = {
   path: string
   sourceId: string
   fileType: "md" | "pdf"
-  storage?: {
+  revision: string
+  storage: {
     bucket: "project-source-pdfs" | "processed-exports"
     path: string
   }
+  lineage: {
+    kind: "raw" | "normalized"
+    rawSourcePath: string
+  }
 }
 
-export const approvedSourceFiles: ApprovedSourceFile[] = [
-  {
-    path: "archive/docs/approved-sources/raw/topic-1-global-governance-basics-knowledge.md",
-    sourceId: "gg-src-global-governance-course-frame",
-    fileType: "md",
-  },
-  {
-    path: "archive/docs/approved-sources/raw/topic-2-major-actors-global-governance-knowledge.md",
-    sourceId: "gg-src-global-governance-course-frame",
-    fileType: "md",
-  },
-  {
-    path: "archive/docs/approved-sources/raw/topic-3-united-nations-purpose-structure-knowledge.md",
-    sourceId: "gg-src-un-charter-institutions",
-    fileType: "md",
-  },
-  {
-    path: "archive/docs/approved-sources/raw/topic-4-limits-criticisms-global-governance-knowledge.md",
-    sourceId: "gg-src-global-governance-course-frame",
-    fileType: "md",
-  },
-  {
-    path: "archive/docs/approved-sources/raw/topic-5-international-law-dispute-resolution-knowledge.md",
-    sourceId: "gg-src-philippines-arbitration-filing",
-    fileType: "md",
-  },
-  {
-    path: "archive/docs/approved-sources/raw/topic-6-west-philippine-sea-south-china-sea-case-knowledge.md",
-    sourceId: "gg-src-south-china-sea-award",
-    fileType: "md",
-  },
-  {
-    path: "archive/docs/approved-sources/raw/topic-7-enforcement-gap-ruling-vs-reality-knowledge.md",
-    sourceId: "gg-src-wps-enforcement-gap-comparison",
-    fileType: "md",
-  },
-  {
-    path: "archive/docs/approved-sources/raw/topic-8-asean-and-regional-governance-knowledge.md",
-    sourceId: "gg-src-wps-political-reality-record",
-    fileType: "md",
-  },
-]
+type ManifestEntry = {
+  sourcePath?: unknown
+  sourceId?: unknown
+  fileType?: unknown
+  revision?: unknown
+  storage?: {
+    bucket?: unknown
+    path?: unknown
+  }
+  lineage?: {
+    kind?: unknown
+    rawSourcePath?: unknown
+  }
+}
+
+type ApprovedSourceManifest = {
+  version?: unknown
+  sources?: unknown
+}
+
+const manifestPath = "archive/docs/approved-sources/manifest.json"
+
+export const approvedSourceFiles = loadApprovedSourceFiles()
+
+function loadApprovedSourceFiles(): ApprovedSourceFile[] {
+  const manifest = JSON.parse(
+    readFileSync(manifestPath, "utf8")
+  ) as ApprovedSourceManifest
+  if (
+    typeof manifest.version !== "string" ||
+    !Array.isArray(manifest.sources)
+  ) {
+    throw new Error("Approved source manifest is malformed")
+  }
+
+  return manifest.sources.map((value, index) =>
+    parseManifestEntry(value as ManifestEntry, index)
+  )
+}
+
+function parseManifestEntry(
+  entry: ManifestEntry,
+  index: number
+): ApprovedSourceFile {
+  const path = requiredString(entry.sourcePath, `${index}.sourcePath`)
+  const sourceId = requiredString(entry.sourceId, `${index}.sourceId`)
+  const fileType = entry.fileType
+  const revision = requiredString(entry.revision, `${index}.revision`)
+  const bucket = entry.storage?.bucket
+  const storagePath = requiredString(
+    entry.storage?.path,
+    `${index}.storage.path`
+  )
+  const lineageKind = entry.lineage?.kind
+  const rawSourcePath = requiredString(
+    entry.lineage?.rawSourcePath,
+    `${index}.lineage.rawSourcePath`
+  )
+
+  if (fileType !== "md" && fileType !== "pdf") {
+    throw new Error(`Unsupported manifest file type at entry ${index}`)
+  }
+  if (bucket !== "project-source-pdfs" && bucket !== "processed-exports") {
+    throw new Error(`Unsupported manifest storage bucket at entry ${index}`)
+  }
+  if (lineageKind !== "raw" && lineageKind !== "normalized") {
+    throw new Error(`Unsupported manifest lineage at entry ${index}`)
+  }
+
+  return {
+    path,
+    sourceId,
+    fileType,
+    revision,
+    storage: {
+      bucket,
+      path: storagePath,
+    },
+    lineage: {
+      kind: lineageKind,
+      rawSourcePath,
+    },
+  }
+}
+
+function requiredString(value: unknown, field: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`Approved source manifest field ${field} is required`)
+  }
+  return value.trim()
+}

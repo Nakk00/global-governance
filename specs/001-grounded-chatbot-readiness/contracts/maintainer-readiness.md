@@ -49,6 +49,8 @@ Used for chunk/citation trust inspection without exposing private source access 
 
 Each successful mutation returns an updated `SourceMutationResult` containing the updated source detail plus refreshed dashboard summary.
 
+An ingest mutation may return a queued or processing state while extraction, embedding, and persistence are underway. It MUST report `succeeded` only after the private source object and its durable document, chunk, citation, reference-link, recorded embedding model and dimensions, and real embedding records are persisted. Extraction, provider, or persistence failures MUST report a failed ingest state and MUST continue to block source activation.
+
 ### Validation workflows
 
 - `GET /api/admin/validation-sets`
@@ -117,4 +119,6 @@ Must preserve:
 - This contract intentionally builds on the current stewardship and validation DTO families instead of creating a second readiness domain.
 - No part of this contract becomes a public browser-facing API for anonymous learners.
 - Maintainer readiness changes must begin with failing backend and frontend tests for healthy, warning, failed, partial-data, unauthorized, empty, retry, and navigation outcomes before implementation.
+- Readiness and activation must use completed ingestion evidence, not merely the existence of a queued job or a synthetic demonstration chunk.
+- The durable ingest-job schema must support `processing` and the recorded embedding evidence fields before the contract is considered fully implemented.
 - New or materially changed readiness executable code must meet the feature's 80% changed-scope coverage gate; the protected Playwright smoke journey supplements rather than replaces those lower-layer tests.

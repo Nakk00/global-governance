@@ -22,6 +22,7 @@
     "backend:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 backend/manage.py check --settings=config.settings.development",
     "backend:migrate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 backend/manage.py migrate --settings=config.settings.development",
     "backend:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 backend/manage.py runserver 127.0.0.1:8000 --settings=config.settings.development",
+    "backend:ingest:approved": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 backend/manage.py ingest_approved_sources --settings=config.settings.development",
     "backend:lint": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 -m ruff check backend",
     "backend:format": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 -m ruff format backend",
     "backend:typecheck": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-python.ps1 -m mypy --config-file backend/pyproject.toml backend",
@@ -40,8 +41,8 @@
     "test:e2e:mocked": "playwright test --grep-invert @chat-live",
     "test:e2e:journey": "playwright test --grep @journey --grep-invert @chat-live",
     "test:e2e:layout": "playwright test --grep @layout --grep-invert @chat-live",
-    "test:e2e:all": "powershell -NoProfile -Command \"$env:VITE_CHAT_API_URL='http://127.0.0.1:8000/api/chat'; pnpm exec playwright test\"",
-    "test:chat:live": "powershell -NoProfile -Command \"$env:VITE_CHAT_API_URL='http://127.0.0.1:8000/api/chat'; pnpm exec playwright test --grep @chat-live --workers 1\"",
+    "test:e2e:all": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/playwright-chat-live.ps1 -All",
+    "test:chat:live": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/playwright-chat-live.ps1",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },

@@ -73,7 +73,7 @@ A maintainer opens the protected readiness workflow and can quickly determine wh
 ### Functional Requirements
 
 - **FR-001**: The system MUST answer public learner chat questions only within the approved Global Governance subject scope and approved learning materials.
-- **FR-002**: The system MUST adapt learner-facing explanations to at least two depth modes: a simpler beginner-friendly mode and a more detailed advanced mode.
+- **FR-002**: The system MUST adapt learner-facing explanations to at least two depth modes. The canonical contract values are `student` for the simpler beginner-friendly mode and `expert` for the more detailed advanced mode.
 - **FR-003**: The system MUST present every learner-facing chat outcome with a visible trust state that distinguishes grounded support, limited support, refusal, cooldown, and fallback behavior.
 - **FR-004**: The system MUST show visible source support details whenever an answer is grounded in approved material.
 - **FR-005**: The system MUST use the learner's current lesson section or topic as contextual guidance when that context is available.
@@ -82,7 +82,7 @@ A maintainer opens the protected readiness workflow and can quickly determine wh
 - **FR-008**: The system MUST return bounded refusal outcomes for off-topic requests and safe bounded outcomes for unsafe or abusive requests.
 - **FR-009**: The public learner experience MUST submit chat requests through a controlled server-side workflow before any privileged retrieval, policy enforcement, or answer drafting occurs.
 - **FR-010**: The system MUST prevent browser-exposed access to privileged source retrieval, approval workflows, secret-bearing operations, or unrestricted answer-generation controls.
-- **FR-011**: The system MUST validate public chat request shape, limit request and response size, and reject malformed or oversized input before expensive processing continues.
+- **FR-011**: The system MUST validate public chat request shape, reject malformed input, cap the JSON request body at 8 KiB, cap the normalized learner question at 2,000 characters, cap learner-visible answer text at 4,000 characters, cap visible citations at 6 items, and reject oversized input before expensive processing continues.
 - **FR-012**: The system MUST enforce public-use protection behavior that includes throttling, abuse detection, and cooldown responses appropriate for anonymous or unauthenticated usage.
 - **FR-013**: The transient protection state for rate limits, abuse counters, cooldown markers, or similar short-lived controls MUST remain separate from the authoritative record of approved sources, grounded content, and long-term references.
 - **FR-014**: Any Redis caching used by the public chat workflow MUST be short-lived, Django-owned, TTL-bound, versioned, keyed without raw learner prompts, and prevented from becoming the source of truth for approved content, retrieval chunks, embeddings, citations, validation records, or broad final answers.
@@ -94,6 +94,7 @@ A maintainer opens the protected readiness workflow and can quickly determine wh
 - **FR-020**: The protected maintainer workflow MUST use understandable loading, empty, retry, and error states that help maintainers decide what to do next.
 - **FR-021**: The MVP scope MUST include the deliberate public-chat cutover from Supabase Edge Functions to Django, and MUST exclude learner accounts, LMS integration, open-domain assistant behavior, public maintainer access, broad grounded-answer caching, and any additional public-chat runtime migration beyond the Django cutover.
 - **FR-022**: Every behavior-changing implementation slice MUST follow red-green-refactor, cover relevant happy, edge, error, and boundary cases at the fastest sufficient test layer, and achieve at least 80% coverage for new or materially changed executable code in every metric reported by the selected coverage tools.
+- **FR-023**: Before the MVP can claim a strongly grounded learner answer, the system MUST process at least one approved material from `archive/docs/approved-sources/` or the protected upload workflow into private durable document, chunk, citation, and real embedding records; ingestion failure MUST remain visible, MUST block activation, and MUST NOT be reported as successful readiness. Real embeddings mean provider-produced vectors with recorded model identity and dimensions; deterministic or synthetic vectors are allowed only in tests or dry-run evidence and must never activate a source.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -122,13 +123,14 @@ A maintainer opens the protected readiness workflow and can quickly determine wh
 
 ### Measurable Outcomes
 
-- **SC-001**: In acceptance review, at least 90% of representative in-scope learner prompts return either a grounded answer or a clearly labeled limited-support answer in a single response cycle.
-- **SC-002**: 100% of sampled off-topic, unsafe, throttled, or degraded chat requests return a bounded learner-understandable outcome instead of an unclassified failure state.
-- **SC-003**: In maintainer testing, a maintainer can determine overall readiness status, current blockers, and recommended next actions within 2 minutes of opening the protected readiness workflow.
-- **SC-004**: In acceptance review, at least 90% of sampled validation findings can be traced from the maintainer workflow to the affected source or grounding area in one navigation flow.
+- **SC-001**: In acceptance review, at least 18 of the 20 in-scope learner prompts recorded in the feature acceptance set return either a grounded answer or a clearly labeled limited-support answer in a single response cycle.
+- **SC-002**: All 12 prompts in the degraded and off-topic acceptance set return a bounded learner-understandable outcome instead of an unclassified failure state.
+- **SC-003**: In maintainer testing against the feature acceptance fixture set, a maintainer can determine overall readiness status, current blockers, and recommended next actions within 2 minutes of opening the protected readiness workflow.
+- **SC-004**: In acceptance review, at least 9 of the 10 sampled validation findings in the feature acceptance set can be traced from the maintainer workflow to the affected source or grounding area in one navigation flow.
 - **SC-005**: During degraded-chat validation, learners can continue the current lesson and access at least one relevant fallback action or suggested question without leaving the lesson page.
-- **SC-006**: In usability review, at least 90% of sampled learners can correctly identify whether a response is grounded, limited-support, refused, or in cooldown by reading the visible chat state cues alone.
+- **SC-006**: In trust-cue review, at least 9 of the 10 scripted learner-state examples in the feature acceptance set can be correctly identified as grounded, limited-support, refused, or in cooldown by reading the visible chat state cues alone.
 - **SC-007**: Automated coverage reports show at least 80% coverage for every reported metric across the feature's new or materially changed executable code, with no skipped or disabled test used to satisfy an acceptance or coverage gate without a documented removal condition.
+- **SC-008**: Before grounded-chat acceptance review, 100% of files selected from the canonical approved-source manifest either produce traceable private storage, document, chunk, citation, and non-synthetic vector records or produce an explicit failed ingest result; at least one successfully processed source is approved and active.
 
 ## Assumptions
 

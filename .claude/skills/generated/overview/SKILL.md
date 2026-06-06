@@ -5,7 +5,7 @@ description: "Skill for the Overview area of global-governance-docuweb. 28 symbo
 
 # Overview
 
-28 symbols | 5 files | Cohesion: 68%
+28 symbols | 5 files | Cohesion: 67%
 
 ## When to Use
 
@@ -17,7 +17,7 @@ description: "Skill for the Overview area of global-governance-docuweb. 28 symbo
 
 | File | Symbols |
 |------|---------|
-| `src/components/modules/MaintainerDashboard/overview/OverviewMetrics.tsx` | ActionPill, RingMetric, ActionIcon, Sparkline, FilterChip (+7) |
+| `src/components/modules/MaintainerDashboard/overview/OverviewMetrics.tsx` | CoverageBar, RingMetric, ActionIcon, Sparkline, FilterChip (+7) |
 | `src/components/modules/MaintainerDashboard/overview/overview-builders.ts` | buildBlockers, buildActions, buildValidationRows, buildAuditRows, buildValidationSummary (+6) |
 | `src/components/modules/MaintainerDashboard/overview/OverviewTables.tsx` | CompactTable, DashboardPanel |
 | `src/components/modules/MaintainerDashboard/overview/OverviewPage.tsx` | OverviewPage, sourceRows |
@@ -46,7 +46,7 @@ Start here when exploring this area:
 | `formatSyncTime` | Function | `src/components/modules/MaintainerDashboard/overview/overview-builders.ts` | 321 |
 | `CompactTable` | Function | `src/components/modules/MaintainerDashboard/overview/OverviewTables.tsx` | 57 |
 | `OverviewPage` | Function | `src/components/modules/MaintainerDashboard/overview/OverviewPage.tsx` | 43 |
-| `ActionPill` | Function | `src/components/modules/MaintainerDashboard/overview/OverviewMetrics.tsx` | 124 |
+| `CoverageBar` | Function | `src/components/modules/MaintainerDashboard/overview/OverviewMetrics.tsx` | 145 |
 | `RingMetric` | Function | `src/components/modules/MaintainerDashboard/overview/OverviewMetrics.tsx` | 161 |
 | `ActionIcon` | Function | `src/components/modules/MaintainerDashboard/overview/OverviewMetrics.tsx` | 176 |
 | `Sparkline` | Function | `src/components/modules/MaintainerDashboard/overview/OverviewMetrics.tsx` | 194 |
@@ -63,14 +63,19 @@ Start here when exploring this area:
 | Flow | Type | Steps |
 |------|------|-------|
 | `DashboardView → Cn` | cross_community | 5 |
+| `SourcesPage → Cn` | cross_community | 4 |
 | `AppShell → Cn` | cross_community | 4 |
 | `NarrativeSection → Cn` | cross_community | 4 |
 | `Navbar → Cn` | cross_community | 4 |
 | `ValidationRemediationQueue → Cn` | cross_community | 4 |
-| `SourcesPage → Cn` | cross_community | 4 |
 | `OverviewPage → FormatShortDateTime` | intra_community | 3 |
-| `ValidationWorkbench → Cn` | cross_community | 3 |
-| `ValidationResultsTable → Cn` | cross_community | 3 |
+| `RenderSourceAwareChat → Cn` | cross_community | 3 |
+
+## Connected Areas
+
+| Area | Connections |
+|------|-------------|
+| Sources | 1 calls |
 
 ## How to Explore
 

@@ -1,11 +1,11 @@
 ---
 name: sources
-description: "Skill for the Sources area of global-governance-docuweb. 64 symbols across 14 files."
+description: "Skill for the Sources area of global-governance-docuweb. 85 symbols across 25 files."
 ---
 
 # Sources
 
-64 symbols | 14 files | Cohesion: 95%
+85 symbols | 25 files | Cohesion: 88%
 
 ## When to Use
 
@@ -18,15 +18,15 @@ description: "Skill for the Sources area of global-governance-docuweb. 64 symbol
 | File | Symbols |
 |------|---------|
 | `backend/sources/views.py` | dashboard, source_detail, source_chunks, source_citations, chunk_detail (+15) |
+| `src/components/modules/MaintainerDashboard/sources/SourcesPage.tsx` | SourcesPage, SourcesKpiRow, PresetBanner, presetSources, presetFocusItems (+2) |
 | `backend/validation/views.py` | validation_sets, validation_runs, validation_run_detail, launch_run, _guard_request (+1) |
-| `backend/config/api.py` | method_not_allowed_response, bootstrap_health, reserved_chat, reserved_admin, not_found (+1) |
 | `backend/sources/dtos.py` | SourceInventoryItemDto, SourceDetailDto, ChunkRowDto, ChunkDetailDto, CitationRowDto (+1) |
+| `backend/config/api.py` | method_not_allowed_response, bootstrap_health, reserved_admin, not_found, server_error |
 | `backend/common/validation.py` | to_response, require_json_content_type, validate_request_size, validate_json_object |
 | `backend/sources/services.py` | get_stewardship_dashboard, list_ingestion_runs, list_validation_runs, list_audit_events |
 | `backend/tests/test_request_validation.py` | test_rejects_wrong_content_type, test_rejects_oversized_body, test_rejects_malformed_json_object |
 | `backend/common/responses.py` | success_envelope, success_response, error_response |
-| `src/components/modules/MaintainerDashboard/sources/SourcesPage.tsx` | SourcesPage, SourcesKpiRow, PresetBanner |
-| `backend/accounts/views.py` | admin_me, _has_unexpected_body |
+| `src/components/modules/MaintainerDashboard/shared/routing.ts` | buildSourceDetailPath, filterSourcesForPreset, getPresetFocusItems |
 
 ## Entry Points
 
@@ -42,12 +42,12 @@ Start here when exploring this area:
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `SourceInventoryItemDto` | Class | `backend/sources/dtos.py` | 34 |
-| `SourceDetailDto` | Class | `backend/sources/dtos.py` | 48 |
-| `ChunkRowDto` | Class | `backend/sources/dtos.py` | 130 |
-| `ChunkDetailDto` | Class | `backend/sources/dtos.py` | 144 |
-| `CitationRowDto` | Class | `backend/sources/dtos.py` | 151 |
-| `CitationDetailDto` | Class | `backend/sources/dtos.py` | 164 |
+| `SourceInventoryItemDto` | Class | `backend/sources/dtos.py` | 42 |
+| `SourceDetailDto` | Class | `backend/sources/dtos.py` | 58 |
+| `ChunkRowDto` | Class | `backend/sources/dtos.py` | 140 |
+| `ChunkDetailDto` | Class | `backend/sources/dtos.py` | 154 |
+| `CitationRowDto` | Class | `backend/sources/dtos.py` | 161 |
+| `CitationDetailDto` | Class | `backend/sources/dtos.py` | 174 |
 | `validation_sets` | Function | `backend/validation/views.py` | 15 |
 | `validation_runs` | Function | `backend/validation/views.py` | 23 |
 | `validation_run_detail` | Function | `backend/validation/views.py` | 33 |
@@ -82,10 +82,14 @@ Start here when exploring this area:
 
 | Area | Connections |
 |------|-------------|
-| Tests | 1 calls |
+| Public-homepage-redesign | 5 calls |
+| Tests | 2 calls |
+| Cluster_79 | 2 calls |
+| Chatbot | 1 calls |
 | Accounts | 1 calls |
 | Overview | 1 calls |
-| Public-homepage-redesign | 1 calls |
+| MaintainerDashboard | 1 calls |
+| Ui | 1 calls |
 
 ## How to Explore
 

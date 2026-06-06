@@ -1,4 +1,5 @@
 export type ChatSourceType = "primary" | "course" | "case" | "reference"
+export type ChatDepthMode = "student" | "expert"
 
 export type ChatCitation = {
   sourceId: string
@@ -18,6 +19,7 @@ export type GroundedChatRequest = {
   question: string
   context?: {
     currentSectionId?: string
+    depthMode?: ChatDepthMode
   }
 }
 
@@ -38,7 +40,7 @@ export type GroundedChatWeakSupport = {
 
 export type GroundedChatRefusal = {
   state: "refused"
-  code: "off_topic"
+  code: "off_topic" | "unsafe"
   message: string
   nextStep: string
 }
@@ -51,11 +53,22 @@ export type GroundedChatCooldown = {
   retryAfterSeconds: number
 }
 
+export type GroundedChatFallback = {
+  state: "fallback"
+  message: string
+  nextStep: string
+  suggestedPrompts: string[]
+  fallbackSource?: {
+    label: string
+  }
+}
+
 export type GroundedChatSuccess =
   | GroundedChatAnswer
   | GroundedChatWeakSupport
   | GroundedChatRefusal
   | GroundedChatCooldown
+  | GroundedChatFallback
 
 export type ChatError = {
   code: string

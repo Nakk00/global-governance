@@ -22,15 +22,15 @@ class RouteGuardTests(SimpleTestCase):
         self.assertEqual(response.status_code, 415)
         self.assertEqual(response.json()["error"]["code"], "unsupported_media_type")
 
-    def test_reserved_chat_route_is_stubbed_without_public_cutover(self):
+    def test_public_chat_route_is_django_owned_and_validates_requests(self):
         response = self.client.post(
-            "/_internal/chat/",
+            "/api/chat",
             data={"message": "hello"},
             content_type="application/json",
         )
 
-        self.assertEqual(response.status_code, 501)
-        self.assertEqual(response.json()["error"]["code"], "chat_cutover_deferred")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"]["code"], "invalid_request")
 
     def test_reserved_admin_route_requires_auth(self):
         response = self.client.get("/_internal/admin/")

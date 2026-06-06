@@ -58,6 +58,7 @@ Start here when exploring this area:
 | `AppShell → UseNavigation` | intra_community | 4 |
 | `AppShell → CloseAtDesktop` | intra_community | 4 |
 | `Navbar → Cn` | cross_community | 4 |
+| `RenderSourceAwareChat → UseNavigation` | cross_community | 3 |
 | `AppShell → ScheduleUpdate` | cross_community | 3 |
 | `AppShell → IsChapterId` | cross_community | 3 |
 | `AppShell → GetChapterIndex` | cross_community | 3 |

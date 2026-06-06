@@ -7,7 +7,7 @@ describe("requestGroundedAnswer", () => {
     vi.unstubAllGlobals()
   })
 
-  it("uses the local Supabase fallback endpoint and forwards chapter context", async () => {
+  it("uses the Django public chat endpoint and forwards chapter and depth context", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -36,10 +36,11 @@ describe("requestGroundedAnswer", () => {
 
     await requestGroundedAnswer("Explain the UN", {
       currentSectionId: "un-command-center",
+      depthMode: "expert",
     })
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://127.0.0.1:54321/functions/v1/chat",
+      "/api/chat",
       expect.objectContaining({
         method: "POST",
         headers: {
@@ -50,9 +51,39 @@ describe("requestGroundedAnswer", () => {
           question: "Explain the UN",
           context: {
             currentSectionId: "un-command-center",
+            depthMode: "expert",
           },
         }),
       })
+    )
+  })
+
+  it("returns typed fallback envelopes without converting them to transport errors", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: {
+            state: "fallback",
+            message:
+              "The assistant could not complete a grounded answer right now.",
+            nextStep: "Continue with the lesson or try a course question.",
+            suggestedPrompts: ["What is global governance?"],
+            fallbackSource: {
+              label: "Current lesson summary",
+            },
+          },
+        }),
+      })
+    )
+
+    await expect(requestGroundedAnswer("Explain the UN")).resolves.toMatchObject(
+      {
+        state: "fallback",
+        suggestedPrompts: ["What is global governance?"],
+      }
     )
   })
 
@@ -84,6 +115,52 @@ describe("requestGroundedAnswer", () => {
       nextStep: "Wait briefly, then ask a course-focused question.",
       retryAfterSeconds: 60,
     })
+  })
+
+  it("maps non-cooldown HTTP failures to the safe client error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({
+          success: true,
+          data: {
+            state: "refused",
+            code: "off_topic",
+            message: "Course boundary reached.",
+            nextStep: "Ask a course question.",
+          },
+        }),
+      })
+    )
+
+    await expect(requestGroundedAnswer("Explain the UN")).rejects.toMatchObject(
+      {
+        code: "grounded_chat_unavailable",
+      }
+    )
+  })
+
+  it("maps explicit server error envelopes to the safe client error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          success: false,
+          error: {
+            code: "invalid_request",
+            message: "A question is required.",
+          },
+        }),
+      })
+    )
+
+    await expect(requestGroundedAnswer("Explain the UN")).rejects.toMatchObject(
+      {
+        code: "grounded_chat_unavailable",
+      }
+    )
   })
 
   it("maps malformed protection payloads to the user-safe unavailable error", async () => {
@@ -150,5 +227,59 @@ describe("requestGroundedAnswer", () => {
 
     expect(firstSessionId).toBeTruthy()
     expect(secondSessionId).toBe(firstSessionId)
+  })
+
+  it("reuses an existing browser session id", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          state: "fallback",
+          message: "Grounded answer unavailable.",
+          nextStep: "Continue with the lesson.",
+          suggestedPrompts: ["What is global governance?"],
+        },
+      }),
+    })
+    globalThis.localStorage.setItem(
+      "global-governance-chat-session",
+      "existing-session"
+    )
+    vi.stubGlobal("fetch", fetchMock)
+
+    await requestGroundedAnswer("Explain the UN")
+
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({
+      "X-Anonymous-Session-Id": "existing-session",
+    })
+  })
+
+  it("falls back to memory when browser storage throws", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: {
+          state: "fallback",
+          message: "Grounded answer unavailable.",
+          nextStep: "Continue with the lesson.",
+          suggestedPrompts: ["What is global governance?"],
+        },
+      }),
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    vi.stubGlobal("localStorage", {
+      getItem: () => {
+        throw new Error("blocked")
+      },
+      setItem: vi.fn(),
+    })
+
+    await requestGroundedAnswer("Explain the UN")
+
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toMatchObject({
+      "X-Anonymous-Session-Id": expect.any(String),
+    })
   })
 })

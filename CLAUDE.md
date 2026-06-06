@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **global-governance-docuweb** (3600 symbols, 7049 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **global-governance-docuweb** (4632 symbols, 8657 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -39,25 +39,25 @@ This project is indexed by GitNexus as **global-governance-docuweb** (3600 symbo
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the Repositories area (109 symbols) | `.claude/skills/generated/repositories/SKILL.md` |
-| Work in the Sources area (64 symbols) | `.claude/skills/generated/sources/SKILL.md` |
-| Work in the Validation area (60 symbols) | `.claude/skills/generated/validation/SKILL.md` |
-| Work in the _shared area (56 symbols) | `.claude/skills/generated/shared/SKILL.md` |
-| Work in the Tests area (55 symbols) | `.claude/skills/generated/tests/SKILL.md` |
-| Work in the Hooks area (38 symbols) | `.claude/skills/generated/hooks/SKILL.md` |
-| Work in the Contexts area (29 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
+| Work in the Tests area (148 symbols) | `.claude/skills/generated/tests/SKILL.md` |
+| Work in the Repositories area (112 symbols) | `.claude/skills/generated/repositories/SKILL.md` |
+| Work in the Sources area (85 symbols) | `.claude/skills/generated/sources/SKILL.md` |
+| Work in the Validation area (52 symbols) | `.claude/skills/generated/validation/SKILL.md` |
+| Work in the Ingestion area (42 symbols) | `.claude/skills/generated/ingestion/SKILL.md` |
+| Work in the Hooks area (33 symbols) | `.claude/skills/generated/hooks/SKILL.md` |
+| Work in the Chatbot area (29 symbols) | `.claude/skills/generated/chatbot/SKILL.md` |
 | Work in the Overview area (28 symbols) | `.claude/skills/generated/overview/SKILL.md` |
-| Work in the Public-homepage-redesign area (27 symbols) | `.claude/skills/generated/public-homepage-redesign/SKILL.md` |
-| Work in the Maintainer area (25 symbols) | `.claude/skills/generated/maintainer/SKILL.md` |
-| Work in the MaintainerDashboard area (24 symbols) | `.claude/skills/generated/maintainerdashboard/SKILL.md` |
-| Work in the Chat area (24 symbols) | `.claude/skills/generated/chat/SKILL.md` |
-| Work in the Sections area (21 symbols) | `.claude/skills/generated/sections/SKILL.md` |
+| Work in the Contexts area (28 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
+| Work in the Chat area (27 symbols) | `.claude/skills/generated/chat/SKILL.md` |
+| Work in the Public-homepage-redesign area (26 symbols) | `.claude/skills/generated/public-homepage-redesign/SKILL.md` |
+| Work in the Maintainer area (22 symbols) | `.claude/skills/generated/maintainer/SKILL.md` |
+| Work in the _shared area (22 symbols) | `.claude/skills/generated/shared/SKILL.md` |
+| Work in the Sections area (22 symbols) | `.claude/skills/generated/sections/SKILL.md` |
 | Work in the Accounts area (20 symbols) | `.claude/skills/generated/accounts/SKILL.md` |
-| Work in the Ui area (11 symbols) | `.claude/skills/generated/ui/SKILL.md` |
-| Work in the Source-bundles area (10 symbols) | `.claude/skills/generated/source-bundles/SKILL.md` |
+| Work in the MaintainerDashboard area (13 symbols) | `.claude/skills/generated/maintainerdashboard/SKILL.md` |
+| Work in the Ui area (10 symbols) | `.claude/skills/generated/ui/SKILL.md` |
 | Work in the Layout area (10 symbols) | `.claude/skills/generated/layout/SKILL.md` |
-| Work in the Chatbot area (7 symbols) | `.claude/skills/generated/chatbot/SKILL.md` |
-| Work in the UNCommandCenter area (7 symbols) | `.claude/skills/generated/uncommandcenter/SKILL.md` |
-| Work in the Cluster_75 area (7 symbols) | `.claude/skills/generated/cluster-75/SKILL.md` |
+| Work in the WpsDossier area (8 symbols) | `.claude/skills/generated/wpsdossier/SKILL.md` |
+| Work in the Cluster_79 area (8 symbols) | `.claude/skills/generated/cluster-79/SKILL.md` |
 
 <!-- gitnexus:end -->

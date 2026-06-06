@@ -15,7 +15,7 @@ def main() -> None:
 
     from common.env import RuntimeCheckError, check_backend_prerequisites, load_env_file
 
-    load_env_file(base_dir / ".env")
+    load_env_file(base_dir / ".env", override=True)
     guarded_commands = {"check", "runserver"}
     if len(sys.argv) > 1 and sys.argv[1] in guarded_commands:
         try:

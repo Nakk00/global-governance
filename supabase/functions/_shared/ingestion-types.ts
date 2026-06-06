@@ -17,21 +17,23 @@ export type IngestionInput = {
 }
 
 export type EmbeddingConfig = {
-  provider: "supabase-ai"
-  model: "gte-small"
+  provider: "dry-run"
+  model: "deterministic-dry-run-vector"
   dimensions: 384
   meanPool: true
   normalize: true
+  synthetic: true
 }
 
 export type EmbeddingVector = number[]
 
 export const pinnedEmbeddingConfig: EmbeddingConfig = {
-  provider: "supabase-ai",
-  model: "gte-small",
+  provider: "dry-run",
+  model: "deterministic-dry-run-vector",
   dimensions: 384,
   meanPool: true,
   normalize: true,
+  synthetic: true,
 }
 
 export type IngestionDocumentRecord = {

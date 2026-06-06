@@ -102,7 +102,7 @@ test("@smoke source-aware chat opens from the shell without disrupting the learn
     releaseGroundedAnswer = resolve
   })
 
-  await page.route("**/functions/v1/chat", async (route) => {
+  await page.route("**/api/chat", async (route) => {
     await groundedAnswerReady
     await route.fulfill({
       contentType: "application/json",

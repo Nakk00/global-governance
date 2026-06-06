@@ -3,7 +3,10 @@ from __future__ import annotations
 from typing import Any, cast
 from uuid import uuid4
 
+from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
+
+from ingestion.dtos import IngestionRunner, IngestionRunResult
 
 from .base import (
     ChunkDetailDto,
@@ -84,7 +87,8 @@ _TEST_REPOSITORY: StewardshipRepository | None = None
 
 
 class InMemoryStewardshipRepository:
-    def __init__(self) -> None:
+    def __init__(self, *, ingestion_runner: IngestionRunner | None = None) -> None:
+        self._ingestion_runner = ingestion_runner
         self._sources: dict[str, SourceRecord] = {
             seed.source_id: _source_from_seed(seed) for seed in APPROVED_SOURCE_SEEDS
         }
@@ -337,10 +341,44 @@ class InMemoryStewardshipRepository:
             outcome="queued",
             summary=queued_job["summary"],
         )
-        completed_job: IngestJobDto = {
+        processing_job: IngestJobDto = {
             **queued_job,
+            "status": "processing",
+            "startedAt": _now(),
+            "summary": "Approved source extraction and embedding are in progress.",
+        }
+        self._jobs[snapshot.source.source_id][0] = processing_job
+        try:
+            ingestion_result = self._run_ingestion(snapshot.source)
+        except Exception:
+            failed_job: IngestJobDto = {
+                **processing_job,
+                "status": "failed",
+                "completedAt": _now(),
+                "summary": "Approved source ingestion failed before activation readiness.",
+                "errorCode": "ingestion_failed",
+            }
+            self._jobs[snapshot.source.source_id][0] = failed_job
+            self._add_audit_event(
+                source_id=snapshot.source.source_id,
+                event_type=event_type,
+                actor=actor,
+                outcome="failed",
+                summary=failed_job["summary"],
+            )
+            return _mutation_result(self._snapshots(), snapshot.source.source_id)
+
+        completed_job: IngestJobDto = {
+            **processing_job,
             "status": "succeeded",
+            "completedAt": _now(),
             "summary": "Protected ingest request completed and is ready for activation.",
+            "documentId": ingestion_result.document_id,
+            "chunkCount": ingestion_result.chunk_count,
+            "referenceCount": ingestion_result.reference_count,
+            "embeddingModel": ingestion_result.embedding_model,
+            "embeddingDimensions": ingestion_result.embedding_dimensions,
+            "errorCode": None,
         }
         self._jobs[snapshot.source.source_id][0] = completed_job
         self._persist_demo_inspection_records(snapshot.source, len(snapshot.ingest_jobs) + 1)
@@ -352,6 +390,21 @@ class InMemoryStewardshipRepository:
             summary=completed_job["summary"],
         )
         return _mutation_result(self._snapshots(), snapshot.source.source_id)
+
+    def _run_ingestion(self, source: SourceRecord) -> IngestionRunResult:
+        if self._ingestion_runner is not None:
+            return self._ingestion_runner(source)
+        if settings.INGESTION_DRY_RUN:
+            return IngestionRunResult(
+                document_id=f"dry-run-{source.source_id}-{uuid4().hex[:8]}",
+                chunk_count=1,
+                reference_count=1,
+                embedding_model="deterministic-dry-run-vector",
+                embedding_dimensions=384,
+            )
+        from ingestion.services import ingest_stewardship_source
+
+        return ingest_stewardship_source(source)
 
     def _latest_document(self, source_id: str) -> DocumentRecord | None:
         documents = self._documents.get(source_id, [])

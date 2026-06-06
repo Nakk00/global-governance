@@ -6,13 +6,11 @@ import {
   toUserSafeChatError,
 } from "./grounded-answer"
 
-const configuredChatEndpoint = import.meta.env.VITE_CHAT_FUNCTION_URL?.trim()
+const configuredChatEndpoint = import.meta.env.VITE_CHAT_API_URL?.trim()
 const chatEndpoint =
   configuredChatEndpoint && configuredChatEndpoint.length > 0
     ? configuredChatEndpoint
-    : import.meta.env.DEV
-      ? "http://127.0.0.1:54321/functions/v1/chat"
-      : "/functions/v1/chat"
+    : "/api/chat"
 const anonymousSessionStorageKey = "global-governance-chat-session"
 let inMemoryAnonymousSessionId: string | undefined
 

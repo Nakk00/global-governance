@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
@@ -25,6 +26,8 @@ from .base import (
 from .memory import (
     InMemoryStewardshipRepository,
     get_test_repository,
+)
+from .memory import (
     reset_stewardship_state as _reset_stewardship_state,
 )
 from .seeds import APPROVED_SOURCE_SEEDS, source_from_seed

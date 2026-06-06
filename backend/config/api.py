@@ -2,16 +2,9 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.http import HttpRequest, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
 from accounts.views import admin_me
 from common.responses import error_response, success_response
-from common.validation import (
-    BoundaryValidationError,
-    require_json_content_type,
-    validate_json_object,
-    validate_request_size,
-)
 
 
 def method_not_allowed_response(*, allowed: str) -> JsonResponse:
@@ -32,25 +25,6 @@ def bootstrap_health(request: HttpRequest) -> JsonResponse:
             "status": "ready",
             "publicChatCutover": settings.PUBLIC_CHAT_CUTOVER_STATUS,
         }
-    )
-
-
-@csrf_exempt
-def reserved_chat(request: HttpRequest) -> JsonResponse:
-    if request.method != "POST":
-        return method_not_allowed_response(allowed="POST")
-
-    try:
-        require_json_content_type(request)
-        validate_request_size(request, max_bytes=settings.MAX_EXTERNAL_JSON_BODY_BYTES)
-        validate_json_object(request)
-    except BoundaryValidationError as error:
-        return error.to_response()
-
-    return error_response(
-        code="chat_cutover_deferred",
-        message="Django chat orchestration is reserved for a later migration story.",
-        status=501,
     )
 
 

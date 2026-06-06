@@ -353,6 +353,7 @@ export function useMaintainerDashboardData({
     mutationState,
     selectedSourceId,
     selectSource,
+    setSelectedSourceId: selectSource,
     retryDashboard: loadDashboard,
     retrySourceDetail: loadSourceDetail,
     uploadDraft,

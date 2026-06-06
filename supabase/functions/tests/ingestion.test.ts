@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs"
+
 import { describe, expect, it } from "vitest"
 
 import {
@@ -45,6 +47,8 @@ describe("ingestion pipeline helpers", () => {
       "6e5f63d40ade22c89d1c6a3326e2ee896149160d1e06f4b5890f9feb0acc748e"
     )
     expect(firstPayload.document.embeddingConfig).toEqual(pinnedEmbeddingConfig)
+    expect(firstPayload.document.embeddingConfig.synthetic).toBe(true)
+    expect(firstPayload.document.metadata.dryRunOnly).toBe(true)
     expect(firstPayload.chunks.map((chunk) => chunk.chunkIndex)).toEqual([
       0, 1, 2,
     ])
@@ -191,5 +195,19 @@ describe("ingestion pipeline helpers", () => {
         },
       })
     ).toThrow(/project-source-pdfs/)
+  })
+
+  it("keeps retained Supabase ingestion functions dry-run only", () => {
+    for (const path of [
+      "supabase/functions/ingest-content/index.ts",
+      "supabase/functions/ingest-pdf/index.ts",
+    ]) {
+      const source = readFileSync(path, "utf8")
+
+      expect(source).toContain("activationAllowed: false")
+      expect(source).toContain('delegate: "django-approved-source-ingestion"')
+      expect(source).not.toContain("persistIngestionPayload")
+      expect(source).not.toContain("uploadPrivateSourceFile")
+    }
   })
 })

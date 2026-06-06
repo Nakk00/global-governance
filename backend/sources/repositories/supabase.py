@@ -9,6 +9,8 @@ from urllib.request import Request, urlopen
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 
+from ingestion.dtos import IngestionRunner
+
 from .base import (
     ChunkDetailDto,
     ChunkRecord,
@@ -107,9 +109,16 @@ from .storage import (
 
 
 class SupabaseStewardshipRepository:
-    def __init__(self, *, supabase_url: str, service_role_key: str) -> None:
+    def __init__(
+        self,
+        *,
+        supabase_url: str,
+        service_role_key: str,
+        ingestion_runner: IngestionRunner | None = None,
+    ) -> None:
         self.supabase_url = supabase_url.rstrip("/") + "/"
         self.service_role_key = service_role_key
+        self._ingestion_runner = ingestion_runner
 
     def get_dashboard(self) -> StewardshipDashboardDto:
         return _dashboard_from_snapshots(self._snapshots())
@@ -387,6 +396,45 @@ class SupabaseStewardshipRepository:
             summary=queued_summary,
             metadata={"jobId": queued_job["id"]},
         )
+        processing_summary = "Approved source extraction and embedding are in progress."
+        self._request(
+            "PATCH",
+            f"rest/v1/source_ingest_jobs?id=eq.{quote(str(queued_job['id']), safe='')}",
+            {
+                "status": "processing",
+                "started_at": _now(),
+                "summary": processing_summary,
+            },
+            prefer="return=representation",
+        )
+        from ingestion.services import ingest_stewardship_source
+
+        runner = self._ingestion_runner or ingest_stewardship_source
+        try:
+            result = runner(snapshot.source)
+        except Exception:
+            failed_summary = "Approved source ingestion failed before activation readiness."
+            self._request(
+                "PATCH",
+                f"rest/v1/source_ingest_jobs?id=eq.{quote(str(queued_job['id']), safe='')}",
+                {
+                    "status": "failed",
+                    "completed_at": _now(),
+                    "summary": failed_summary,
+                    "error_code": "ingestion_failed",
+                },
+                prefer="return=representation",
+            )
+            self._create_audit_event(
+                source_id=snapshot.source.source_id,
+                event_type=event_type,
+                actor=actor,
+                outcome="failed",
+                summary=failed_summary,
+                metadata={"jobId": queued_job["id"]},
+            )
+            return self._mutation_result_from_record(snapshot.source.source_id)
+
         completed_summary = "Protected ingest request completed and is ready for activation."
         self._request(
             "PATCH",
@@ -396,6 +444,11 @@ class SupabaseStewardshipRepository:
                 "completed_at": _now(),
                 "summary": completed_summary,
                 "error_code": None,
+                "document_id": result.document_id,
+                "chunk_count": result.chunk_count,
+                "reference_count": result.reference_count,
+                "embedding_model": result.embedding_model,
+                "embedding_dimensions": result.embedding_dimensions,
             },
             prefer="return=representation",
         )
@@ -510,7 +563,9 @@ class SupabaseStewardshipRepository:
         rows = self._request(
             "GET",
             "rest/v1/source_ingest_jobs"
-            "?select=id,source_id,status,requested_at,summary"
+            "?select=id,source_id,status,requested_at,started_at,completed_at,summary,"
+            "document_id,chunk_count,reference_count,embedding_model,"
+            "embedding_dimensions,error_code"
             "&order=requested_at.desc",
         )
         jobs: dict[str, list[IngestJobDto]] = {}
@@ -522,6 +577,14 @@ class SupabaseStewardshipRepository:
                     "status": cast(Any, row["status"]),
                     "requestedAt": row["requested_at"],
                     "summary": row["summary"],
+                    "startedAt": row.get("started_at"),
+                    "completedAt": row.get("completed_at"),
+                    "documentId": row.get("document_id"),
+                    "chunkCount": row.get("chunk_count"),
+                    "referenceCount": row.get("reference_count"),
+                    "embeddingModel": row.get("embedding_model"),
+                    "embeddingDimensions": row.get("embedding_dimensions"),
+                    "errorCode": row.get("error_code"),
                 }
             )
         return jobs

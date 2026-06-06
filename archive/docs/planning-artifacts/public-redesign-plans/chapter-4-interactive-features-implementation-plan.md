@@ -42,13 +42,27 @@ The final behavior should let the learner:
 5. Expand a `Ruling vs Reality` row to understand the legal finding and enforcement gap.
 6. Use the existing source-aware chat from the Chapter 4 context without leaving the case-file surface.
 
+## Initialization Snapshot
+
+This plan is initialized for execution with companion working-memory files in:
+
+- `archive/docs/planning-artifacts/public-redesign-plans/plans-memory/task_plan.md`
+- `archive/docs/planning-artifacts/public-redesign-plans/plans-memory/findings.md`
+- `archive/docs/planning-artifacts/public-redesign-plans/plans-memory/progress.md`
+
+Recommended first implementation slice:
+
+- keep the first runtime pass local to `WpsDossier`, WPS section data, WPS CSS, and WPS-specific tests
+- defer `SourceAwareChat`, `AppShell`, `NavigationContext`, and `resolveKnownSectionId` changes unless a later gate explicitly expands scope
+- use the targeted Chapter 4 unit and Playwright checks named below before broader shared-shell verification
+
 ## Graphify Evidence
 
 Graphify merged report:
 
 - `graphify-out-merged/GRAPH_REPORT.md`
-- built from commit `9a39e93b`
-- current `git rev-parse HEAD` returned `9a39e93bc21e1da68e66a684792fb655c5bd78ed`
+- built from commit `d67eef43`
+- current `git rev-parse HEAD` returned `d67eef437672c7b195e75bf4ac13d663913f458f`
 - therefore the merged and frontend graph reports match the inspected commit
 
 Graphify frontend report:
@@ -62,8 +76,9 @@ Graphify frontend report:
 Graphify query result:
 
 - query: `Chapter 4 WpsDossier interactions timeline map evidence chat navigation`
-- traversal started from `WpsDossier`, `WpsEvidenceSurface`, and related WPS nodes
-- returned nearby nodes in `App.tsx`, `WpsDossier.tsx`, `WpsDossier.test.tsx`, `AppShell`, `NavigationProvider`, `GlobalGovernanceOverviewChapter`, `UNCommandCenter`, `core-narrative.ts`, and `renderWithNavigation`
+- refreshed query: `Chapter 4 WpsDossier timeline map evidence chat navigation tests`
+- traversal started from `WpsDossier`, historical `WpsEvidenceSurface`, and `render-with-navigation.tsx`
+- returned nearby nodes in `App.tsx`, `WpsDossier.tsx`, `WpsDossier.test.tsx`, `AppShell`, `ChapterTransitionBlock`, `HeroNarrativeFrame`, `UNCommandCenter`, `GlobalGovernanceOverviewChapter`, `core-narrative.ts`, `SourceAwareChat.test.tsx`, and `renderWithNavigation`
 
 Important graph caveat:
 
@@ -76,7 +91,10 @@ Important graph caveat:
 GitNexus repo:
 
 - `global-governance-docuweb`
-- indexed at commit `9a39e93bc21e1da68e66a684792fb655c5bd78ed`
+- refreshed with `gitnexus analyze --force --embeddings --skills` after the index reported one stale commit
+- indexed at commit `d67eef437672c7b195e75bf4ac13d663913f458f`
+- fresh index size: 3,469 nodes, 6,868 edges, 148 clusters, 291 flows
+- embeddings were generated, but GitNexus reported exact-scan fallback because no vector index is configured
 
 Symbol context:
 
@@ -88,10 +106,10 @@ Symbol context:
 
 Impact checks:
 
-- `WpsDossier`: LOW risk, one direct test caller, no affected indexed execution processes.
-- `getSourceAwareChatStarterPrompts`: LOW risk, direct coverage in `src/data/chat/source-aware-chat.test.ts`.
+- `WpsDossier`: LOW risk, one impacted test file, no affected indexed execution processes.
+- `getSourceAwareChatStarterPrompts`: LOW risk, one impacted test file, no affected indexed execution processes.
 - `setActiveChapterPanel` in `NavigationContext`: LOW indexed upstream impact, but it is a shared context API used conceptually by Chapter 2 and Chapter 3 patterns.
-- `SourceAwareChat`: HIGH risk because it is mounted by `AppShell` and covered by dedicated chat tests.
+- `SourceAwareChat`: HIGH risk because it is mounted by `AppShell`, directly covered by chat tests, and affects the `AppShell` process plus Layout, Sections, and UNCommandCenter modules.
 - `resolveKnownSectionId`: HIGH risk because it feeds `navigateToSection`, `reconcileHash`, `NavigationProvider`, `navigateToAdjacentChapter`, and `AppShell`.
 
 Planning implication:
@@ -99,6 +117,27 @@ Planning implication:
 - Keep most implementation inside `WpsDossier` and `west-philippine-sea-dossier.ts`.
 - Use existing chat behavior instead of rewriting `SourceAwareChat` in the first implementation pass.
 - Do not change `resolveKnownSectionId` or legacy redirects as part of this work.
+- Treat any proposed `SourceAwareChat`, `AppShell`, or `NavigationContext` edit as a separate gate that must re-run impact analysis and broaden tests before implementation.
+- Treat `src/mockups/public-homepage-redesign/WestPhilippineSeaCaseFileMockupPage.tsx` and `westPhilippineSeaCaseFileMockupData.ts` as design evidence, not runtime sources of truth.
+
+## Strengthening Pass Notes
+
+Current source inspection adds these execution details:
+
+- `WpsDossier` already imports all current WPS case-file data from `west-philippine-sea-dossier.ts`.
+- `WpsDossier` currently accepts a `shell` prop type but destructures only `{ content }`, so Phase 1 should begin by changing the component signature to use `shell`.
+- `WpsDossier` currently stores only `selectedEventId` and `selectedEvidenceId`.
+- map labels are currently noninteractive spans inside an `aria-hidden` visual frame.
+- `WpsDossier.test.tsx` currently asserts that the ruling/reality matrix has no extra comparison controls.
+- raw source IDs are already hidden from visible public copy but exist in `data-source-ids`; tests should continue checking visible text, not internal attributes.
+
+Execution gates before coding:
+
+- keep the first pass local to `WpsDossier`, WPS data, WPS CSS, and WPS-specific tests
+- rewrite the current "no extra comparison controls" test when Phase 4 introduces disclosure controls
+- require public source-label rendering before any evidence tray UI is considered complete
+- keep `WpsEvidenceSurface` out of the implementation unless a separate restoration plan is approved
+- use the mockup component as layout and interaction inspiration only, because runtime data already lives in `src/data/sections/west-philippine-sea-dossier.ts`
 
 ## Current Runtime Baseline
 

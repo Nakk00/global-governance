@@ -1,16 +1,16 @@
 ---
 name: public-homepage-redesign
-description: "Skill for the Public-homepage-redesign area of global-governance-docuweb. 27 symbols across 4 files."
+description: "Skill for the Public-homepage-redesign area of global-governance-docuweb. 26 symbols across 3 files."
 ---
 
 # Public-homepage-redesign
 
-27 symbols | 4 files | Cohesion: 70%
+26 symbols | 3 files | Cohesion: 71%
 
 ## When to Use
 
 - Working with code in `src/`
-- Understanding how HeroMockupPage, WpsEvidenceSurface, OverviewPage work
+- Understanding how HeroMockupPage, OverviewPage work
 - Modifying public-homepage-redesign-related functionality
 
 ## Key Files
@@ -20,14 +20,12 @@ description: "Skill for the Public-homepage-redesign area of global-governance-d
 | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | OverviewPage, ValidationResultOverlay, OverviewCards, SourceUploadPanel, FormField (+19) |
 | `src/mockups/public-homepage-redesign/HeroMockupPage.tsx` | HeroMockupPage |
 | `src/components/ui/button.tsx` | Button |
-| `src/components/modules/WpsDossier/WpsEvidenceSurface.tsx` | WpsEvidenceSurface |
 
 ## Entry Points
 
 Start here when exploring this area:
 
 - **`HeroMockupPage`** (Function) — `src/mockups/public-homepage-redesign/HeroMockupPage.tsx:20`
-- **`WpsEvidenceSurface`** (Function) — `src/components/modules/WpsDossier/WpsEvidenceSurface.tsx:19`
 - **`OverviewPage`** (Function) — `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx:843`
 
 ## Key Symbols
@@ -35,7 +33,6 @@ Start here when exploring this area:
 | Symbol | Type | File | Line |
 |--------|------|------|------|
 | `HeroMockupPage` | Function | `src/mockups/public-homepage-redesign/HeroMockupPage.tsx` | 20 |
-| `WpsEvidenceSurface` | Function | `src/components/modules/WpsDossier/WpsEvidenceSurface.tsx` | 19 |
 | `OverviewPage` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 843 |
 | `Button` | Function | `src/components/ui/button.tsx` | 44 |
 | `ValidationResultOverlay` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1564 |
@@ -54,6 +51,7 @@ Start here when exploring this area:
 | `ChunkDetailView` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3481 |
 | `CitationDetailView` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3535 |
 | `CopyButton` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3585 |
+| `DetailTerm` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 3599 |
 
 ## Execution Flows
 
@@ -63,21 +61,22 @@ Start here when exploring this area:
 | `SourceDetailPanel → ClearSupabaseSession` | cross_community | 5 |
 | `SourceDetailPanel → MaintainerApiError` | cross_community | 5 |
 | `DashboardView → Cn` | cross_community | 5 |
+| `SourcesPage → Cn` | cross_community | 4 |
 | `AppShell → Cn` | cross_community | 4 |
 | `NarrativeSection → Cn` | cross_community | 4 |
 | `Navbar → Cn` | cross_community | 4 |
-| `DashboardView → BuildSourceDetailPath` | cross_community | 4 |
 | `ValidationRemediationQueue → Cn` | cross_community | 4 |
-| `SourcesPage → Cn` | cross_community | 4 |
+| `DashboardView → BuildSourceDetailPath` | cross_community | 4 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| MaintainerDashboard | 4 calls |
+| Cluster_79 | 3 calls |
 | Maintainer | 2 calls |
 | Overview | 1 calls |
 | Cluster_75 | 1 calls |
+| Cluster_78 | 1 calls |
 | Ui | 1 calls |
 
 ## How to Explore

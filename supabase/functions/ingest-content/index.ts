@@ -1,6 +1,5 @@
 import { buildIngestionPayload } from "../_shared/ingestion-pipeline.ts"
 import { parseContentIngestionRequest } from "../_shared/ingestion-request-validation.ts"
-import { persistIngestionPayload } from "../_shared/ingestion-persistence.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +22,7 @@ Deno.serve(async (request) => {
         success: false,
         error: {
           code: "method_not_allowed",
-          message: "Use POST for content ingestion.",
+          message: "Use POST for content ingestion dry runs.",
         },
       },
       {
@@ -36,12 +35,19 @@ Deno.serve(async (request) => {
   try {
     const body = parseContentIngestionRequest(await request.json())
     const payload = await buildIngestionPayload(body)
-    const result = await persistIngestionPayload(payload)
 
     return Response.json(
       {
         success: true,
-        data: result,
+        data: {
+          dryRun: true,
+          activationAllowed: false,
+          delegate: "django-approved-source-ingestion",
+          documentId: payload.document.id,
+          chunkCount: payload.chunks.length,
+          referenceCount: payload.references.length,
+          embeddingConfig: payload.document.embeddingConfig,
+        },
       },
       {
         headers: corsHeaders,
@@ -56,7 +62,7 @@ Deno.serve(async (request) => {
           message:
             error instanceof Error
               ? error.message
-              : "Content ingestion was rejected.",
+              : "Content ingestion dry run was rejected.",
         },
       },
       {

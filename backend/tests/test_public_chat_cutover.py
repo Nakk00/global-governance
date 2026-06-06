@@ -8,7 +8,6 @@ from django.urls import resolve
 
 from chatbot.views import public_chat
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SUPABASE_CONFIG = REPO_ROOT / "supabase" / "config.toml"
 SUPABASE_FUNCTIONS = REPO_ROOT / "supabase" / "functions"

@@ -36,6 +36,49 @@ function optionalString(value: unknown, label: string): string | undefined {
   return requireString(value, label)
 }
 
+function optionalSafePublicUrl(
+  value: unknown,
+  label: string
+): string | undefined {
+  const rawUrl = optionalString(value, label)
+
+  if (!rawUrl) {
+    return undefined
+  }
+
+  let parsed: URL
+  try {
+    parsed = new URL(rawUrl)
+  } catch {
+    throw new Error(`Invalid grounded chat ${label}`)
+  }
+
+  const hostname = parsed.hostname.toLowerCase()
+  const isPrivateIpv4 =
+    /^10\./.test(hostname) ||
+    /^127\./.test(hostname) ||
+    /^169\.254\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
+  const isPrivateHost =
+    hostname === "localhost" ||
+    hostname.endsWith(".local") ||
+    hostname === "::1" ||
+    hostname.startsWith("[") ||
+    isPrivateIpv4
+
+  if (
+    (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+    isPrivateHost ||
+    parsed.username.length > 0 ||
+    parsed.password.length > 0
+  ) {
+    throw new Error(`Invalid grounded chat ${label}`)
+  }
+
+  return parsed.toString()
+}
+
 function requirePositiveInteger(value: unknown, label: string): number {
   if (
     typeof value !== "number" ||
@@ -65,7 +108,7 @@ function parseCitation(value: unknown): ChatCitation {
     shortTitle: requireString(citation.shortTitle, "citation short title"),
     sourceType: sourceType as ChatCitation["sourceType"],
     detail: requireString(citation.detail, "citation detail"),
-    url: optionalString(citation.url, "citation url"),
+    url: optionalSafePublicUrl(citation.url, "citation url"),
   }
 }
 
@@ -91,7 +134,19 @@ function parseCitations(value: unknown): ChatCitation[] {
     throw new Error("Invalid grounded chat citations")
   }
 
+  if (value.length > 6) {
+    throw new Error("Invalid grounded chat citation count")
+  }
+
   return value.map(parseCitation)
+}
+
+function parseSuggestedPrompts(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 4) {
+    throw new Error("Invalid grounded chat suggested prompts")
+  }
+
+  return value.map((prompt) => requireString(prompt, "suggested prompt"))
 }
 
 function parseSuccessData(value: unknown): GroundedChatSuccess {
@@ -126,7 +181,7 @@ function parseSuccessData(value: unknown): GroundedChatSuccess {
   if (state === "refused") {
     const code = requireString(data.code, "refusal code")
 
-    if (code !== "off_topic") {
+    if (code !== "off_topic" && code !== "unsafe") {
       throw new Error("Invalid grounded chat refusal code")
     }
 
@@ -154,6 +209,26 @@ function parseSuccessData(value: unknown): GroundedChatSuccess {
         data.retryAfterSeconds,
         "cooldown retry seconds"
       ),
+    }
+  }
+
+  if (state === "fallback") {
+    const fallbackSource =
+      data.fallbackSource === undefined
+        ? undefined
+        : {
+            label: requireString(
+              asRecord(data.fallbackSource, "fallback source").label,
+              "fallback source label"
+            ),
+          }
+
+    return {
+      state,
+      message: requireString(data.message, "fallback message"),
+      nextStep: requireString(data.nextStep, "fallback next step"),
+      suggestedPrompts: parseSuggestedPrompts(data.suggestedPrompts),
+      ...(fallbackSource ? { fallbackSource } : {}),
     }
   }
 

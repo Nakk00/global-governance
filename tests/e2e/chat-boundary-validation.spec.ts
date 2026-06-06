@@ -52,7 +52,7 @@ test("@journey source-aware chat keeps shift enter for multiline prompts", async
 test("@journey mocked chat fallback states stay visible and recoverable in the browser", async ({
   page,
 }) => {
-  await page.route("**/functions/v1/chat", async (route) => {
+  await page.route("**/api/chat", async (route) => {
     const request = route.request().postDataJSON() as {
       question: string
     }
@@ -116,6 +116,26 @@ test("@journey mocked chat fallback states stay visible and recoverable in the b
       return
     }
 
+    if (request.question === "Trigger provider fallback") {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          data: {
+            state: "fallback",
+            message:
+              "The assistant could not complete a grounded answer right now.",
+            nextStep: "Continue with the lesson or try a course question.",
+            suggestedPrompts: ["What is global governance?"],
+            fallbackSource: {
+              label: "Current lesson summary",
+            },
+          },
+        }),
+      })
+      return
+    }
+
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
@@ -159,6 +179,15 @@ test("@journey mocked chat fallback states stay visible and recoverable in the b
   })
   await rephraseButton.click()
   await expect(input).toBeFocused()
+
+  await askVisibleChat(page, "Trigger provider fallback")
+  await expect(panel.getByText("Grounded answer unavailable")).toBeVisible()
+  await expect(panel.getByText("Current lesson summary")).toBeVisible()
+  await panel
+    .getByRole("button", { name: "What is global governance?" })
+    .click()
+  await expect(input).toHaveValue("What is global governance?")
+  await expect(page).toHaveURL(/#hero-narrative-frame$/)
 
   await askVisibleChat(page, abuseCooldownCase.prompts.at(-1)!)
   await expect(panel.getByText("Assistant temporarily limited")).toBeVisible()

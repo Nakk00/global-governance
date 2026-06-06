@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, TypedDict
+from typing import Literal, NotRequired, TypedDict
 
 LifecycleState = Literal["draft", "approved", "active", "disabled", "archived"]
 ReadinessState = Literal["ready", "partial", "empty"]
-RunStatus = Literal["succeeded", "warning", "failed", "queued"]
+RunStatus = Literal["succeeded", "warning", "failed", "queued", "processing"]
 InspectionState = Literal["empty", "partial", "stale", "inactive", "ready", "unavailable"]
 
 
@@ -30,6 +30,14 @@ class IngestJobDto(TypedDict):
     status: RunStatus
     requestedAt: str
     summary: str
+    startedAt: NotRequired[str | None]
+    completedAt: NotRequired[str | None]
+    documentId: NotRequired[str | None]
+    chunkCount: NotRequired[int | None]
+    referenceCount: NotRequired[int | None]
+    embeddingModel: NotRequired[str | None]
+    embeddingDimensions: NotRequired[int | None]
+    errorCode: NotRequired[str | None]
 
 
 class SourceInventoryItemDto(TypedDict):
@@ -37,6 +45,8 @@ class SourceInventoryItemDto(TypedDict):
     title: str
     sourceType: str
     lifecycleState: LifecycleState
+    createdAt: str | None
+    updatedAt: str | None
     aliases: list[str]
     usageScope: list[str]
     provenance: str

@@ -1,11 +1,11 @@
 ---
 name: maintainer
-description: "Skill for the Maintainer area of global-governance-docuweb. 25 symbols across 7 files."
+description: "Skill for the Maintainer area of global-governance-docuweb. 22 symbols across 6 files."
 ---
 
 # Maintainer
 
-25 symbols | 7 files | Cohesion: 68%
+22 symbols | 6 files | Cohesion: 81%
 
 ## When to Use
 
@@ -17,11 +17,10 @@ description: "Skill for the Maintainer area of global-governance-docuweb. 25 sym
 
 | File | Symbols |
 |------|---------|
-| `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | loadValidation, timer, loadChunks, loadCitations, openChunkDetail (+4) |
+| `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | loadValidation, timer, runSelectedSet, validationAlertForRun, validationDetailAlert (+4) |
 | `src/lib/maintainer/validation-api.ts` | fetchValidationSets, fetchValidationRuns, fetchValidationRunDetail, launchValidationRun |
 | `src/lib/maintainer/source-api.ts` | fetchSourceChunks, fetchSourceCitations, fetchChunkDetail, fetchCitationDetail |
 | `src/lib/maintainer/envelope.ts` | MaintainerApiError, parseMaintainerEnvelope, isApiEnvelope |
-| `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | loadValidation, timer, runSelectedSet |
 | `src/lib/maintainer/client.ts` | fetchMaintainerJson |
 | `src/components/modules/MaintainerDashboard/MaintainerDashboard.test.tsx` | arrange |
 
@@ -32,8 +31,8 @@ Start here when exploring this area:
 - **`fetchValidationSets`** (Function) — `src/lib/maintainer/validation-api.ts:15`
 - **`fetchValidationRuns`** (Function) — `src/lib/maintainer/validation-api.ts:22`
 - **`fetchValidationRunDetail`** (Function) — `src/lib/maintainer/validation-api.ts:29`
+- **`launchValidationRun`** (Function) — `src/lib/maintainer/validation-api.ts:39`
 - **`fetchSourceChunks`** (Function) — `src/lib/maintainer/source-api.ts:45`
-- **`fetchSourceCitations`** (Function) — `src/lib/maintainer/source-api.ts:55`
 
 ## Key Symbols
 
@@ -43,28 +42,27 @@ Start here when exploring this area:
 | `fetchValidationSets` | Function | `src/lib/maintainer/validation-api.ts` | 15 |
 | `fetchValidationRuns` | Function | `src/lib/maintainer/validation-api.ts` | 22 |
 | `fetchValidationRunDetail` | Function | `src/lib/maintainer/validation-api.ts` | 29 |
+| `launchValidationRun` | Function | `src/lib/maintainer/validation-api.ts` | 39 |
 | `fetchSourceChunks` | Function | `src/lib/maintainer/source-api.ts` | 45 |
 | `fetchSourceCitations` | Function | `src/lib/maintainer/source-api.ts` | 55 |
 | `fetchChunkDetail` | Function | `src/lib/maintainer/source-api.ts` | 65 |
 | `fetchCitationDetail` | Function | `src/lib/maintainer/source-api.ts` | 75 |
 | `parseMaintainerEnvelope` | Function | `src/lib/maintainer/envelope.ts` | 34 |
 | `fetchMaintainerJson` | Function | `src/lib/maintainer/client.ts` | 7 |
-| `loadValidation` | Function | `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | 202 |
-| `timer` | Function | `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | 318 |
 | `loadValidation` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1099 |
 | `timer` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1215 |
-| `launchValidationRun` | Function | `src/lib/maintainer/validation-api.ts` | 39 |
-| `runSelectedSet` | Function | `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | 324 |
 | `runSelectedSet` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1221 |
 | `isApiEnvelope` | Function | `src/lib/maintainer/envelope.ts` | 57 |
 | `arrange` | Function | `src/components/modules/MaintainerDashboard/MaintainerDashboard.test.tsx` | 868 |
+| `validationAlertForRun` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1643 |
+| `validationDetailAlert` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1667 |
 | `loadChunks` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 2295 |
+| `loadCitations` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 2332 |
 
 ## Execution Flows
 
 | Flow | Type | Steps |
 |------|------|-------|
-| `MaintainerDashboard → IsApiEnvelope` | cross_community | 7 |
 | `UseMaintainerDashboardData → IsApiEnvelope` | cross_community | 7 |
 | `MaintainerDashboard → ClearSupabaseSession` | cross_community | 6 |
 | `MaintainerDashboard → MaintainerApiError` | cross_community | 6 |
@@ -72,8 +70,9 @@ Start here when exploring this area:
 | `SourceDetailPanel → IsApiEnvelope` | cross_community | 6 |
 | `UseMaintainerDashboardData → ClearSupabaseSession` | cross_community | 6 |
 | `UseMaintainerDashboardData → MaintainerApiError` | cross_community | 6 |
-| `Timer → IsApiEnvelope` | intra_community | 6 |
 | `MaintainerDashboard → ClearSupabaseSession` | cross_community | 5 |
+| `MaintainerDashboard → MaintainerApiError` | cross_community | 5 |
+| `ValidationWorkbench → ClearSupabaseSession` | cross_community | 5 |
 
 ## Connected Areas
 

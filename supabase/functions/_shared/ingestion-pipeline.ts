@@ -120,6 +120,8 @@ export async function buildIngestionPayload(
           bucket: validated.storage?.bucket ?? null,
           path: validated.storage?.path ?? null,
         },
+        dryRunOnly: true,
+        syntheticEmbedding: true,
         ...(validated.metadata ?? {}),
       },
     },

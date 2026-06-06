@@ -73,16 +73,40 @@ export type WpsCaseFileMapLabel = {
     | "scarborough-shoal"
 }
 
+export type WpsCaseFileMapHotspot = {
+  id: WpsCaseFileMapLabel["id"]
+  label: string
+  position: WpsCaseFileMapLabel["position"]
+  summary: string
+  whyItMatters: string
+  relatedEventIds: string[]
+  relatedEvidenceIds: string[]
+  relatedComparisonRowIds: string[]
+}
+
 export type WpsCaseFileLegendItem = {
   label: string
   tone: "eez" | "tribunal" | "claim" | "baseline"
+}
+
+export type WpsCaseFileInteractionMode = {
+  id: "evidence-file" | "law-power"
+  title: string
+  detail: string
+  defaultEventId: string
+  defaultEvidenceId: string
+  defaultHotspotId: string
+  defaultComparisonRowId: string
 }
 
 export type WpsCaseFileEvidenceCategory = {
   id: string
   title: string
   summary: string
+  primaryFinding: string
   sourceTypeLabel: string
+  sourceCountLabel: string
+  linkedStateLabel: string
   tone: "history" | "geography" | "legal" | "conduct"
   sourceIds: string[]
 }
@@ -91,6 +115,11 @@ export type WpsCaseFileRulingRealityRow = {
   id: string
   legalClarity: string
   politicalReality: string
+  explanation: string
+  citationLabel: string
+  sourceIds: string[]
+  relatedEventIds: string[]
+  relatedEvidenceIds: string[]
 }
 
 export type WpsCaseFileThesisAction = {
@@ -329,6 +358,87 @@ export const wpsCaseFileMapLabels: WpsCaseFileMapLabel[] = [
   },
 ]
 
+export const wpsCaseFileInteractionModes: WpsCaseFileInteractionMode[] = [
+  {
+    id: "evidence-file",
+    title: "Open the evidence file",
+    detail:
+      "Start with the record: claims, rulings, state behavior, and public consequences should be read as connected evidence.",
+    defaultEventId: "arbitration-filing",
+    defaultEvidenceId: "historic-use",
+    defaultHotspotId: "scarborough-shoal",
+    defaultComparisonRowId: "nine-dash-line",
+  },
+  {
+    id: "law-power",
+    title: "Trace law and power",
+    detail:
+      "Follow how legal clarity shapes claims and diplomacy while enforcement still depends on political choices.",
+    defaultEventId: "final-award",
+    defaultEvidenceId: "legal-findings",
+    defaultHotspotId: "west-philippine-sea",
+    defaultComparisonRowId: "sovereign-rights",
+  },
+]
+
+export const wpsCaseFileDefaultInteractionState = {
+  modeId: "evidence-file",
+  eventId: "arbitration-filing",
+  evidenceId: "historic-use",
+  hotspotId: "scarborough-shoal",
+  comparisonRowId: "nine-dash-line",
+} as const
+
+export const wpsCaseFileMapHotspots: WpsCaseFileMapHotspot[] = [
+  {
+    id: "scarborough-shoal",
+    label: "Scarborough Shoal",
+    position: "scarborough-shoal",
+    summary: "A 2012 standoff turned contested access into a public test case.",
+    whyItMatters:
+      "The shoal makes the dispute concrete: vessels, access, and official presence became evidence for how maritime rights are asserted.",
+    relatedEventIds: ["arbitration-filing"],
+    relatedEvidenceIds: ["historic-use", "state-practice"],
+    relatedComparisonRowIds: ["scarborough-eez"],
+  },
+  {
+    id: "spratly-islands",
+    label: "Spratly Islands",
+    position: "spratly-islands",
+    summary:
+      "The Award clarified what maritime features can and cannot generate.",
+    whyItMatters:
+      "Spratly features show why classification matters under UNCLOS: legal entitlements depend on the feature, not on slogans around it.",
+    relatedEventIds: ["final-award", "post-award"],
+    relatedEvidenceIds: ["geographic-realities", "legal-findings"],
+    relatedComparisonRowIds: ["spratly-entitlements"],
+  },
+  {
+    id: "palawan",
+    label: "Palawan",
+    position: "palawan",
+    summary:
+      "Palawan anchors the Philippine maritime zone in the case-file map.",
+    whyItMatters:
+      "The island helps learners connect coastal geography to EEZ rights, resource access, and why distance matters in maritime law.",
+    relatedEventIds: ["tribunal-constituted", "final-award"],
+    relatedEvidenceIds: ["geographic-realities"],
+    relatedComparisonRowIds: ["sovereign-rights"],
+  },
+  {
+    id: "west-philippine-sea",
+    label: "West Philippine Sea",
+    position: "west-philippine-sea",
+    summary:
+      "The broader case space links legal clarity to continuing conduct at sea.",
+    whyItMatters:
+      "This area keeps the chapter focused on governance: a ruling can clarify rights while diplomacy, capacity, and compliance determine practical change.",
+    relatedEventIds: ["final-award", "post-award"],
+    relatedEvidenceIds: ["legal-findings", "state-practice"],
+    relatedComparisonRowIds: ["nine-dash-line", "respect-rights"],
+  },
+]
+
 export const wpsCaseFileLegend: WpsCaseFileLegendItem[] = [
   { label: "Philippine EEZ (200 nm)", tone: "eez" },
   { label: "Arbitral Tribunal Jurisdiction", tone: "tribunal" },
@@ -341,7 +451,11 @@ export const wpsCaseFileEvidenceCategories: WpsCaseFileEvidenceCategory[] = [
     id: "historic-use",
     title: "Historic Use of Waters and Features",
     summary: "Longstanding Philippine activities in the area.",
+    primaryFinding:
+      "The record starts with conduct at sea, where access, presence, and official response made the dispute visible before arbitration.",
     sourceTypeLabel: "Historical Records",
+    sourceCountLabel: "2 approved source records",
+    linkedStateLabel: "Linked to 2012 standoff",
     tone: "history",
     sourceIds: [
       "gg-src-scarborough-standoff-record",
@@ -352,7 +466,11 @@ export const wpsCaseFileEvidenceCategories: WpsCaseFileEvidenceCategory[] = [
     id: "geographic-realities",
     title: "Geographic & Maritime Realities",
     summary: "Features, distances, and entitlements under UNCLOS.",
+    primaryFinding:
+      "Geography shapes the legal question: maritime zones and feature status determine what rights can be claimed.",
     sourceTypeLabel: "Geo-Spatial Data",
+    sourceCountLabel: "1 approved source record",
+    linkedStateLabel: "Linked to maritime entitlements",
     tone: "geography",
     sourceIds: ["gg-src-south-china-sea-award"],
   },
@@ -360,7 +478,11 @@ export const wpsCaseFileEvidenceCategories: WpsCaseFileEvidenceCategory[] = [
     id: "legal-findings",
     title: "Legal Findings (2016 Award)",
     summary: "Rulings on jurisdiction, maritime rights, and entitlements.",
+    primaryFinding:
+      "The tribunal rejected broad historic-rights claims and clarified how UNCLOS governs maritime entitlements.",
     sourceTypeLabel: "Tribunal Award",
+    sourceCountLabel: "2 approved source records",
+    linkedStateLabel: "Linked to 2016 ruling",
     tone: "legal",
     sourceIds: [
       "gg-src-south-china-sea-award",
@@ -371,7 +493,11 @@ export const wpsCaseFileEvidenceCategories: WpsCaseFileEvidenceCategory[] = [
     id: "state-practice",
     title: "State Practice & Conduct",
     summary: "Official acts, protests, and diplomacy.",
+    primaryFinding:
+      "Post-award conduct shows the enforcement gap between legal clarity and changes in day-to-day behavior.",
     sourceTypeLabel: "Official Records",
+    sourceCountLabel: "2 approved source records",
+    linkedStateLabel: "Linked to post-award conduct",
     tone: "conduct",
     sourceIds: [
       "gg-src-post-award-compliance-record",
@@ -385,12 +511,27 @@ export const wpsCaseFileRulingRealityRows: WpsCaseFileRulingRealityRow[] = [
     id: "nine-dash-line",
     legalClarity: "Nine-dash line has no legal basis.",
     politicalReality: "The line continues to be asserted.",
+    explanation:
+      "The Award rejected broad historic-rights claims that exceeded UNCLOS. The governance gap is that claims can keep appearing in public and diplomatic practice even after the legal basis is clarified.",
+    citationLabel: "PCA Award and UNCLOS record",
+    sourceIds: ["gg-src-south-china-sea-award"],
+    relatedEventIds: ["final-award"],
+    relatedEvidenceIds: ["legal-findings"],
   },
   {
     id: "scarborough-eez",
     legalClarity:
       "Features like Scarborough Shoal are within the Philippine EEZ.",
     politicalReality: "Access remains restricted; incidents continue.",
+    explanation:
+      "Scarborough Shoal shows why the case is more than map trivia: legal framing can identify rights, while access still depends on what states do around the feature.",
+    citationLabel: "Scarborough standoff record",
+    sourceIds: [
+      "gg-src-scarborough-standoff-record",
+      "gg-src-south-china-sea-award",
+    ],
+    relatedEventIds: ["arbitration-filing"],
+    relatedEvidenceIds: ["historic-use", "state-practice"],
   },
   {
     id: "spratly-entitlements",
@@ -398,17 +539,41 @@ export const wpsCaseFileRulingRealityRows: WpsCaseFileRulingRealityRow[] = [
       "Spratly features do not generate their own EEZ or continental shelf.",
     politicalReality:
       "Artificial features and outposts still influence facts on the water.",
+    explanation:
+      "The tribunal's feature analysis narrowed what maritime zones could be claimed. Physical outposts can still alter risk, access, and bargaining even when they do not create new legal entitlements.",
+    citationLabel: "Tribunal feature analysis",
+    sourceIds: ["gg-src-south-china-sea-award"],
+    relatedEventIds: ["final-award", "post-award"],
+    relatedEvidenceIds: ["geographic-realities", "legal-findings"],
   },
   {
     id: "sovereign-rights",
     legalClarity: "Philippines' sovereign rights in its EEZ are well-founded.",
     politicalReality:
       "Interference with fishing, surveys, and resource activities persists.",
+    explanation:
+      "The legal finding supports the Philippines' position over activities in its EEZ. The continuing problem is implementation: rights must be defended through lawful capacity, diplomacy, and public accountability.",
+    citationLabel: "Award plus post-award conduct",
+    sourceIds: [
+      "gg-src-south-china-sea-award",
+      "gg-src-post-award-compliance-record",
+    ],
+    relatedEventIds: ["final-award", "post-award"],
+    relatedEvidenceIds: ["legal-findings", "state-practice"],
   },
   {
     id: "respect-rights",
     legalClarity: "Obligation to respect Philippines' rights under UNCLOS.",
     politicalReality: "Compliance remains inadequate.",
+    explanation:
+      "International law can define obligations and raise reputational costs. It still needs state compliance, coalitions, and steady diplomatic pressure to become lived reality.",
+    citationLabel: "Compliance and political reality records",
+    sourceIds: [
+      "gg-src-post-award-compliance-record",
+      "gg-src-wps-political-reality-record",
+    ],
+    relatedEventIds: ["post-award"],
+    relatedEvidenceIds: ["state-practice"],
   },
 ]
 

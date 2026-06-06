@@ -20,27 +20,36 @@ To use the components in your app, import them as follows:
 import { Button } from "@/components/ui/button"
 ```
 
-## Local Supabase Chat
+## Local Django Chat
 
-The source-aware chat calls the local Supabase Edge Function through:
+The source-aware chat calls the Django backend through:
 
 ```txt
-VITE_CHAT_FUNCTION_URL=http://127.0.0.1:54321/functions/v1/chat
+VITE_CHAT_API_URL=/api/chat
 ```
 
-Run the local stack and function server in separate terminals:
+Start local Redis, Supabase data services, Django backend, and Vite frontend together:
 
 ```bash
+pnpm local:dev
+```
+
+Use separate terminals when you want to run each service independently:
+
+```bash
+pnpm redis:start
 pnpm supabase:start
-pnpm supabase:functions:chat
+pnpm backend:dev
 pnpm dev
 ```
 
-`supabase:functions:chat` serves the public demo chat function with JWT verification disabled, while server-only model settings stay in `.env.local`.
+`pnpm backend:dev` starts Django only. It expects local Redis and Supabase to already be reachable, so use `pnpm local:dev` when you want the full chatbot-ready development stack.
+
+Supabase still provides private storage and Postgres/pgvector data services. Django owns public chat orchestration, Redis-backed protection state, and server-only model settings in `backend/.env`.
 
 ## Django Backend Foundation
 
-The Django backend lives under `backend/` and is reserved for internal bootstrap, future chat orchestration, and protected maintainer/admin work. The browser chat path still defaults to the Supabase Edge Function at `functions/v1/chat`; public Django chat cutover is intentionally deferred.
+The Django backend lives under `backend/` and owns internal bootstrap, public chat orchestration, Redis-backed public-chat protection, and protected maintainer/admin work. The browser chat path defaults to `/api/chat`.
 
 Clean-clone backend setup:
 
@@ -70,13 +79,33 @@ pnpm backend:dev
 `pnpm backend:test` uses pytest with `pytest-django` and reads its Django settings from `backend/pyproject.toml`.
 `pnpm backend:lint` and `pnpm backend:format` run Ruff, `pnpm backend:typecheck` runs MyPy with Django stubs, and `pnpm backend:security` runs `pip-audit` against `backend/requirements.txt`.
 
-To start the local Supabase stack, Supabase chat Edge Function, Django service, and Vite frontend through one explicit command path on Windows PowerShell:
+Local Redis is Docker-managed as a separate container from Supabase and binds only to `127.0.0.1:6379`:
+
+```bash
+pnpm redis:start
+pnpm redis:status
+pnpm redis:stop
+```
+
+Redis Insight is available as a separate Docker-managed admin UI:
+
+```bash
+pnpm redis:insight:start
+pnpm redis:insight:status
+pnpm redis:insight:stop
+```
+
+Open `http://127.0.0.1:5540` after it starts. When adding the local Redis database in Redis Insight, use host `global-governance-redis`, port `6379`, database `0`, and no username or password.
+
+To start the same local Redis service, Supabase data services, Django service, and Vite frontend through the underlying Windows PowerShell stack helper:
 
 ```bash
 pnpm dev:backend-stack
 ```
 
-The startup path fails before serving Django if `backend/.env` is missing, required server-only values are absent, the Python runtime is unsupported, or local Supabase is unavailable.
+`pnpm local:dev` is the friendlier alias for this stack helper.
+
+The startup path fails before serving Django if `backend/.env` is missing, required server-only values are absent, the Python runtime is unsupported, or local Redis/Supabase services are unavailable.
 
 ## Django Admin Auth Boundary
 

@@ -1,11 +1,11 @@
 ---
 name: validation
-description: "Skill for the Validation area of global-governance-docuweb. 60 symbols across 7 files."
+description: "Skill for the Validation area of global-governance-docuweb. 52 symbols across 5 files."
 ---
 
 # Validation
 
-60 symbols | 7 files | Cohesion: 83%
+52 symbols | 5 files | Cohesion: 88%
 
 ## When to Use
 
@@ -19,10 +19,8 @@ description: "Skill for the Validation area of global-governance-docuweb. 60 sym
 |------|---------|
 | `backend/validation/repository.py` | list_sets, list_runs, get_run, seed_inflight_validation_run, list_validation_sets (+33) |
 | `src/components/modules/MaintainerDashboard/validation/validation-remediation.ts` | reviewStatusForOutcome, destinationSurfaceForOutcome, nextActionForOutcome, followUpForOutcome, formatSourceContextLabel (+1) |
-| `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | ValidationWorkbench, ValidationSummary, ValidationRunHistory, validationStatusLabel, ValidationAlert |
 | `backend/tests/test_admin_validation.py` | test_duplicate_in_flight_launch_returns_safe_conflict, test_result_row_preserves_zero_support_score, setUp |
 | `src/components/modules/MaintainerDashboard/validation/ValidationRemediationQueue.tsx` | DetailTerm, RemediationAction, ValidationRemediationQueue |
-| `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | ValidationSummary, DetailTerm, ValidationWorkbench |
 | `backend/validation/dtos.py` | ValidationRunSummaryDto, ValidationRunDetailDto |
 
 ## Entry Points
@@ -48,9 +46,6 @@ Start here when exploring this area:
 | `launch_validation_run` | Function | `backend/validation/repository.py` | 633 |
 | `buildValidationRemediationItems` | Function | `src/components/modules/MaintainerDashboard/validation/validation-remediation.ts` | 107 |
 | `ValidationRemediationQueue` | Function | `src/components/modules/MaintainerDashboard/validation/ValidationRemediationQueue.tsx` | 56 |
-| `ValidationSummary` | Function | `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | 56 |
-| `ValidationWorkbench` | Function | `src/components/modules/MaintainerDashboard/validation/ValidationWorkbench.tsx` | 192 |
-| `ValidationWorkbench` | Function | `src/components/modules/MaintainerDashboard/shared/maintainerDashboardShared.tsx` | 1089 |
 | `reset_validation_state` | Function | `backend/validation/repository.py` | 590 |
 | `list_sets` | Method | `backend/validation/repository.py` | 122 |
 | `list_runs` | Method | `backend/validation/repository.py` | 132 |
@@ -59,31 +54,30 @@ Start here when exploring this area:
 | `launch_run` | Method | `backend/validation/repository.py` | 140 |
 | `seed_inflight` | Method | `backend/validation/repository.py` | 205 |
 | `launch_run` | Method | `backend/validation/repository.py` | 301 |
+| `list_sets` | Method | `backend/validation/repository.py` | 246 |
+| `list_runs` | Method | `backend/validation/repository.py` | 270 |
+| `get_run` | Method | `backend/validation/repository.py` | 282 |
 
 ## Execution Flows
 
 | Flow | Type | Steps |
 |------|------|-------|
-| `ValidationWorkbench → IsApiEnvelope` | cross_community | 6 |
-| `ValidationWorkbench → ClearSupabaseSession` | cross_community | 5 |
-| `ValidationWorkbench → MaintainerApiError` | cross_community | 5 |
-| `ValidationWorkbench → ClearSupabaseSession` | cross_community | 5 |
-| `ValidationWorkbench → MaintainerApiError` | cross_community | 5 |
 | `Launch_validation_run → _now` | cross_community | 4 |
 | `Launch_validation_run → _answer_preview` | cross_community | 4 |
+| `ValidationRemediationQueue → BuildSourceDetailPath` | cross_community | 4 |
 | `ValidationRemediationQueue → Cn` | cross_community | 4 |
 | `Launch_run → _request` | cross_community | 3 |
-| `ValidationWorkbench → ValidationAlertForRun` | cross_community | 3 |
+| `List_validation_sets → _set_dto` | intra_community | 3 |
+| `List_validation_runs → _run_summary` | intra_community | 3 |
+| `Launch_validation_run → _has_inflight_run` | cross_community | 3 |
 
 ## Connected Areas
 
 | Area | Connections |
 |------|-------------|
-| Public-homepage-redesign | 7 calls |
-| Maintainer | 4 calls |
-| Ui | 3 calls |
-| MaintainerDashboard | 2 calls |
 | Tests | 1 calls |
+| Public-homepage-redesign | 1 calls |
+| Sources | 1 calls |
 
 ## How to Explore
 

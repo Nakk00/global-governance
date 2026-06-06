@@ -43,14 +43,26 @@ test("@smoke four-chapter Chapter 4 flow renders the live WPS contract", async (
   const comparison = dossier.getByRole("region", {
     name: "Ruling vs Reality",
   })
+  const evidenceMode = dossier.getByRole("button", {
+    name: "Open the evidence file",
+  })
+  const lawPowerMode = dossier.getByRole("button", {
+    name: "Trace law and power",
+  })
   const finalAward = timeline.getByRole("button", {
     name: /2016.*Final Award/i,
+  })
+  const spratlyHotspot = map.getByRole("button", {
+    name: "Spratly Islands",
   })
   const legalFindings = evidence.getByRole("button", {
     name: "Inspect evidence for Legal Findings (2016 Award)",
   })
   const statePractice = evidence.getByRole("button", {
     name: "Inspect evidence for State Practice & Conduct",
+  })
+  const scarboroughRow = comparison.getByRole("button", {
+    name: /Features like Scarborough Shoal/i,
   })
 
   await expect(primaryNav.getByRole("link")).toHaveCount(4)
@@ -67,6 +79,17 @@ test("@smoke four-chapter Chapter 4 flow renders the live WPS contract", async (
   await expect(
     dossier.getByRole("heading", { name: "West Philippine Sea Case File" })
   ).toBeVisible()
+  await expect(evidenceMode).toBeVisible()
+  await expect(lawPowerMode).toBeVisible()
+  await expect(evidenceMode).toHaveAttribute("aria-pressed", "true")
+  await expectTouchTarget(evidenceMode)
+  await lawPowerMode.click()
+  await expect(lawPowerMode).toHaveAttribute("aria-pressed", "true")
+  await expect(
+    dossier.getByText(/legal clarity can shape claims/i)
+  ).toBeVisible()
+  await evidenceMode.click()
+  await expect(evidenceMode).toHaveAttribute("aria-pressed", "true")
 
   for (const regionName of [
     "Maritime Case Map",
@@ -96,8 +119,17 @@ test("@smoke four-chapter Chapter 4 flow renders the live WPS contract", async (
   await finalAward.press("Enter")
   await expect(timelineDetail).toContainText("Legal clarity enters the record.")
   await expect(map.getByText("2016")).toBeVisible()
+  await expect(map.getByText(/Spratly Islands context selected/i)).toBeVisible()
 
-  await expect(evidenceDetail).toContainText("Historical Records")
+  await spratlyHotspot.focus()
+  await expectVisibleFocus(spratlyHotspot)
+  await spratlyHotspot.click()
+  await expect(
+    map.getByText(/The Award clarified what maritime features can/i)
+  ).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+
+  await expect(evidenceDetail).toContainText("Geo-Spatial Data")
   await legalFindings.focus()
   await expectVisibleFocus(legalFindings)
   await legalFindings.press("Enter")
@@ -105,6 +137,10 @@ test("@smoke four-chapter Chapter 4 flow renders the live WPS contract", async (
   await expect(evidenceDetail).toContainText(
     "Rulings on jurisdiction, maritime rights, and entitlements."
   )
+  await expect(evidenceDetail).toContainText("PCA Case No. 2013-19")
+  await expect(
+    evidence.getByRole("link", { name: "View source excerpts" })
+  ).toBeVisible()
   await statePractice.click()
   await expect(evidenceDetail).toContainText("Official Records")
 
@@ -113,6 +149,13 @@ test("@smoke four-chapter Chapter 4 flow renders the live WPS contract", async (
   ).toBeVisible()
   await expect(
     comparison.getByText("The line continues to be asserted.")
+  ).toBeVisible()
+  await expect(comparison.getByText(/Tribunal feature analysis/i)).toBeVisible()
+  await scarboroughRow.click()
+  await expect(
+    comparison.getByText(
+      /Scarborough Shoal shows why the case is more than map/i
+    )
   ).toBeVisible()
   await expectNoHorizontalOverflow(page)
 })

@@ -25,6 +25,8 @@ Defines the browser-to-Django contract for the public grounded chat workflow.
 - `question` is required.
 - `context.currentSectionId` is optional.
 - `context.depthMode` is optional during rollout but must normalize to one of `student` or `expert`.
+- The request body must not exceed 8 KiB.
+- The normalized `question` value must not exceed 2,000 characters.
 - The client sends an anonymous session identifier header so protection logic can rate-limit and cooldown repeat traffic.
 
 ## Successful Envelope
@@ -35,6 +37,11 @@ Defines the browser-to-Django contract for the public grounded chat workflow.
   "data": {}
 }
 ```
+
+**Response rules**
+
+- Learner-visible answer text must not exceed 4,000 characters.
+- Visible citation arrays must not exceed 6 items.
 
 ### `answered`
 
@@ -150,6 +157,8 @@ Transport-level validation and unclassified server failures use:
 - Section context and depth mode are hints for scoped grounding and presentation, not permissions.
 - NVIDIA provider names, model IDs, API keys, and routing decisions remain server-only configuration in the Django chat runtime.
 - Public chat implementation must begin with failing Django contract tests for valid answers, weak support, refusal, cooldown, fallback, malformed input, oversized input, provider failure, and Redis-unavailable behavior.
+- An `answered` outcome with strong support may cite only active sources backed by completed durable ingestion records and real embeddings; staged files or queued/failed ingest jobs are not retrieval evidence.
+- Real embeddings mean provider-produced vectors with recorded model identity and dimensions. Deterministic fixture vectors are allowed only in tests and dry runs.
 - Public chat tests should use deterministic provider doubles for generation, embedding, reranking, topic guard, and safety guard behavior rather than live NVIDIA calls by default.
 - New or materially changed public-chat executable code must meet the feature's 80% changed-scope coverage gate before the live-chat canary is treated as release evidence.
 - Django may use Redis for short-lived protection state and narrow operational caches, but browser responses must not expose cache keys, raw prompt hashes, Redis internals, or private source content.

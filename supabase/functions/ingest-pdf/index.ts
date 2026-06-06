@@ -3,11 +3,6 @@ import {
   extractPdfText,
 } from "../_shared/ingestion-pipeline.ts"
 import { parsePdfIngestionRequest } from "../_shared/ingestion-request-validation.ts"
-import {
-  deletePrivateSourceFile,
-  persistIngestionPayload,
-  uploadPrivateSourceFile,
-} from "../_shared/ingestion-persistence.ts"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,7 +25,7 @@ Deno.serve(async (request) => {
         success: false,
         error: {
           code: "method_not_allowed",
-          message: "Use POST for PDF ingestion.",
+          message: "Use POST for PDF ingestion dry runs.",
         },
       },
       {
@@ -43,41 +38,32 @@ Deno.serve(async (request) => {
   try {
     const body = parsePdfIngestionRequest(await request.json())
     const pdfBytes = decodeBase64(body.pdfBase64)
-    await uploadPrivateSourceFile({
-      bucket: body.storage.bucket,
-      path: body.storage.path,
-      bytes: pdfBytes,
-      contentType: "application/pdf",
+    const payload = await buildIngestionPayload({
+      sourceId: body.sourceId,
+      sourcePath: body.sourcePath,
+      fileType: "pdf",
+      content: extractPdfText(pdfBytes),
+      storage: body.storage,
+      metadata: body.metadata,
     })
 
-    try {
-      const payload = await buildIngestionPayload({
-        sourceId: body.sourceId,
-        sourcePath: body.sourcePath,
-        fileType: "pdf",
-        content: extractPdfText(pdfBytes),
-        storage: body.storage,
-        metadata: body.metadata,
-      })
-      const result = await persistIngestionPayload(payload)
-
-      return Response.json(
-        {
-          success: true,
-          data: result,
+    return Response.json(
+      {
+        success: true,
+        data: {
+          dryRun: true,
+          activationAllowed: false,
+          delegate: "django-approved-source-ingestion",
+          documentId: payload.document.id,
+          chunkCount: payload.chunks.length,
+          referenceCount: payload.references.length,
+          embeddingConfig: payload.document.embeddingConfig,
         },
-        {
-          headers: corsHeaders,
-        }
-      )
-    } catch (error) {
-      await deletePrivateSourceFile({
-        bucket: body.storage.bucket,
-        path: body.storage.path,
-      })
-
-      throw error
-    }
+      },
+      {
+        headers: corsHeaders,
+      }
+    )
   } catch (error) {
     return Response.json(
       {
@@ -87,7 +73,7 @@ Deno.serve(async (request) => {
           message:
             error instanceof Error
               ? error.message
-              : "PDF ingestion was rejected.",
+              : "PDF ingestion dry run was rejected.",
         },
       },
       {

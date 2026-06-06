@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest import mock
 from urllib.error import URLError
 
@@ -8,11 +9,16 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, SimpleTestCase, override_settings
 
 from accounts.auth import AdminAuthError
+from ingestion.dtos import IngestionRunResult
 from sources import services as sources_service
+from sources.repositories.memory import InMemoryStewardshipRepository
+from sources.repositories.mutations import validate_transition
 from sources.repository import reset_stewardship_state
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
-@override_settings(ROOT_URLCONF="config.urls")
+
+@override_settings(ROOT_URLCONF="config.urls", INGESTION_DRY_RUN=True)
 class AdminStewardshipApiTests(SimpleTestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -429,6 +435,89 @@ class AdminStewardshipApiTests(SimpleTestCase):
             second_ingest.json()["data"]["source"]["auditTrail"][0]["eventType"],
             "re-ingest",
         )
+
+    def test_ingest_job_moves_through_processing_before_success(self):
+        observed_statuses: list[str] = []
+        repository: InMemoryStewardshipRepository
+
+        def runner(source):
+            detail = repository.get_source_detail(source.source_id)
+            assert detail is not None
+            job = detail["latestIngestJob"]
+            assert job is not None
+            observed_statuses.append(job["status"])
+            return IngestionRunResult(
+                document_id="doc-success",
+                chunk_count=3,
+                reference_count=1,
+                embedding_model="nvidia/test-embedding-model",
+                embedding_dimensions=4,
+            )
+
+        repository = InMemoryStewardshipRepository(ingestion_runner=runner)
+
+        result = repository.dispatch_ingest(
+            source_id="gg-src-un-charter-institutions",
+            actor="admin@example.test",
+        )
+
+        assert observed_statuses == ["processing"]
+        job = result["source"]["latestIngestJob"]
+        assert job is not None
+        assert job["status"] == "succeeded"
+        assert job["documentId"] == "doc-success"
+        assert job["embeddingModel"] == "nvidia/test-embedding-model"
+        assert job["embeddingDimensions"] == 4
+
+    def test_failed_ingest_is_retryable_and_blocks_activation(self):
+        attempts = 0
+
+        def runner(_source):
+            nonlocal attempts
+            attempts += 1
+            if attempts == 1:
+                raise RuntimeError("embedding provider unavailable")
+            return IngestionRunResult(
+                document_id="doc-retry",
+                chunk_count=2,
+                reference_count=1,
+                embedding_model="nvidia/test-embedding-model",
+                embedding_dimensions=4,
+            )
+
+        repository = InMemoryStewardshipRepository(ingestion_runner=runner)
+        source_id = "gg-src-global-governance-course-frame"
+        repository._sources[source_id].lifecycle_state = "approved"
+
+        failed = repository.dispatch_ingest(source_id=source_id, actor="admin@example.test")
+
+        failed_job = failed["source"]["latestIngestJob"]
+        assert failed_job is not None
+        assert failed_job["status"] == "failed"
+        assert failed_job["errorCode"] == "ingestion_failed"
+        snapshot = repository._find_snapshot(source_id)
+        assert snapshot is not None
+        with self.assertRaisesRegex(ValueError, "successfully ingested"):
+            validate_transition(snapshot, "active")
+
+        succeeded = repository.dispatch_ingest(source_id=source_id, actor="admin@example.test")
+
+        succeeded_job = succeeded["source"]["latestIngestJob"]
+        assert succeeded_job is not None
+        assert succeeded_job["status"] == "succeeded"
+        assert attempts == 2
+
+    def test_ingest_schema_supports_processing_and_embedding_evidence(self):
+        migration = (
+            REPO_ROOT / "supabase" / "migrations" / "0014_operationalize_source_ingest_jobs.sql"
+        ).read_text(encoding="utf-8")
+
+        assert "'processing'" in migration
+        assert "document_id" in migration
+        assert "chunk_count" in migration
+        assert "reference_count" in migration
+        assert "embedding_model" in migration
+        assert "embedding_dimensions" in migration
 
     def test_revoked_session_error_stays_distinguishable(self):
         error = AdminAuthError(

@@ -56,25 +56,25 @@
 
 ### Red Tests For Approved Source Ingestion
 
-- [ ] T015 [P] Add failing manifest tests for all staged files, stable canonical `sourceId` mappings, duplicate revisions, missing files, unsupported types, and raw/normalized lineage in `backend/tests/test_approved_source_manifest.py`
-- [ ] T016 [P] Add failing pipeline tests for extraction, normalization, bounded chunking, checksums, real embedding adapter use, no synthetic production vectors, and malformed content in `backend/tests/test_ingestion_pipeline.py`
-- [ ] T017 [P] Add failing persistence tests for atomic document/chunk/reference/vector writes, idempotent re-ingestion, rollback on partial failure, and private metadata in `backend/tests/test_ingestion_repository.py`
-- [ ] T018 [P] Add failing maintainer ingest tests for queued/succeeded/failed jobs, real processing dispatch, retry safety, and activation blocking after failure in `backend/tests/test_admin_stewardship.py`
-- [ ] T019 Run the focused ingestion tests from `backend/tests/test_approved_source_manifest.py`, `backend/tests/test_ingestion_pipeline.py`, `backend/tests/test_ingestion_repository.py`, and `backend/tests/test_admin_stewardship.py`; record the intended red failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
+- [X] T015 [P] Add failing manifest tests for all staged files, stable canonical `sourceId` mappings, duplicate revisions, missing files, unsupported types, and raw/normalized lineage in `backend/tests/test_approved_source_manifest.py`
+- [X] T016 [P] Add failing pipeline tests for extraction, normalization, bounded chunking, checksums, real embedding adapter use, no synthetic production vectors, and malformed content in `backend/tests/test_ingestion_pipeline.py`
+- [X] T017 [P] Add failing persistence tests for atomic document/chunk/reference/vector writes, idempotent re-ingestion, rollback on partial failure, and private metadata in `backend/tests/test_ingestion_repository.py`
+- [X] T018 [P] Add failing maintainer ingest tests for queued/succeeded/failed jobs, real processing dispatch, retry safety, and activation blocking after failure in `backend/tests/test_admin_stewardship.py`
+- [X] T019 Run the focused ingestion tests from `backend/tests/test_approved_source_manifest.py`, `backend/tests/test_ingestion_pipeline.py`, `backend/tests/test_ingestion_repository.py`, and `backend/tests/test_admin_stewardship.py`; record the intended red failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
 
 ### Implementation For Approved Source Ingestion
 
-- [ ] T094 Add a failing schema compatibility test proving the durable ingest-job store supports `queued -> processing -> succeeded/failed` plus recorded embedding evidence fields in `backend/tests/test_admin_stewardship.py` and `supabase/migrations/`
-- [ ] T020 [P] Create a canonical staged-source manifest and align the existing TypeScript preparation utility to it in `archive/docs/approved-sources/manifest.json`, `scripts/chatbot/approved-source-set.ts`, and `scripts/chatbot/prepare-ingestion.ts`
-- [ ] T021 [P] Define validated ingestion request, manifest, document, chunk, reference, embedding, and job-result contracts in `backend/ingestion/dtos.py`
-- [ ] T022 Implement approved-path enforcement, Markdown/PDF extraction, normalization, bounded chunking, stable checksums, and citation construction in `backend/ingestion/pipeline.py`
-- [ ] T023 [P] Implement the server-only NVIDIA embedding adapter with batching, dimensions validation, bounded timeouts, and typed provider failures in `backend/chatbot/nvidia.py`
-- [ ] T024 [P] Implement service-role private storage upload/read support plus persistence through `persist_ingestion_document`, idempotency, and atomic failure handling in `backend/ingestion/repository.py`
-- [ ] T095 Implement the ingest-job schema migration for `processing` status plus recorded embedding evidence fields, and update durable stewardship DTO mappings in `supabase/migrations/`, `backend/sources/dtos.py`, and `backend/sources/repositories/`
-- [ ] T025 Connect manifest or protected-upload ingestion orchestration, job status transitions, retries, and activation readiness to the real pipeline in `backend/ingestion/services.py`, `backend/sources/repositories/supabase.py`, and `backend/sources/repositories/memory.py`
-- [ ] T096 Add compatibility tests and enforcement so retained Supabase ingestion functions cannot activate production sources with synthetic vectors, and either delegate to Django ingestion or stay dry-run only in `supabase/functions/tests/ingestion.test.ts`, `supabase/functions/ingest-content/index.ts`, and `supabase/functions/ingest-pdf/index.ts`
-- [ ] T026 Add `pnpm backend:ingest:approved` and a Django management command that supports dry-run and selected-source execution in `package.json` and `backend/ingestion/management/commands/ingest_approved_sources.py`
-- [ ] T027 Run ingestion tests to green, execute a dry run over all files in `archive/docs/approved-sources/manifest.json`, persist at least one source and its private storage object against local Supabase, verify nonzero real vectors plus document/chunk/reference links, activate it, and record evidence and the 80% changed-scope coverage result in `specs/001-grounded-chatbot-readiness/quickstart.md`
+- [X] T094 Add a failing schema compatibility test proving the durable ingest-job store supports `queued -> processing -> succeeded/failed` plus recorded embedding evidence fields in `backend/tests/test_admin_stewardship.py` and `supabase/migrations/`
+- [X] T020 [P] Create a canonical staged-source manifest and align the existing TypeScript preparation utility to it in `archive/docs/approved-sources/manifest.json`, `scripts/chatbot/approved-source-set.ts`, and `scripts/chatbot/prepare-ingestion.ts`
+- [X] T021 [P] Define validated ingestion request, manifest, document, chunk, reference, embedding, and job-result contracts in `backend/ingestion/dtos.py`
+- [X] T022 Implement approved-path enforcement, Markdown/PDF extraction, normalization, bounded chunking, stable checksums, and citation construction in `backend/ingestion/pipeline.py`
+- [X] T023 [P] Implement the server-only NVIDIA embedding adapter with batching, dimensions validation, bounded timeouts, and typed provider failures in `backend/chatbot/nvidia.py`
+- [X] T024 [P] Implement service-role private storage upload/read support plus persistence through `persist_ingestion_document`, idempotency, and atomic failure handling in `backend/ingestion/repository.py`
+- [X] T095 Implement the ingest-job schema migration for `processing` status plus recorded embedding evidence fields, and update durable stewardship DTO mappings in `supabase/migrations/`, `backend/sources/dtos.py`, and `backend/sources/repositories/`
+- [X] T025 Connect manifest or protected-upload ingestion orchestration, job status transitions, retries, and activation readiness to the real pipeline in `backend/ingestion/services.py`, `backend/sources/repositories/supabase.py`, and `backend/sources/repositories/memory.py`
+- [X] T096 Add compatibility tests and enforcement so retained Supabase ingestion functions cannot activate production sources with synthetic vectors, and either delegate to Django ingestion or stay dry-run only in `supabase/functions/tests/ingestion.test.ts`, `supabase/functions/ingest-content/index.ts`, and `supabase/functions/ingest-pdf/index.ts`
+- [X] T026 Add `pnpm backend:ingest:approved` and a Django management command that supports dry-run and selected-source execution in `package.json` and `backend/ingestion/management/commands/ingest_approved_sources.py`
+- [X] T027 Run ingestion tests to green, execute a dry run over all files in `archive/docs/approved-sources/manifest.json`, persist at least one source and its private storage object against local Supabase, verify nonzero real vectors plus document/chunk/reference links, activate it, and record evidence and the 80% changed-scope coverage result in `specs/001-grounded-chatbot-readiness/quickstart.md`
 
 **Checkpoint**: At least one approved source is genuinely retrieval-ready and active; strong grounded-answer testing may begin.
 
@@ -88,30 +88,30 @@
 
 ### Red Tests For User Story 1
 
-- [ ] T028 [P] [US1] Add failing Django request and envelope tests for student/expert depth, section context, malformed JSON, missing/oversized questions, response limits, and safe errors in `backend/tests/test_public_chat_contract.py`
-- [ ] T029 [P] [US1] Add failing orchestration tests for generation, embedding, reranking, topic guard, safety guard, strong support, weak support, refusal, unsafe prompts, provider failures, and citation packaging in `backend/tests/test_chatbot_orchestration.py`
-- [ ] T030 [P] [US1] Add failing retrieval tests for approved-source filtering, section scoping, support thresholds, stable source IDs, safe public URLs, and empty retrieval in `backend/tests/test_retrieval_service.py`
-- [ ] T031 [P] [US1] Extend failing parser and request tests for `depthMode`, `fallback`, strict successful variants, safe citations, and 429 typed-success handling in `src/lib/chat/grounded-answer.test.ts` and `src/lib/chat/api-client.test.ts`
-- [ ] T032 [P] [US1] Add failing component tests for depth selection, grounded/limited/refused trust labels, expandable citation rows, keyboard behavior, visible focus, and reduced motion in `src/components/chat/SourceAwareChat.test.tsx`
-- [ ] T033 [US1] Run the focused US1 tests from `backend/tests/test_public_chat_contract.py`, `backend/tests/test_chatbot_orchestration.py`, `backend/tests/test_retrieval_service.py`, `src/lib/chat/grounded-answer.test.ts`, `src/lib/chat/api-client.test.ts`, and `src/components/chat/SourceAwareChat.test.tsx`; record the intended red failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
+- [X] T028 [P] [US1] Add failing Django request and envelope tests for student/expert depth, section context, malformed JSON, missing/oversized questions, response limits, and safe errors in `backend/tests/test_public_chat_contract.py`
+- [X] T029 [P] [US1] Add failing orchestration tests for generation, embedding, reranking, topic guard, safety guard, strong support, weak support, refusal, unsafe prompts, provider failures, and citation packaging in `backend/tests/test_chatbot_orchestration.py`
+- [X] T030 [P] [US1] Add failing retrieval tests for approved-source filtering, section scoping, support thresholds, stable source IDs, safe public URLs, and empty retrieval in `backend/tests/test_retrieval_service.py`
+- [X] T031 [P] [US1] Extend failing parser and request tests for `depthMode`, `fallback`, strict successful variants, safe citations, and 429 typed-success handling in `src/lib/chat/grounded-answer.test.ts` and `src/lib/chat/api-client.test.ts`
+- [X] T032 [P] [US1] Add failing component tests for depth selection, grounded/limited/refused trust labels, expandable citation rows, keyboard behavior, visible focus, and reduced motion in `src/components/chat/SourceAwareChat.test.tsx`
+- [X] T033 [US1] Run the focused US1 tests from `backend/tests/test_public_chat_contract.py`, `backend/tests/test_chatbot_orchestration.py`, `backend/tests/test_retrieval_service.py`, `src/lib/chat/grounded-answer.test.ts`, `src/lib/chat/api-client.test.ts`, and `src/components/chat/SourceAwareChat.test.tsx`; record the intended red failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
 
 ### Implementation For User Story 1
 
-- [ ] T034 [P] [US1] Extend learner request, depth, fallback, grounding, citation, and typed-success unions in `src/types/chat.ts`
-- [ ] T035 [P] [US1] Define validated Django request, outcome, grounding, citation, and provider-role DTOs in `backend/chatbot/dtos.py`
-- [ ] T036 [P] [US1] Implement strict request normalization and response-envelope construction for all public chat variants in `backend/chatbot/contracts.py`
-- [ ] T037 [P] [US1] Extend the server-only NVIDIA adapter from the ingestion embedding role to generation, query embedding, rerank, topic guard, and safety guard with bounded timeouts and typed provider errors in `backend/chatbot/nvidia.py`
-- [ ] T038 [P] [US1] Define approved-source retrieval protocols and Supabase/Postgres repository mapping for chunks, citations, source activation, and source-index versioning in `backend/retrieval/repositories.py`
-- [ ] T039 [US1] Implement candidate retrieval, section-aware filtering, embedding, reranking, support classification, and citation selection in `backend/retrieval/services.py`
-- [ ] T040 [US1] Implement topic guard, safety guard, retrieval, depth-aware generation, weak-support, refusal, provider-fallback, and response-size orchestration in `backend/chatbot/services.py`
-- [ ] T041 [US1] Replace the migration-pending response with validated orchestration and typed envelopes in `backend/chatbot/views.py` and keep the public route at `/api/chat` in `backend/chatbot/urls.py`
-- [ ] T042 [P] [US1] Extend browser request creation and response parsing for depth mode, fallback, 429 typed success, and safe citation URLs in `src/lib/chat/grounded-answer.ts`
-- [ ] T043 [US1] Send section context, depth mode, and the anonymous session header to Django while preserving typed success for HTTP 429 in `src/lib/chat/api-client.ts`
-- [ ] T044 [US1] Add student/expert controls, visible trust-state treatments, citation support details, refusal guidance, accessible status announcements, focus behavior, and reduced-motion handling in `src/components/chat/SourceAwareChat.tsx`
-- [ ] T045 [US1] Run all focused US1 tests to green, refactor the changed modules while green, and resolve ownership or naming drift in `backend/chatbot/`, `backend/retrieval/`, `src/lib/chat/`, `src/types/chat.ts`, and `src/components/chat/`
-- [ ] T046 [US1] Run `pnpm test:coverage` and `pnpm backend:test:coverage`, add missing edge and error coverage in `src/**/*.test.ts`, `src/**/*.test.tsx`, and `backend/tests/test_*chat*.py`, and reach at least 80% for every reported metric on US1 changed files
-- [ ] T047 [US1] Update the mocked learner smoke test for depth, grounded trust cues, weak support, refusal, and citation expansion in `tests/e2e/source-aware-chatbox.smoke.spec.ts`
-- [ ] T048 [US1] Update the minimal real Django `/api/chat` canary for one supported answer and one bounded refusal without mocking the endpoint in `tests/e2e/chat-live.spec.ts`
+- [X] T034 [P] [US1] Extend learner request, depth, fallback, grounding, citation, and typed-success unions in `src/types/chat.ts`
+- [X] T035 [P] [US1] Define validated Django request, outcome, grounding, citation, and provider-role DTOs in `backend/chatbot/dtos.py`
+- [X] T036 [P] [US1] Implement strict request normalization and response-envelope construction for all public chat variants in `backend/chatbot/contracts.py`
+- [X] T037 [P] [US1] Extend the server-only NVIDIA adapter from the ingestion embedding role to generation, query embedding, rerank, topic guard, and safety guard with bounded timeouts and typed provider errors in `backend/chatbot/nvidia.py`
+- [X] T038 [P] [US1] Define approved-source retrieval protocols and Supabase/Postgres repository mapping for chunks, citations, source activation, and source-index versioning in `backend/retrieval/repositories.py`
+- [X] T039 [US1] Implement candidate retrieval, section-aware filtering, embedding, reranking, support classification, and citation selection in `backend/retrieval/services.py`
+- [X] T040 [US1] Implement topic guard, safety guard, retrieval, depth-aware generation, weak-support, refusal, provider-fallback, and response-size orchestration in `backend/chatbot/services.py`
+- [X] T041 [US1] Replace the migration-pending response with validated orchestration and typed envelopes in `backend/chatbot/views.py` and keep the public route at `/api/chat` in `backend/chatbot/urls.py`
+- [X] T042 [P] [US1] Extend browser request creation and response parsing for depth mode, fallback, 429 typed success, and safe citation URLs in `src/lib/chat/grounded-answer.ts`
+- [X] T043 [US1] Send section context, depth mode, and the anonymous session header to Django while preserving typed success for HTTP 429 in `src/lib/chat/api-client.ts`
+- [X] T044 [US1] Add student/expert controls, visible trust-state treatments, citation support details, refusal guidance, accessible status announcements, focus behavior, and reduced-motion handling in `src/components/chat/SourceAwareChat.tsx`
+- [X] T045 [US1] Run all focused US1 tests to green, refactor the changed modules while green, and resolve ownership or naming drift in `backend/chatbot/`, `backend/retrieval/`, `src/lib/chat/`, `src/types/chat.ts`, and `src/components/chat/`
+- [X] T046 [US1] Run `pnpm test:coverage` and `pnpm backend:test:coverage`, add missing edge and error coverage in `src/**/*.test.ts`, `src/**/*.test.tsx`, and `backend/tests/test_*chat*.py`, and reach at least 80% for every reported metric on US1 changed files
+- [X] T047 [US1] Update the mocked learner smoke test for depth, grounded trust cues, weak support, refusal, and citation expansion in `tests/e2e/source-aware-chatbox.smoke.spec.ts`
+- [X] T048 [US1] Update the minimal real Django `/api/chat` canary for one supported answer and one bounded refusal without mocking the endpoint in `tests/e2e/chat-live.spec.ts`
 
 **Checkpoint**: User Story 1 is independently usable and is the suggested MVP release scope.
 
@@ -125,24 +125,24 @@
 
 ### Red Tests For User Story 2
 
-- [ ] T049 [P] [US2] Add failing protection tests for anonymous identities, rate windows, abuse escalation, cooldown creation/expiry, clock boundaries, Redis failures, and deterministic test-only protection doubles in `backend/tests/test_chatbot_protection.py`
-- [ ] T050 [P] [US2] Add failing cache-policy tests for TTLs, schema/policy/model/source versions, HMAC prompt keys, no raw prompt/source text, and disabled final-answer caching in `backend/tests/test_chatbot_cache.py`
-- [ ] T051 [P] [US2] Add failing service and view tests for cooldown HTTP 429 typed success, provider fallback, Redis runtime-failure handling, stale/missing section context, and fallback suggestions in `backend/tests/test_chatbot_orchestration.py` and `backend/tests/test_public_chat_contract.py`
-- [ ] T052 [P] [US2] Add failing parser and client tests for fallback suggestions, retry timing, transport failure conversion, and session-local continuity in `src/lib/chat/grounded-answer.test.ts` and `src/lib/chat/api-client.test.ts`
-- [ ] T053 [P] [US2] Add failing component tests for section-aware starter prompts, fallback guidance, retry, cooldown countdown text, keyboard access, focus restoration, reduced motion, and uninterrupted lesson controls in `src/components/chat/SourceAwareChat.test.tsx`
-- [ ] T054 [US2] Run the focused US2 tests from `backend/tests/test_chatbot_protection.py`, `backend/tests/test_chatbot_cache.py`, `backend/tests/test_chatbot_orchestration.py`, `backend/tests/test_public_chat_contract.py`, and `src/components/chat/SourceAwareChat.test.tsx`; record the intended red failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
+- [X] T049 [P] [US2] Add failing protection tests for anonymous identities, rate windows, abuse escalation, cooldown creation/expiry, clock boundaries, Redis failures, and deterministic test-only protection doubles in `backend/tests/test_chatbot_protection.py`
+- [X] T050 [P] [US2] Add failing cache-policy tests for TTLs, schema/policy/model/source versions, HMAC prompt keys, no raw prompt/source text, and disabled final-answer caching in `backend/tests/test_chatbot_cache.py`
+- [X] T051 [P] [US2] Add failing service and view tests for cooldown HTTP 429 typed success, provider fallback, Redis runtime-failure handling, stale/missing section context, and fallback suggestions in `backend/tests/test_chatbot_orchestration.py` and `backend/tests/test_public_chat_contract.py`
+- [X] T052 [P] [US2] Add failing parser and client tests for fallback suggestions, retry timing, transport failure conversion, and session-local continuity in `src/lib/chat/grounded-answer.test.ts` and `src/lib/chat/api-client.test.ts`
+- [X] T053 [P] [US2] Add failing component tests for section-aware starter prompts, fallback guidance, retry, cooldown countdown text, keyboard access, focus restoration, reduced motion, and uninterrupted lesson controls in `src/components/chat/SourceAwareChat.test.tsx`
+- [X] T054 [US2] Run the focused US2 tests from `backend/tests/test_chatbot_protection.py`, `backend/tests/test_chatbot_cache.py`, `backend/tests/test_chatbot_orchestration.py`, `backend/tests/test_public_chat_contract.py`, and `src/components/chat/SourceAwareChat.test.tsx`; record the intended red failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
 
 ### Implementation For User Story 2
 
-- [ ] T055 [P] [US2] Implement the protection-store protocol, required Redis store, test-only in-memory double, hashed anonymous identity, rate limits, abuse counters, cooldown state, and expiry handling in `backend/chatbot/protection.py`
-- [ ] T056 [P] [US2] Implement versioned HMAC cache keys, explicit TTLs, guard/query-helper cache records, source-index invalidation, and final-answer-cache exclusion in `backend/chatbot/cache.py`
-- [ ] T057 [US2] Integrate protection and narrow operational caches before expensive model work, returning typed cooldown or fallback outcomes without exposing internals in `backend/chatbot/services.py` and `backend/chatbot/views.py`
-- [ ] T058 [P] [US2] Add section-aware approved starter prompts and fallback prompt selection in `src/data/chat/source-aware-chat.ts`
-- [ ] T059 [US2] Render contextual starter prompts, weak-support next steps, fallback source guidance, calm cooldown/retry states, and session-preserving recovery in `src/components/chat/SourceAwareChat.tsx`
-- [ ] T060 [US2] Run all focused US2 tests to green, refactor protection/cache ownership while green, and keep Redis isolated from canonical retrieval data in `backend/chatbot/protection.py`, `backend/chatbot/cache.py`, `backend/chatbot/services.py`, and `src/components/chat/SourceAwareChat.tsx`
-- [ ] T061 [US2] Run `pnpm test:coverage` and `pnpm backend:test:coverage`, add missing boundary coverage in `src/**/*.test.ts`, `src/**/*.test.tsx`, and `backend/tests/test_chatbot_*.py`, and reach at least 80% for every reported metric on US2 changed files
-- [ ] T062 [US2] Add a mocked degraded-state browser journey covering provider fallback, cooldown, retry guidance, suggested prompts, and preserved lesson navigation in `tests/e2e/chat-boundary-validation.spec.ts`
-- [ ] T063 [US2] Extend the live Django canary with required Redis protection and one cooldown response while keeping provider calls deterministic in `tests/e2e/chat-live.spec.ts`
+- [X] T055 [P] [US2] Implement the protection-store protocol, required Redis store, test-only in-memory double, hashed anonymous identity, rate limits, abuse counters, cooldown state, and expiry handling in `backend/chatbot/protection.py`
+- [X] T056 [P] [US2] Implement versioned HMAC cache keys, explicit TTLs, guard/query-helper cache records, source-index invalidation, and final-answer-cache exclusion in `backend/chatbot/cache.py`
+- [X] T057 [US2] Integrate protection and narrow operational caches before expensive model work, returning typed cooldown or fallback outcomes without exposing internals in `backend/chatbot/services.py` and `backend/chatbot/views.py`
+- [X] T058 [P] [US2] Add section-aware approved starter prompts and fallback prompt selection in `src/data/chat/source-aware-chat.ts`
+- [X] T059 [US2] Render contextual starter prompts, weak-support next steps, fallback source guidance, calm cooldown/retry states, and session-preserving recovery in `src/components/chat/SourceAwareChat.tsx`
+- [X] T060 [US2] Run all focused US2 tests to green, refactor protection/cache ownership while green, and keep Redis isolated from canonical retrieval data in `backend/chatbot/protection.py`, `backend/chatbot/cache.py`, `backend/chatbot/services.py`, and `src/components/chat/SourceAwareChat.tsx`
+- [X] T061 [US2] Run `pnpm test:coverage` and `pnpm backend:test:coverage`, add missing boundary coverage in `src/**/*.test.ts`, `src/**/*.test.tsx`, and `backend/tests/test_chatbot_*.py`, and reach at least 80% for every reported metric on US2 changed files
+- [X] T062 [US2] Add a mocked degraded-state browser journey covering provider fallback, cooldown, retry guidance, suggested prompts, and preserved lesson navigation in `tests/e2e/chat-boundary-validation.spec.ts`
+- [X] T063 [US2] Extend the live Django canary with required Redis protection and one cooldown response while keeping provider calls deterministic in `tests/e2e/chat-live.spec.ts`
 
 **Checkpoint**: User Stories 1 and 2 both work independently, and the lesson remains useful when chat degrades.
 

@@ -6,7 +6,7 @@
 
 ## Summary
 
-Extend the existing source-aware chat and maintainer stewardship surfaces so the public chatbot can deliver depth-aware grounded answers, visible trust states, explicit fallback behavior, and Redis-backed protection through Django, while the protected maintainer workflow surfaces readiness, source validation, audit evidence, and next actions through the Django-admin-backed stewardship APIs that already exist in the repo. This feature includes retiring the existing Supabase-owned public chat runtime so Django becomes the public chatbot backend and Redis protection owner.
+Extend the existing source-aware chat and maintainer stewardship surfaces so the public chatbot can deliver depth-aware grounded answers, visible trust states, explicit fallback behavior, and Redis-backed protection through Django, while the protected maintainer workflow surfaces readiness, source validation, audit evidence, and next actions through the Django-admin-backed stewardship APIs that already exist in the repo. Before strong grounded answers are enabled, the feature must operationalize ingestion of the approved materials staged under `archive/docs/approved-sources/`: Django owns extraction orchestration and real NVIDIA embeddings, while private Supabase storage and Postgres/pgvector remain the durable document, chunk, citation, and vector store. This feature also includes retiring the existing Supabase-owned public chat runtime so Django becomes the public chatbot backend and Redis protection owner.
 
 ## Technical Context
 
@@ -14,15 +14,17 @@ Extend the existing source-aware chat and maintainer stewardship surfaces so the
 
 **Primary Dependencies**: React, motion, lucide-react, Django public chat APIs, Django admin APIs, existing maintainer API clients, Supabase Storage/Postgres/pgvector data access, Redis for Django-owned protection state, server-side NVIDIA Build/NIM adapters
 
-**Storage**: Supabase Storage and Postgres for approved sources, chunks, embeddings, citations, and source metadata; Redis owned by Django only for short-lived public-chat protection state when configured; browser session/local storage only for anonymous chat session identity
+**Storage**: Supabase Storage and Postgres for approved sources, chunks, embeddings, citations, and source metadata; Redis owned by Django only for required short-lived public-chat protection state; browser session/local storage only for anonymous chat session identity
 
-**Redis Architecture**: Redis is a Django-owned operational protection layer, not a retrieval or content layer. It may hold short-lived state such as rate-limit windows, abuse counters, cooldown markers, temporary request fingerprints, and narrowly scoped operational cache entries when explicitly justified. Redis MUST NOT become the source of truth for approved documents, source chunks, embeddings, citations, validation records, or any other durable knowledge objects. When Redis is unavailable, local development and basic test paths should degrade to deterministic in-memory protection behavior rather than blocking the entire chatbot stack.
+**Public Chat Limits**: The MVP request contract caps the JSON body at 8 KiB, the normalized learner question at 2,000 characters, learner-visible answer text at 4,000 characters, and visible citations at 6 items.
+
+**Redis Architecture**: Redis is a Django-owned operational protection layer, not a retrieval or content layer. It may hold short-lived state such as rate-limit windows, abuse counters, cooldown markers, temporary request fingerprints, and narrowly scoped operational cache entries when explicitly justified. Redis MUST NOT become the source of truth for approved documents, source chunks, embeddings, citations, validation records, or any other durable knowledge objects. Redis is required for normal local and runtime chatbot startup; isolated backend tests may use deterministic in-memory doubles to exercise degraded behavior without making Redis optional in the real stack.
 
 **Caching Strategy**: Redis caching is allowed only as a short-lived Django runtime optimization with explicit TTLs, versioned keys, and no raw private source content. The MVP cache policy is:
 
 | Cache class | Default | TTL target | Key ingredients | Notes |
 |---|---|---|---|---|
-| Protection state | Enabled when Redis is configured | 60 seconds to 15 minutes | Hashed anonymous session, coarse network fingerprint, policy version | Rate windows, abuse counters, cooldown markers, challenge markers |
+| Protection state | Enabled through required runtime Redis | 60 seconds to 15 minutes | Hashed anonymous session, coarse network fingerprint, policy version | Rate windows, abuse counters, cooldown markers, challenge markers |
 | Guard decision cache | Optional | 5 to 15 minutes | HMAC of normalized prompt, section, guard model, policy version | Topic/safety precheck results for repeated identical prompts; never store raw prompts |
 | Query helper cache | Optional | 5 to 10 minutes | HMAC of normalized prompt, section, depth mode, model version | Query embedding or rerank helper outputs may be cached only if they do not become canonical knowledge |
 | Retrieval result cache | Post-MVP by default | 2 to 10 minutes | Prompt hash, section, depth mode, active source index version, retrieval policy version | May cache chunk IDs and scores, not private chunk text as the source of truth |
@@ -44,13 +46,13 @@ All cache keys that depend on learner text must use a server-side HMAC or equiva
 
 `nvidia/llama-3.3-nemotron-super-49b-v1.5` is reserved as a future upgrade candidate for heavier expert-mode evaluation or high-quality review runs, not the MVP default.
 
-**Testing**: Mandatory red-green-refactor using frontend Vitest + React Testing Library + MSW, Django pytest with deterministic Redis/NVIDIA doubles, non-chat Supabase Function Vitest for ingestion changes, focused Playwright smoke coverage, and a minimal Django live-chat canary. Foundational work MUST add `pnpm test:coverage` with `@vitest/coverage-v8` and `pnpm backend:test:coverage` with `pytest-cov`; each reported metric for new or materially changed executable code MUST meet 80%. Standard verification remains `pnpm test:unit`, `pnpm backend:test`, `pnpm test:e2e`, `pnpm test:chat:live`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, and relevant backend checks.
+**Testing**: Mandatory red-green-refactor using frontend Vitest + React Testing Library + MSW, Django pytest with deterministic Redis/NVIDIA/Supabase doubles, non-chat Supabase Function Vitest for storage-support and compatibility behavior, focused Playwright smoke coverage, and a minimal Django live-chat canary. Foundational work MUST add `pnpm test:coverage` with `@vitest/coverage-v8` and `pnpm backend:test:coverage` with `pytest-cov`; each reported metric for new or materially changed executable code MUST meet 80%. Ingestion tests must prove the staged corpus maps to stable source identities, produces provider-returned non-synthetic embeddings with recorded model and dimension evidence, persists documents/chunks/references atomically, and cannot mark a source ready or active after partial failure. Standard verification remains `pnpm test:unit`, `pnpm backend:test`, `pnpm test:e2e`, `pnpm test:chat:live`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, and relevant backend checks.
 
 **Target Platform**: Public browser SPA, Django public chat APIs, protected Django maintainer/admin APIs, and Supabase data/storage services
 
 **Project Type**: Multi-runtime monorepo with Vite React SPA, Django public/protected backend surfaces, and Supabase data plus non-chat ingestion functions
 
-**Performance Goals**: Keep public chat interactions responsive enough for classroom/demo use, preserve the lesson flow when chat degrades, avoid blocking page rendering, and keep maintainer readiness views scannable under partial-data conditions
+**Performance Goals**: Keep public chat interactions within a 5-second p95 time-to-bounded-outcome target for local demo and classroom use, preserve the lesson flow when chat degrades, avoid blocking page rendering, and keep maintainer readiness views scannable under partial-data conditions
 
 **Constraints**: Public chat remains scoped to approved materials; browser code cannot own privileged retrieval, secrets, or source access; typed successful chat states must cover refusal, weak support, cooldown, and fallback; Django owns public chat orchestration and Redis protection state; Supabase no longer owns a public chat backend in this feature; no React Router, global store, learner accounts, public admin surface, broad answer caching, or additional public-chat runtime migration beyond the Django cutover
 
@@ -65,9 +67,10 @@ The chatbot's information pipeline for MVP is:
 3. Cleaned markdown, extracted text, or normalized working copies live in `archive/docs/approved-sources/normalized/`.
 4. Approved source files are uploaded into private Supabase storage and registered with stable source metadata.
 5. Server-side ingestion extracts and normalizes source text, splits it into retrieval chunks, and associates chunk/citation metadata with canonical `sourceId` values.
-6. The embedding role creates vectors for approved chunks and stores them in Supabase/Postgres alongside citations, source metadata, and retrieval-ready records.
-7. At chat time, the Django public chat runtime receives the learner prompt and optional section/depth context, applies Redis-backed protection and topic guard checks, retrieves candidate chunks from the approved-source store, reranks them, and passes the selected context to the generation role.
-8. The safety guard screens the final answer before the browser receives a typed learner-visible response plus safe citation details.
+6. The Django-owned embedding role creates real NVIDIA vectors for approved chunks; deterministic synthetic vectors are permitted only in tests and dry-run fixtures.
+7. Django persists the resulting document, chunk, citation, and vector records atomically into private Supabase/Postgres, records provider/model evidence for those vectors, and records ingest success or failure before activation is allowed.
+8. At chat time, the Django public chat runtime receives the learner prompt and optional section/depth context, applies Redis-backed protection and topic guard checks, retrieves candidate chunks from the approved-source store, reranks them, and passes the selected context to the generation role.
+9. The safety guard screens the final answer before the browser receives a typed learner-visible response plus safe citation details.
 
 The browser never reads raw private source files directly and never performs privileged retrieval itself. The browser only receives bounded chat responses and source-support details that are safe to display. Redis is outside this knowledge path and exists only to help Django make short-lived operational protection decisions around that path.
 
@@ -102,14 +105,15 @@ All behavior-changing work follows this sequence:
 
 | Story | First red tests | Fastest primary layer | Critical higher-level proof |
 |---|---|---|---|
+| Ingestion prerequisite | Django tests for manifest mapping, extraction, chunking, real embedding adapter use, schema migration compatibility, atomic persistence, job failure states, and activation guards; Supabase compatibility tests where retained | `pnpm backend:test`, `pnpm test:functions` | One local initial-load verification against private Supabase |
 | US1 trusted scoped answers | Django request/envelope tests for depth, five model roles, grounding, weak support, refusal, provider failure, malformed/oversized input; frontend parser/rendering tests for trust and citation states | `pnpm backend:test`, `pnpm test:unit` with MSW where the real fetch boundary matters | One mocked learner smoke journey and one minimal live Django chat canary |
-| US2 degraded lesson continuity | Django protection tests for rate windows, abuse escalation, cooldown expiry, Redis failure, and in-memory fallback; frontend tests for suggestions, cooldown, fallback, retry, keyboard, and reduced-motion behavior | `pnpm backend:test`, `pnpm test:unit` | One mocked degraded-state browser journey |
+| US2 degraded lesson continuity | Django protection tests for rate windows, abuse escalation, cooldown expiry, Redis failure, and test-only protection doubles; frontend tests for suggestions, cooldown, fallback, retry, keyboard, and reduced-motion behavior | `pnpm backend:test`, `pnpm test:unit` | One mocked degraded-state browser journey |
 | US3 maintainer readiness | Django API tests for auth, partial data, blockers, validation detail, audit filters, and action links; frontend tests for healthy/warning/failed/empty/retry states | `pnpm backend:test`, `pnpm test:unit` | One protected maintainer smoke journey |
 
 ### Coverage scope and commands
 
 - Frontend changed scope: executable files added or materially changed under `src/components/chat`, `src/lib/chat`, `src/types/chat.ts`, and the touched `MaintainerDashboard` modules.
-- Backend changed scope: executable files added or materially changed under `backend/chatbot`, `backend/retrieval`, and touched `backend/sources` or `backend/validation` modules.
+- Backend changed scope: executable files added or materially changed under `backend/ingestion`, `backend/chatbot`, `backend/retrieval`, and touched `backend/sources` or `backend/validation` modules.
 - Non-chat Supabase ingestion code is included only when this feature materially changes it.
 - Foundational tasks MUST add `pnpm test:coverage` and `pnpm backend:test:coverage` before story implementation. The commands MUST fail below 80% for every metric they report on the changed scope.
 - Playwright results do not substitute for instrumented frontend/backend coverage. They provide critical-journey confidence after lower test layers are green.
@@ -128,7 +132,7 @@ specs/001-grounded-chatbot-readiness/
 ├── contracts/
 │   ├── maintainer-readiness.md
 │   └── public-chat.md
-└── tasks.md                    # Created later by /speckit-tasks
+└── tasks.md                    # Generated by /speckit-tasks
 ```
 
 ### Source Code (repository root)
@@ -164,8 +168,16 @@ supabase/
 │   │   ├── ingestion-pipeline.ts
 │   │   └── ingestion-request-validation.ts
 │   └── tests/
+├── migrations/
+│   └── 00xx_update_source_ingest_jobs_for_processing.sql
 
 backend/
+├── ingestion/
+│   ├── dtos.py
+│   ├── pipeline.py
+│   ├── repository.py
+│   ├── services.py
+│   └── management/commands/ingest_approved_sources.py
 ├── chatbot/
 │   ├── views.py
 │   ├── urls.py
@@ -190,7 +202,7 @@ tests/
 └── support/
 ```
 
-**Structure Decision**: Build on the existing chat and maintainer modules instead of creating parallel workflows. Public chat UX and parsing stay feature-owned under `src/components/chat`, `src/lib/chat`, and `src/types/chat.ts`; public chat protection, grounding policies, Redis state, retrieval orchestration, and NVIDIA model routing move into Django under `backend/chatbot` and related backend services; and readiness, source, validation, and audit workflows continue to use the current maintainer dashboard frontend backed by Django `sources` and `validation` endpoints. Supabase chat functions and chat-specific shared helpers are retired as part of this cutover.
+**Structure Decision**: Build on the existing chat and maintainer modules instead of creating parallel workflows. Approved-source processing becomes an explicit Django workflow under `backend/ingestion`, using the staged corpus or protected uploads as input, the shared server-side NVIDIA embedding adapter for real vectors, and private Supabase persistence for durable retrieval records. Public chat UX and parsing stay feature-owned under `src/components/chat`, `src/lib/chat`, and `src/types/chat.ts`; public chat protection, grounding policies, Redis state, retrieval orchestration, and NVIDIA model routing stay in Django under `backend/chatbot` and related backend services; and readiness, source, validation, and audit workflows continue to use the current maintainer dashboard frontend backed by Django `sources` and `validation` endpoints. Supabase chat functions and chat-specific shared helpers are retired as part of this cutover; retained Supabase ingestion code must either be locked to dry-run or compatibility behavior or delegate into the Django-owned ingestion path, and it must never remain a second activation-capable production path that can write synthetic embeddings.
 
 ## Delivery Strategy
 
@@ -200,27 +212,29 @@ tests/
 - Preserve the five model responsibilities from the chatbot architecture artifact: generation, embedding, reranking, topic guard, and safety guard.
 - Confirm the NVIDIA provider adapter configuration and server-only Django environment names for each model role.
 - Confirm the approved-source ingestion path from `archive/docs/approved-sources/` into private Supabase storage and retrieval-ready Postgres records.
-- Confirm the exact Redis key families, TTLs, invalidation markers, and fallback rules for rate limits, abuse counters, cooldown markers, guard decision caches, query helper caches, and any narrowly scoped operational cache entries.
+- Confirm the exact Redis key families, TTLs, invalidation markers, failure rules, and test-double boundaries for rate limits, abuse counters, cooldown markers, guard decision caches, query helper caches, and any narrowly scoped operational cache entries.
 - Decide how to extend the existing chat envelope to carry depth mode and fallback without breaking the current typed-success pattern.
-- Confirm Redis usage remains optional, Django-owned, and limited to short-lived protection state with a no-Redis local-development fallback.
+- Confirm Redis usage is required for normal local/runtime chatbot startup, Django-owned, and limited to short-lived protection state with deterministic no-Redis behavior only in isolated tests.
 
 ### Phase 1 - Design and contract shaping
 
 - Add frontend and backend coverage tooling, deterministic Redis/NVIDIA test doubles, and changed-scope coverage commands before production implementation begins.
+- Define the canonical approved-source manifest, operational Django ingestion contract, real embedding requirement, schema migration for `processing` ingest jobs and evidence fields, atomic persistence behavior, job failure states, and activation gate before learner chat implementation begins.
 - Extend public chat request/response contracts to support section context, depth mode, explicit fallback, and visible source support.
 - Define how the generation, embedding, reranking, topic guard, and safety guard responsibilities are represented in public chat contracts, Django backend services, and verification coverage.
 - Define server-only adapter contracts for NVIDIA generation, embedding, rerank, topic guard, and safety guard calls, including deterministic test doubles for backend tests.
-- Define Redis protection and caching contracts for rate limiting, abuse scoring, cooldown escalation, expiration behavior, cache invalidation, no-Redis fallback semantics, and protected observability without letting Redis leak into source-of-truth content ownership.
+- Define Redis protection and caching contracts for rate limiting, abuse scoring, cooldown escalation, expiration behavior, cache invalidation, runtime failure semantics, test-only fallback doubles, and protected observability without letting Redis leak into source-of-truth content ownership.
 - Align maintainer readiness contracts around the current stewardship dashboard, source detail, validation, and audit DTOs instead of introducing a new dashboard model.
 - Identify the exact frontend and backend owners for readiness metrics, validation detail, and audit navigation.
 
 ### Phase 2 - Implementation slices for task generation
 
 - Slice 0: Coverage tooling and deterministic fixtures required for the 80% gate
-- Slice 1: Red tests, then public chat contracts, trust labels, and learner-visible typed states
-- Slice 2: Red tests, then Django public chat cutover, Redis-backed operational state, and distinct generation, embedding, reranking, topic guard, and safety guard responsibilities
-- Slice 3: Red tests, then maintainer readiness, validation, and audit workflow tightening
-- Slice 4: Green/refactor checkpoints, changed-scope coverage closure, focused browser smoke checks, and the minimal live-chat canary
+- Slice 1: Red tests, then ingest-job schema alignment plus operational approved-source ingestion from the staged corpus or protected uploads into private Supabase documents, chunks, citations, and real NVIDIA embeddings
+- Slice 2: Red tests, then public chat contracts, trust labels, and learner-visible typed states
+- Slice 3: Red tests, then Django public chat cutover, Redis-backed operational state, and distinct generation, embedding, reranking, topic guard, and safety guard responsibilities
+- Slice 4: Red tests, then maintainer readiness, validation, and audit workflow tightening
+- Slice 5: Green/refactor checkpoints, changed-scope coverage closure, focused browser smoke checks, and the minimal live-chat canary
 
 ## Complexity Tracking
 

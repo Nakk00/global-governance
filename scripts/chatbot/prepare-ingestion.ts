@@ -1,37 +1,33 @@
+import { createHash } from "node:crypto"
 import { readFile } from "node:fs/promises"
 
-import { buildIngestionPayload } from "../../supabase/functions/_shared/ingestion-pipeline.ts"
 import { approvedSourceFiles } from "./approved-source-set.ts"
 
 async function main() {
-  const payloads = await Promise.all(
-    approvedSourceFiles.map(async (sourceFile) =>
-      buildIngestionPayload({
+  const documents = await Promise.all(
+    approvedSourceFiles.map(async (sourceFile) => {
+      const content = await readFile(sourceFile.path)
+
+      return {
         sourceId: sourceFile.sourceId,
         sourcePath: sourceFile.path,
+        revision: sourceFile.revision,
         fileType: sourceFile.fileType,
-        content: await readFile(sourceFile.path, "utf8"),
+        checksum: createHash("sha256").update(content).digest("hex"),
+        byteCount: content.byteLength,
         storage: sourceFile.storage,
-      })
-    )
+        lineage: sourceFile.lineage,
+      }
+    })
   )
 
   console.log(
     JSON.stringify(
       {
         preparedAt: new Date().toISOString(),
-        documentCount: payloads.length,
-        chunkCount: payloads.reduce(
-          (count, payload) => count + payload.chunks.length,
-          0
-        ),
-        documents: payloads.map((payload) => ({
-          id: payload.document.id,
-          sourceId: payload.document.sourceId,
-          sourcePath: payload.document.sourcePath,
-          checksum: payload.document.checksum,
-          chunkCount: payload.chunks.length,
-        })),
+        mode: "manifest-validation",
+        documentCount: documents.length,
+        documents,
       },
       null,
       2

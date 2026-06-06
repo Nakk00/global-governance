@@ -27,10 +27,11 @@ REQUIRED_SERVER_ENV = (
     EnvRequirement("SUPABASE_JWT_ISSUER", "Expected Supabase Auth JWT issuer."),
     EnvRequirement("SUPABASE_JWT_AUDIENCE", "Expected Supabase Auth JWT audience."),
     EnvRequirement("SUPABASE_JWKS_URL", "Supabase Auth JWKS endpoint for token verification."),
+    EnvRequirement("REDIS_URL", "Django-owned Redis URL for public-chat protection state."),
 )
 
 
-def load_env_file(path: Path) -> None:
+def load_env_file(path: Path, *, override: bool = False) -> None:
     if not path.exists():
         return
 
@@ -39,7 +40,9 @@ def load_env_file(path: Path) -> None:
         if not stripped or stripped.startswith("#") or "=" not in stripped:
             continue
         key, value = stripped.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip("'\""))
+        clean_key = key.strip()
+        if override or clean_key not in os.environ:
+            os.environ[clean_key] = value.strip().strip("'\"")
 
 
 def validate_required_env() -> None:
@@ -75,32 +78,70 @@ def validate_backend_dependencies() -> None:
         )
 
 
-def validate_supabase_service(timeout_seconds: float = 0.5, retries: int = 10) -> None:
-    supabase_url = os.environ.get("SUPABASE_URL", "")
-    parsed = urlparse(supabase_url)
+def _parse_tcp_service_address(key: str, example: str) -> tuple[str, int]:
+    service_url = os.environ.get(key, "")
+    parsed = urlparse(service_url)
     try:
         port = parsed.port
     except ValueError as error:
         raise RuntimeCheckError(
-            "SUPABASE_URL must include a valid numeric port, for example http://127.0.0.1:54321."
+            f"{key} must include a valid numeric port, for example {example}."
         ) from error
 
     if not parsed.hostname or not port:
         raise RuntimeCheckError(
-            "SUPABASE_URL must include a host and port, for example http://127.0.0.1:54321."
+            f"{key} must include a host and port, for example {example}."
         )
+
+    return parsed.hostname, port
+
+
+def _validate_tcp_service(
+    *,
+    key: str,
+    example: str,
+    unavailable_message: str,
+    timeout_seconds: float,
+    retries: int,
+) -> None:
+    hostname, port = _parse_tcp_service_address(key, example)
 
     for attempt in range(retries):
         try:
-            with socket.create_connection((parsed.hostname, port), timeout=timeout_seconds):
+            with socket.create_connection((hostname, port), timeout=timeout_seconds):
                 return
         except OSError as error:
             if attempt == retries - 1:
-                raise RuntimeCheckError(
-                    "Local Supabase services are not reachable from Django. "
-                    "Run `pnpm supabase:start` before `pnpm backend:dev`."
-                ) from error
+                raise RuntimeCheckError(unavailable_message) from error
             sleep(0.5)
+
+
+def validate_supabase_service(timeout_seconds: float = 0.5, retries: int = 10) -> None:
+    _validate_tcp_service(
+        key="SUPABASE_URL",
+        example="http://127.0.0.1:54321",
+        unavailable_message=(
+            "Local Supabase services are not reachable from Django. "
+            "Run `pnpm local:dev` for the full local stack, or run "
+            "`pnpm supabase:start` before `pnpm backend:dev`."
+        ),
+        timeout_seconds=timeout_seconds,
+        retries=retries,
+    )
+
+
+def validate_redis_service(timeout_seconds: float = 0.5, retries: int = 10) -> None:
+    _validate_tcp_service(
+        key="REDIS_URL",
+        example="redis://127.0.0.1:6379/0",
+        unavailable_message=(
+            "Local Redis is not reachable from Django. "
+            "Run `pnpm local:dev` for the full local stack, or run "
+            "`pnpm redis:start` before `pnpm backend:dev`."
+        ),
+        timeout_seconds=timeout_seconds,
+        retries=retries,
+    )
 
 
 def check_backend_prerequisites(*, check_services: bool = True) -> None:
@@ -109,3 +150,4 @@ def check_backend_prerequisites(*, check_services: bool = True) -> None:
     validate_backend_dependencies()
     if check_services:
         validate_supabase_service()
+        validate_redis_service()
