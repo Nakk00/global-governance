@@ -11,6 +11,7 @@ dependencies = [
   "pip-audit==2.9.0",
   "PyJWT==2.12.0",
   "pytest==9.0.3",
+  "pytest-cov==7.1.0",
   "pytest-django==4.12.0",
   "ruff==0.14.2",
   "sqlparse==0.5.4",
@@ -23,6 +24,25 @@ settings-module = "config.settings.development"
 DJANGO_SETTINGS_MODULE = "config.settings.development"
 python_files = ["test_*.py"]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = [
+  "chatbot",
+  "retrieval",
+  "ingestion",
+  "sources",
+  "validation",
+]
+omit = [
+  "*/tests/*",
+  "*/migrations/*",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true
 
 [tool.ruff]
 target-version = "py312"
