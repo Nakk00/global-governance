@@ -4,7 +4,7 @@
 - Keep the frontend SPA-first and anchor-navigation oriented unless the architecture is explicitly updated.
 - Use `pnpm` for project commands.
 - Keep shadcn/ui primitives in `src/components/ui` and feature composites in feature-owned folders.
-- Keep browser-facing code in `src/` and privileged retrieval, ingestion, citation packaging, and service-role logic in `supabase/functions/`.
+- Keep browser-facing code in `src/`. Public chatbot orchestration, Redis-backed protection, privileged retrieval, citation packaging, and model/provider secrets belong in Django backend code; Supabase functions remain for non-chat ingestion and storage-support workflows.
 
 ## Project Structure Rules
 
@@ -29,7 +29,7 @@
 - Do not assume `pnpm backend:format` covers frontend files or non-Python assets.
 - For scaffold or infrastructure changes, also verify the app boots locally with `pnpm dev` when the task calls for runtime confirmation.
 - Use `pnpm test:unit` for frontend Vitest coverage under `src/`.
-- Use `pnpm test:functions` for Supabase Edge Function Vitest coverage under `supabase/functions/tests`.
+- Use `pnpm test:functions` for non-chat Supabase Edge Function Vitest coverage under `supabase/functions/tests`.
 - Use `pnpm backend:lint` for Python Ruff linting under `backend/`.
 - Use `pnpm backend:typecheck` for Python MyPy type checking under `backend/`.
 - Use `pnpm backend:security` for Python dependency vulnerability scanning against `backend/requirements.txt`.
@@ -42,7 +42,7 @@
 - Do not invent Next.js-specific verification steps for this repo.
 - Use `pnpm test:e2e` as the default fast Playwright suite; it excludes live chat backend checks and keeps chat requests mocked where the spec intends UI-only coverage.
 - Use `Vitest + React Testing Library + MSW` as the preferred frontend layer for mocked request/response behavior, safe-envelope parsing, and UI-state matrices that do not require a real browser.
-- Use `pnpm test:chat:live` when work touches the `/functions/v1/chat` endpoint, the `supabase/functions/chat` Edge Function, grounding rules, section scoping, chat request wiring, or local Supabase integration. This workflow expects a real local chat backend, typically started with `pnpm supabase:dev`.
+- Use `pnpm test:chat:live` when work touches the Django `/api/chat` endpoint, grounding rules, section scoping, chat request wiring, or local Django chat integration. This workflow expects a real local chat backend, typically started with `pnpm backend:dev`.
 - Use `pnpm test:e2e:all` only when you intentionally want both the mocked Playwright suite and the tagged live chat coverage in one run.
 - Use `pnpm test:e2e:mocked` when you intentionally want the full mocked Playwright suite without live chat coverage.
 - Use `pnpm test:e2e:journey` for the slower mocked browser flows tagged `@journey`.
@@ -53,11 +53,15 @@
 
 ### Test Layer Strategy
 
+- Every behavior-changing feature, bug fix, refactor, API endpoint, or interactive component MUST follow red-green-refactor: write the focused test, run it and confirm the intended failure, implement the minimum behavior, then refactor while the selected suite remains green.
+- Documentation-only, comment-only, generated-artifact, and non-behavioral configuration changes do not require a failing test. Any other exception must be justified in the active plan or task with alternative verification.
+- New or materially changed executable code MUST achieve at least 80% coverage for every metric reported by the selected coverage tool. Plans and tasks must name the changed scope and coverage command; add missing coverage tooling before implementation.
+- Tests MUST cover relevant happy paths, edge cases, error scenarios, and boundary conditions. Do not use skipped or disabled tests to satisfy acceptance or coverage gates without a documented reason and removal condition.
 - Prefer the fastest test layer that can prove the behavior with confidence.
 - Use `pnpm test:unit` for frontend rendering logic, local state transitions, parser or adapter behavior, session-local UI behavior, and accessibility semantics that do not require a full browser workflow.
 - Use `Vitest + React Testing Library + MSW` for frontend request/response integration where components or frontend API helpers should exercise real `fetch(...)` behavior without a live backend.
-- Use `pnpm test:functions` for Supabase Edge Function request validation, response envelopes, grounding rules, refusal, weak-support, and cooldown contracts, retrieval parity, and public-chat protection logic.
-- Use `pnpm backend:test` for Django route guards, admin auth, permission checks, request validation, and backend response envelopes for maintainer workflows.
+- Use `pnpm test:functions` for non-chat Supabase Edge Function ingestion and storage-support coverage.
+- Use `pnpm backend:test` for Django route guards, admin auth, permission checks, public-chat request validation, Redis protection behavior, grounding contracts, and backend response envelopes for maintainer workflows.
 - Use `pnpm test:e2e` for a small mocked browser journey layer. Do not use default Playwright coverage as the primary layer for business-rule matrices, contract validation, or repeated breakpoint sweeps when faster layers can cover the same behavior.
 - Use `pnpm test:chat:live` for a minimal live-chat canary layer that proves real endpoint wiring and a small number of critical user-visible states.
 - If slower mocked browser coverage is still needed for layout, responsive, or broader accessibility sweeps, tag it separately and keep it out of the default `pnpm test:e2e` lane.
@@ -67,7 +71,8 @@
 ### Verification Selection
 
 - For narrow frontend logic or UI-state changes, start with `pnpm test:unit`.
-- For Supabase Function or chat-contract changes, start with `pnpm test:functions` and add `pnpm test:chat:live` only when the real `/functions/v1/chat` path or local integration is affected.
+- For Supabase Function ingestion changes, start with `pnpm test:functions`.
+- For public chat-contract changes, start with `pnpm backend:test` and add `pnpm test:chat:live` only when the real Django `/api/chat` path or local integration is affected.
 - For Django-only maintainer or backend changes, start with `pnpm backend:test` and add the other backend Python checks when the change touches auth, configuration, or shared backend utilities.
 - For browser journey, navigation, or mocked chat-surface changes, use `pnpm test:e2e`.
 - Reserve `pnpm test:e2e:all` for intentional full browser validation, release rehearsal, or work that spans both mocked and live browser coverage.
@@ -76,10 +81,10 @@
 
 - Vitest is the repo-managed baseline for frontend unit and component testing in this project.
 - Plain `pnpm exec vitest run` should be safe for this repo and must not attempt to execute Playwright specs from `tests/e2e`.
-- When a story explicitly requires checked-in unit or component tests, use the repo-managed Vitest baseline and keep tests co-located as `*.test.ts` or `*.test.tsx`.
+- When a story changes behavior, use the repo-managed Vitest baseline for applicable unit or component coverage and keep tests co-located as `*.test.ts` or `*.test.tsx`.
 - Use unit or component tests for isolated behavior, rendering logic, state handling, data shaping, and boundary conditions that do not require a full browser workflow.
 - Use MSW when a frontend test should keep the real network boundary and validate request shape, response parsing, or envelope handling; prefer `vi.mock(...)` when a dependency is already injected or the smaller seam keeps the test clearer.
-- Do not default every story to unit-test generation; add checked-in unit or component tests when the story scope, acceptance criteria, changed logic, or regression risk clearly justify them.
+- Every behavior-changing story requires checked-in tests, but not every story requires every test layer. Select the smallest layer set that proves its observable behavior and coverage target.
 - If shared unit-test helpers or setup utilities are needed, keep them in a dedicated top-level testing support area under `tests/`.
 
 ## UI and Product Guardrails
@@ -87,7 +92,7 @@
 - Preserve reduced-motion behavior, keyboard access, and visible fallback states across interactive sections.
 - Keep the core learning flow usable even when chat, premium visuals, or showcase scenes fail.
 - Do not add React Router, a global store, or a public maintainer dashboard in the MVP unless the architecture is explicitly updated.
-- Keep chat presentation components free of privileged retrieval or data-mutation logic.
+- Keep chat presentation components free of privileged retrieval, Redis protection, model routing, or data-mutation logic.
 - Treat off-topic refusal, weak-support, and cooldown states as typed successful responses, not transport failures.
 
 ## Git Workflow
@@ -140,13 +145,13 @@
 
 ### Story E2E Automation
 
-- When a story or phase explicitly requires checked-in E2E automation, use the GSD workflow that fits the scope: prefer `$gsd-add-tests <phase>` for phase-owned coverage and use `$gsd-quick --validate` when the work is smaller but still needs structured verification.
+- When a story or phase explicitly requires checked-in E2E automation, use the repo-managed Playwright baseline and add the necessary verification steps directly to the task plan.
 - Use the repo-managed Playwright baseline for those generated E2E tests.
 - Save generated Playwright specs under `tests/e2e` and any shared Playwright support code under `tests/playwright`.
 - Align generated E2E tests with the project context coverage expectations for accessibility, reduced motion, responsive behavior, and chat fallback, refusal, weak-support, or cooldown states when applicable.
 - Keep source-aware chat coverage split intentionally:
   - `pnpm test:e2e` covers mocked UI behavior and interaction states.
-  - `pnpm test:chat:live` covers the real local Supabase chat path without mocking the `/functions/v1/chat` endpoint.
+  - `pnpm test:chat:live` covers the real local Django chat path without mocking the `/api/chat` endpoint.
 - Do not generate checked-in E2E scripts for every story by default; use them when the story scope, acceptance criteria, or verification needs clearly call for end-to-end coverage.
 
 > GitNexus refresh note: if you need to reanalyze or refresh the GitNexus-managed section below, strictly use `gitnexus analyze --force --embeddings --skills` and ignore `npx gitnexus analyze`.
@@ -154,7 +159,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **global-governance-docuweb** (3600 symbols, 7049 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **global-governance-docuweb** (3469 symbols, 6868 relationships, 291 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -193,16 +198,15 @@ This project is indexed by GitNexus as **global-governance-docuweb** (3600 symbo
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 | Work in the Repositories area (109 symbols) | `.claude/skills/generated/repositories/SKILL.md` |
+| Work in the Maintainer area (65 symbols) | `.claude/skills/generated/maintainer/SKILL.md` |
 | Work in the Sources area (64 symbols) | `.claude/skills/generated/sources/SKILL.md` |
-| Work in the Validation area (60 symbols) | `.claude/skills/generated/validation/SKILL.md` |
 | Work in the _shared area (56 symbols) | `.claude/skills/generated/shared/SKILL.md` |
 | Work in the Tests area (55 symbols) | `.claude/skills/generated/tests/SKILL.md` |
-| Work in the Hooks area (38 symbols) | `.claude/skills/generated/hooks/SKILL.md` |
+| Work in the Validation area (52 symbols) | `.claude/skills/generated/validation/SKILL.md` |
+| Work in the Hooks area (31 symbols) | `.claude/skills/generated/hooks/SKILL.md` |
 | Work in the Contexts area (29 symbols) | `.claude/skills/generated/contexts/SKILL.md` |
 | Work in the Overview area (28 symbols) | `.claude/skills/generated/overview/SKILL.md` |
-| Work in the Public-homepage-redesign area (27 symbols) | `.claude/skills/generated/public-homepage-redesign/SKILL.md` |
-| Work in the Maintainer area (25 symbols) | `.claude/skills/generated/maintainer/SKILL.md` |
-| Work in the MaintainerDashboard area (24 symbols) | `.claude/skills/generated/maintainerdashboard/SKILL.md` |
+| Work in the MaintainerDashboard area (25 symbols) | `.claude/skills/generated/maintainerdashboard/SKILL.md` |
 | Work in the Chat area (24 symbols) | `.claude/skills/generated/chat/SKILL.md` |
 | Work in the Sections area (21 symbols) | `.claude/skills/generated/sections/SKILL.md` |
 | Work in the Accounts area (20 symbols) | `.claude/skills/generated/accounts/SKILL.md` |
@@ -211,7 +215,8 @@ This project is indexed by GitNexus as **global-governance-docuweb** (3600 symbo
 | Work in the Layout area (10 symbols) | `.claude/skills/generated/layout/SKILL.md` |
 | Work in the Chatbot area (7 symbols) | `.claude/skills/generated/chatbot/SKILL.md` |
 | Work in the UNCommandCenter area (7 symbols) | `.claude/skills/generated/uncommandcenter/SKILL.md` |
-| Work in the Cluster_75 area (7 symbols) | `.claude/skills/generated/cluster-75/SKILL.md` |
+| Work in the Cluster_68 area (7 symbols) | `.claude/skills/generated/cluster-68/SKILL.md` |
+| Work in the Supabase area (6 symbols) | `.claude/skills/generated/supabase/SKILL.md` |
 
 <!-- gitnexus:end -->
 
@@ -223,7 +228,6 @@ This project has multiple graphify knowledge graphs:
 - `graphify-out-backend/` = `backend` slice
 - `graphify-out-supabase/` = `supabase` slice
 - `graphify-out-merged/` = merged cross-layer map for `src + backend + supabase`
-- `.planning/` = GSD planning workspace for project setup, requirements, roadmap, state, codebase maps, research, phases, verification notes, sketches, spikes, and debug sessions
 
 Rules:
 - Before answering architecture or codebase questions, read `graphify-out-merged/GRAPH_REPORT.md` first when it exists.
@@ -235,19 +239,16 @@ Rules:
 - For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` against the most relevant graph before grep.
 - Treat graph outputs as architecture maps, not ground truth. Verify important `INFERRED` edges against source before making high-impact conclusions.
 - When creating stories, implementation plans, architecture notes, or refactor plans, consult the merged graph first, then the relevant slice graph, and use the graph's god nodes, bridges, and communities to scope work.
-- When running GSD workflows, use Graphify context whenever the task depends on codebase structure, ownership, dependencies, execution flow, architectural boundaries, implementation scope, or review coverage.
-- This especially applies to GSD workflows such as `$gsd-map-codebase`, `$gsd-discuss-phase`, `$gsd-plan-phase`, `$gsd-execute-phase`, `$gsd-code-review`, `$gsd-debug`, `$gsd-ui-phase`, `$gsd-ui-review`, `$gsd-ai-integration-phase`, and `$gsd-eval-review`.
-- It does not need to be forced for GSD workflows that are mostly prose-only or process-only and do not depend on repo structure.
-- For GSD graph-aware flows, prefer this sequence:
+- For graph-aware planning and review flows, prefer this sequence:
   - read `graphify-out-merged/GRAPH_REPORT.md` first
   - read the most relevant slice report second
   - use graph findings to identify touched modules, cross-layer dependencies, likely bridge nodes, and verification risks
-- Do not produce a shallow GSD implementation plan, execution pass, or review that names only one folder or module when the merged graph shows cross-layer touchpoints.
+- Do not produce a shallow implementation plan or review that names only one folder or module when the merged graph shows cross-layer touchpoints.
 - If code changed in `src`, `backend`, or `supabase`, assume the corresponding graph and `graphify-out-merged/` may be stale until refreshed.
 - After meaningful code changes, refresh the affected graph slice and then refresh the merged graph before relying on graph-based planning again.
 
-GSD planning rules:
-- Use `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, and the relevant `.planning/phases/`, `.planning/research/`, or `.planning/codebase/` files when the task is about planning or delivery artifacts rather than runtime code.
-- Treat `.planning/` as the workflow source of truth for project intent, phase scope, and current execution state, but not as the source of truth for runtime behavior, API wiring, or code dependencies; use the code graphs and GitNexus for those.
-- Verify important assumptions from GSD planning artifacts against the underlying codebase before making high-impact implementation or architecture claims.
-- If `.planning/` files change substantially during planning or execution, reread the relevant planning artifacts before relying on older summaries.
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan:
+`specs/001-grounded-chatbot-readiness/plan.md`
+<!-- SPECKIT END -->
