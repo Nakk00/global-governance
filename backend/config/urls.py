@@ -6,6 +6,11 @@ from chatbot.views import public_chat
 from config import api
 
 urlpatterns = [
+    # Vercel Services strip the service routePrefix before Django receives the path.
+    path("", include("chatbot.urls")),
+    path("admin/", include("accounts.urls")),
+    path("admin/", include("sources.urls")),
+    path("admin/", include("validation.urls")),
     path("api/", include("chatbot.urls")),
     path("api/admin/", include("accounts.urls")),
     path("api/admin/", include("sources.urls")),

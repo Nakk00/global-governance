@@ -32,8 +32,24 @@ class RouteGuardTests(SimpleTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"]["code"], "invalid_request")
 
+    def test_public_chat_route_supports_vercel_service_mount(self):
+        response = self.client.post(
+            "/chat",
+            data={"message": "hello"},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"]["code"], "invalid_request")
+
     def test_reserved_admin_route_requires_auth(self):
         response = self.client.get("/_internal/admin/")
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["error"]["code"], "admin_auth_missing")
+
+    def test_admin_route_supports_vercel_service_mount(self):
+        response = self.client.get("/admin/me")
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()["error"]["code"], "admin_auth_missing")
