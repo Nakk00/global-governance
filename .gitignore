@@ -24,6 +24,7 @@ __pycache__/
 
 # TypeScript / test output
 coverage/
+.coverage
 *.tsbuildinfo
 .pytest_cache/
 .mypy_cache/
