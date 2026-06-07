@@ -69,3 +69,6 @@ graphify-out-supabase/
 graphify-out-merged/
 backend/graphify-out/
 supabase/graphify-out/
+
+.vercel
+.env*.local

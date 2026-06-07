@@ -1,9 +1,11 @@
 import importlib
 import os
+import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock
 
+from django.core.exceptions import ImproperlyConfigured
 from django.test import SimpleTestCase
 
 from common.env import (
@@ -20,13 +22,23 @@ from common.env import (
 
 class ProjectBootstrapTests(SimpleTestCase):
     def test_explicit_settings_modules_import(self):
-        for module_name in (
-            "config.settings.base",
-            "config.settings.development",
-            "config.settings.production",
-        ):
+        for module_name in ("config.settings.base", "config.settings.development"):
             with self.subTest(module_name=module_name):
                 self.assertIsNotNone(importlib.import_module(module_name))
+
+        with (
+            self.subTest(module_name="config.settings.production"),
+            mock.patch.dict(
+                os.environ,
+                {
+                    "DJANGO_SECRET_KEY": "production-secret",
+                    "DJANGO_ALLOWED_HOSTS": ".vercel.app,global-governance.vercel.app",
+                },
+                clear=True,
+            ),
+        ):
+            sys.modules.pop("config.settings.production", None)
+            self.assertIsNotNone(importlib.import_module("config.settings.production"))
 
     def test_entry_points_select_development_settings_by_default(self):
         with mock.patch.dict(os.environ, {}, clear=True):
@@ -37,18 +49,75 @@ class ProjectBootstrapTests(SimpleTestCase):
             importlib.reload(importlib.import_module("config.wsgi"))
             self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
 
-    def test_entry_points_override_inherited_settings_module(self):
+    def test_entry_points_preserve_inherited_settings_module(self):
         with mock.patch.dict(
-            os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True
+            os.environ,
+            {
+                "DJANGO_SETTINGS_MODULE": "config.settings.production",
+                "DJANGO_SECRET_KEY": "production-secret",
+                "DJANGO_ALLOWED_HOSTS": ".vercel.app,global-governance.vercel.app",
+            },
+            clear=True,
         ):
             importlib.reload(importlib.import_module("config.asgi"))
-            self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
+            self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.production")
 
         with mock.patch.dict(
-            os.environ, {"DJANGO_SETTINGS_MODULE": "config.settings.production"}, clear=True
+            os.environ,
+            {
+                "DJANGO_SETTINGS_MODULE": "config.settings.production",
+                "DJANGO_SECRET_KEY": "production-secret",
+                "DJANGO_ALLOWED_HOSTS": ".vercel.app,global-governance.vercel.app",
+            },
+            clear=True,
         ):
             importlib.reload(importlib.import_module("config.wsgi"))
-            self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.development")
+            self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.production")
+
+    def test_manage_py_preserves_inherited_settings_module(self):
+        with (
+            mock.patch.dict(
+                os.environ,
+                {"DJANGO_SETTINGS_MODULE": "config.settings.production"},
+                clear=True,
+            ),
+            mock.patch.object(sys, "argv", ["manage.py", "showmigrations"]),
+            mock.patch("common.env.load_env_file"),
+            mock.patch(
+                "django.core.management.execute_from_command_line"
+            ) as execute_from_command_line,
+        ):
+            manage = importlib.import_module("manage")
+            manage.main()
+
+            self.assertEqual(os.environ["DJANGO_SETTINGS_MODULE"], "config.settings.production")
+            execute_from_command_line.assert_called_once_with(["manage.py", "showmigrations"])
+
+    def test_production_settings_require_secret_key(self):
+        with mock.patch.dict(
+            os.environ,
+            {"DJANGO_ALLOWED_HOSTS": ".vercel.app,global-governance.vercel.app"},
+            clear=True,
+        ):
+            sys.modules.pop("config.settings.production", None)
+
+            with self.assertRaises(ImproperlyConfigured) as context:
+                importlib.import_module("config.settings.production")
+
+        self.assertIn("DJANGO_SECRET_KEY", str(context.exception))
+
+    def test_production_settings_require_allowed_hosts(self):
+        with mock.patch.dict(
+            os.environ,
+            {"DJANGO_SECRET_KEY": "production-secret"},
+            clear=True,
+        ):
+            sys.modules.pop("config.settings.production", None)
+
+            with self.assertRaises(ImproperlyConfigured) as context:
+                importlib.import_module("config.settings.production")
+
+        self.assertIn("DJANGO_ALLOWED_HOSTS", str(context.exception))
 
     def test_required_server_environment_is_declared(self):
         keys = {requirement.key for requirement in REQUIRED_SERVER_ENV}

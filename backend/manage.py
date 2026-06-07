@@ -11,7 +11,7 @@ from pathlib import Path
 def main() -> None:
     base_dir = Path(__file__).resolve().parent
     sys.path.insert(0, str(base_dir))
-    os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.development"
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 
     from common.env import RuntimeCheckError, check_backend_prerequisites, load_env_file
 

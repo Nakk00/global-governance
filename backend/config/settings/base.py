@@ -57,7 +57,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SECURE_PROXY_SSL_HEADER = None
+SECURE_PROXY_SSL_HEADER: tuple[str, str] | None = None
 USE_X_FORWARDED_HOST = False
 PUBLIC_CHAT_CUTOVER_STATUS = "django-public-chat-ready"
 PUBLIC_CHAT_REQUEST_BODY_MAX_BYTES = int(
