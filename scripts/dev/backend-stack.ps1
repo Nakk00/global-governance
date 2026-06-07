@@ -40,6 +40,35 @@ function Stop-ProcessTree($Process) {
   }
 }
 
+function Read-EnvValue($Path, $Key) {
+  if (-not (Test-Path $Path)) {
+    return ""
+  }
+
+  foreach ($line in Get-Content $Path) {
+    $trimmed = $line.Trim()
+    if (-not $trimmed -or $trimmed.StartsWith("#") -or -not $trimmed.Contains("=")) {
+      continue
+    }
+
+    $parts = $trimmed.Split("=", 2)
+    if ($parts[0].Trim() -eq $Key) {
+      return $parts[1].Trim().Trim("'").Trim('"')
+    }
+  }
+
+  return ""
+}
+
+function Test-LocalServiceUrl($Value) {
+  [System.Uri]$uri = $null
+  if (-not [System.Uri]::TryCreate($Value, [System.UriKind]::Absolute, [ref]$uri)) {
+    return $false
+  }
+
+  return $uri.Host -in @("127.0.0.1", "localhost", "::1")
+}
+
 Require-Command "pnpm" "Install pnpm before running the local stack."
 
 if (-not (Test-Path "backend/.env")) {
@@ -56,14 +85,29 @@ if ($LASTEXITCODE -ne 0) {
   throw "Django backend preflight failed."
 }
 
-pnpm supabase:start
-if ($LASTEXITCODE -ne 0) {
-  throw "Supabase failed to start."
+$supabaseUrl = Read-EnvValue "backend/.env" "SUPABASE_URL"
+$redisUrl = Read-EnvValue "backend/.env" "REDIS_URL"
+$usesLocalSupabase = Test-LocalServiceUrl $supabaseUrl
+$usesLocalRedis = Test-LocalServiceUrl $redisUrl
+
+if ($usesLocalSupabase) {
+  pnpm supabase:start
+  if ($LASTEXITCODE -ne 0) {
+    throw "Supabase failed to start."
+  }
+}
+else {
+  Write-Host "Using configured hosted Supabase; skipping local Supabase start."
 }
 
-pnpm redis:start
-if ($LASTEXITCODE -ne 0) {
-  throw "Redis failed to start."
+if ($usesLocalRedis) {
+  pnpm redis:start
+  if ($LASTEXITCODE -ne 0) {
+    throw "Redis failed to start."
+  }
+}
+else {
+  Write-Host "Using configured Redis; skipping local Redis start."
 }
 
 Write-Host "Applying Django migrations for development database..."
@@ -76,7 +120,9 @@ $processes = @()
 $processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $backendPythonScript, "backend/manage.py", "runserver", "127.0.0.1:8000", "--settings=config.settings.development" -NoNewWindow -PassThru
 $processes += Start-Process -FilePath "powershell" -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "pnpm dev -- --host 127.0.0.1" -WorkingDirectory (Get-Location).Path -NoNewWindow -PassThru
 
-Write-Host "Started Supabase data services, Redis at redis://127.0.0.1:6379/0, Django at http://127.0.0.1:8000, and Vite."
+$supabaseLabel = if ($usesLocalSupabase) { "local Supabase data services" } else { "configured hosted Supabase" }
+$redisLabel = if ($usesLocalRedis) { "local Redis at redis://127.0.0.1:6379/0" } else { "configured Redis" }
+Write-Host "Started $supabaseLabel, $redisLabel, Django at http://127.0.0.1:8000, and Vite."
 Write-Host "Press Ctrl+C to stop this coordinator, then stop child processes if needed."
 
 try {

@@ -148,6 +148,21 @@ class ProjectBootstrapTests(SimpleTestCase):
 
         self.assertIn("valid numeric port", str(context.exception))
 
+    def test_hosted_supabase_url_uses_https_default_port(self):
+        with (
+            mock.patch.dict(
+                os.environ,
+                {
+                    "SUPABASE_URL": "https://project-ref.supabase.co",
+                },
+                clear=True,
+            ),
+            mock.patch("common.env.socket.create_connection") as create_connection,
+        ):
+            validate_supabase_service(timeout_seconds=0.5, retries=1)
+
+        create_connection.assert_called_once_with(("project-ref.supabase.co", 443), timeout=0.5)
+
     def test_invalid_redis_url_reports_actionable_message(self):
         with mock.patch.dict(
             os.environ,

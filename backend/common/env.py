@@ -88,10 +88,24 @@ def _parse_tcp_service_address(key: str, example: str) -> tuple[str, int]:
             f"{key} must include a valid numeric port, for example {example}."
         ) from error
 
+    if port is None:
+        port = _default_port_for_scheme(parsed.scheme)
+
     if not parsed.hostname or not port:
         raise RuntimeCheckError(f"{key} must include a host and port, for example {example}.")
 
     return parsed.hostname, port
+
+
+def _default_port_for_scheme(scheme: str) -> int | None:
+    return {
+        "http": 80,
+        "https": 443,
+        "redis": 6379,
+        "rediss": 6379,
+        "ws": 80,
+        "wss": 443,
+    }.get(scheme.lower())
 
 
 def _validate_tcp_service(
