@@ -40,6 +40,25 @@ Represents the typed learner-visible result of one public chat request.
 - May reference zero or more `SourceSupportRecord`
 - May be shaped by one `ProtectionRecord`
 
+### ChatTranscriptEntry
+
+Represents one session-local turn preserved by the browser chat surface.
+
+| Field | Type | Notes |
+|---|---|---|
+| `entryId` | string | Client-generated stable key for rendering and focus management |
+| `role` | enum | `learner` or `assistant` |
+| `question` | string optional | Present for learner turns |
+| `outcome` | `GroundedChatOutcome` optional | Present for assistant turns when a typed response is available |
+| `transportError` | object optional | Present only for unclassified transport failures that could not become a typed success |
+| `createdAt` | timestamp | Session-local ordering timestamp |
+
+**Validation rules**
+
+- Transcript entries are session-local browser presentation state for MVP and are not canonical storage.
+- Assistant entries preserve typed outcomes exactly enough for prior citations, weak-support guidance, refusals, cooldowns, and fallback suggestions to remain reviewable.
+- Semantic multi-turn retrieval is not implied by this entity. If follow-up context later affects answer generation, the public chat request contract must be extended deliberately.
+
 ### SourceSupportRecord
 
 Represents the evidence shown to the learner for a grounded or limited-support answer.
@@ -52,6 +71,44 @@ Represents the evidence shown to the learner for a grounded or limited-support a
 | `sourceType` | enum | Existing source-type taxonomy |
 | `detail` | string | Display summary of why the source supports the answer |
 | `url` | string optional | Publicly safe source link when available |
+
+### SuggestedPromptReadinessResult
+
+Represents the audit outcome for one suggested learner prompt before release.
+
+| Field | Type | Notes |
+|---|---|---|
+| `prompt` | string | Exact suggested prompt text from the frontend catalog |
+| `sectionId` | string optional | Section where the prompt appears |
+| `depthMode` | enum optional | Optional audit mode, usually `student` first |
+| `classification` | enum | `answered`, `limitedSupport`, `boundaryRefusal`, `weakCitation`, `cooldown`, `transportFailure`, `missingSource` |
+| `sourceIds` | string[] | Source IDs returned or expected for support |
+| `followUpAction` | enum | `keep`, `reword`, `remove`, `widenApprovedScope`, `addApprovedSource` |
+| `notes` | string optional | Human-readable evidence or remediation note |
+
+**Validation rules**
+
+- Every visible suggested prompt must have an audit classification before release.
+- Source widening may use only approved, course-relevant material.
+- Prompts that remain unsupported must be reworded, removed, or intentionally bounded with learner-safe guidance.
+
+### SectionSourceScope
+
+Represents the approved source IDs Django may retrieve for a lesson section.
+
+| Field | Type | Notes |
+|---|---|---|
+| `sectionId` | string | Lesson section identifier |
+| `sourceIds` | string[] | Approved source IDs allowed for section-scoped retrieval |
+| `evidenceSourceIds` | string[] | Source IDs already used by the visible lesson evidence data |
+| `scopePolicy` | enum | `matchesSectionEvidence`, `intentionallyNarrow`, `coreTopicFallback` |
+| `rationale` | string optional | Required when the retrieval scope is intentionally narrower than visible evidence |
+
+**Validation rules**
+
+- Section source scope should match approved evidence used by the lesson section unless a narrower policy is documented.
+- A mismatch must be covered by backend retrieval tests and learner-safe limited-support behavior.
+- West Philippine Sea dossier scoping must consider the approved dossier evidence sources already represented in the chapter data, not only the arbitral award source.
 
 ### ProtectionRecord
 

@@ -56,9 +56,7 @@ class SupabaseRetrievalRepository:
             supabase_url if supabase_url is not None else settings.SUPABASE_URL
         ).rstrip("/")
         self.service_role_key = (
-            service_role_key
-            if service_role_key is not None
-            else settings.SUPABASE_SERVICE_ROLE_KEY
+            service_role_key if service_role_key is not None else settings.SUPABASE_SERVICE_ROLE_KEY
         )
         self.timeout_seconds = (
             timeout_seconds

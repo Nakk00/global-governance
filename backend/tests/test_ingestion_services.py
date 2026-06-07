@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from io import StringIO
+from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
@@ -8,15 +9,20 @@ import pytest
 from django.core.management import call_command
 from django.test import override_settings
 
+from ingestion.pipeline import load_approved_source_manifest
 from ingestion.repository import InMemoryIngestionRepository
 from ingestion.services import IngestionServiceError, ingest_approved_sources
 from tests.test_ingestion_pipeline import RecordingEmbedder
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MANIFEST_PATH = REPO_ROOT / "archive" / "docs" / "approved-sources" / "manifest.json"
+
 
 def test_dry_run_processes_every_manifest_file_without_persistence() -> None:
     results = ingest_approved_sources(dry_run=True)
+    manifest = load_approved_source_manifest(MANIFEST_PATH, repo_root=REPO_ROOT)
 
-    assert len(results) == 8
+    assert len(results) == len(manifest.entries)
     assert all(result.chunk_count > 0 for result in results)
     assert all(result.reference_count == 1 for result in results)
     assert all(result.embedding_model == "deterministic-dry-run-vector" for result in results)

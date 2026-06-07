@@ -124,9 +124,7 @@ class OperationalCache:
         *,
         model_version: str | None = None,
     ) -> dict[str, Any] | None:
-        raw_value = self.store.get(
-            self.key_for(cache_class, prompt, model_version=model_version)
-        )
+        raw_value = self.store.get(self.key_for(cache_class, prompt, model_version=model_version))
         if raw_value is None:
             return None
         try:

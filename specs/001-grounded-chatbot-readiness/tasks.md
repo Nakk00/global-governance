@@ -148,6 +148,36 @@
 
 ---
 
+## Phase 5A: Public Chatbox QA Remediation (Post-Phase-5 Amendment)
+
+**Goal**: Close the learner-facing chatbox issues found during local browser QA before continuing release validation: viewport containment, duplicate launcher visibility, multi-line composer spacing, visible transcript history, and source-aligned suggested prompts.
+
+**Independent Test**: Open the source-aware chat in desktop and narrow viewports, submit multiple learner questions, type a multi-line prompt, click suggested prompts for each section, and verify the panel remains contained, the launcher is hidden while open, prior turns remain reviewable, and kept suggestions are answerable or intentionally bounded by approved sources.
+
+### Red Tests For Public Chatbox QA Remediation
+
+- [X] T100 [P] [US2] Add failing component tests for open-panel containment classes, hidden launcher while open, multi-line composer height behavior, and preserved focus in `src/components/chat/SourceAwareChat.test.tsx`
+- [X] T101 [P] [US1] Add failing component tests for append-only transcript preservation across answered, weak-support, refused, cooldown, fallback, and transport-error turns in `src/components/chat/SourceAwareChat.test.tsx`
+- [X] T102 [P] [US1] Add failing backend retrieval and orchestration tests proving `west-philippine-sea-dossier` chat scope includes the approved dossier evidence sources already used by the chapter, anchoring the expected source set to the existing dossier evidence/source-bundle mapping instead of a second hand-maintained list, in `backend/tests/test_retrieval_service.py` and `backend/tests/test_chatbot_orchestration.py`
+- [X] T103 [P] [US2] Add failing starter-prompt readiness tests that export every prompt from `src/data/chat/source-aware-chat.ts` and flag prompts without an approved-source readiness classification in `src/data/chat/source-aware-chat.test.ts`
+- [X] T104 [US2] Run the focused Phase 5A red tests from `src/components/chat/SourceAwareChat.test.tsx`, `src/data/chat/source-aware-chat.test.ts`, `backend/tests/test_retrieval_service.py`, and `backend/tests/test_chatbot_orchestration.py`; record the intended failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
+
+### Implementation For Public Chatbox QA Remediation
+
+- [X] T105 [US2] Refactor the `SourceAwareChat` shell, launcher, scroll area, and composer layout so the open panel stays viewport-contained, the launcher is not rendered while open, and multi-line input scrolls or caps without blank space in `src/components/chat/SourceAwareChat.tsx`
+- [X] T106 [US1] Replace the single `submittedQuestion` and `answerState` rendering model with append-only session-local transcript entries in `src/components/chat/SourceAwareChat.tsx` and `src/types/chat.ts`
+- [X] T107 [US1] Preserve the MVP single-turn backend request contract while documenting browser-local transcript behavior and proving multi-turn UI sessions still send only the latest learner question to Django in `src/lib/chat/api-client.ts` tests and `specs/001-grounded-chatbot-readiness/contracts/public-chat.md`
+- [X] T108 [US1] Expand section source scoping for `west-philippine-sea-dossier` to include approved dossier evidence already represented by the lesson, updating `backend/chatbot/services.py`, backend fixtures, and citation/source adapters only where needed
+- [X] T109 [US2] Add a repeatable suggested-prompt readiness audit workflow for the frontend prompt catalog in `scripts/chatbot/audit-suggested-prompts.ts` and document its usage plus stable output schema fields `section`, `depthMode`, `prompt`, `classification`, `sourceIds`, `followUpAction`, `endpointMode`, and `notes` in `specs/001-grounded-chatbot-readiness/quickstart.md`
+- [X] T110 [US2] Reconcile suggested prompts after the audit by keeping, rewording, removing, or backing prompts with approved course-relevant sources in `src/data/chat/source-aware-chat.ts` and related approved-source mapping files
+- [X] T111 [US2] Add browser layout coverage for desktop and narrow viewport open-panel containment, hidden launcher, and bounded multi-line composer behavior in `tests/e2e/source-aware-chatbox.smoke.spec.ts` or a dedicated `tests/e2e/source-aware-chatbox.layout.spec.ts`
+- [X] T112 [US2] Run focused Phase 5A frontend/backend tests, changed-scope coverage for touched chat files, the mocked layout lane, and a Playwright visual review using snapshots or screenshots of the open panel at desktop and narrow viewports; record the test results plus visual evidence notes in `specs/001-grounded-chatbot-readiness/quickstart.md`
+- [X] T113 [US1] Run the live suggested-prompt audit against local Django `/api/chat`, classify every prompt outcome with the documented schema fields, reconcile any misses, and record the prompt-readiness table in `specs/001-grounded-chatbot-readiness/quickstart.md`
+
+**Checkpoint**: Learner-facing chatbox QA issues are closed or explicitly deferred with documented scope, and suggested prompts are aligned with approved source support before maintainer readiness resumes.
+
+---
+
 ## Phase 6: User Story 3 - Judge Readiness And Trust As A Maintainer (Priority: P3)
 
 **Goal**: A protected maintainer can identify readiness, blockers, validation findings, source issues, audit evidence, and the next action within one workflow.
@@ -156,11 +186,13 @@
 
 ### Red Tests For User Story 3
 
-- [ ] T064 [P] [US3] Add failing protected API tests for readiness summary, source health labels, blockers, next actions, partial data, auth failures, audit filters, and source/validation links in `backend/tests/test_admin_stewardship.py`
-- [ ] T065 [P] [US3] Add failing validation tests for itemized reasons, affected source/grounding area, remediation actions, audit evidence, empty results, and retryable failures in `backend/tests/test_admin_validation.py`
-- [ ] T066 [P] [US3] Add failing frontend API contract tests for readiness, partial markers, validation detail, audit filters, auth expiry, and retryable errors in `src/lib/maintainer/api.test.ts`
-- [ ] T067 [P] [US3] Add failing overview and trust-state tests for healthy, warning, failed, empty, loading, partial, retry, and action navigation in `src/components/modules/MaintainerDashboard/MaintainerDashboard.test.tsx`
-- [ ] T068 [P] [US3] Add failing source, validation remediation, and audit filtering tests in `src/components/modules/MaintainerDashboard/sources/SourcesPage.test.tsx`, `src/components/modules/MaintainerDashboard/validation/ValidationRemediationQueue.test.tsx`, and `src/components/modules/MaintainerDashboard/audit-trail/AuditTrailPage.test.tsx`
+Before adding new red tests in this phase, audit the existing maintainer readiness test inventory in `backend/tests/test_admin_stewardship.py`, `backend/tests/test_admin_validation.py`, `src/lib/maintainer/api.test.ts`, `src/components/modules/MaintainerDashboard/**/*.test.tsx`, and `tests/e2e/maintainer-readiness.smoke.spec.ts`. Add only the missing contract or acceptance cases needed for this feature instead of duplicating already-covered behavior.
+
+- [ ] T064 [P] [US3] Add failing protected API tests only for missing readiness summary, source health labels, blockers, next actions, partial data, auth failures, audit filters, and source/validation links in `backend/tests/test_admin_stewardship.py`
+- [ ] T065 [P] [US3] Add failing validation tests only for missing itemized reasons, affected source or grounding area, remediation actions, audit evidence, empty results, and retryable failures in `backend/tests/test_admin_validation.py`
+- [ ] T066 [P] [US3] Add failing frontend API contract tests only for missing readiness, partial markers, validation detail, audit filters, auth expiry, and retryable errors in `src/lib/maintainer/api.test.ts`
+- [ ] T067 [P] [US3] Add failing overview and trust-state tests only for missing healthy, warning, failed, empty, loading, partial, retry, and action navigation cases in `src/components/modules/MaintainerDashboard/MaintainerDashboard.test.tsx`
+- [ ] T068 [P] [US3] Add failing source, validation remediation, and audit filtering tests only for missing acceptance cases in `src/components/modules/MaintainerDashboard/sources/SourcesPage.test.tsx`, `src/components/modules/MaintainerDashboard/validation/ValidationRemediationQueue.test.tsx`, and `src/components/modules/MaintainerDashboard/audit-trail/AuditTrailPage.test.tsx`
 - [ ] T069 [US3] Run the focused US3 tests from `backend/tests/test_admin_stewardship.py`, `backend/tests/test_admin_validation.py`, `src/lib/maintainer/api.test.ts`, and `src/components/modules/MaintainerDashboard/**/*.test.tsx`; record the intended red failures in `specs/001-grounded-chatbot-readiness/quickstart.md`
 
 ### Implementation For User Story 3
@@ -192,8 +224,8 @@
 - [ ] T085 [P] Confirm Supabase retains only non-chat ingestion and storage-support coverage in `supabase/functions/tests/ingestion.test.ts` and `supabase/functions/vitest.config.ts`
 - [ ] T086 Confirm no skipped or disabled tests satisfy acceptance or coverage gates by auditing `src/**/*.test.ts`, `src/**/*.test.tsx`, `backend/tests/test_*.py`, and `tests/e2e/*.spec.ts`
 - [ ] T087 Run the documented quickstart scenarios and update commands or expected outcomes that differ from reality in `specs/001-grounded-chatbot-readiness/quickstart.md`
-- [ ] T097 Create and record the feature acceptance sets for the 20 in-scope prompts, 12 degraded prompts, 10 validation findings, and 10 trust-cue examples in `specs/001-grounded-chatbot-readiness/quickstart.md`
-- [ ] T098 Run the scripted acceptance measurements for SC-001, SC-002, SC-004, and SC-006, record the counts in `specs/001-grounded-chatbot-readiness/quickstart.md`, and reconcile any misses before release
+- [ ] T097 Create and record the feature acceptance sets for the 20 in-scope prompts, 12 degraded prompts, 10 validation findings, 10 trust-cue examples, one three-turn transcript scenario, one dual-viewport layout scenario, and the full visible starter-prompt inventory in `specs/001-grounded-chatbot-readiness/quickstart.md`
+- [ ] T098 Run the scripted acceptance measurements for SC-001, SC-002, SC-004, SC-005, SC-006, SC-009, SC-010, and SC-011, record the counts or pass/fail evidence in `specs/001-grounded-chatbot-readiness/quickstart.md`, and reconcile any misses before release
 - [ ] T099 Time the maintainer readiness workflow against the scripted fixture set for SC-003, record the measured completion time in `specs/001-grounded-chatbot-readiness/quickstart.md`, and tighten blockers or next-action cues if it exceeds 2 minutes
 - [ ] T088 Run `pnpm format` and `pnpm backend:format`, then review formatting-only changes in `src/`, `backend/`, and `tests/`
 - [ ] T089 Run `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm test:unit`, `pnpm test:functions`, `pnpm backend:lint`, `pnpm backend:typecheck`, `pnpm backend:security`, `pnpm backend:test`, and `pnpm backend:check`; resolve failures only in feature-touched files
@@ -213,13 +245,15 @@
 - **Phase 3 - Approved Source Ingestion**: Depends on Phase 2 and blocks strong grounded-answer implementation, acceptance testing, and release claims.
 - **Phase 4 - US1**: Depends on Phase 3 and is the grounded-chat MVP.
 - **Phase 5 - US2**: Depends on Phase 2 and the public chat contracts established in US1; it must preserve US1 behavior.
-- **Phase 6 - US3**: Depends on Phase 3 and the impact report in T006 because readiness and activation consume completed ingestion evidence and shared stewardship repositories.
+- **Phase 5A - Public Chatbox QA Remediation**: Depends on Phase 5 and should complete before Phase 6 on this branch because the findings are learner-facing public-chat acceptance blockers.
+- **Phase 6 - US3**: Depends on Phase 3, Phase 5A for this branch, and the impact report in T006 because readiness and activation consume completed ingestion evidence and shared stewardship repositories.
 - **Phase 7 - Polish**: Depends on every phase selected for the release.
 
 ### User Story Dependencies
 
 - **User Story 1 (P1)**: Depends on the Phase 3 ingestion checkpoint so strong support is proven against real retrieval-ready material.
 - **User Story 2 (P2)**: Reuses the public chat contracts established by US1, but its protection and lesson-continuity behavior remains independently testable.
+- **Phase 5A Amendment (US1/US2)**: Reuses US1/US2 chat contracts and closes QA gaps discovered after Phase 5; transcript reviewability belongs to the frontend MVP unless semantic follow-up support is deliberately added later.
 - **User Story 3 (P3)**: No behavioral dependency on US1 or US2, but it depends on Phase 3 because it consumes protected ingestion readiness evidence and shared stewardship repository state.
 
 ### Within Each User Story
@@ -241,6 +275,8 @@
 - US1 backend adapters T035, T037, and T038 can run in parallel after their contracts are agreed; frontend T034 can proceed independently.
 - US2 red tests T049-T053 can run in parallel by layer.
 - US2 protection T055, cache T056, and frontend prompt data T058 can run in parallel.
+- Phase 5A red tests T100-T103 can run in parallel by frontend shell, transcript behavior, backend retrieval scope, and prompt catalog readiness.
+- Phase 5A implementation T105-T109 can start after red confirmation, with T105-T107 kept sequential when they touch `SourceAwareChat.tsx` and shared chat types.
 - US3 red tests T064-T068 can run in parallel by backend/frontend ownership.
 - US3 DTO work T070-T071 and frontend presentation work T076-T079 can run in parallel once their corresponding contracts are stable.
 - US3 frontend fixture and presentation tests can begin early, but repository-backed readiness integration should wait until Phase 3 closes the ingestion evidence and schema work.
@@ -275,6 +311,21 @@ Task T056: Narrow operational cache
 Task T058: Section-aware starter prompt data
 ```
 
+## Parallel Example: Phase 5A
+
+```text
+Task T100: Chatbox shell and composer regression tests
+Task T101: Transcript preservation tests
+Task T102: WPS retrieval scope tests
+Task T103: Starter-prompt readiness tests
+
+After red confirmation:
+Task T105: Shell, launcher, and composer implementation
+Task T106: Transcript state implementation
+Task T108: Section source-scope implementation
+Task T109: Prompt audit workflow
+```
+
 ## Parallel Example: User Story 3
 
 ```text
@@ -300,28 +351,32 @@ Task T079: Audit and trust presentation
 1. Complete Phase 1 and Phase 2.
 2. Complete Phase 3 and verify at least one real approved source is persisted and active.
 3. Complete User Story 1 through T048.
-4. Stop and validate the Django public chat path, visible trust states, citation safety, changed-scope coverage, mocked smoke journey, and live canary.
-5. Demo or release US1 if the bounded grounded-chat MVP is sufficient.
+4. Complete User Story 2 through T063.
+5. Complete Phase 5A through T113 so public-chat layout, transcript, and prompt-source alignment issues are closed before maintainer readiness resumes.
+6. Stop and validate the Django public chat path, visible trust states, citation safety, changed-scope coverage, mocked smoke journey, and live canary.
+7. Demo or release the bounded grounded-chat MVP if learner-facing acceptance is sufficient.
 
 ### Incremental Delivery
 
 1. Operationalize approved-source ingestion and activate the first retrieval-ready source.
 2. Add US1 for trustworthy depth-aware answers.
 3. Add US2 for protection controls and lesson continuity.
-4. Add US3 for protected readiness and remediation after ingestion evidence is trustworthy.
-5. Complete Phase 7 for full release evidence and architecture refresh.
+4. Add Phase 5A for the post-Phase-5 public chatbox QA remediation.
+5. Add US3 for protected readiness and remediation after ingestion evidence and public chatbox QA are trustworthy.
+6. Complete Phase 7 for full release evidence and architecture refresh.
 
 ### Suggested Team Split
 
 1. Shared setup and cutover foundation: T001-T014.
 2. Approved-source ingestion owner: T015-T027 plus T094-T096.
-3. Learner contract and frontend owner: T031-T034, T042-T048, T052-T054, T058-T063.
-4. Django chat and retrieval owner: T028-T030, T035-T041, T049-T051, T055-T057.
+3. Learner contract and frontend owner: T031-T034, T042-T048, T052-T054, T058-T063, T100-T101, T103-T107, T109-T113.
+4. Django chat and retrieval owner: T028-T030, T035-T041, T049-T051, T055-T057, T102, T108.
 5. Maintainer readiness owner: T064-T083.
 
 ## Notes
 
 - `[P]` means different files and no dependency on an unfinished task; tasks that touch the same file must remain sequential.
+- T100-T113 are a post-Phase-5 amendment block added after Phase 6/7 task IDs already existed; do not renumber older tasks just to make the amendment appear sequential.
 - Refusal, weak support, cooldown, and fallback are typed learner-visible successes, not generic transport failures.
 - Redis is Django-owned short-lived operational state and never the canonical store for sources, chunks, embeddings, citations, validation evidence, or final answers.
 - Browser code must not receive NVIDIA keys/model routing, private storage paths, raw cache keys, prompt hashes, or unrestricted retrieval controls.

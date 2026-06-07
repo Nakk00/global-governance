@@ -54,15 +54,7 @@ def test_model_roles_use_query_embedding_and_nvidia_rerank_contracts() -> None:
 def test_model_roles_generate_a_depth_aware_bounded_grounded_prompt() -> None:
     roles = _roles()
     response = _JsonResponse(
-        {
-            "choices": [
-                {
-                    "message": {
-                        "content": "The UN coordinates action through institutions."
-                    }
-                }
-            ]
-        }
+        {"choices": [{"message": {"content": "The UN coordinates action through institutions."}}]}
     )
 
     with mock.patch("chatbot.nvidia.urlopen", return_value=response) as mocked_urlopen:
@@ -86,22 +78,10 @@ def test_model_roles_parse_topic_and_safety_guard_decisions() -> None:
     roles = _roles()
     responses = [
         _JsonResponse(
-            {
-                "choices": [
-                    {
-                        "message": {
-                            "content": '{"allowed": false, "label": "off_topic"}'
-                        }
-                    }
-                ]
-            }
+            {"choices": [{"message": {"content": '{"allowed": false, "label": "off_topic"}'}}]}
         ),
         _JsonResponse(
-            {
-                "choices": [
-                    {"message": {"content": '{"allowed": true, "label": "safe"}'}}
-                ]
-            }
+            {"choices": [{"message": {"content": '{"allowed": true, "label": "safe"}'}}]}
         ),
     ]
 
@@ -116,20 +96,11 @@ def test_model_roles_parse_topic_and_safety_guard_decisions() -> None:
 def test_model_roles_normalize_native_guard_response_formats() -> None:
     roles = _roles()
     responses = [
-        _JsonResponse(
-            {"choices": [{"message": {"content": "on-topic"}}]}
-        ),
+        _JsonResponse({"choices": [{"message": {"content": "on-topic"}}]}),
         _JsonResponse(
             {
                 "choices": [
-                    {
-                        "message": {
-                            "content": (
-                                '{"User Safety": "safe", '
-                                '"Response Safety": "safe"}'
-                            )
-                        }
-                    }
+                    {"message": {"content": ('{"User Safety": "safe", "Response Safety": "safe"}')}}
                 ]
             }
         ),

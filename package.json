@@ -32,6 +32,7 @@
     "local:dev": "pnpm dev:backend-stack",
     "dev:backend-stack": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev/backend-stack.ps1",
     "chatbot:prepare-ingestion": "node --experimental-strip-types scripts/chatbot/prepare-ingestion.ts",
+    "chatbot:audit-prompts": "node --experimental-strip-types scripts/chatbot/audit-suggested-prompts.ts",
     "chatbot:validate-boundaries": "node --experimental-strip-types scripts/chatbot/validate-chatbot-boundaries.ts",
     "chatbot:validate-set": "node --experimental-strip-types scripts/chatbot/validate-chatbot-set.ts",
     "test:unit": "vitest run",

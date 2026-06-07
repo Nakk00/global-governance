@@ -26,9 +26,7 @@ def _with_public_chat_cors(
 ) -> HttpResponse:
     response["Access-Control-Allow-Origin"] = _public_chat_cors_origin(request)
     response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-    response["Access-Control-Allow-Headers"] = (
-        "Content-Type, X-Anonymous-Session-Id"
-    )
+    response["Access-Control-Allow-Headers"] = "Content-Type, X-Anonymous-Session-Id"
     response["Access-Control-Max-Age"] = "600"
 
     return response

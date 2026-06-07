@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -49,11 +50,7 @@ class RetrievalService:
         current_section_id: str | None = None,
     ) -> RetrievalResult:
         vectors, _evidence = self.models.embed([question])
-        source_ids = (
-            self.section_source_ids.get(current_section_id)
-            if current_section_id
-            else None
-        )
+        source_ids = self.section_source_ids.get(current_section_id) if current_section_id else None
         candidates = [
             candidate
             for candidate in self.repository.retrieve_candidates(
@@ -72,18 +69,34 @@ class RetrievalService:
             question,
             [candidate.content for candidate in candidates],
         )
+        rerank_scores = {
+            index: score for index, score in ranking if 0 <= index < len(candidates)
+        }
+        scored_candidates = tuple(
+            (
+                candidate,
+                _effective_support_score(
+                    question,
+                    candidate,
+                    rerank_scores.get(index, 0.0),
+                ),
+            )
+            for index, candidate in enumerate(candidates)
+        )
         selected = tuple(
-            candidates[index]
-            for index, score in ranking
-            if 0 <= index < len(candidates) and score >= self.weak_threshold
+            candidate
+            for candidate, score in sorted(
+                scored_candidates,
+                key=lambda item: item[1],
+                reverse=True,
+            )
+            if score >= self.weak_threshold
         )[: self.context_limit]
         if not selected:
             return self._weak_result()
 
-        top_score = max(score for index, score in ranking if 0 <= index < len(candidates))
-        support_level: SupportLevel = (
-            "strong" if top_score >= self.strong_threshold else "weak"
-        )
+        top_score = max(score for _candidate, score in scored_candidates)
+        support_level: SupportLevel = "strong" if top_score >= self.strong_threshold else "weak"
         citations = _citations_for(selected)
         if support_level == "weak":
             return RetrievalResult(
@@ -108,6 +121,78 @@ class RetrievalService:
         )
 
 
+def _effective_support_score(
+    question: str,
+    candidate: RetrievalCandidate,
+    rerank_score: float,
+) -> float:
+    if not _has_meaningful_term_overlap(question, candidate.content):
+        return rerank_score
+    return max(rerank_score, candidate.vector_score)
+
+
+def _has_meaningful_term_overlap(question: str, content: str) -> bool:
+    question_terms = _meaningful_terms(question)
+    content_terms = _meaningful_terms(content)
+    return len(question_terms & content_terms) >= 2
+
+
+def _meaningful_terms(value: str) -> set[str]:
+    return {
+        _normalize_term(token)
+        for token in re.findall(r"[a-z0-9]+", value.lower())
+        if token == "un" or (len(token) > 2 and token not in _STOP_WORDS)
+    }
+
+
+def _normalize_term(value: str) -> str:
+    if len(value) > 4 and value.endswith("s"):
+        return value[:-1]
+    return value
+
+
+_STOP_WORDS = {
+    "about",
+    "across",
+    "after",
+    "also",
+    "and",
+    "are",
+    "because",
+    "before",
+    "between",
+    "both",
+    "but",
+    "can",
+    "course",
+    "did",
+    "does",
+    "from",
+    "how",
+    "inside",
+    "into",
+    "its",
+    "not",
+    "one",
+    "only",
+    "should",
+    "show",
+    "that",
+    "the",
+    "their",
+    "this",
+    "through",
+    "what",
+    "when",
+    "where",
+    "which",
+    "while",
+    "why",
+    "with",
+    "without",
+}
+
+
 def _citations_for(candidates: tuple[RetrievalCandidate, ...]) -> tuple[ChatCitation, ...]:
     citations: list[ChatCitation] = []
     seen: set[str] = set()
@@ -123,9 +208,7 @@ def _citations_for(candidates: tuple[RetrievalCandidate, ...]) -> tuple[ChatCita
                 source_type=candidate.source_type,
                 detail=candidate.detail,
                 url=(
-                    candidate.url
-                    if candidate.url and is_safe_public_url(candidate.url)
-                    else None
+                    candidate.url if candidate.url and is_safe_public_url(candidate.url) else None
                 ),
             )
         )

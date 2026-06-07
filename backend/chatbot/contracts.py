@@ -70,9 +70,7 @@ def serialize_chat_outcome(outcome: ChatOutcome) -> dict[str, Any]:
             "grounding": _serialize_grounding(outcome.grounding),
             "citations": [
                 _serialize_citation(citation)
-                for citation in outcome.citations[
-                    : settings.PUBLIC_CHAT_VISIBLE_CITATION_LIMIT
-                ]
+                for citation in outcome.citations[: settings.PUBLIC_CHAT_VISIBLE_CITATION_LIMIT]
             ],
         }
     if isinstance(outcome, WeakSupportOutcome):
@@ -83,9 +81,7 @@ def serialize_chat_outcome(outcome: ChatOutcome) -> dict[str, Any]:
             "grounding": _serialize_grounding(outcome.grounding),
             "citations": [
                 _serialize_citation(citation)
-                for citation in outcome.citations[
-                    : settings.PUBLIC_CHAT_VISIBLE_CITATION_LIMIT
-                ]
+                for citation in outcome.citations[: settings.PUBLIC_CHAT_VISIBLE_CITATION_LIMIT]
             ],
         }
     if isinstance(outcome, RefusedOutcome):

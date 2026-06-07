@@ -75,6 +75,25 @@ export type ChatError = {
   message: string
 }
 
+export type ChatTranscriptTurnState =
+  | {
+      status: "loading"
+    }
+  | {
+      status: "success"
+      response: GroundedChatSuccess
+    }
+  | {
+      status: "error"
+      error: ChatError
+    }
+
+export type ChatTranscriptTurn = {
+  id: string
+  question: string
+  response: ChatTranscriptTurnState
+}
+
 export type GroundedChatEnvelope =
   | {
       success: true
@@ -91,15 +110,4 @@ export type ChatAsyncState =
   | {
       status: "idle"
     }
-  | {
-      status: "loading"
-      question: string
-    }
-  | {
-      status: "success"
-      response: GroundedChatSuccess
-    }
-  | {
-      status: "error"
-      error: ChatError
-    }
+  | ChatTranscriptTurnState

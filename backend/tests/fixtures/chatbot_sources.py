@@ -47,8 +47,8 @@ APPROVED_SOURCE_FIXTURE = ApprovedSourceRecordFixture(
 )
 
 WPS_SOURCE_FIXTURE = ApprovedSourceRecordFixture(
-    source_id="gg-src-west-philippine-sea-dossier",
-    title="West Philippine Sea Dossier",
+    source_id="gg-src-south-china-sea-award",
+    title="South China Sea Arbitration Award",
     source_type="case",
     storage_bucket="approved-sources",
     storage_path="raw/topic-6-west-philippine-sea.md",
@@ -56,6 +56,61 @@ WPS_SOURCE_FIXTURE = ApprovedSourceRecordFixture(
     chunks=(
         "The West Philippine Sea dispute shows how legal rulings and state behavior interact.",
     ),
+)
+
+WPS_ARBITRATION_FILING_FIXTURE = ApprovedSourceRecordFixture(
+    source_id="gg-src-philippines-arbitration-filing",
+    title="Philippines Notification and Statement of Claim",
+    source_type="case",
+    storage_bucket="approved-sources",
+    storage_path="raw/topic-5-international-law-dispute-resolution-knowledge.md",
+    revision="topic-5-2026-06-06",
+    chunks=(
+        "The Philippines used UNCLOS dispute settlement to frame legal questions "
+        "around maritime rights.",
+    ),
+)
+
+WPS_ENFORCEMENT_GAP_FIXTURE = ApprovedSourceRecordFixture(
+    source_id="gg-src-wps-enforcement-gap-comparison",
+    title="Tribunal Award and Post-Award Conduct Comparison",
+    source_type="case",
+    storage_bucket="approved-sources",
+    storage_path="raw/topic-7-enforcement-gap-ruling-vs-reality-knowledge.md",
+    revision="topic-7-2026-06-06",
+    chunks=(
+        "The award clarified legal rights while later conduct showed practical enforcement limits.",
+    ),
+)
+
+WPS_POLITICAL_REALITY_FIXTURE = ApprovedSourceRecordFixture(
+    source_id="gg-src-wps-political-reality-record",
+    title="Diplomatic Response and State Behavior Record",
+    source_type="case",
+    storage_bucket="approved-sources",
+    storage_path="raw/topic-8-asean-and-regional-governance-knowledge.md",
+    revision="topic-8-2026-06-06",
+    chunks=("Diplomacy, reputation, and state capacity shaped behavior after the award.",),
+)
+
+WPS_POST_AWARD_COMPLIANCE_FIXTURE = ApprovedSourceRecordFixture(
+    source_id="gg-src-post-award-compliance-record",
+    title="Post-Award Compliance and Diplomacy Record",
+    source_type="case",
+    storage_bucket="approved-sources",
+    storage_path="raw/post-award-compliance-record-knowledge.md",
+    revision="post-award-compliance-2026-06-07",
+    chunks=("Post-award compliance showed the gap between legal clarity and enforcement.",),
+)
+
+WPS_SCARBOROUGH_FIXTURE = ApprovedSourceRecordFixture(
+    source_id="gg-src-scarborough-standoff-record",
+    title="Scarborough Shoal Standoff Public Record",
+    source_type="case",
+    storage_bucket="approved-sources",
+    storage_path="raw/scarborough-standoff-record-knowledge.md",
+    revision="scarborough-standoff-2026-06-07",
+    chunks=("The Scarborough record shows state behavior around contested maritime access.",),
 )
 
 APPROVED_CITATION_FIXTURE = CitationRecordFixture(
@@ -91,7 +146,14 @@ SECTION_CONTEXT_FIXTURES = {
     "west-philippine-sea-dossier": SectionContextFixture(
         section_id="west-philippine-sea-dossier",
         title="West Philippine Sea Dossier",
-        approved_source_ids=(WPS_SOURCE_FIXTURE.source_id,),
+        approved_source_ids=(
+            "gg-src-south-china-sea-award",
+            "gg-src-wps-enforcement-gap-comparison",
+            "gg-src-wps-political-reality-record",
+            "gg-src-philippines-arbitration-filing",
+            "gg-src-post-award-compliance-record",
+            "gg-src-scarborough-standoff-record",
+        ),
         starter_prompts=(
             "Why does the West Philippine Sea case matter for governance?",
             "How can law clarify a dispute without ending political conflict?",
@@ -105,7 +167,15 @@ ANONYMOUS_SESSION_HEADERS = {
 
 
 def approved_source_records() -> tuple[ApprovedSourceRecordFixture, ...]:
-    return (APPROVED_SOURCE_FIXTURE, WPS_SOURCE_FIXTURE)
+    return (
+        APPROVED_SOURCE_FIXTURE,
+        WPS_SOURCE_FIXTURE,
+        WPS_ARBITRATION_FILING_FIXTURE,
+        WPS_ENFORCEMENT_GAP_FIXTURE,
+        WPS_POLITICAL_REALITY_FIXTURE,
+        WPS_POST_AWARD_COMPLIANCE_FIXTURE,
+        WPS_SCARBOROUGH_FIXTURE,
+    )
 
 
 def citation_records() -> tuple[CitationRecordFixture, ...]:

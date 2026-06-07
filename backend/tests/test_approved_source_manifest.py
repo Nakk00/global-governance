@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from ingestion.pipeline import ManifestValidationError, load_approved_source_manifest
+from tests.fixtures.chatbot_sources import SECTION_CONTEXT_FIXTURES, approved_source_records
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_PATH = REPO_ROOT / "archive" / "docs" / "approved-sources" / "manifest.json"
@@ -55,6 +56,17 @@ def test_manifest_covers_every_staged_supported_source_file() -> None:
 
     assert {entry.source_path for entry in manifest.entries} == staged_paths
     assert all(entry.source_id.startswith("gg-src-") for entry in manifest.entries)
+
+
+def test_manifest_and_backend_fixtures_cover_section_scoped_chat_sources() -> None:
+    manifest = load_approved_source_manifest(MANIFEST_PATH, repo_root=REPO_ROOT)
+    manifest_source_ids = {entry.source_id for entry in manifest.entries}
+    fixture_source_ids = {source.source_id for source in approved_source_records()}
+
+    for section in SECTION_CONTEXT_FIXTURES.values():
+        for source_id in section.approved_source_ids:
+            assert source_id in manifest_source_ids
+            assert source_id in fixture_source_ids
 
 
 def test_manifest_keeps_raw_and_normalized_files_on_one_canonical_source_identity(

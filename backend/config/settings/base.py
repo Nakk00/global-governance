@@ -94,9 +94,7 @@ REDIS_FINAL_ANSWER_CACHE_ENABLED = os.environ.get(
     "REDIS_FINAL_ANSWER_CACHE_ENABLED", "false"
 ).lower() in {"1", "true", "yes"}
 NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY", "")
-NVIDIA_API_BASE_URL = (
-    os.environ.get("NVIDIA_API_BASE_URL") or "https://integrate.api.nvidia.com/v1"
-)
+NVIDIA_API_BASE_URL = os.environ.get("NVIDIA_API_BASE_URL") or "https://integrate.api.nvidia.com/v1"
 NVIDIA_GENERATION_MODEL = os.environ.get(
     "NVIDIA_GENERATION_MODEL", "nvidia/llama-3.1-nemotron-nano-8b-v1"
 )
@@ -105,9 +103,7 @@ NVIDIA_EMBEDDING_MODEL = os.environ.get(
 )
 NVIDIA_EMBEDDING_DIMENSIONS = int(os.environ.get("NVIDIA_EMBEDDING_DIMENSIONS", "384"))
 NVIDIA_EMBEDDING_BATCH_SIZE = int(os.environ.get("NVIDIA_EMBEDDING_BATCH_SIZE", "16"))
-NVIDIA_PROVIDER_TIMEOUT_SECONDS = float(
-    os.environ.get("NVIDIA_PROVIDER_TIMEOUT_SECONDS", "20")
-)
+NVIDIA_PROVIDER_TIMEOUT_SECONDS = float(os.environ.get("NVIDIA_PROVIDER_TIMEOUT_SECONDS", "20"))
 NVIDIA_RERANK_MODEL = os.environ.get("NVIDIA_RERANK_MODEL", "nvidia/llama-nemotron-rerank-1b-v2")
 NVIDIA_RETRIEVAL_API_BASE_URL = (
     os.environ.get("NVIDIA_RETRIEVAL_API_BASE_URL")

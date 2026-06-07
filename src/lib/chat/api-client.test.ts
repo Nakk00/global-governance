@@ -255,6 +255,92 @@ describe("requestGroundedAnswer", () => {
     })
   })
 
+  it("keeps repeated browser-session requests single-turn and sends only the newest learner question", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: {
+            state: "answered",
+            answer: "First grounded answer",
+            grounding: {
+              supportLevel: "strong",
+              cue: "Grounded with 1 approved source",
+            },
+            citations: [
+              {
+                sourceId: "gg-src-un-charter-institutions",
+                title: "Charter of the United Nations",
+                shortTitle: "UN Charter",
+                sourceType: "primary",
+                detail: "Institutional frame",
+              },
+            ],
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: {
+            state: "answered",
+            answer: "Second grounded answer",
+            grounding: {
+              supportLevel: "strong",
+              cue: "Grounded with 1 approved source",
+            },
+            citations: [
+              {
+                sourceId: "gg-src-south-china-sea-award",
+                title: "South China Sea Arbitration Award",
+                shortTitle: "SCS award",
+                sourceType: "case",
+                detail: "WPS case support",
+              },
+            ],
+          },
+        }),
+      })
+    globalThis.localStorage.setItem(
+      "global-governance-chat-session",
+      "continuing-session"
+    )
+    vi.stubGlobal("fetch", fetchMock)
+
+    await requestGroundedAnswer("Explain the UN", {
+      currentSectionId: "un-command-center",
+      depthMode: "student",
+    })
+    await requestGroundedAnswer("Explain the ruling gap", {
+      currentSectionId: "west-philippine-sea-dossier",
+      depthMode: "expert",
+    })
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock.mock.calls[0]?.[1]?.body).toBe(
+      JSON.stringify({
+        question: "Explain the UN",
+        context: {
+          currentSectionId: "un-command-center",
+          depthMode: "student",
+        },
+      })
+    )
+    expect(fetchMock.mock.calls[1]?.[1]?.body).toBe(
+      JSON.stringify({
+        question: "Explain the ruling gap",
+        context: {
+          currentSectionId: "west-philippine-sea-dossier",
+          depthMode: "expert",
+        },
+      })
+    )
+    expect(fetchMock.mock.calls[1]?.[1]?.body).not.toContain("Explain the UN")
+  })
+
   it("falls back to memory when browser storage throws", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

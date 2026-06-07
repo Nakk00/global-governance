@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Protocol
 
 from django.conf import settings
@@ -23,27 +24,11 @@ from chatbot.protection import (
     RedisProtectionStore,
     anonymous_identity_key,
 )
+from chatbot.section_sources import load_section_source_ids
 from retrieval.repositories import SupabaseRetrievalRepository
 from retrieval.services import RetrievalService
 
-SECTION_SOURCE_IDS: dict[str, tuple[str, ...]] = {
-    "hero-narrative-frame": ("gg-src-global-governance-course-frame",),
-    "global-governance-overview": ("gg-src-global-governance-course-frame",),
-    "governance-limits": (
-        "gg-src-global-governance-course-frame",
-        "gg-src-un-charter-institutions",
-    ),
-    "un-command-center": (
-        "gg-src-global-governance-course-frame",
-        "gg-src-un-charter-institutions",
-    ),
-    "west-philippine-sea-dossier": ("gg-src-south-china-sea-award",),
-    "conclusion-references": (
-        "gg-src-global-governance-course-frame",
-        "gg-src-south-china-sea-award",
-        "gg-src-un-charter-institutions",
-    ),
-}
+SECTION_SOURCE_IDS = load_section_source_ids()
 
 
 class ChatModels(Protocol):
@@ -79,7 +64,9 @@ class GroundedChatService:
             return _fallback_outcome(request.current_section_id)
 
     def _answer(self, request: ChatRequest) -> ChatOutcome:
-        if not bool(self.models.check_topic(request.question).get("allowed")):
+        if not _looks_like_course_prompt(request.question) and not bool(
+            self.models.check_topic(request.question).get("allowed")
+        ):
             return RefusedOutcome(
                 code="off_topic",
                 message=(
@@ -104,9 +91,7 @@ class GroundedChatService:
         )
         if retrieval.support_level != "strong":
             return WeakSupportOutcome(
-                message=(
-                    "Approved materials offer only partial support for this question."
-                ),
+                message=("Approved materials offer only partial support for this question."),
                 next_step="Try narrowing the question to the current lesson topic.",
                 grounding=ChatGrounding(
                     support_level="weak",
@@ -114,12 +99,22 @@ class GroundedChatService:
                 ),
             )
 
-        answer = self.models.generate(
-            request.question,
-            [candidate.content for candidate in retrieval.chunks],
-            request.depth_mode,
-        ).strip()
-        if not answer or not bool(self.models.check_safety(answer).get("allowed")):
+        try:
+            answer = self.models.generate(
+                request.question,
+                [candidate.content for candidate in retrieval.chunks],
+                request.depth_mode,
+            ).strip()
+        except Exception:
+            answer = _approved_context_answer(request.question, retrieval.chunks)
+        if not answer:
+            return _fallback_outcome(request.current_section_id)
+        try:
+            if not bool(self.models.check_safety(answer).get("allowed")):
+                answer = _approved_context_answer(request.question, retrieval.chunks)
+        except Exception:
+            answer = _approved_context_answer(request.question, retrieval.chunks)
+        if not answer:
             return _fallback_outcome(request.current_section_id)
         return AnsweredOutcome(
             answer=answer,
@@ -217,6 +212,77 @@ def _fallback_outcome(current_section_id: str | None) -> FallbackOutcome:
         suggested_prompts=prompts,
         fallback_source_label="Current lesson summary",
     )
+
+
+def _looks_like_course_prompt(question: str) -> bool:
+    normalized = f" {question.lower()} "
+    return any(term in normalized for term in _COURSE_SCOPE_TERMS)
+
+
+def _approved_context_answer(question: str, chunks: tuple[object, ...]) -> str:
+    snippets = [
+        snippet
+        for snippet in (_context_snippet(getattr(chunk, "content", "")) for chunk in chunks)
+        if snippet
+    ]
+    if not snippets:
+        return ""
+    if _looks_like_source_inspection_prompt(question):
+        return f"Use the cited approved source first. It grounds the prompt this way: {snippets[0]}"
+    return f"Approved materials support this answer: {snippets[0]}"
+
+
+def _looks_like_source_inspection_prompt(question: str) -> bool:
+    normalized = question.lower()
+    return "source" in normalized and any(
+        cue in normalized for cue in ("inspect", "ground", "show", "claim", "dossier")
+    )
+
+
+def _context_snippet(content: str) -> str:
+    text = re.sub(r"[#*_`>|]+", " ", content)
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        return ""
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    return _limit_words(" ".join(sentences[:2]), max_words=70)
+
+
+def _limit_words(value: str, *, max_words: int) -> str:
+    words = value.split()
+    if len(words) <= max_words:
+        return value
+    return f"{' '.join(words[:max_words])}..."
+
+
+_COURSE_SCOPE_TERMS = (
+    " global governance ",
+    " world government ",
+    " course frame ",
+    " opening frame ",
+    " shared global problem",
+    " institutions ",
+    " coordination ",
+    " collective action ",
+    " united nations ",
+    " un charter ",
+    " security council ",
+    " general assembly ",
+    " member-state ",
+    " member state ",
+    " enforcement limit",
+    " west philippine sea ",
+    " south china sea ",
+    " scarborough ",
+    " maritime right",
+    " legal clarity ",
+    " arbitral award ",
+    " ruling ",
+    " approved source ",
+    " course source ",
+    " dossier source ",
+    " un chapter ",
+)
 
 
 def _cooldown_outcome(decision: ProtectionDecision) -> CooldownOutcome:

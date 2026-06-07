@@ -1,5 +1,5 @@
 {
-  "version": "2026-06-06",
+  "version": "2026-06-07",
   "sources": [
     {
       "sourcePath": "archive/docs/approved-sources/raw/topic-1-global-governance-basics-knowledge.md",
@@ -85,6 +85,40 @@
       "lineage": {
         "kind": "raw",
         "rawSourcePath": "archive/docs/approved-sources/raw/topic-5-international-law-dispute-resolution-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/post-award-compliance-record-knowledge.md",
+      "sourceId": "gg-src-post-award-compliance-record",
+      "fileType": "md",
+      "revision": "post-award-compliance-2026-06-07",
+      "title": "Post-Award Compliance and Diplomacy Record",
+      "shortTitle": "Post-award record",
+      "sourceType": "case",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/post-award-compliance-record-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/post-award-compliance-record-knowledge.md"
+      }
+    },
+    {
+      "sourcePath": "archive/docs/approved-sources/raw/scarborough-standoff-record-knowledge.md",
+      "sourceId": "gg-src-scarborough-standoff-record",
+      "fileType": "md",
+      "revision": "scarborough-standoff-2026-06-07",
+      "title": "Scarborough Shoal Standoff Public Record",
+      "shortTitle": "Scarborough record",
+      "sourceType": "case",
+      "storage": {
+        "bucket": "processed-exports",
+        "path": "approved-sources/raw/scarborough-standoff-record-knowledge.md"
+      },
+      "lineage": {
+        "kind": "raw",
+        "rawSourcePath": "archive/docs/approved-sources/raw/scarborough-standoff-record-knowledge.md"
       }
     },
     {

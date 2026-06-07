@@ -1,0 +1,36 @@
+{
+  "bundleId": "global-governance-approved-sources",
+  "bundleVersion": "2026.05.01",
+  "sectionSourceIds": {
+    "hero-narrative-frame": [
+      "gg-src-global-governance-course-frame"
+    ],
+    "global-governance-overview": [
+      "gg-src-global-governance-course-frame",
+      "gg-src-un-charter-institutions"
+    ],
+    "governance-limits": [
+      "gg-src-global-governance-course-frame",
+      "gg-src-un-charter-institutions"
+    ],
+    "un-command-center": [
+      "gg-src-global-governance-course-frame",
+      "gg-src-un-charter-institutions"
+    ],
+    "west-philippine-sea-dossier": [
+      "gg-src-south-china-sea-award",
+      "gg-src-philippines-arbitration-filing",
+      "gg-src-post-award-compliance-record",
+      "gg-src-scarborough-standoff-record",
+      "gg-src-wps-enforcement-gap-comparison",
+      "gg-src-wps-political-reality-record"
+    ],
+    "conclusion-references": [
+      "gg-src-global-governance-course-frame",
+      "gg-src-south-china-sea-award",
+      "gg-src-un-charter-institutions",
+      "gg-src-wps-enforcement-gap-comparison",
+      "gg-src-wps-political-reality-record"
+    ]
+  }
+}

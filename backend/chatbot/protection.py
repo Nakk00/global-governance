@@ -79,13 +79,16 @@ class PublicChatProtector:
         abuse_cooldown_seconds: int,
         protection_ttl_seconds: int,
     ) -> None:
-        if min(
-            rate_window_seconds,
-            rate_max_requests,
-            abuse_threshold,
-            abuse_cooldown_seconds,
-            protection_ttl_seconds,
-        ) <= 0:
+        if (
+            min(
+                rate_window_seconds,
+                rate_max_requests,
+                abuse_threshold,
+                abuse_cooldown_seconds,
+                protection_ttl_seconds,
+            )
+            <= 0
+        ):
             raise ValueError("Public chat protection settings must be positive.")
         self.store = store
         self.rate_window_seconds = rate_window_seconds

@@ -23,6 +23,7 @@ A learner asks a question about the current Global Governance lesson and receive
 1. **Given** a learner is viewing an approved lesson topic and asks an in-scope question, **When** the chatbot has sufficient support, **Then** it returns an answer adapted to the selected depth mode and visibly shows that the answer is supported by approved material.
 2. **Given** a learner asks a question with only partial support in approved materials, **When** the chatbot responds, **Then** it returns a limited-support outcome that explains the constraint and avoids overclaiming.
 3. **Given** a learner asks an off-topic or disallowed question, **When** the chatbot responds, **Then** it returns a refusal outcome that explains scope boundaries and redirects the learner toward relevant approved topics.
+4. **Given** a learner asks a follow-up question in the same chat session, **When** the new response is returned, **Then** the previous questions, answers, citations, refusals, weak-support states, and cooldown states remain reviewable in the visible transcript.
 
 ---
 
@@ -39,6 +40,7 @@ A learner remains able to continue the lesson when chat is unavailable, throttle
 1. **Given** a learner is in a specific lesson section, **When** they open chat before typing, **Then** they see suggested questions relevant to the current topic or approved core themes.
 2. **Given** the chatbot is temporarily unavailable or fails to complete a request, **When** the learner is still on the lesson page, **Then** the interface provides fallback guidance or static approved support that allows the learner to continue without leaving the lesson.
 3. **Given** a learner exceeds public-use protection limits, **When** the cooldown state is triggered, **Then** the interface shows a calm, understandable cooldown outcome instead of a raw failure and preserves access to the surrounding lesson content.
+4. **Given** the learner opens the chat panel on a desktop or narrow viewport, **When** the panel is open and the learner types a multi-line question, **Then** the panel remains contained in the viewport, the launcher is not duplicated beneath it, and the composer grows or scrolls without creating blank unusable space.
 
 ---
 
@@ -67,6 +69,11 @@ A maintainer opens the protected readiness workflow and can quickly determine wh
 - How does the feature behave with keyboard-only navigation, reduced motion, and visible focus?
 - What fallback, empty, loading, or error state keeps the core learning flow usable?
 - If chat or grounding is involved, how are refusal, weak-support, and cooldown states represented as typed successful responses?
+- How does the learner review prior turns when they ask multiple questions during one page session?
+- How does the chat launcher behave after the panel is open, especially at the bottom-right edge of the viewport?
+- How does the composer behave when a learner types or scrolls a three-line or longer prompt?
+- What happens when a suggested prompt cannot be answered from the currently scoped approved sources?
+- How do section-scoped source filters stay aligned with approved evidence already used by the visible lesson chapter?
 
 ## Requirements *(mandatory)*
 
@@ -95,12 +102,19 @@ A maintainer opens the protected readiness workflow and can quickly determine wh
 - **FR-021**: The MVP scope MUST include the deliberate public-chat cutover from Supabase Edge Functions to Django, and MUST exclude learner accounts, LMS integration, open-domain assistant behavior, public maintainer access, broad grounded-answer caching, and any additional public-chat runtime migration beyond the Django cutover.
 - **FR-022**: Every behavior-changing implementation slice MUST follow red-green-refactor, cover relevant happy, edge, error, and boundary cases at the fastest sufficient test layer, and achieve at least 80% coverage for new or materially changed executable code in every metric reported by the selected coverage tools.
 - **FR-023**: Before the MVP can claim a strongly grounded learner answer, the system MUST process at least one approved material from `archive/docs/approved-sources/` or the protected upload workflow into private durable document, chunk, citation, and real embedding records; ingestion failure MUST remain visible, MUST block activation, and MUST NOT be reported as successful readiness. Real embeddings mean provider-produced vectors with recorded model identity and dimensions; deterministic or synthetic vectors are allowed only in tests or dry-run evidence and must never activate a source.
+- **FR-024**: The public chat interface MUST preserve an append-only session-local transcript of learner questions and typed chat outcomes so learners can review prior answers, source support, weak-support guidance, refusals, cooldowns, and transport recovery states without leaving the lesson.
+- **FR-025**: The open public chat panel MUST remain contained within the visible viewport, hide or transform the closed-state launcher while open, preserve keyboard/focus access, and keep the input composer stable when learner text spans multiple lines.
+- **FR-026**: Suggested learner questions MUST be auditable against the approved source corpus; prompts that cannot be answered or bounded from approved materials MUST be reworded, removed, or backed by deliberately added approved course-relevant sources.
+- **FR-027**: Section-scoped retrieval MUST align with the approved source evidence already used by that lesson section, and any intentionally narrower scope MUST be documented with a learner-safe fallback expectation.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Learner Chat Prompt**: A public learner question plus the active lesson context and selected explanation depth.
 - **Chat Outcome**: The bounded learner-facing result of a prompt, including grounded answer, limited-support answer, refusal, cooldown, or fallback state.
+- **Chat Transcript Entry**: A session-local learner or assistant turn preserved by the browser chat surface so earlier questions, typed outcomes, and citations remain reviewable during the current page session.
 - **Source Support Record**: The approved material references or support summary associated with a grounded or limited-support chat outcome.
+- **Suggested Prompt Readiness Result**: The audit classification for a suggested prompt, including answered, limited support, boundary/refusal, weak citation, cooldown, transport failure, or missing-source follow-up.
+- **Section Source Scope**: The approved source identifiers Django may retrieve for a lesson section, expected to match the approved evidence used by that section unless a narrower policy is explicitly documented.
 - **Protection Signal**: Short-lived public-use control data such as request counts, cooldown state, or abuse indicators that influence whether the chat may proceed.
 - **Operational Cache Entry**: A short-lived Redis entry used by Django for protection, guard, query-helper, or retrieval-helper acceleration without storing canonical source content or broad final answers.
 - **Source Record**: An approved learning material item tracked for readiness, validation, trust, and maintainer review.
@@ -131,6 +145,9 @@ A maintainer opens the protected readiness workflow and can quickly determine wh
 - **SC-006**: In trust-cue review, at least 9 of the 10 scripted learner-state examples in the feature acceptance set can be correctly identified as grounded, limited-support, refused, or in cooldown by reading the visible chat state cues alone.
 - **SC-007**: Automated coverage reports show at least 80% coverage for every reported metric across the feature's new or materially changed executable code, with no skipped or disabled test used to satisfy an acceptance or coverage gate without a documented removal condition.
 - **SC-008**: Before grounded-chat acceptance review, 100% of files selected from the canonical approved-source manifest either produce traceable private storage, document, chunk, citation, and non-synthetic vector records or produce an explicit failed ingest result; at least one successfully processed source is approved and active.
+- **SC-009**: In chatbox QA review, a three-turn learner session preserves all prior questions and typed outcomes in the visible transcript while the latest answer is added.
+- **SC-010**: In desktop and narrow viewport browser checks, the open chat panel stays within the viewport, the closed-state launcher is not visible beneath the open panel, and a three-line or longer composer input does not create large blank space.
+- **SC-011**: Before release, 100% of suggested prompt catalog entries are classified by the prompt-readiness audit, and every kept prompt is either answerable from approved materials or intentionally bounded with learner-safe limited-support guidance.
 
 ## Assumptions
 

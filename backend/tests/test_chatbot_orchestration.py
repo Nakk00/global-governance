@@ -1,19 +1,23 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from chatbot.dtos import ChatRequest
 from chatbot.protection import ProtectionDecision, ProtectionUnavailable
-from chatbot.services import GroundedChatService, PublicChatRuntime
+from chatbot.services import SECTION_SOURCE_IDS, GroundedChatService, PublicChatRuntime
 from retrieval.repositories import RetrievalCandidate
 from retrieval.services import RetrievalService
 from tests.chatbot_fakes import FakeNvidiaModelRoles
-from tests.test_retrieval_service import RetrievalRepositoryDouble
+from tests.test_retrieval_service import (
+    RetrievalRepositoryDouble,
+    _candidate,
+    _load_wps_dossier_source_ids,
+)
 
 
 def test_strong_support_uses_all_model_roles_and_preserves_expert_depth() -> None:
     models = FakeNvidiaModelRoles(
-        generation_text=(
-            "The UN combines coordination, legitimacy, and constrained enforcement."
-        )
+        generation_text=("The UN combines coordination, legitimacy, and constrained enforcement.")
     )
     service = _service(
         models,
@@ -35,7 +39,6 @@ def test_strong_support_uses_all_model_roles_and_preserves_expert_depth() -> Non
     assert outcome.grounding.support_level == "strong"
     assert outcome.citations[0].source_id == "gg-src-un-charter-institutions"
     assert [call.role for call in models.calls] == [
-        "topic_guard",
         "safety_guard",
         "embedding",
         "rerank",
@@ -98,7 +101,7 @@ def test_unsafe_prompt_returns_bounded_refusal_without_internal_details() -> Non
     assert [call.role for call in models.calls] == ["topic_guard", "safety_guard"]
 
 
-def test_unsafe_generated_output_becomes_a_typed_fallback() -> None:
+def test_unsafe_generated_output_uses_approved_context_answer() -> None:
     models = UnsafeOutputModels()
     outcome = _service(models).answer(
         ChatRequest(
@@ -108,15 +111,15 @@ def test_unsafe_generated_output_becomes_a_typed_fallback() -> None:
         )
     )
 
-    assert outcome.state == "fallback"
-    assert outcome.suggested_prompts
-    assert "grounded answer" in outcome.message.lower()
+    assert outcome.state == "answered"
+    assert outcome.grounding.support_level == "strong"
+    assert "approved materials" in outcome.answer.lower()
 
 
-def test_provider_failure_becomes_a_safe_typed_fallback() -> None:
+def test_uncategorized_topic_guard_failure_becomes_a_safe_typed_fallback() -> None:
     outcome = _service(FailingTopicGuardModels()).answer(
         ChatRequest(
-            question="What is global governance?",
+            question="Tell me something interesting.",
             current_section_id="global-governance-overview",
             depth_mode="student",
         )
@@ -125,6 +128,79 @@ def test_provider_failure_becomes_a_safe_typed_fallback() -> None:
     assert outcome.state == "fallback"
     assert "provider" not in outcome.message.lower()
     assert "nvidia" not in outcome.message.lower()
+
+
+def test_course_prompt_skips_unavailable_topic_guard_when_retrieval_is_grounded() -> None:
+    models = FailingTopicGuardModels()
+    service = _service(
+        models,
+        content=(
+            "Global governance coordinates rules and institutions without becoming "
+            "a single world government."
+        ),
+    )
+
+    outcome = service.answer(
+        ChatRequest(
+            question="How does global governance coordinate without a world government?",
+            current_section_id="global-governance-overview",
+            depth_mode="student",
+        )
+    )
+
+    assert outcome.state == "answered"
+    assert outcome.grounding.support_level == "strong"
+    assert outcome.citations[0].source_id == "gg-src-un-charter-institutions"
+
+
+def test_source_inspection_prompt_stays_in_scope_when_topic_guard_is_unavailable() -> None:
+    models = FailingTopicGuardModels()
+    service = _service(
+        models,
+        content=(
+            "The UN Charter source should be inspected before making claims about "
+            "the United Nations chapter."
+        ),
+    )
+
+    outcome = service.answer(
+        ChatRequest(
+            question=(
+                "Which UN Charter source should I inspect before making a claim "
+                "about the UN chapter?"
+            ),
+            current_section_id="un-command-center",
+            depth_mode="student",
+        )
+    )
+
+    assert outcome.state == "answered"
+    assert outcome.grounding.support_level == "strong"
+    assert outcome.citations[0].source_id == "gg-src-un-charter-institutions"
+
+
+def test_generation_failure_after_strong_retrieval_returns_grounded_context_answer() -> None:
+    models = FailingGenerationModels()
+    service = _service(
+        models,
+        content=(
+            "Global governance coordinates rules and institutions across borders. "
+            "It does not become a single world government."
+        ),
+    )
+
+    outcome = service.answer(
+        ChatRequest(
+            question="How does global governance coordinate institutions?",
+            current_section_id="global-governance-overview",
+            depth_mode="student",
+        )
+    )
+
+    assert outcome.state == "answered"
+    assert outcome.grounding.support_level == "strong"
+    assert "approved materials" in outcome.answer.lower()
+    assert outcome.citations[0].source_id == "gg-src-un-charter-institutions"
 
 
 def test_rate_limit_stops_model_work_and_returns_typed_cooldown() -> None:
@@ -203,12 +279,60 @@ def test_runtime_redis_failure_returns_safe_lesson_fallback() -> None:
     )
 
 
+def test_global_overview_scope_supports_the_answered_un_starter_prompt() -> None:
+    assert "gg-src-un-charter-institutions" in SECTION_SOURCE_IDS["global-governance-overview"]
+
+
+def test_wps_questions_use_the_bundle_dossier_scope_for_answer_generation() -> None:
+    expected_source_ids = _load_wps_dossier_source_ids()
+    models = FakeNvidiaModelRoles(
+        generation_text=(
+            "The ruling clarified legal rights, while later conduct exposed the gap "
+            "between institutional clarity and political enforcement."
+        )
+    )
+    repository = RetrievalRepositoryDouble(
+        candidates=[
+            _candidate(
+                source_id=source_id,
+                content=(
+                    "Approved dossier evidence explains how legal clarity and "
+                    "political enforcement diverged after the ruling."
+                ),
+                section_ids=("west-philippine-sea-dossier",),
+            )
+            for source_id in expected_source_ids
+        ]
+    )
+    retrieval = RetrievalService(
+        repository=repository,
+        models=models,
+        section_source_ids={
+            "west-philippine-sea-dossier": SECTION_SOURCE_IDS["west-philippine-sea-dossier"],
+        },
+    )
+
+    outcome = GroundedChatService(models=models, retrieval=retrieval).answer(
+        ChatRequest(
+            question=(
+                "How does the West Philippine Sea ruling show the difference "
+                "between legal clarity and political enforcement?"
+            ),
+            current_section_id="west-philippine-sea-dossier",
+            depth_mode="student",
+        )
+    )
+
+    assert outcome.state == "answered"
+    assert len(expected_source_ids) > 1
+    assert repository.calls[0]["sourceIds"] == expected_source_ids
+
+
 def _service(
     models: FakeNvidiaModelRoles,
     *,
     content: str = (
-        "Global governance coordinates institutions and rules without becoming "
-        "a world government."
+        "Global governance coordinates institutions and rules without becoming a world government."
     ),
 ) -> GroundedChatService:
     repository = RetrievalRepositoryDouble(
@@ -262,6 +386,14 @@ class UnsafeOutputModels(FakeNvidiaModelRoles):
 class FailingTopicGuardModels(FakeNvidiaModelRoles):
     def check_topic(self, prompt: str) -> dict[str, object]:
         raise RuntimeError("provider detail must remain private")
+
+
+class FailingGenerationModels(FakeNvidiaModelRoles):
+    def generate(
+        self, prompt: str, context_chunks: Sequence[str], depth_mode: str = "student"
+    ) -> str:
+        super().generate(prompt, context_chunks, depth_mode)
+        raise RuntimeError("generation provider unavailable")
 
 
 class ProtectorDouble:

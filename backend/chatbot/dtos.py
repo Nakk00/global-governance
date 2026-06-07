@@ -77,9 +77,5 @@ class FallbackOutcome:
 
 
 type ChatOutcome = (
-    AnsweredOutcome
-    | WeakSupportOutcome
-    | RefusedOutcome
-    | CooldownOutcome
-    | FallbackOutcome
+    AnsweredOutcome | WeakSupportOutcome | RefusedOutcome | CooldownOutcome | FallbackOutcome
 )

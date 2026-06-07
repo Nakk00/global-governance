@@ -147,23 +147,19 @@ class NvidiaModelRoles:
         timeout_seconds: float | None = None,
     ) -> None:
         self.api_key = api_key if api_key is not None else settings.NVIDIA_API_KEY
-        self.base_url = (
-            base_url if base_url is not None else settings.NVIDIA_API_BASE_URL
-        ).rstrip("/")
+        self.base_url = (base_url if base_url is not None else settings.NVIDIA_API_BASE_URL).rstrip(
+            "/"
+        )
         self.retrieval_base_url = (
             retrieval_base_url
             if retrieval_base_url is not None
             else settings.NVIDIA_RETRIEVAL_API_BASE_URL
         ).rstrip("/")
         self.generation_model = (
-            generation_model
-            if generation_model is not None
-            else settings.NVIDIA_GENERATION_MODEL
+            generation_model if generation_model is not None else settings.NVIDIA_GENERATION_MODEL
         )
         self.embedding_model = (
-            embedding_model
-            if embedding_model is not None
-            else settings.NVIDIA_EMBEDDING_MODEL
+            embedding_model if embedding_model is not None else settings.NVIDIA_EMBEDDING_MODEL
         )
         self.rerank_model = (
             rerank_model if rerank_model is not None else settings.NVIDIA_RERANK_MODEL
@@ -302,9 +298,7 @@ class NvidiaModelRoles:
             {
                 "model": self.rerank_model,
                 "query": {"text": cleaned_query[:2000]},
-                "passages": [
-                    {"text": passage[:4000]} for passage in cleaned_passages[:12]
-                ],
+                "passages": [{"text": passage[:4000]} for passage in cleaned_passages[:12]],
                 "truncate": "END",
             },
         )

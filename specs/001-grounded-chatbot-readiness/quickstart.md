@@ -242,6 +242,7 @@ Use and record the same scripted samples for release evidence:
 - `12` degraded, off-topic, unsafe, throttled, or cooldown prompts for SC-002
 - `10` maintainer validation findings for SC-004
 - `10` scripted learner-state examples for SC-006
+- `100%` of visible suggested starter prompts from `src/data/chat/source-aware-chat.ts` classified by the prompt-readiness audit before release
 
 For SC-003, time a maintainer from initial protected readiness page load until they can name overall readiness, the current blocker set, and the next recommended action. Record the elapsed time in this document.
 
@@ -464,6 +465,199 @@ Results:
 - Frontend changed-scope coverage reached `94.11%` statements, `87.05%` branches,
   `100%` functions, and `94%` lines.
 
+## Phase 5A Public Chatbox QA Remediation
+
+Added on 2026-06-07 from the post-Phase-5 browser QA report:
+`archive/docs/planning-artifacts/public-redesign-plans/source-aware-chatbox-qa-report.md`.
+
+This amendment merges the report findings into the active Spec Kit source of truth
+without rewriting completed Phase 5 tasks. The remediation scope is tracked as
+T100-T113 in `tasks.md`.
+
+### Investigation summary
+
+- Graphify and GitNexus review identified the affected areas as the frontend chat
+  shell in `src/components/chat/SourceAwareChat.tsx`, static starter prompts in
+  `src/data/chat/source-aware-chat.ts`, the browser chat client in
+  `src/lib/chat/api-client.ts`, and Django section-scoped retrieval in
+  `backend/chatbot/services.py` and `backend/retrieval/services.py`.
+- `SourceAwareChat` currently uses a single `submittedQuestion` and single
+  `answerState`, so follow-up questions replace prior reviewable content instead
+  of appending to a transcript.
+- The bottom-right launcher remains rendered while the chat panel is open, which
+  explains the duplicate visible "Ask a question" surface under the panel.
+- The composer is a plain bounded `textarea` without managed autosize behavior,
+  which leaves the multi-line blank-space regression unguarded.
+- The West Philippine Sea section chat scope is narrower than the approved
+  chapter evidence: the backend currently relies on `gg-src-south-china-sea-award`
+  while the chapter data also references approved dossier evidence such as
+  `gg-src-wps-enforcement-gap-comparison`,
+  `gg-src-wps-political-reality-record`, and
+  `gg-src-philippines-arbitration-filing`.
+- Graphify highlights the best source-alignment anchor for this remediation as the
+  existing dossier evidence path through `getDossierEvidenceSources()` and
+  `createWpsEvidenceRegistry()`, so the backend scope tests should verify against
+  that existing evidence model instead of introducing a second manually curated
+  expectation list.
+
+### Intended red baseline
+
+Confirmed before implementation with:
+
+```powershell
+pnpm exec vitest run src/components/chat/SourceAwareChat.test.tsx src/data/chat/source-aware-chat.test.ts
+backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml backend\tests\test_retrieval_service.py backend\tests\test_chatbot_orchestration.py -q
+```
+
+The first focused Phase 5A red run failed in the intended remediation areas:
+
+- the open panel still left the closed-state launcher visible underneath it;
+- transcript rendering replaced the previous exchange instead of preserving prior turns;
+- the composer assertions could not prove a stable multi-line height cap plus focus continuity;
+- starter prompts were not fully classified for approved-source readiness;
+- `west-philippine-sea-dossier` retrieval scope omitted approved dossier evidence already represented by the lesson.
+
+### Green implementation evidence
+
+Commands and results after T105-T113:
+
+```powershell
+pnpm exec vitest run src/components/chat/SourceAwareChat.test.tsx src/data/chat/source-aware-chat.test.ts src/data/source-bundles/approved-source-bundle.test.ts src/lib/chat/api-client.test.ts
+backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml backend\tests\test_retrieval_service.py backend\tests\test_chatbot_orchestration.py -q
+pnpm exec vitest run src/components/chat/SourceAwareChat.test.tsx src/data/chat/source-aware-chat.test.ts src/data/source-bundles/approved-source-bundle.test.ts src/lib/chat/api-client.test.ts --coverage --coverage.include=src/components/chat/SourceAwareChat.tsx --coverage.include=src/data/chat/source-aware-chat.ts --coverage.include=src/data/source-bundles/approved-source-bundle.ts --coverage.include=src/lib/chat/api-client.ts --coverage.reporter=text --coverage.reportsDirectory=coverage/frontend-phase5a
+backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml --cov=chatbot.services --cov=retrieval.services --cov-branch --cov-report=term-missing --cov-fail-under=80 backend\tests\test_retrieval_service.py backend\tests\test_chatbot_orchestration.py -q
+pnpm exec playwright install --dry-run
+pnpm test:e2e:layout
+pnpm test:chat:live
+pnpm typecheck
+pnpm backend:typecheck
+pnpm build
+```
+
+- Focused frontend Phase 5A tests passed for shell containment, hidden-launcher behavior, append-only transcript rendering, prompt readiness metadata, source-bundle chat adapters, and single-turn request payload preservation.
+- Focused backend Phase 5A tests passed for widened West Philippine Sea section scope and source-aligned citation packaging.
+- Frontend changed-scope coverage reached `96.80%` statements, `86.14%` branches, `98.57%` functions, and `96.69%` lines across `SourceAwareChat.tsx`, `source-aware-chat.ts`, `approved-source-bundle.ts`, and `api-client.ts`.
+- Backend changed-scope coverage reached `88.97%` total, with `chatbot.services` at `86%` and `retrieval.services` at `93%`.
+- `pnpm test:e2e:layout` passed `4` mocked Playwright layout checks.
+- `pnpm test:chat:live` passed `3` live Django `/api/chat` canaries.
+- `pnpm exec playwright install --dry-run` confirmed Chromium was already available, so no browser install was needed.
+- `pnpm typecheck`, `pnpm backend:typecheck`, and `pnpm build` passed.
+- The default `pnpm test:e2e` command was intentionally not run for Phase 5A by request; this phase used the targeted layout lane plus the live chat canary instead.
+
+Playwright visual review artifacts:
+
+| Viewport | Snapshot artifact | Screenshot artifact | Visual result | Notes |
+|---|---|---|---|---|
+| Desktop | `.playwright-cli/phase5a-desktop-final.yaml` | `.playwright-cli/phase5a-desktop-final.png` | Pass | Two completed turns remained visible, the open panel stayed inside the viewport, the closed-state launcher was absent while open, and the three-line draft stayed bounded in the composer without blank-space growth. |
+| Narrow | `.playwright-cli/phase5a-narrow-final.yaml` | `.playwright-cli/phase5a-narrow-final.png` | Pass | The WPS mobile prompt set stayed section-aware, prior transcript content remained visible above the second turn, the panel remained reachable on a `430x932` viewport, and the multiline draft stayed visually capped inside the composer. |
+| Corrective desktop | `.playwright-cli/phase5a-fix-after-rephrase.yaml` | `.playwright-cli/phase5a-fix-after-rephrase.png` | Pass | At `1365x768`, the fixed panel stayed within the viewport, the `UN limits` prompt chip submitted and rendered a grounded answer, and the boundary-refusal recovery button submitted a safe course-scoped answer. |
+
+Visual success criteria:
+
+- The open panel stays inside the visible viewport and the composer remains reachable.
+- The closed-state launcher is not visible or interactive underneath the open panel.
+- Prior learner and assistant turns remain readable after a later answer appears.
+- The multi-line composer uses bounded height or internal scrolling without a large blank area.
+- Focus, visible controls, and reduced-motion behavior remain understandable.
+
+For the WPS retrieval-scope checks, the canonical expectation deliberately reused
+the existing dossier evidence registry/source-bundle mapping through
+`getDossierEvidenceSources()` and `createWpsEvidenceRegistry()` rather than a
+separate hand-maintained list.
+
+The widened approved chat scope now covers:
+
+- `gg-src-wps-enforcement-gap-comparison`
+- `gg-src-wps-political-reality-record`
+- `gg-src-philippines-arbitration-filing`
+- `gg-src-post-award-compliance-record`
+- `gg-src-scarborough-standoff-record`
+- `gg-src-south-china-sea-award`
+
+### Prompt audit workflow
+
+Run the audit in markdown mode:
+
+```powershell
+pnpm chatbot:audit-prompts -- --endpoint-mode live --endpoint http://127.0.0.1:8000/api/chat
+```
+
+Run the same audit in JSON mode for stable machine-readable review:
+
+```powershell
+pnpm chatbot:audit-prompts -- --json --endpoint-mode live --endpoint http://127.0.0.1:8000/api/chat
+```
+
+Stable output fields:
+
+- `section`
+- `depthMode`
+- `prompt`
+- `classification`
+- `sourceIds`
+- `followUpAction`
+- `endpointMode`
+- `notes`
+- `isPrimaryChapter`
+
+Strict release gate:
+
+- `--fail-on-miss` now fails when any primary chapter row returns anything other
+  than `classification=answered`.
+- A primary prompt counts as `answered` only when the response state is
+  `answered`, `grounding.supportLevel` is `strong`, and at least one returned
+  citation source ID matches the prompt's expected source IDs.
+- Supporting sections such as `governance-limits` and `conclusion-references`
+  remain diagnostic and are not counted as Chapters 1-4.
+
+### Prompt-readiness audit table
+
+Recorded on 2026-06-07 against local Django `/api/chat` after the Phase 5A
+prompt reconciliation. All visible prompts resolved to `followUpAction=keep`.
+
+Strict prompt-coverage implementation note, 2026-06-07: the table below is
+historical Phase 5A soft-audit evidence. It is superseded by the stricter
+primary-chapter contract of exactly `20` primary rows, all of which must be
+`classification=answered` under `--fail-on-miss`. Replace this table after the
+strict live audit passes against a ready local Django/Redis/retrieval stack.
+
+| Section | Depth mode | Prompt | Classification | Source IDs | Follow-up action | Endpoint mode | Notes |
+|---|---|---|---|---|---|---|---|
+| `hero-narrative-frame` | `student` | `How does the course frame distinguish global governance from world government?` | `limitedSupport` | `gg-src-global-governance-course-frame` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `hero-narrative-frame` | `student` | `How do institutions coordinate global governance without becoming a world government?` | `limitedSupport` | `gg-src-global-governance-course-frame` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `hero-narrative-frame` | `student` | `Which institutions help coordinate global governance across states?` | `limitedSupport` | `gg-src-global-governance-course-frame` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `global-governance-overview` | `student` | `How does the course frame distinguish global governance from world government?` | `limitedSupport` | `gg-src-global-governance-course-frame` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `global-governance-overview` | `student` | `Where does the UN help coordinate states, and where do its enforcement limits show up?` | `answered` | `gg-src-un-charter-institutions`, `gg-src-global-governance-course-frame` | `keep` | `live` | `Returned citations: gg-src-un-charter-institutions` |
+| `global-governance-overview` | `student` | `How do institutions coordinate global governance without becoming a world government?` | `limitedSupport` | `gg-src-global-governance-course-frame` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `un-command-center` | `student` | `Where does the UN help coordinate states, and where do its enforcement limits show up?` | `answered` | `gg-src-un-charter-institutions`, `gg-src-global-governance-course-frame` | `keep` | `live` | `Returned citations: gg-src-un-charter-institutions` |
+| `un-command-center` | `student` | `How does the Security Council show both coordination and enforcement limits?` | `limitedSupport` | `gg-src-un-charter-institutions` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `governance-limits` | `student` | `How does the course frame distinguish global governance from world government?` | `limitedSupport` | `gg-src-global-governance-course-frame` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `governance-limits` | `student` | `How does the Security Council show both coordination and enforcement limits?` | `limitedSupport` | `gg-src-un-charter-institutions` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `west-philippine-sea-dossier` | `student` | `Connect the West Philippine Sea ruling to the gap between legal clarity and political enforcement.` | `limitedSupport` | `gg-src-south-china-sea-award`, `gg-src-wps-enforcement-gap-comparison`, `gg-src-wps-political-reality-record` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `west-philippine-sea-dossier` | `student` | `How does the West Philippine Sea ruling test the limits of institutions and enforcement?` | `limitedSupport` | `gg-src-south-china-sea-award`, `gg-src-philippines-arbitration-filing`, `gg-src-wps-enforcement-gap-comparison` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `west-philippine-sea-dossier` | `student` | `What did the ruling clarify about maritime rights?` | `limitedSupport` | `gg-src-south-china-sea-award`, `gg-src-philippines-arbitration-filing` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `conclusion-references` | `student` | `How does the course frame distinguish global governance from world government?` | `limitedSupport` | `gg-src-global-governance-course-frame` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+| `conclusion-references` | `student` | `Where does the UN help coordinate states, and where do its enforcement limits show up?` | `answered` | `gg-src-un-charter-institutions`, `gg-src-global-governance-course-frame` | `keep` | `live` | `Returned citations: gg-src-un-charter-institutions` |
+| `conclusion-references` | `student` | `Connect the West Philippine Sea ruling to the gap between legal clarity and political enforcement.` | `limitedSupport` | `gg-src-south-china-sea-award`, `gg-src-wps-enforcement-gap-comparison`, `gg-src-wps-political-reality-record` | `keep` | `live` | `Try narrowing the question to the current lesson topic.` |
+
+Classification values:
+
+- `answered`
+- `limitedSupport`
+- `boundaryRefusal`
+- `weakCitation`
+- `cooldown`
+- `transportFailure`
+- `missingSource`
+
+Follow-up action values:
+
+- `keep`
+- `reword`
+- `remove`
+- `widenApprovedScope`
+- `addApprovedSource`
+
 ## Validation Scenarios
 
 ### 1. Public chat returns typed learner states
@@ -480,6 +674,8 @@ Expected outcome:
 - The initial approved-source ingestion check has succeeded for at least one active source.
 - Public chat request parsing succeeds for valid prompts.
 - `answered`, `weakSupport`, `refused`, `cooldown`, and `fallback` states are validated as explicit contracts.
+- The chat transcript preserves prior learner and assistant turns during a multi-question session.
+- The open chat shell remains contained and does not show the closed-state launcher underneath it.
 
 ### 2. Protection logic remains bounded and operationally separate
 
@@ -547,7 +743,21 @@ Record:
 - SC-002: confirm all 12 degraded/off-topic prompts return bounded outcomes
 - SC-003: maintainer readiness completion time
 - SC-004: count one-flow validation-to-source traces from the 10-finding set
+- SC-005: confirm every degraded continuity case preserves at least one relevant fallback action or suggested question without leaving the lesson page
 - SC-006: count correct trust-state identifications from the 10 scripted learner-state examples
+- SC-009: confirm the three-turn chat transcript keeps prior typed outcomes visible
+- SC-010: confirm desktop and narrow viewport chatbox containment, hidden launcher, and stable multi-line composer behavior with automated layout assertions and Playwright visual evidence
+- SC-011: confirm every suggested prompt is classified and every kept prompt is answerable or intentionally bounded
+
+Acceptance-set inventory to record alongside the results:
+
+- The 20 in-scope learner prompts used for SC-001
+- The 12 degraded or off-topic prompts used for SC-002 and SC-005
+- The 10 maintainer validation findings used for SC-004
+- The 10 trust-cue examples used for SC-006
+- The exact three-turn transcript scenario used for SC-009
+- The desktop and narrow viewport pair used for SC-010
+- The complete visible suggested-prompt inventory audited for SC-011
 
 ## Full Verification Sweep
 

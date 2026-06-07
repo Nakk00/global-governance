@@ -104,6 +104,8 @@ def test_supabase_repository_uploads_private_source_and_uses_atomic_rpc() -> Non
         _BytesResponse(
             b'{"documentId":"doc-course-abc123","embeddingCount":2,"embeddingDimensions":3}'
         ),
+        _BytesResponse(b""),
+        _BytesResponse(b""),
     ]
 
     with mock.patch("ingestion.repository.urlopen", side_effect=responses) as mocked_urlopen:
@@ -118,6 +120,23 @@ def test_supabase_repository_uploads_private_source_and_uses_atomic_rpc() -> Non
     assert requests[2].full_url.endswith("/rest/v1/rpc/persist_ingestion_document")
     rpc_body = json.loads(requests[2].data)
     assert rpc_body["payload"]["document"]["embeddingConfig"]["synthetic"] is False
+    assert requests[3].method == "POST"
+    assert requests[3].full_url.endswith("/rest/v1/source_records?on_conflict=source_id")
+    source_record_body = json.loads(requests[3].data)
+    assert source_record_body["source_id"] == "gg-src-global-governance-course-frame"
+    assert source_record_body["lifecycle_state"] == "active"
+    assert source_record_body["usage_scope"] == ["public-chat", "approved-source-bundle"]
+    assert source_record_body["storage_bucket"] == "processed-exports"
+    assert source_record_body["storage_path"] == "raw/course.md"
+    assert requests[4].method == "POST"
+    assert requests[4].full_url.endswith("/rest/v1/source_ingest_jobs")
+    ingest_job_body = json.loads(requests[4].data)
+    assert ingest_job_body["source_id"] == "gg-src-global-governance-course-frame"
+    assert ingest_job_body["document_id"] == "doc-course-abc123"
+    assert ingest_job_body["status"] == "succeeded"
+    assert ingest_job_body["chunk_count"] == 2
+    assert ingest_job_body["reference_count"] == 1
+    assert ingest_job_body["embedding_dimensions"] == 3
 
 
 def test_supabase_repository_rejects_rpc_without_complete_vector_evidence() -> None:
@@ -181,6 +200,17 @@ def test_supabase_repository_treats_local_storage_wrapped_404_as_missing() -> No
 
     with mock.patch("ingestion.repository.urlopen", side_effect=wrapped_not_found):
         assert repository.read_private_source("processed-exports", "missing.md") is None
+
+
+def test_supabase_repository_treats_storage_read_timeout_as_missing_preflight() -> None:
+    repository = SupabaseIngestionRepository(
+        supabase_url="http://127.0.0.1:54321",
+        service_role_key="service-role",
+        timeout_seconds=1,
+    )
+
+    with mock.patch("ingestion.repository.urlopen", side_effect=TimeoutError("timed out")):
+        assert repository.read_private_source("processed-exports", "slow.md") is None
 
 
 def test_vector_repair_migration_persists_and_reports_embedding_evidence() -> None:

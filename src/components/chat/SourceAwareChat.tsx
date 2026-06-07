@@ -32,8 +32,9 @@ import { useNavigation } from "@/hooks/useNavigation"
 import { requestGroundedAnswer } from "@/lib/chat/api-client"
 import { cn } from "@/lib/utils"
 import type {
-  ChatAsyncState,
+  ChatError,
   ChatDepthMode,
+  ChatTranscriptTurn,
   GroundedChatRequest,
   GroundedChatSuccess,
 } from "@/types/chat"
@@ -48,6 +49,8 @@ type SourceAwareChatProps = {
 
 const assistantGreeting =
   "I can help explain institutions, norms, and collective action using the approved course materials."
+const composerMinHeightPx = 48
+const composerMaxHeightPx = 144
 
 export function SourceAwareChat({
   starterPrompts = sourceAwareChatStarterPrompts,
@@ -57,22 +60,25 @@ export function SourceAwareChat({
   const [isOpen, setIsOpen] = useState(false)
   const [question, setQuestion] = useState("")
   const [depthMode, setDepthMode] = useState<ChatDepthMode>("student")
-  const [submittedQuestion, setSubmittedQuestion] = useState<string | null>(
+  const [transcript, setTranscript] = useState<ChatTranscriptTurn[]>([])
+  const [expandedCitationKey, setExpandedCitationKey] = useState<string | null>(
     null
   )
-  const [answerState, setAnswerState] = useState<ChatAsyncState>({
-    status: "idle",
-  })
-  const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null)
   const [isDockHovered, setIsDockHovered] = useState(false)
   const [isDockFocused, setIsDockFocused] = useState(false)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const transcriptRef = useRef<HTMLDivElement>(null)
+  const isOpenRef = useRef(isOpen)
+  const turnIdRef = useRef(0)
   const panelId = useId()
   const inputId = useId()
   const promptGroupId = useId()
   const shouldReduceMotion = useReducedMotion()
+  const isSubmitting = transcript.some(
+    (turn) => turn.response.status === "loading"
+  )
   const isDockExpanded = isOpen || isDockHovered || isDockFocused
   const dockMotionState = isDockExpanded ? "expanded" : "collapsed"
   const dockEase = [0.16, 1, 0.3, 1] as const
@@ -133,21 +139,55 @@ export function SourceAwareChat({
       ? getSourceAwareChatStarterPrompts(activeSectionId)
       : starterPrompts
   const promptState = resolveStarterPromptState(promptCatalog)
+  const rephrasePrompt =
+    promptState.status === "available"
+      ? (promptState.prompts.find(
+          (prompt) => prompt.readiness.classification === "answered"
+        ) ?? promptState.prompts[0]).prompt
+      : "Where does the UN help coordinate states, and where do its enforcement limits show up?"
+
+  useEffect(() => {
+    isOpenRef.current = isOpen
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) {
       return
     }
 
-    const frame = window.requestAnimationFrame(() =>
-      inputRef.current?.focus({ preventScroll: true })
-    )
+    const frame = window.requestAnimationFrame(() => {
+      focusComposer(inputRef, isOpenRef)
+      syncComposerHeight(inputRef.current)
+    })
 
     return () => window.cancelAnimationFrame(frame)
   }, [isOpen])
 
+  useEffect(() => {
+    syncComposerHeight(inputRef.current)
+  }, [question, isOpen])
+
+  useEffect(() => {
+    if (!isOpen) {
+      return
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const transcriptElement = transcriptRef.current
+      if (!transcriptElement) {
+        return
+      }
+
+      transcriptElement.scrollTop = transcriptElement.scrollHeight
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [isOpen, transcript])
+
   function closeChat() {
     setIsOpen(false)
+    setIsDockHovered(false)
+    setIsDockFocused(false)
     window.requestAnimationFrame(() =>
       triggerRef.current?.focus({ preventScroll: true })
     )
@@ -160,20 +200,28 @@ export function SourceAwareChat({
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function submitQuestion(questionToSubmit: string) {
+    const trimmedQuestion = questionToSubmit.trim()
 
-    const trimmedQuestion = question.trim()
-
-    if (trimmedQuestion.length === 0 || answerState.status === "loading") {
+    if (trimmedQuestion.length === 0 || isSubmitting) {
       return
     }
 
-    setExpandedSourceId(null)
-    setSubmittedQuestion(trimmedQuestion)
-    setAnswerState({
-      status: "loading",
+    const turnId = createTranscriptTurnId(turnIdRef)
+    const transcriptTurn: ChatTranscriptTurn = {
+      id: turnId,
       question: trimmedQuestion,
+      response: {
+        status: "loading",
+      },
+    }
+
+    setExpandedCitationKey(null)
+    setTranscript((current) => [...current, transcriptTurn])
+    setQuestion("")
+    window.requestAnimationFrame(() => {
+      syncComposerHeight(inputRef.current)
+      focusComposer(inputRef, isOpenRef)
     })
 
     try {
@@ -182,33 +230,43 @@ export function SourceAwareChat({
         depthMode,
       })
 
-      setAnswerState({
-        status: "success",
-        response,
-      })
+      setTranscript((current) =>
+        current.map((turn) =>
+          turn.id === turnId
+            ? {
+                ...turn,
+                response: {
+                  status: "success",
+                  response,
+                },
+              }
+            : turn
+        )
+      )
     } catch (error) {
-      const chatError =
-        typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        "message" in error &&
-        typeof error.code === "string" &&
-        typeof error.message === "string"
-          ? {
-              code: error.code,
-              message: error.message,
-            }
-          : {
-              code: "grounded_chat_unavailable",
-              message:
-                "The assistant could not return a grounded answer right now. Please try again with a course question.",
-            }
+      const chatError = toChatError(error)
 
-      setAnswerState({
-        status: "error",
-        error: chatError,
-      })
+      setTranscript((current) =>
+        current.map((turn) =>
+          turn.id === turnId
+            ? {
+                ...turn,
+                response: {
+                  status: "error",
+                  error: chatError,
+                },
+              }
+            : turn
+        )
+      )
+    } finally {
+      window.requestAnimationFrame(() => focusComposer(inputRef, isOpenRef))
     }
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    void submitQuestion(question)
   }
 
   function handleQuestionKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -228,10 +286,7 @@ export function SourceAwareChat({
   }
 
   function chooseStarterPrompt(prompt: string) {
-    setQuestion(prompt)
-    window.requestAnimationFrame(() =>
-      inputRef.current?.focus({ preventScroll: true })
-    )
+    void submitQuestion(prompt)
   }
 
   return (
@@ -247,8 +302,8 @@ export function SourceAwareChat({
             aria-label="Source-aware academic chat"
             data-source-aware-chat-panel=""
             className={cn(
-              "fixed inset-x-3 bottom-3 flex max-h-[calc(100svh-1.5rem)] min-w-0 flex-col overflow-hidden rounded-[1.45rem] border border-sky-300/25 bg-slate-950/95 text-slate-100 shadow-[0_30px_90px_rgba(2,8,23,0.58)] backdrop-blur-2xl",
-              "sm:inset-x-auto sm:right-6 sm:bottom-20 sm:w-[26rem] sm:max-w-[calc(100vw-3rem)]",
+              "fixed inset-x-3 top-3 bottom-3 flex min-w-0 flex-col overflow-hidden rounded-[1.45rem] border border-sky-300/25 bg-slate-950/95 text-slate-100 shadow-[0_30px_90px_rgba(2,8,23,0.58)] backdrop-blur-2xl",
+              "sm:inset-x-auto sm:top-6 sm:right-6 sm:bottom-6 sm:w-[26rem] sm:max-w-[calc(100vw-3rem)]",
               "md:w-[31rem]"
             )}
           >
@@ -311,63 +366,71 @@ export function SourceAwareChat({
             </div>
 
             <div
+              ref={transcriptRef}
               className="min-h-0 flex-1 overflow-y-auto border-y border-white/10 px-4 py-4 sm:px-5"
               aria-live="polite"
               aria-label="Conversation with Governance Guide"
+              data-source-aware-chat-transcript=""
             >
               <div className="space-y-4">
                 <AssistantMessage>{assistantGreeting}</AssistantMessage>
 
-                {submittedQuestion ? (
-                  <div
-                    role="article"
-                    aria-label="Submitted question"
-                    className="flex justify-end"
-                  >
-                    <div className="max-w-[82%] rounded-2xl rounded-tr-md border border-sky-300/30 bg-sky-500/20 px-4 py-3 text-sm leading-6 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                      {submittedQuestion}
+                {transcript.map((turn) => (
+                  <div key={turn.id} className="space-y-4">
+                    <div
+                      role="article"
+                      aria-label="Submitted question"
+                      className="flex justify-end"
+                    >
+                      <div className="max-w-[82%] rounded-2xl rounded-tr-md border border-sky-300/30 bg-sky-500/20 px-4 py-3 text-sm leading-6 text-sky-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                        {turn.question}
+                      </div>
                     </div>
+
+                    {turn.response.status === "loading" ? (
+                      <AssistantMessage>
+                        <span className="inline-flex items-center gap-2">
+                          <LoaderCircle
+                            aria-hidden="true"
+                            className="size-4 animate-spin text-sky-300 motion-reduce:animate-none"
+                          />
+                          Checking approved materials for a grounded answer.
+                        </span>
+                      </AssistantMessage>
+                    ) : null}
+
+                    {turn.response.status === "error" ? (
+                      <AssistantMessage tone="alert">
+                        <span role="alert">{turn.response.error.message}</span>
+                      </AssistantMessage>
+                    ) : null}
+
+                    {turn.response.status === "success" ? (
+                      <div className="flex min-w-0 items-start gap-3">
+                        <AssistantAvatar />
+                        <div className="min-w-0 flex-1">
+                          <GroundedAnswerSurface
+                            turnId={turn.id}
+                            response={turn.response.response}
+                            expandedCitationKey={expandedCitationKey}
+                            onRefocusQuestion={() =>
+                              focusComposer(inputRef, isOpenRef)
+                            }
+                            onRephraseCourseQuestion={() =>
+                              chooseStarterPrompt(rephrasePrompt)
+                            }
+                            onChooseSuggestedPrompt={chooseStarterPrompt}
+                            onToggleSource={(citationKey) =>
+                              setExpandedCitationKey((current) =>
+                                current === citationKey ? null : citationKey
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
-                ) : null}
-
-                {answerState.status === "loading" ? (
-                  <AssistantMessage>
-                    <span className="inline-flex items-center gap-2">
-                      <LoaderCircle
-                        aria-hidden="true"
-                        className="size-4 animate-spin text-sky-300 motion-reduce:animate-none"
-                      />
-                      Checking approved materials for a grounded answer.
-                    </span>
-                  </AssistantMessage>
-                ) : null}
-
-                {answerState.status === "error" ? (
-                  <AssistantMessage tone="alert">
-                    <span role="alert">{answerState.error.message}</span>
-                  </AssistantMessage>
-                ) : null}
-
-                {answerState.status === "success" ? (
-                  <div className="flex min-w-0 items-start gap-3">
-                    <AssistantAvatar />
-                    <div className="min-w-0 flex-1">
-                      <GroundedAnswerSurface
-                        response={answerState.response}
-                        expandedSourceId={expandedSourceId}
-                        onRefocusQuestion={() =>
-                          inputRef.current?.focus({ preventScroll: true })
-                        }
-                        onChooseSuggestedPrompt={chooseStarterPrompt}
-                        onToggleSource={(sourceId) =>
-                          setExpandedSourceId((current) =>
-                            current === sourceId ? null : sourceId
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                ) : null}
+                ))}
               </div>
             </div>
 
@@ -424,6 +487,7 @@ export function SourceAwareChat({
                         size="sm"
                         className="h-auto min-h-11 rounded-full border-white/15 bg-white/5 px-3 py-2 text-left text-xs font-semibold whitespace-normal text-slate-100 hover:border-sky-300/45 hover:bg-sky-300/10 hover:text-white"
                         onClick={() => chooseStarterPrompt(prompt.prompt)}
+                        disabled={isSubmitting}
                       >
                         <BookOpenCheck
                           aria-hidden="true"
@@ -456,18 +520,16 @@ export function SourceAwareChat({
                     onKeyDown={handleQuestionKeyDown}
                     rows={1}
                     placeholder="Ask about this chapter..."
-                    className="max-h-28 min-h-12 flex-1 resize-none bg-transparent px-0 py-3 text-base leading-6 text-white outline-none placeholder:text-slate-500 sm:text-sm"
+                    className="min-h-12 flex-1 resize-none bg-transparent px-0 py-3 text-base leading-6 text-white outline-none placeholder:text-slate-500 sm:text-sm"
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    aria-label={
-                      answerState.status === "loading" ? "Asking" : "Ask"
-                    }
+                    aria-label={isSubmitting ? "Asking" : "Ask"}
                     className="size-12 shrink-0 rounded-2xl bg-amber-300 text-slate-950 shadow-[0_12px_28px_rgba(245,158,11,0.22)] hover:bg-amber-200"
-                    disabled={answerState.status === "loading"}
+                    disabled={isSubmitting}
                   >
-                    {answerState.status === "loading" ? (
+                    {isSubmitting ? (
                       <LoaderCircle
                         aria-hidden="true"
                         className="animate-spin motion-reduce:animate-none"
@@ -498,54 +560,108 @@ export function SourceAwareChat({
           </section>
         ) : null}
 
-        <motion.button
-          ref={triggerRef}
-          type="button"
-          aria-controls={panelId}
-          aria-expanded={isOpen}
-          aria-label="Open source-aware chat"
-          tabIndex={isOpen ? -1 : undefined}
-          data-source-aware-chat-trigger=""
-          data-expanded={isDockExpanded ? "true" : "false"}
-          className="source-chat-dock"
-          initial={false}
-          animate={dockMotionState}
-          variants={dockVariants}
-          transition={dockTransition}
-          onPointerEnter={() => setIsDockHovered(true)}
-          onPointerLeave={() => setIsDockHovered(false)}
-          onFocus={() => setIsDockFocused(true)}
-          onBlur={() => setIsDockFocused(false)}
-          onClick={() => setIsOpen((current) => !current)}
-        >
-          <motion.span
-            className="source-chat-dock-icon"
-            aria-hidden="true"
-            variants={dockIconVariants}
-            transition={dockRevealTransition}
+        {!isOpen ? (
+          <motion.button
+            ref={triggerRef}
+            type="button"
+            aria-controls={panelId}
+            aria-expanded={isOpen}
+            aria-label="Open source-aware chat"
+            data-source-aware-chat-trigger=""
+            data-expanded={isDockExpanded ? "true" : "false"}
+            className="source-chat-dock"
+            initial={false}
+            animate={dockMotionState}
+            variants={dockVariants}
+            transition={dockTransition}
+            onPointerEnter={() => setIsDockHovered(true)}
+            onPointerLeave={() => setIsDockHovered(false)}
+            onFocus={() => setIsDockFocused(true)}
+            onBlur={() => setIsDockFocused(false)}
+            onClick={() => setIsOpen(true)}
           >
-            <MessageCircle />
-          </motion.span>
-          <motion.span
-            className="source-chat-dock-copy"
-            variants={dockCopyVariants}
-            transition={dockRevealTransition}
-          >
-            <strong>Ask a question about this chapter</strong>
-            <small>Source-aware • Cite-verified</small>
-          </motion.span>
-          <motion.span
-            className="source-chat-dock-arrow"
-            aria-hidden="true"
-            variants={dockArrowVariants}
-            transition={dockRevealTransition}
-          >
-            <ArrowRight />
-          </motion.span>
-        </motion.button>
+            <motion.span
+              className="source-chat-dock-icon"
+              aria-hidden="true"
+              variants={dockIconVariants}
+              transition={dockRevealTransition}
+            >
+              <MessageCircle />
+            </motion.span>
+            <motion.span
+              className="source-chat-dock-copy"
+              variants={dockCopyVariants}
+              transition={dockRevealTransition}
+            >
+              <strong>Ask a question about this chapter</strong>
+              <small>Source-aware • Cite-verified</small>
+            </motion.span>
+            <motion.span
+              className="source-chat-dock-arrow"
+              aria-hidden="true"
+              variants={dockArrowVariants}
+              transition={dockRevealTransition}
+            >
+              <ArrowRight />
+            </motion.span>
+          </motion.button>
+        ) : null}
       </div>
     </div>
   )
+}
+
+function createTranscriptTurnId(turnIdRef: { current: number }) {
+  turnIdRef.current += 1
+  return `chat-turn-${turnIdRef.current}`
+}
+
+function focusComposer(
+  inputRef: { current: HTMLTextAreaElement | null },
+  isOpenRef: { current: boolean }
+) {
+  if (!isOpenRef.current) {
+    return
+  }
+
+  inputRef.current?.focus({ preventScroll: true })
+}
+
+function syncComposerHeight(textarea: HTMLTextAreaElement | null) {
+  if (!textarea) {
+    return
+  }
+
+  textarea.style.height = "0px"
+  const nextHeight = Math.min(
+    Math.max(textarea.scrollHeight, composerMinHeightPx),
+    composerMaxHeightPx
+  )
+  textarea.style.height = `${nextHeight}px`
+  textarea.style.overflowY =
+    textarea.scrollHeight > composerMaxHeightPx ? "auto" : "hidden"
+}
+
+function toChatError(error: unknown): ChatError {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    "message" in error &&
+    typeof error.code === "string" &&
+    typeof error.message === "string"
+  ) {
+    return {
+      code: error.code,
+      message: error.message,
+    }
+  }
+
+  return {
+    code: "grounded_chat_unavailable",
+    message:
+      "The assistant could not return a grounded answer right now. Please try again with a course question.",
+  }
 }
 
 type AssistantMessageProps = {
@@ -595,17 +711,21 @@ function AssistantAvatar({ tone = "default" }: AssistantAvatarProps) {
 }
 
 type GroundedAnswerSurfaceProps = {
+  turnId: string
   response: GroundedChatSuccess
-  expandedSourceId: string | null
+  expandedCitationKey: string | null
   onRefocusQuestion: () => void
+  onRephraseCourseQuestion: () => void
   onChooseSuggestedPrompt: (prompt: string) => void
-  onToggleSource: (sourceId: string) => void
+  onToggleSource: (citationKey: string) => void
 }
 
 function GroundedAnswerSurface({
+  turnId,
   response,
-  expandedSourceId,
+  expandedCitationKey,
   onRefocusQuestion,
+  onRephraseCourseQuestion,
   onChooseSuggestedPrompt,
   onToggleSource,
 }: GroundedAnswerSurfaceProps) {
@@ -662,7 +782,7 @@ function GroundedAnswerSurface({
           type="button"
           variant="outline"
           className="min-h-11 rounded-full border-sky-300/30 bg-sky-300/10 text-sky-50 hover:bg-sky-300/20 hover:text-white"
-          onClick={onRefocusQuestion}
+          onClick={onRephraseCourseQuestion}
         >
           Rephrase a course question
         </Button>
@@ -707,8 +827,9 @@ function GroundedAnswerSurface({
         <p className="text-sm font-semibold text-slate-100">Source support</p>
         <div className="grid gap-2">
           {response.citations.map((citation) => {
-            const isExpanded = expandedSourceId === citation.sourceId
-            const sourceDetailsId = `${detailsId}-${citation.sourceId}`
+            const citationKey = `${turnId}:${citation.sourceId}`
+            const isExpanded = expandedCitationKey === citationKey
+            const sourceDetailsId = `${detailsId}-${turnId}-${citation.sourceId}`
 
             return (
               <div key={citation.sourceId} className="min-w-0">
@@ -717,7 +838,7 @@ function GroundedAnswerSurface({
                   aria-expanded={isExpanded}
                   aria-controls={sourceDetailsId}
                   className="inline-flex min-h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-white/10 bg-slate-950/50 px-3 py-2 text-left text-xs font-semibold text-slate-100 transition-colors hover:border-sky-300/45 hover:bg-sky-300/10 focus-visible:border-sky-300 focus-visible:ring-3 focus-visible:ring-sky-300/25 focus-visible:outline-none motion-reduce:transition-none"
-                  onClick={() => onToggleSource(citation.sourceId)}
+                  onClick={() => onToggleSource(citationKey)}
                 >
                   <FileText
                     aria-hidden="true"

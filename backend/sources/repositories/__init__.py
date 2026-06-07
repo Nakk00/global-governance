@@ -71,10 +71,10 @@ def _should_use_runtime_fallback(
     error: SourceMutationError,
     repository: StewardshipRepository,
 ) -> bool:
-    return (
-        isinstance(repository, SupabaseStewardshipRepository)
-        and error.code in {"admin_source_store_missing", "admin_source_store_unavailable"}
-    )
+    return isinstance(repository, SupabaseStewardshipRepository) and error.code in {
+        "admin_source_store_missing",
+        "admin_source_store_unavailable",
+    }
 
 
 def get_stewardship_dashboard() -> StewardshipDashboardDto:
@@ -90,9 +90,7 @@ def get_source_chunks(source_id: str) -> SourceChunksInspectionDto | None:
 
 
 def get_source_citations(source_id: str) -> SourceCitationsInspectionDto | None:
-    return _with_runtime_fallback(
-        lambda repository: repository.get_source_citations(source_id)
-    )
+    return _with_runtime_fallback(lambda repository: repository.get_source_citations(source_id))
 
 
 def get_chunk_detail(chunk_id: str) -> ChunkDetailDto | None:
@@ -100,9 +98,7 @@ def get_chunk_detail(chunk_id: str) -> ChunkDetailDto | None:
 
 
 def get_citation_detail(citation_id: str) -> CitationDetailDto | None:
-    return _with_runtime_fallback(
-        lambda repository: repository.get_citation_detail(citation_id)
-    )
+    return _with_runtime_fallback(lambda repository: repository.get_citation_detail(citation_id))
 
 
 def upload_source(

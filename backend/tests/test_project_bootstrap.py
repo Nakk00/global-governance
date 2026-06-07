@@ -66,8 +66,7 @@ class ProjectBootstrapTests(SimpleTestCase):
         with TemporaryDirectory() as temp_dir:
             env_path = Path(temp_dir) / ".env"
             env_path.write_text(
-                "REDIS_ABUSE_COOLDOWN_SECONDS=10\n"
-                "REDIS_RATE_LIMIT_MAX_REQUESTS=5\n",
+                "REDIS_ABUSE_COOLDOWN_SECONDS=10\nREDIS_RATE_LIMIT_MAX_REQUESTS=5\n",
                 encoding="utf-8",
             )
 

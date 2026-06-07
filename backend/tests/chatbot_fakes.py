@@ -225,9 +225,7 @@ def deterministic_embedding(text: str, dimensions: int = 8) -> list[float]:
 
 
 def deterministic_score(query: str, passage: str) -> float:
-    query_terms = {
-        term.lower().strip(".,;:!?") for term in query.split() if term.strip()
-    }
+    query_terms = {term.lower().strip(".,;:!?") for term in query.split() if term.strip()}
     passage_terms = {term.lower().strip(".,;:!?") for term in passage.split() if term.strip()}
 
     if not query_terms:

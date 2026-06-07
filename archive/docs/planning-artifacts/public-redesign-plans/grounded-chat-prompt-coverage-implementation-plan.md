@@ -1,333 +1,284 @@
-# Grounded Chat Prompt Coverage Implementation Plan
+# Grounded Chat Suggested Prompt Source-Knowledge Remediation Plan
 
 Date: 2026-06-07
-Status: Proposed implementation plan
+Status: Scoped to the reported suggested-prompt answerability issue
 Owner surface: Public source-aware chat
-Primary goal: Every visible suggested prompt for Chapters 1-4 returns a grounded answer, with exactly 5 suggested prompts shown per chapter.
+Primary goal: Every visible suggested prompt returns a live grounded `answered` response from `/api/chat`.
+Current visible audit inventory: 25 suggested prompts from `getSourceAwareChatStarterPromptAuditEntries()` as of 2026-06-07.
 
-## Objective
+## Reported Issue
 
-Bring the public source-aware chat to a stricter contract:
+Some suggested prompts still produce non-grounded learner-facing response cards even though they are shown as recommended questions.
 
-- Each visible chapter prompt chip must be intentionally supported by approved sources.
-- Each visible chapter prompt chip must resolve to a grounded `answered` outcome, not `weakSupport`, `refused`, or `fallback`.
-- Each primary chapter context must expose exactly 5 suggested prompts.
-- The implementation must remain constitution-compliant: browser-owned presentation in `src/`, Django-owned privileged retrieval in `backend/`, typed degraded states preserved, and verification driven by red-green-refactor plus changed-scope coverage.
+Observed failing cards:
 
-This plan treats the current `200 332` vs `200 799` backend log sizes as a useful debugging signal, not as the business rule. The durable rule is outcome type plus citation quality, not response byte count.
+- `Limited support in approved materials`
+- `Course boundary reached`
+- `Grounded answer unavailable`
+
+Observed Django log signals:
+
+- `POST /api/chat` with response size around `200 332` maps to the limited-support card.
+- `POST /api/chat` with response size around `200 295` maps to the boundary-refusal card.
+- `POST /api/chat` with response size around `200 364` maps to the grounded-unavailable fallback card.
+
+The HTTP `200` status and response byte size are only diagnostics. A suggested prompt passes only when the typed response is `answered`, the grounding support is `strong`, and the answer includes at least one matching approved citation.
 
 ## Scope
 
 In scope:
 
-- Chapter prompt inventory for the public chat surface
-- Approved-source coverage expansion using already-approved source identities first
-- Backend section-to-source scoping for grounded retrieval
-- Frontend prompt catalog changes so each chapter shows 5 prompts
-- Prompt audit automation and release gates proving every visible prompt is grounded
+- Collect every visible suggested prompt from `src/data/chat/source-aware-chat.ts`; do not limit the gate to primary chapters only.
+- Run every suggested prompt against the live Django `/api/chat` endpoint.
+- Record each failing prompt by section ID, prompt ID, label, prompt text, expected source IDs, response state, support level, returned citation source IDs, visible card, endpoint mode, and notes.
+- Convert each failing prompt into a precise course claim that the chatbot needs to support.
+- Compare the prompt's expected source IDs against source bundle metadata, `archive/docs/approved-sources/manifest.json`, backend section scope, and active retrieval chunks.
+- Update or add approved raw source knowledge files under `archive/docs/approved-sources/raw`.
+- Ensure updated raw source knowledge is represented in the manifest, source metadata, citation adapters, ingestion or retrieval fixtures, active retrieval chunks, and backend section scope.
+- Re-run the same live prompt audit until every suggested prompt returns a grounded answer.
 
-Out of scope:
+Out of scope for this plan:
 
-- Free-form expansion of the chatbot into open-domain knowledge
-- Moving retrieval or secrets into the frontend
-- Replacing typed `weakSupport`, `refused`, `cooldown`, or `fallback` contracts
-- Multi-turn semantic memory beyond the already implemented session-local transcript
+- Any chatbox issue unrelated to suggested prompts returning grounded answers.
+- Open-domain chatbot expansion.
+- Adding broad or unrelated material just to make the model answer more often.
 
-## Constitution Check
+## Tool-Assisted Findings
 
-### I. Multi-Runtime Architecture Boundaries
+Graphify and GitNexus both point to a cross-layer remediation, not a single-file content edit.
 
-Pass.
+Graphify findings:
 
-- Prompt presentation stays in `src/components/chat` and `src/data/chat`.
-- Privileged retrieval, section scoping, and source filtering stay in Django under `backend/chatbot` and `backend/retrieval`.
-- Approved source identity and adapter metadata stay repo-managed under `src/data/source-bundles`.
+- The relevant graph communities span prompt data, prompt audit tooling, public chat outcomes, approved-source ingestion, source bundle helpers, retrieval, and Django chat orchestration.
+- The backend graph highlights `PublicChatRuntime`, `GroundedChatService`, and `RetrievalService` as central chat nodes, so the plan must separate guard, retrieval, and generation fallback failures.
+- The ingestion community is separate from the chat outcome community, so raw source edits must be explicitly carried through manifest entries, ingestion, retrievable chunks, and citations.
 
-### II. Runtime-Appropriate Modularization
+GitNexus findings:
 
-Pass.
+- `scripts/chatbot/audit-suggested-prompts.ts` is the audit entrypoint and gets its inventory from `getSourceAwareChatStarterPromptAuditEntries()`.
+- `src/lib/chat/prompt-audit.ts` currently has a strict miss helper named `hasStrictPrimaryPromptAuditMiss`, which only fails primary-chapter misses. That does not satisfy this plan because the target is every visible suggested prompt.
+- `src/data/chat/source-aware-chat.test.ts` still asserts a 20-prompt primary-chapter release gate. That older gate is insufficient because the visible audit inventory currently contains 25 prompts, including supporting-section prompts that can still be shown to learners.
+- `src/lib/chat/prompt-audit.ts` currently maps typed `fallback` responses to `transportFailure` or `missingSource`. That loses the exact learner-visible `Grounded answer unavailable` branch, so the audit schema must preserve fallback as its own classification and raw response state.
+- `GroundedChatService._answer()` maps the three observed cards to different branches:
+  - `Course boundary reached` is a topic or safety guard refusal before retrieval.
+  - `Limited support in approved materials` is returned when `RetrievalService.retrieve()` does not reach strong support.
+  - `Grounded answer unavailable` is a safe fallback after orchestration cannot complete a grounded answer.
+- `RetrievalService.retrieve()` only returns strong support when active `gg-src-*` candidates are inside the current section scope and pass rerank thresholds.
+- `load_approved_source_manifest()` and `prepare_ingestion()` show that raw approved files become active only through manifest entries, revisions, chunking, embeddings, and ingestion persistence.
+- GitNexus did not expose `/api/chat` through route-map or shape-check route nodes, but it did resolve `backend/chatbot/views.py::public_chat`. Use `public_chat` symbol context and backend contract tests as the route verification source of truth for this remediation.
 
-- Frontend changes remain feature-owned inside the chat feature.
-- Backend changes remain domain-owned inside `chatbot` and `retrieval`.
-- The plan avoids introducing a new global shared layer unless the source-scope derivation logic earns a dedicated helper through multiple real consumers.
+Known suspect to verify first:
 
-### III. Accessible, Resilient Learning Experience
+- `src/data/chat/source-aware-chat.ts` expects WPS source IDs including `gg-src-post-award-compliance-record` and `gg-src-scarborough-standoff-record`.
+- `backend/chatbot/section-source-projection.json` scopes those same IDs to `west-philippine-sea-dossier`.
+- `archive/docs/approved-sources/manifest.json` currently does not show manifest entries for `gg-src-post-award-compliance-record` or `gg-src-scarborough-standoff-record`.
+- If the live audit failures involve prompts mapped to those IDs, the likely fix is to add or split approved raw material plus manifest entries, then ingest them, rather than merely changing prompt wording.
 
-Pass.
+## Remediation Requirements
 
-- The learner still receives typed bounded states when they ask unsupported free-form questions.
-- The stricter rule applies to visible suggested prompts only.
-- The existing transcript, reduced-motion, keyboard, and fallback behavior remain part of verification.
+The implementation must close these gaps before source-knowledge changes are considered verified:
 
-### IV. Typed Boundary Contracts and Deliberate States
+- Replace the primary-only strict audit helper with an all-visible-prompt miss helper. `--fail-on-miss` must exit nonzero for any row whose classification is not `answered`, regardless of `isPrimaryChapter`.
+- Update prompt-audit tests so a supporting-section weak-support, refusal, cooldown, fallback, transport failure, weak citation, or missing-source row fails the strict gate.
+- Update source-aware prompt tests so they assert the full visible audit inventory, not only the 20 primary chapter prompts.
+- Add prompt ID and label to both Markdown and JSON audit output.
+- Add raw `responseState`, `supportLevel`, returned citation source IDs, and visible card or outcome label to audit rows.
+- Add an explicit `fallback` audit classification for typed `state=fallback`, instead of collapsing fallback into `transportFailure`.
+- Add a machine-readable audit artifact target for the full live run and preserve failing rows in the QA report or linked JSON.
+- Add a fast parity check that every expected prompt source ID exists in the approved-source manifest, source bundle metadata, backend section scope when section-specific, and ingestion fixtures where applicable.
+- Add a fast parity check that every backend section source ID expected by visible prompts has a manifest entry before live retrieval is trusted.
+- Include `/api/chat` contract verification through `backend/tests/test_public_chat_contract.py`; route-map output is not sufficient for this repository because GitNexus does not currently expose `/api/chat` as a route node.
+- Include changed-scope coverage commands whenever executable code changes, satisfying the repo constitution's 80% coverage gate for every reported metric.
 
-Pass.
+## Source-Knowledge Meaning
 
-- Prompt success will be validated via typed response envelopes, citation matches, and source support.
-- Byte-size observations from server logs are diagnostic only and must not replace typed contract assertions.
+For this plan, widening source knowledge means updating the approved raw source material in:
 
-### V. Cohesive, Intention-Revealing Code
+`archive/docs/approved-sources/raw`
 
-Pass.
+Current raw topic files:
 
-- Prompt definitions, approved-source mappings, and retrieval scope each keep one understandable owner.
-- The plan prefers deriving chapter chat scope from the approved source bundle over duplicating large hand-maintained mappings in multiple places.
+- `topic-1-global-governance-basics-knowledge.md`
+- `topic-2-major-actors-global-governance-knowledge.md`
+- `topic-3-united-nations-purpose-structure-knowledge.md`
+- `topic-4-limits-criticisms-global-governance-knowledge.md`
+- `topic-5-international-law-dispute-resolution-knowledge.md`
+- `topic-6-west-philippine-sea-south-china-sea-case-knowledge.md`
+- `topic-7-enforcement-gap-ruling-vs-reality-knowledge.md`
+- `topic-8-asean-and-regional-governance-knowledge.md`
 
-### VI. Test-Driven Verification and Delivery Safety
+Raw source updates are not complete by themselves. The updated knowledge must also become retrievable and citeable through the backend chat path:
 
-Pass.
+- Add or update the raw approved file.
+- Add or update the corresponding `archive/docs/approved-sources/manifest.json` entry and revision.
+- Ensure the source ID exists in source bundle citation metadata when it is expected by a visible prompt.
+- Ensure the source ID is included in the correct backend section scope.
+- Run approved-source ingestion so the live retrieval store has active chunks.
+- Verify `/api/chat` returns the source as a matching citation for the relevant suggested prompt.
 
-- Every workstream below starts with red tests or audit failure.
-- Verification uses the smallest confident layer first: Vitest for prompt inventory and UI behavior, pytest for retrieval scope and outcome rules, Playwright for browser confidence, and the live prompt audit for final release proof.
+## Failure-Specific Fix Paths
 
-## Architecture Evidence
+`Limited support in approved materials`:
 
-### Graphify findings
+- Treat this first as a retrieval/source-coverage failure.
+- Check whether the expected source IDs have manifest entries, active chunks, and section scope.
+- If the right source exists but does not retrieve, update the raw source wording so the relevant course claim appears clearly in a compact chunk.
+- If the right source ID has no manifest entry, add or split approved raw material and ingest it.
+- Only consider retrieval threshold or ranking changes after proving that source IDs, chunks, and prompt language are aligned.
 
-- Merged graph `Community 33` groups `getSourceAwareChatStarterPrompts`, `chooseStarterPrompt`, and `handleSubmit`, confirming the prompt rail is centrally owned by `src/components/chat/SourceAwareChat.tsx` and `src/data/chat/source-aware-chat.ts`.
-- `Community 18` groups `requestGroundedAnswer` and the grounded-answer parsing helpers, confirming the browser request contract is already a stable seam for prompt auditing.
-- `Community 32` groups `RetrievalService` and its tests, showing strong/weak support is determined inside `backend/retrieval/services.py`.
-- `Community 2` and `Community 6` connect the approved source manifest, bundle adapters, and dossier evidence helpers, which makes the approved source bundle the strongest long-term authority for chapter chat scope.
+`Course boundary reached`:
 
-### GitNexus findings
+- Treat this first as a topic-guard or prompt-wording failure.
+- If the prompt is clearly about the course, adjust the guard examples or backend guard handling so visible course prompts are allowed.
+- If the prompt overreaches the approved materials, narrow the visible prompt text.
+- Do not assume a raw source update will fix this branch, because refusal happens before retrieval.
 
-- `SourceAwareChat` has HIGH upstream risk because it feeds `AppShell` and shared render helpers. Plan changes should keep the frontend prompt work localized and heavily tested.
-- `answer_public_chat` is called by `backend/chatbot/views.py:public_chat`, so backend grounding changes naturally funnel through a single public runtime entrypoint.
-- `requestGroundedAnswer` already funnels browser calls through `createChatRequest` and `parseGroundedChatEnvelope`, which is the right place to preserve the typed contract while we change source coverage.
-- `RetrievalService` is the backend seam that decides whether an answer is `strong` or `weak`, based on section scoping and retrieval/rerank thresholds.
+`Grounded answer unavailable`:
 
-## Current Gaps
+- Treat this as a post-orchestration fallback until proven otherwise.
+- Capture whether the failure happens after strong retrieval, model generation, safety filtering, protection, or provider error handling.
+- Preserve this outcome as `classification=fallback` in the prompt audit output.
+- If fallback follows weak or missing retrieval, fix the same source/manifest/chunk path as limited support.
+- If fallback follows strong retrieval, inspect generation and safety behavior instead of broadening raw sources blindly.
 
-1. The frontend prompt catalog in `src/data/chat/source-aware-chat.ts` currently marks many visible prompts as `limitedSupport`, which means the UI already knows several recommended prompts are not reliably grounded.
-2. Chapter prompt counts are inconsistent. Several chapter contexts expose 2-3 prompts instead of the desired fixed set of 5.
-3. `backend/chatbot/services.py:SECTION_SOURCE_IDS` is narrower than the richer approved-source bundle in `src/data/source-bundles/approved-source-bundle.ts`, especially for chapter-specific support.
-4. `src/data/source-bundles/approved-source-bundle.ts` already contains chapter-aware `chatCitations` adapters, but the backend section scope is still partially hand-maintained rather than derived from that source of truth.
-5. The prompt audit script currently allows `limitedSupport` prompts to remain in the visible inventory. That is useful for diagnostics, but it is not strict enough for the new release goal.
+## Test-First Sequence
 
-## Implementation Strategy
+All executable-code changes in this remediation must follow red-green-refactor:
 
-### Workstream 1: Establish the new chapter prompt contract
+1. Add or update the focused test that proves the missing behavior.
+2. Run that focused test and confirm it fails for the intended reason.
+3. Implement the smallest code change that makes the focused test pass.
+4. Refactor only while the focused suite stays green.
+5. Run the selected verification commands and changed-scope coverage gates.
 
-Goal:
+Required red tests before production edits:
 
-- Exactly 5 visible prompts for each primary chapter context:
-  - `hero-narrative-frame`
-  - `global-governance-overview`
-  - `un-command-center`
-  - `west-philippine-sea-dossier`
+- Prompt audit strictness: supporting-section misses must fail the release gate.
+- Prompt audit schema: rows must include prompt ID, label, response state, support level, returned citation source IDs, visible card, and explicit fallback classification.
+- Prompt inventory: the full visible audit inventory must be asserted, including the current 25 entries.
+- Source parity: every prompt-expected source ID must exist in manifest, source metadata, backend section scope, and test fixtures.
+- `/api/chat` contract: backend tests must still prove section and depth context reach orchestration, typed cooldown remains a successful outcome, and provider fallback stays bounded.
 
-Tasks:
+## Remediation Loop
 
-- Define 5 prompt intents per chapter that are narrow enough to be source-groundable.
-- Keep prompt wording anchored to course language already present in approved materials.
-- Maintain internal supporting contexts such as `governance-limits` and `conclusion-references`, but do not let them drift away from the chapter-level prompt contract.
+1. Add the red tests listed in the Test-First Sequence section.
+2. Update the prompt audit harness so `--fail-on-miss` fails any visible suggested prompt miss, not only primary-chapter misses.
+3. Extend the audit row schema to preserve prompt ID, label, expected source IDs, raw response state, support level, returned citation source IDs, visible card, and explicit fallback classification.
+4. Add prompt/source parity tests before changing the raw corpus.
+5. Start the local live stack needed for `/api/chat`.
+6. Export the full suggested-prompt inventory.
+7. Run the prompt audit against `http://127.0.0.1:8000/api/chat`.
+8. Save every prompt row to a machine-readable JSON artifact and every failing prompt row to the QA report or a linked JSON artifact.
+9. For each failure, identify the exact course claim the prompt expects.
+10. Search `archive/docs/approved-sources/raw` for supporting material.
+11. Classify the root cause:
+   - raw source exists but is not in `archive/docs/approved-sources/manifest.json`
+   - raw source exists in the manifest but is not active or retrievable
+   - raw source exists but backend section scope excludes it
+   - raw source exists but does not clearly state the needed claim
+   - raw source is missing and needs a new approved file or an update to an existing file
+   - prompt wording is course-relevant but the topic guard rejects it
+   - prompt wording overreaches the approved course materials
+   - generation or safety fallback occurs after otherwise strong retrieval
+12. Update the raw approved source knowledge when the claim gap is real.
+13. Update manifest entries, source bundle metadata, citation adapters, ingestion or retrieval fixtures, active chunks, and backend section scope as needed.
+14. Run approved-source ingestion after raw or manifest edits.
+15. Re-run the same failing prompt before moving to the next miss.
+16. Run the focused unit/backend tests and changed-scope coverage gates.
+17. Repeat until the strict live audit has zero suggested-prompt misses.
 
-Primary files:
+## Expected Files
+
+Primary source-knowledge files:
+
+- `archive/docs/approved-sources/raw/*.md`
+- `archive/docs/approved-sources/manifest.json`
+
+Likely supporting files:
 
 - `src/data/chat/source-aware-chat.ts`
 - `src/data/chat/source-aware-chat.test.ts`
-- `src/components/chat/SourceAwareChat.tsx`
-- `src/components/chat/SourceAwareChat.test.tsx`
-
-TDD entry:
-
-- Red test that each primary chapter returns exactly 5 prompts.
-- Red test that no visible primary chapter prompt is tagged `limitedSupport` or `boundaryRefusal`.
-
-### Workstream 2: Expand approved source coverage deliberately
-
-Goal:
-
-- Back each visible prompt with approved material rather than relying on the model to improvise.
-
-Tasks:
-
-- Audit current chapter prompt intents against the existing approved source bundle.
-- Expand chapter chat coverage using already-approved sources first.
-- Where a prompt intent still lacks support after scope alignment, add or refine approved source records and adapters deliberately rather than broadening prompt language vaguely.
-- Prefer adding chapter-relevant sources to `chatCitations` and related adapters instead of scattering new source IDs directly into frontend prompt definitions.
-
-Primary files:
-
+- `src/lib/chat/prompt-audit.ts`
+- `src/lib/chat/prompt-audit.test.ts`
 - `src/data/source-bundles/approved-source-bundle.ts`
 - `src/data/source-bundles/approved-source-bundle.test.ts`
-- `backend/tests/fixtures/chatbot_sources.py`
-
-Important rule:
-
-- Do not widen sources randomly to force answers.
-- Every added source or adapter must directly support a visible prompt family or chapter claim.
-
-### Workstream 3: Derive backend section chat scope from approved source metadata
-
-Goal:
-
-- Stop frontend prompts and backend retrieval scope from drifting apart.
-
-Tasks:
-
-- Refactor backend section scope so it is derived from the approved source bundle's chapter chat mappings, or from a single server-safe projection of that mapping.
-- Reduce the amount of duplicated hand-maintained chapter scope in `SECTION_SOURCE_IDS`.
-- Preserve Django ownership of retrieval scoping and do not move privileged retrieval decisions into the frontend.
-- Keep the derivation deterministic and testable.
-
-Primary files:
-
+- `backend/chatbot/section-source-projection.json`
+- `backend/chatbot/section_sources.py`
 - `backend/chatbot/services.py`
 - `backend/retrieval/services.py`
+- `backend/ingestion/pipeline.py`
+- `backend/ingestion/services.py`
 - `backend/tests/test_chatbot_orchestration.py`
+- `backend/tests/test_public_chat_contract.py`
+- `backend/tests/test_approved_source_manifest.py`
+- `backend/tests/test_ingestion_repository.py`
 - `backend/tests/test_retrieval_service.py`
-
-Design preference:
-
-- Preferred: derive section source scope from bundle-backed chat citation adapters.
-- Acceptable fallback: a narrow server-only mapping helper if direct derivation would couple browser metadata too tightly into backend runtime imports.
-
-### Workstream 4: Tighten grounded-answer qualification for visible prompt audits
-
-Goal:
-
-- Treat visible prompt success as a release gate, not a soft suggestion.
-
-Tasks:
-
-- Update the prompt audit workflow so the primary release expectation is: every visible chapter prompt returns `answered` with at least one citation matching the expected approved source set.
-- Keep non-`answered` classifications for diagnostics, but fail the release audit when any visible primary chapter prompt misses grounded-answer criteria.
-- Preserve the distinction between:
-  - source mismatch
-  - weak support
-  - fallback/transport failure
-  - refusal/cooldown
-
-Primary files:
-
+- `backend/tests/test_ingestion_pipeline.py`
+- `backend/tests/test_ingestion_services.py`
+- `backend/tests/fixtures/chatbot_sources.py`
 - `scripts/chatbot/audit-suggested-prompts.ts`
+- `archive/docs/planning-artifacts/public-redesign-plans/source-aware-chatbox-qa-report.md`
 - `specs/001-grounded-chatbot-readiness/quickstart.md`
-- Optional archive QA follow-up notes if needed
 
-Diagnostic note:
+Only touch frontend component files if the failing prompt itself must be removed, renamed, or narrowed in the visible prompt catalog.
 
-- Log size differences like `200 332` vs `200 799` can help local debugging, but the audit must assert typed outcomes and citation matches instead of byte thresholds.
+## Verification
 
-### Workstream 5: Keep the chat UI aligned with the new stricter prompt contract
+Fast red-green gates before live testing:
 
-Goal:
+- `pnpm exec vitest run src/lib/chat/prompt-audit.test.ts src/data/chat/source-aware-chat.test.ts src/data/source-bundles/approved-source-bundle.test.ts`
+- `pnpm backend:test -- backend/tests/test_approved_source_manifest.py backend/tests/test_ingestion_pipeline.py backend/tests/test_ingestion_repository.py backend/tests/test_ingestion_services.py backend/tests/test_retrieval_service.py backend/tests/test_chatbot_orchestration.py backend/tests/test_public_chat_contract.py`
 
-- The prompt rail should only surface prompts that are known-good for the active chapter.
+Audit schema gates:
 
-Tasks:
+- `pnpm chatbot:audit-prompts -- --endpoint-mode fixture --json`
+- `pnpm chatbot:audit-prompts -- --endpoint-mode fixture --fail-on-miss`
 
-- Update the prompt rail rendering to assume a stable 5-item inventory for each primary chapter.
-- Preserve current submit behavior, transcript behavior, and prompt-click flow.
-- Ensure any auxiliary contexts still degrade safely if a user navigates into them.
+The fixture mode may use deterministic local responses, but it must prove the CLI schema, all-visible-prompt fail behavior, fallback classification, prompt ID and label fields, response state, support level, returned citation source IDs, and visible card fields before the live endpoint is used as the release gate.
 
-Primary files:
+Source ingestion gate after raw or manifest edits:
 
-- `src/components/chat/SourceAwareChat.tsx`
-- `src/components/chat/SourceAwareChat.test.tsx`
+- `pnpm backend:ingest:approved`
 
-## Verification Plan
+Live prompt gate:
 
-### Frontend
-
-- `pnpm exec vitest run src/data/chat/source-aware-chat.test.ts src/components/chat/SourceAwareChat.test.tsx`
-- Verify:
-  - 5 prompts per primary chapter
-  - prompt click still submits immediately
-  - no visible primary chapter prompt is marked as intentionally `limitedSupport`
-  - transcript and shell behavior remain intact
-
-### Backend
-
-- `backend\.venv\Scripts\python.exe -m pytest -c backend\pyproject.toml backend\tests\test_chatbot_orchestration.py backend\tests\test_retrieval_service.py -q`
-- Verify:
-  - section scope includes the expected approved sources for each chapter
-  - strong support is reachable for each visible prompt family
-  - citation packaging stays stable and safe
-
-### Bundle and source metadata
-
-- `pnpm exec vitest run src/data/source-bundles/approved-source-bundle.test.ts`
-- Verify:
-  - chapter chat adapters cover every prompt-backed source
-  - no chapter prompt depends on an unmapped or inactive source
-
-### Browser confidence
-
-- `pnpm test:e2e:layout`
-- Optional targeted mocked Playwright spec if needed for prompt-rail density or label wrapping
-- Verify:
-  - 5 prompts remain usable and readable in the open chat shell
-  - prompt clicks still produce responses without breaking containment
-
-### Live release gate
-
+- `pnpm redis:start`
+- `pnpm backend:dev`
 - `pnpm chatbot:audit-prompts -- --endpoint-mode live --endpoint http://127.0.0.1:8000/api/chat --fail-on-miss`
-- Release expectation:
-  - every visible primary chapter prompt resolves to `followUpAction=keep`
-  - every visible primary chapter prompt resolves to `classification=answered`
-  - each answered prompt includes at least one matching approved citation
+- `pnpm chatbot:audit-prompts -- --json --endpoint-mode live --endpoint http://127.0.0.1:8000/api/chat --fail-on-miss`
+- `pnpm test:chat:live`
 
-### Standard repo checks
+Changed-scope coverage gates when executable code changes:
+
+- `pnpm test:coverage`
+- `pnpm backend:test:coverage`
+
+Standard repo checks only when implementation touches executable code:
 
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm build`
 - `pnpm backend:lint`
 - `pnpm backend:typecheck`
-
-Do not use `pnpm test:e2e` as the default lane for this slice unless the scope broadens and specifically requires it.
-
-## TDD Sequence
-
-1. Write failing frontend tests for fixed 5-prompt chapter inventories and stricter readiness expectations.
-2. Write failing backend tests for chapter source scope derivation and prompt-support coverage.
-3. Write failing source-bundle tests for missing chapter chat mappings.
-4. Update source metadata and backend scope derivation with the smallest changes needed to make prompt support real.
-5. Update the frontend prompt catalog to surface only the newly grounded 5-prompt sets.
-6. Run the live prompt audit and use any misses to drive the next smallest source or prompt adjustment.
-7. Refactor only after the focused suites and live audit are green.
-
-## File Touch Map
-
-Expected primary edits:
-
-- `src/data/chat/source-aware-chat.ts`
-- `src/data/chat/source-aware-chat.test.ts`
-- `src/components/chat/SourceAwareChat.tsx`
-- `src/components/chat/SourceAwareChat.test.tsx`
-- `src/data/source-bundles/approved-source-bundle.ts`
-- `src/data/source-bundles/approved-source-bundle.test.ts`
-- `backend/chatbot/services.py`
-- `backend/retrieval/services.py`
-- `backend/tests/test_chatbot_orchestration.py`
-- `backend/tests/test_retrieval_service.py`
-- `backend/tests/fixtures/chatbot_sources.py`
-- `scripts/chatbot/audit-suggested-prompts.ts`
-- `specs/001-grounded-chatbot-readiness/quickstart.md`
-
-Potential helper extraction only if earned by multiple consumers:
-
-- server-only section source projection helper under `backend/chatbot/`
-
-## Risks and Mitigations
-
-- Risk: A prompt can still be semantically in scope but fail strong-support thresholds.
-  - Mitigation: tune prompt wording first, widen approved source coverage second, and only then revisit retrieval thresholds if the source support is genuinely present but the ranking gate is too strict.
-
-- Risk: Duplicating source scope in both frontend and backend will recreate drift.
-  - Mitigation: prefer bundle-driven derivation or a single projection source of truth.
-
-- Risk: Forcing 5 prompts per chapter could lead to filler prompts.
-  - Mitigation: only ship prompts that pass the live grounded audit; if a chapter cannot support 5 prompts yet, the plan requires adding approved support before shipping the extra chips.
-
-- Risk: Expanding source coverage could blur trust boundaries.
-  - Mitigation: keep all new source activation deliberate, approved, and server-owned.
+- `pnpm backend:security`
+- `pnpm backend:check`
 
 ## Definition of Done
 
-- Chapters 1-4 each show exactly 5 suggested prompts in the source-aware chat.
-- Every visible primary chapter prompt returns an `answered` outcome against the live Django chat endpoint.
-- Every visible primary chapter prompt returns at least one matching approved citation.
-- Approved source coverage for those prompts is expressed through maintained bundle metadata and backend retrieval scope, not ad hoc frontend-only assumptions.
-- Frontend, backend, and live prompt audit verification all pass under the constitution's red-green-refactor and changed-scope verification rules.
+- Every visible suggested prompt has been tested against the live `/api/chat` endpoint.
+- `--fail-on-miss` fails on any visible suggested prompt miss, not just a primary-chapter miss.
+- The checked-in prompt inventory test asserts the full visible audit inventory, including supporting-section prompts.
+- The prompt audit schema records prompt ID, label, expected source IDs, raw response state, support level, returned citation source IDs, visible card, endpoint mode, and notes.
+- Typed fallback responses are classified as `fallback`, not hidden inside `transportFailure`.
+- No suggested prompt returns `Limited support in approved materials`.
+- No suggested prompt returns `Course boundary reached`.
+- No suggested prompt returns `Grounded answer unavailable`.
+- Every suggested prompt returns `state=answered`.
+- Every suggested prompt returns `grounding.supportLevel=strong`.
+- Every suggested prompt includes at least one matching approved citation.
+- Every prompt-expected source ID is backed by source metadata, a manifest entry, active retrievable chunks, and the correct backend section scope.
+- Every backend section source ID used by a visible prompt has a manifest entry.
+- Every previously failing prompt has a recorded root cause and fix tied to approved source knowledge or a documented non-source branch.
+- Updated raw source knowledge is active in retrieval and citeable by the backend chat response.
+- The strict live prompt audit passes with `--fail-on-miss`.
+- Changed-scope coverage reports meet at least 80% for every reported metric on new or materially changed executable code.

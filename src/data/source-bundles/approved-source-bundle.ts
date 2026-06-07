@@ -110,7 +110,7 @@ const sourceRecords: ApprovedSourceRecord[] = [
       "It shows how the dispute moved from maritime confrontation into an institutional process with defined questions.",
     detail:
       "The filing identifies the legal questions the Philippines brought under UNCLOS dispute settlement.",
-    usageScope: ["evidence", "ingestion"],
+    usageScope: ["chat", "evidence", "ingestion"],
     lifecycle: { state: "active" },
     aliases: ["wps-src-2013-arbitration-filing"],
     ingestion: {
@@ -133,7 +133,7 @@ const sourceRecords: ApprovedSourceRecord[] = [
       "It supports the governance lesson that law can shape legitimacy while practical change still depends on state action.",
     detail:
       "A post-award source cluster tracking continued maritime pressure, diplomatic positioning, and public accountability.",
-    usageScope: ["evidence", "ingestion"],
+    usageScope: ["chat", "evidence", "ingestion"],
     lifecycle: { state: "active" },
     aliases: ["wps-src-post-2016-compliance"],
     ingestion: {
@@ -155,7 +155,7 @@ const sourceRecords: ApprovedSourceRecord[] = [
       "It anchors the opening milestone in observable state behavior instead of treating the dispute as an abstract claim.",
     detail:
       "A contemporary incident record showing how official vessels and access claims turned the shoal into a visible dispute.",
-    usageScope: ["evidence", "ingestion"],
+    usageScope: ["chat", "evidence", "ingestion"],
     lifecycle: { state: "active" },
     aliases: ["wps-src-2012-scarborough"],
     ingestion: {
@@ -247,7 +247,7 @@ const sourceRecords: ApprovedSourceRecord[] = [
       "It helps learners verify why the ruling mattered even though it did not automatically change behavior at sea.",
     detail:
       "A paired reading of the award and later conduct that separates legal clarification from enforcement capacity.",
-    usageScope: ["evidence", "ingestion"],
+    usageScope: ["chat", "evidence", "ingestion"],
     lifecycle: { state: "active" },
     aliases: ["wps-src-comparison-enforcement-gap"],
     ingestion: {
@@ -269,7 +269,7 @@ const sourceRecords: ApprovedSourceRecord[] = [
       "It keeps the comparison grounded in political incentives rather than implying law and power are separate worlds.",
     detail:
       "A governance-focused record of how states used diplomacy, reputation, and capacity after the award.",
-    usageScope: ["evidence", "ingestion"],
+    usageScope: ["chat", "evidence", "ingestion"],
     lifecycle: { state: "active" },
     aliases: ["wps-src-comparison-political-reality"],
     ingestion: {
@@ -330,12 +330,33 @@ export const activeApprovedSourceBundle: ApprovedSourceBundle = {
         sectionIds: ["west-philippine-sea-dossier", "conclusion-references"],
       },
       {
+        sourceId: "gg-src-philippines-arbitration-filing",
+        sectionIds: ["west-philippine-sea-dossier"],
+      },
+      {
+        sourceId: "gg-src-post-award-compliance-record",
+        sectionIds: ["west-philippine-sea-dossier"],
+      },
+      {
+        sourceId: "gg-src-scarborough-standoff-record",
+        sectionIds: ["west-philippine-sea-dossier"],
+      },
+      {
         sourceId: "gg-src-un-charter-institutions",
         sectionIds: [
+          "global-governance-overview",
           "un-command-center",
           "governance-limits",
           "conclusion-references",
         ],
+      },
+      {
+        sourceId: "gg-src-wps-enforcement-gap-comparison",
+        sectionIds: ["west-philippine-sea-dossier", "conclusion-references"],
+      },
+      {
+        sourceId: "gg-src-wps-political-reality-record",
+        sectionIds: ["west-philippine-sea-dossier", "conclusion-references"],
       },
     ],
     dossierEvidence: [

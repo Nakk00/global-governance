@@ -89,9 +89,7 @@ def _parse_tcp_service_address(key: str, example: str) -> tuple[str, int]:
         ) from error
 
     if not parsed.hostname or not port:
-        raise RuntimeCheckError(
-            f"{key} must include a host and port, for example {example}."
-        )
+        raise RuntimeCheckError(f"{key} must include a host and port, for example {example}.")
 
     return parsed.hostname, port
 

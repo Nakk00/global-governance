@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from copy import deepcopy
 from dataclasses import asdict
+from datetime import UTC, datetime
 from typing import TypedDict
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
@@ -147,6 +148,8 @@ class SupabaseIngestionRepository:
                     _content_type(payload.document.file_type),
                 )
             raise
+        self._activate_source_record(payload)
+        self._record_successful_ingest(payload)
         return _result(payload)
 
     def read_private_source(self, bucket: str, path: str) -> bytes | None:
@@ -165,6 +168,8 @@ class SupabaseIngestionRepository:
             raise IngestionPersistenceError(
                 f"Private source read failed with status {error.code}"
             ) from error
+        except TimeoutError:
+            return None
         except URLError as error:
             raise IngestionPersistenceError("Private source storage is unavailable") from error
 
@@ -228,6 +233,64 @@ class SupabaseIngestionRepository:
             raise IngestionPersistenceError(
                 "Ingestion persistence returned incomplete vector evidence"
             )
+
+    def _activate_source_record(self, payload: IngestionPayload) -> None:
+        document = payload.document
+        now = _utc_now()
+        request = Request(
+            f"{self.supabase_url}/rest/v1/source_records?on_conflict=source_id",
+            data=json.dumps(
+                {
+                    "source_id": document.source_id,
+                    "title": document.title,
+                    "source_type": document.source_type,
+                    "provenance": "approved-source-manifest",
+                    "summary": "Approved source ingested for public grounded chat retrieval.",
+                    "usage_scope": ["public-chat", "approved-source-bundle"],
+                    "aliases": _source_aliases(payload),
+                    "lifecycle_state": "active",
+                    "storage_bucket": document.storage.bucket,
+                    "storage_path": document.storage.path,
+                    "updated_at": now,
+                }
+            ).encode("utf-8"),
+            headers={
+                **self._headers(),
+                "Content-Type": "application/json",
+                "Prefer": "resolution=merge-duplicates,return=minimal",
+            },
+            method="POST",
+        )
+        self._execute(request, "Source activation")
+
+    def _record_successful_ingest(self, payload: IngestionPayload) -> None:
+        document = payload.document
+        now = _utc_now()
+        request = Request(
+            f"{self.supabase_url}/rest/v1/source_ingest_jobs",
+            data=json.dumps(
+                {
+                    "source_id": document.source_id,
+                    "status": "succeeded",
+                    "requested_by": "approved-source-ingestion",
+                    "started_at": now,
+                    "document_id": document.id,
+                    "chunk_count": len(payload.chunks),
+                    "reference_count": len(payload.references),
+                    "embedding_model": payload.embedding_evidence.model,
+                    "embedding_dimensions": payload.embedding_evidence.dimensions,
+                    "completed_at": now,
+                    "summary": "Approved source ingest completed and is retrieval eligible.",
+                }
+            ).encode("utf-8"),
+            headers={
+                **self._headers(),
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal",
+            },
+            method="POST",
+        )
+        self._execute(request, "Ingestion job recording")
 
     def _execute(self, request: Request, operation: str) -> bytes:
         try:
@@ -326,6 +389,16 @@ def _result(payload: IngestionPayload) -> IngestionRunResult:
         embedding_model=payload.embedding_evidence.model,
         embedding_dimensions=payload.embedding_evidence.dimensions,
     )
+
+
+def _source_aliases(payload: IngestionPayload) -> list[str]:
+    aliases = [payload.document.title]
+    aliases.extend(reference.citation_label for reference in payload.references)
+    return list(dict.fromkeys(alias for alias in aliases if alias))
+
+
+def _utc_now() -> str:
+    return datetime.now(UTC).isoformat()
 
 
 def _content_type(file_type: str) -> str:

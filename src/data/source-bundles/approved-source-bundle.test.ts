@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
 
+import approvedSourceManifestText from "../../../archive/docs/approved-sources/manifest.json?raw"
+import sectionSourceProjectionText from "../../../backend/chatbot/section-source-projection.json?raw"
+import { getSourceAwareChatStarterPromptAuditEntries } from "../chat/source-aware-chat"
 import {
   activeApprovedSourceBundle,
   getApprovedSource,
@@ -87,8 +90,70 @@ describe("activeApprovedSourceBundle", () => {
     expect(getChatCitationSources().map((source) => source.sourceId)).toEqual([
       "gg-src-global-governance-course-frame",
       "gg-src-south-china-sea-award",
+      "gg-src-philippines-arbitration-filing",
+      "gg-src-post-award-compliance-record",
+      "gg-src-scarborough-standoff-record",
       "gg-src-un-charter-institutions",
+      "gg-src-wps-enforcement-gap-comparison",
+      "gg-src-wps-political-reality-record",
     ])
     expect(getDossierEvidenceSources()).toHaveLength(6)
+  })
+
+  it("keeps the server-safe section source projection in parity with chat citations", () => {
+    const projection = JSON.parse(sectionSourceProjectionText) as {
+      sectionSourceIds: Record<string, string[]>
+    }
+    const expectedSectionSourceIds = new Map<string, string[]>()
+
+    for (const source of getChatCitationSources()) {
+      for (const sectionId of source.sectionIds) {
+        expectedSectionSourceIds.set(sectionId, [
+          ...(expectedSectionSourceIds.get(sectionId) ?? []),
+          source.sourceId,
+        ])
+      }
+    }
+
+    expect(projection.sectionSourceIds).toEqual(
+      Object.fromEntries(expectedSectionSourceIds)
+    )
+  })
+
+  it("backs every visible suggested-prompt source with metadata, manifest entries, and section scope", () => {
+    const manifest = JSON.parse(approvedSourceManifestText) as {
+      sources: Array<{ sourceId: string }>
+    }
+    const projection = JSON.parse(sectionSourceProjectionText) as {
+      sectionSourceIds: Record<string, string[]>
+    }
+    const sourceMetadataIds = new Set(
+      activeApprovedSourceBundle.sources.map((source) => source.sourceId)
+    )
+    const manifestSourceIds = new Set(
+      manifest.sources.map((source) => source.sourceId)
+    )
+    const chatCitationSourceIds = new Set(
+      getChatCitationSources().map((source) => source.sourceId)
+    )
+
+    for (const entry of getSourceAwareChatStarterPromptAuditEntries()) {
+      for (const sourceId of entry.readiness.sourceIds) {
+        expect(sourceMetadataIds.has(sourceId), `${entry.id}:${sourceId}`).toBe(
+          true
+        )
+        expect(
+          chatCitationSourceIds.has(sourceId),
+          `${entry.id}:${sourceId}`
+        ).toBe(true)
+        expect(manifestSourceIds.has(sourceId), `${entry.id}:${sourceId}`).toBe(
+          true
+        )
+        expect(
+          projection.sectionSourceIds[entry.section]?.includes(sourceId),
+          `${entry.id}:${sourceId}`
+        ).toBe(true)
+      }
+    }
   })
 })
